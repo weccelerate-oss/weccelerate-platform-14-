@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'i.ytimg.com', // YouTube thumbnails
+        hostname: 'i.ytimg.com',
       },
     ],
     formats: ['image/avif', 'image/webp'],
@@ -35,14 +35,9 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
 
-  // --- הגדרות חדשות למניעת עצירת ה-Build ---
+  // Ignore TypeScript errors during build
   typescript: {
-    // מתעלם משגיאות טיפוסים (כמו ה-any שקפץ לך) בזמן הבנייה
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    // מתעלם משגיאות לינטר בזמן הבנייה
-    ignoreDuringBuilds: true,
   },
 };
 
