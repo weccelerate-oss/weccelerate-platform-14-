@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40bd823161cabf6900e90cb4305e81d35b925124fe": {
+      "workers": {
+        "app/(admin)/admin/videos/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin)/admin/videos/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin)/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteVideoAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/videos/page": "action-browser"
+      },
+      "exportedName": "deleteVideoAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "6042942d2e43f59d874bd3c63f95d5c4b8ddfd08fb": {
+      "workers": {
+        "app/(admin)/admin/videos/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin)/admin/videos/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin)/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateVideoAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/videos/page": "action-browser"
+      },
+      "exportedName": "updateVideoAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "401544133c464efa021d3566366a42a5bd791e2818": {
+      "workers": {
+        "app/(admin)/admin/videos/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin)/admin/videos/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin)/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createVideoAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/videos/page": "action-browser"
+      },
+      "exportedName": "createVideoAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    }
+  },
+  "edge": {}
+}

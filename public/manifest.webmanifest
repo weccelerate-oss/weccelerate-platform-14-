@@ -1,0 +1,27 @@
+{
+  "name": "WeCcelerate",
+  "short_name": "WeCcelerate",
+  "description": "Business Acceleration & Entrepreneurial Services",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFBFC",
+  "theme_color": "#1E3A8A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "he",
+  "dir": "ltr"
+}

@@ -1,0 +1,166 @@
+/**
+ * Authentication Utilities
+ * 
+ * Helper functions for authentication and authorization.
+ */
+
+import bcrypt from 'bcryptjs';
+import { auth } from './auth.config';
+
+// Define UserRole type locally to avoid Prisma import issues
+export type UserRole = 'ADMIN' | 'ENTREPRENEUR' | 'MENTOR' | 'INVESTOR' | 'PARTNER';
+
+// =============================================================================
+// PASSWORD UTILITIES
+// =============================================================================
+
+/**
+ * Hash a password using bcrypt
+ * @param password - Plain text password
+ * @returns Hashed password
+ */
+export async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 12; // Higher = more secure but slower
+  return bcrypt.hash(password, saltRounds);
+}
+
+/**
+ * Verify a password against a hash
+ * @param password - Plain text password
+ * @param hash - Hashed password
+ * @returns Whether the password matches
+ */
+export async function verifyPassword(
+  password: string,
+  hash: string
+): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+/**
+ * Validate password strength
+ * @param password - Password to validate
+ * @returns Validation result
+ */
+export function validatePasswordStrength(password: string): {
+  isValid: boolean;
+  errors: string[];
+} {
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters');
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push('Password must contain at least one lowercase letter');
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push('Password must contain at least one number');
+  }
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    errors.push('Password must contain at least one special character');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+// =============================================================================
+// SESSION UTILITIES
+// =============================================================================
+
+/**
+ * Get the current session (server-side)
+ * @returns Current session or null
+ */
+export async function getSession() {
+  return auth();
+}
+
+/**
+ * Get the current user (server-side)
+ * @returns Current user from session or null
+ */
+export async function getCurrentUser() {
+  const session = await auth();
+  return session?.user ?? null;
+}
+
+/**
+ * Check if user is authenticated (server-side)
+ * @returns Whether user is authenticated
+ */
+export async function isAuthenticated(): Promise<boolean> {
+  const session = await auth();
+  return !!session?.user;
+}
+
+/**
+ * Check if user has a specific role (server-side)
+ * @param role - Role to check
+ * @returns Whether user has the role
+ */
+export async function hasRole(role: UserRole): Promise<boolean> {
+  const session = await auth();
+  return session?.user?.role === role;
+}
+
+/**
+ * Check if user has any of the specified roles (server-side)
+ * @param roles - Roles to check
+ * @returns Whether user has any of the roles
+ */
+export async function hasAnyRole(roles: UserRole[]): Promise<boolean> {
+  const session = await auth();
+  return !!session?.user?.role && roles.includes(session.user.role);
+}
+
+/**
+ * Require authentication - throws if not authenticated
+ * Use in Server Components or Server Actions
+ */
+export async function requireAuth() {
+  const session = await auth();
+  
+  if (!session?.user) {
+    throw new Error('Unauthorized: Authentication required');
+  }
+  
+  return session.user;
+}
+
+/**
+ * Require specific role - throws if not authorized
+ * Use in Server Components or Server Actions
+ */
+export async function requireRole(role: UserRole) {
+  const user = await requireAuth();
+  
+  if (user.role !== role) {
+    throw new Error(`Forbidden: ${role} role required`);
+  }
+  
+  return user;
+}
+
+/**
+ * Require any of the specified roles
+ */
+export async function requireAnyRole(roles: UserRole[]) {
+  const user = await requireAuth();
+  
+  if (!roles.includes(user.role)) {
+    throw new Error(`Forbidden: One of [${roles.join(', ')}] roles required`);
+  }
+  
+  return user;
+}
+
+// =============================================================================
+// TYPES - exported above
+// =============================================================================

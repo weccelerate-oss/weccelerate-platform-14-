@@ -1,0 +1,546 @@
+// =============================================================================
+// PRISMA SCHEMA - WeCcelerate Platform
+// =============================================================================
+// Database: PostgreSQL
+// ORM: Prisma 7
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum UserRole {
+  ADMIN           // Platform administrators
+  ENTREPRENEUR    // Startup founders/business owners
+  MENTOR          // Mentors and advisors
+  INVESTOR        // Investors with view access
+  PARTNER         // External partners (e.g., Leumit)
+}
+
+enum ProjectStatus {
+  DRAFT                // Initial draft, not submitted
+  CHARACTERIZATION     // שלב אפיון - Project characterization
+  MARKET_RESEARCH      // מחקר שוק - Market research phase
+  BUSINESS_MODEL       // מודל עסקי - Business model development
+  DEVELOPMENT          // פיתוח - Product/service development
+  FUNDING_PREP         // הכנה לגיוס - Preparing for fundraising
+  ACTIVE_FUNDING       // גיוס פעיל - Actively fundraising
+  POST_FUNDING         // לאחר גיוס - Post-funding growth
+  SCALING              // צמיחה - Scaling phase
+  GRADUATED            // בוגר - Graduated from program
+  ON_HOLD              // מושהה - Project on hold
+  CANCELLED            // בוטל - Project cancelled
+}
+
+enum UrgencyLevel {
+  NORMAL
+  IMPORTANT
+  URGENT
+  BREAKING
+}
+
+enum EventLocationType {
+  PHYSICAL
+  VIRTUAL
+  HYBRID
+}
+
+enum EventStatus {
+  DRAFT
+  UPCOMING
+  ONGOING
+  PAST
+  CANCELLED
+}
+
+enum VideoCategory {
+  INTERVIEW
+  SUMMARY
+  WEBINAR
+  TUTORIAL
+  TESTIMONIAL
+  HIGHLIGHT
+}
+
+enum FileType {
+  DOCUMENT       // PDF, DOC, etc.
+  SPREADSHEET    // XLS, CSV
+  PRESENTATION   // PPT, KEY
+  IMAGE          // PNG, JPG, etc.
+  VIDEO          // MP4, MOV
+  OTHER
+}
+
+// =============================================================================
+// USER & AUTHENTICATION
+// =============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?   // Hashed password (nullable for OAuth)
+  name          String
+  phone         String?
+  avatar        String?   // Avatar URL
+  image         String?   // NextAuth standard field
+  role          UserRole  @default(ENTREPRENEUR)
+  isActive      Boolean   @default(true)
+  
+  // Profile fields
+  company       String?   // Company/startup name
+  position      String?   // Job title
+  bio           String?   @db.Text
+  linkedinUrl   String?
+  websiteUrl    String?
+  
+  // Preferences
+  language      String    @default("he") // he, en
+  timezone      String    @default("Asia/Jerusalem")
+  
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  projects      Project[]
+  uploadedFiles File[]    @relation("UploadedBy")
+  notifications Notification[]
+  activities    ActivityLog[]
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  @@map("users")
+}
+
+// NextAuth.js Account model (for OAuth providers)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+// NextAuth.js Session model
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// NextAuth.js VerificationToken model
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// =============================================================================
+// ENTREPRENEUR PORTAL - PROJECTS
+// =============================================================================
+
+model Project {
+  id            String        @id @default(cuid())
+  
+  // Basic info
+  name          String
+  description   String?       @db.Text
+  industry      String?       // Industry/sector
+  website       String?
+  
+  // CRM Integration
+  pipedriveId   String?       @unique // Pipedrive Deal ID
+  hubspotId     String?       // HubSpot Deal ID (future)
+  
+  // Status & Pipeline
+  status        ProjectStatus @default(DRAFT)
+  stage         Int           @default(1) // Numeric stage (1-10)
+  
+  // Timeline & Milestones (stored as JSON for flexibility)
+  timeline      Json?         // { stages: [{ name, startDate, endDate, status }] }
+  milestones    Json?         // { items: [{ title, dueDate, completed }] }
+  
+  // Funding info
+  targetFunding Decimal?      @db.Decimal(15, 2) // Target funding amount
+  fundingRaised Decimal?      @db.Decimal(15, 2) // Amount raised so far
+  fundingCurrency String      @default("USD")
+  
+  // Team info
+  teamSize      Int?
+  foundingDate  DateTime?
+  
+  // Relations
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  files         File[]
+  notes         ProjectNote[]
+  activities    ActivityLog[]
+  
+  // Metadata
+  isArchived    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  @@index([userId])
+  @@index([pipedriveId])
+  @@index([status])
+  @@map("projects")
+}
+
+model ProjectNote {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  isPrivate   Boolean  @default(false) // Admin-only notes
+  
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String
+  
+  authorName  String?  // For admin notes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([projectId])
+  @@map("project_notes")
+}
+
+// =============================================================================
+// FILE MANAGEMENT - Google Cloud Storage
+// =============================================================================
+
+model File {
+  id            String    @id @default(cuid())
+  
+  // File info
+  name          String    // Original filename
+  displayName   String?   // User-friendly name
+  description   String?
+  
+  // Google Cloud Storage
+  url           String    // Public or signed URL from GCS
+  gcsPath       String?   // Full GCS path (gs://bucket/path)
+  bucket        String?   // GCS bucket name
+  
+  // Signed URL support
+  signedUrl     String?   // Pre-signed URL for private access
+  signedUrlExpiry DateTime? // When the signed URL expires
+  isPrivate     Boolean   @default(true) // If true, requires signed URL
+  
+  // Metadata
+  type          FileType  @default(OTHER)
+  mimeType      String?   // MIME type
+  size          Int?      // File size in bytes
+  checksum      String?   // MD5 hash for integrity
+  
+  // Relations
+  project       Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId     String?
+  
+  uploadedBy    User?     @relation("UploadedBy", fields: [uploadedById], references: [id])
+  uploadedById  String?
+  
+  // Timestamps
+  uploadedAt    DateTime  @default(now())
+  
+  @@index([projectId])
+  @@index([type])
+  @@index([uploadedById])
+  @@map("files")
+}
+
+// =============================================================================
+// DYNAMIC CONTENT - NEWS TICKER
+// =============================================================================
+
+model NewsUpdate {
+  id            String       @id @default(cuid())
+  
+  // Content
+  title         String
+  titleEn       String?      // English version
+  excerpt       String?      @db.Text
+  link          String?      // Optional link to full article
+  
+  // Display settings
+  urgencyLevel  UrgencyLevel @default(NORMAL)
+  isActive      Boolean      @default(true)
+  isPinned      Boolean      @default(false)
+  
+  // Scheduling
+  publishAt     DateTime     @default(now())
+  expireAt      DateTime?    // Auto-expire
+  
+  // Metadata
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  @@index([isActive, publishAt])
+  @@index([urgencyLevel])
+  @@map("news_updates")
+}
+
+// =============================================================================
+// DYNAMIC CONTENT - EVENTS
+// =============================================================================
+
+model Event {
+  id               String           @id @default(cuid())
+  
+  // Basic info
+  name             String
+  nameEn           String?          // English version
+  slug             String           @unique // URL-friendly slug
+  description      String?          @db.Text
+  descriptionEn    String?          @db.Text
+  
+  // Date & Time
+  date             DateTime
+  time             String           // Start time (e.g., "18:00")
+  endTime          String?          // End time
+  timezone         String           @default("Asia/Jerusalem")
+  
+  // Location
+  locationType     EventLocationType @default(PHYSICAL)
+  address          String?
+  city             String?
+  virtualLink      String?          // Zoom/Meet link
+  locationDetails  String?          // Additional instructions
+  
+  // Registration
+  registrationLink String?
+  registrationRequired Boolean      @default(true)
+  capacity         Int?
+  registeredCount  Int              @default(0)
+  
+  // Pricing
+  price            Decimal?         @db.Decimal(10, 2)
+  currency         String           @default("ILS")
+  isFree           Boolean          @default(true)
+  
+  // Media
+  imageUrl         String?
+  thumbnailUrl     String?
+  
+  // Categorization
+  category         String?          // Event type/category
+  tags             String[]         // Array of tags
+  
+  // Host/Speaker
+  host             String?
+  hostBio          String?          @db.Text
+  
+  // Status & Display
+  status           EventStatus      @default(DRAFT)
+  isActive         Boolean          @default(true)
+  isFeatured       Boolean          @default(false)
+  
+  // Timestamps
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  
+  @@index([status, isActive, date])
+  @@index([date])
+  @@map("events")
+}
+
+// =============================================================================
+// DYNAMIC CONTENT - VIDEOS
+// =============================================================================
+
+model Video {
+  id            String        @id @default(cuid())
+  
+  // Basic info
+  title         String
+  titleEn       String?
+  slug          String        @unique
+  description   String?       @db.Text
+  descriptionEn String?       @db.Text
+  
+  // Video source
+  youtubeUrl    String?       // YouTube video URL or ID
+  vimeoUrl      String?       // Vimeo URL
+  videoUrl      String?       // Direct video URL
+  embedUrl      String?       // Pre-formatted embed URL
+  
+  // Media
+  thumbnail     String?       // Thumbnail image URL
+  duration      Int?          // Duration in seconds
+  
+  // Categorization
+  category      VideoCategory @default(INTERVIEW)
+  tags          String[]
+  
+  // Speaker/Guest
+  speaker       String?
+  speakerTitle  String?
+  speakerImage  String?
+  
+  // Stats
+  views         Int           @default(0)
+  
+  // Display settings
+  isActive      Boolean       @default(true)
+  isFeatured    Boolean       @default(false)
+  publishAt     DateTime      @default(now())
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  @@index([category, isActive])
+  @@index([publishAt])
+  @@map("videos")
+}
+
+// =============================================================================
+// DYNAMIC CONTENT - SUCCESS STORIES
+// =============================================================================
+
+model SuccessStory {
+  id               String   @id @default(cuid())
+  
+  // Company info
+  companyName      String
+  logoUrl          String?
+  industry         String?
+  website          String?
+  
+  // Testimonial
+  quote            String   @db.Text
+  quoteEn          String?  @db.Text
+  
+  // Person giving testimonial
+  personName       String?
+  personRole       String?
+  personImage      String?
+  
+  // Results/Metrics
+  metrics          Json?    // { items: [{ label, value }] }
+  
+  // Story details
+  slug             String   @unique
+  fullStory        String?  @db.Text // Full case study
+  fullStoryEn      String?  @db.Text
+  projectLink      String?  // Link to case study page
+  
+  // Collaboration
+  collaborationDate String? // Year or date of collaboration
+  programName       String? // Which program they were in
+  
+  // Display settings
+  isActive         Boolean  @default(true)
+  isFeatured       Boolean  @default(false)
+  displayOrder     Int      @default(0)
+  
+  // Timestamps
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([isActive, isFeatured])
+  @@map("success_stories")
+}
+
+// =============================================================================
+// NOTIFICATIONS & ACTIVITY
+// =============================================================================
+
+model Notification {
+  id          String   @id @default(cuid())
+  
+  // Content
+  title       String
+  message     String   @db.Text
+  link        String?  // Action link
+  type        String   // info, success, warning, error
+  
+  // Target
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  
+  // Status
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  
+  // Action details
+  action      String   // e.g., "project.created", "file.uploaded"
+  description String?
+  metadata    Json?    // Additional context
+  
+  // Relations
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId      String?
+  
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId   String?
+  
+  // Context
+  ipAddress   String?
+  userAgent   String?
+  
+  // Timestamp
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([projectId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// =============================================================================
+// SITE SETTINGS & CONFIGURATION
+// =============================================================================
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json     // Flexible JSON value
+  description String?
+  
+  updatedAt   DateTime @updatedAt
+  
+  @@map("site_settings")
+}

@@ -1,0 +1,361 @@
+'use client';
+
+import { useState, useTransition, ReactNode } from 'react';
+import { X } from 'lucide-react';
+import { createStoryAction, updateStoryAction } from '../actions';
+
+interface StoryFormData {
+  companyName: string;
+  logoUrl?: string;
+  industry?: string;
+  website?: string;
+  quote: string;
+  quoteEn?: string;
+  personName?: string;
+  personRole?: string;
+  personImage?: string;
+  slug: string;
+  fullStory?: string;
+  projectLink?: string;
+  collaborationDate?: string;
+  programName?: string;
+  order: number;
+  isActive: boolean;
+  isFeatured: boolean;
+}
+
+interface Story extends StoryFormData {
+  id: string;
+}
+
+interface StoryFormDialogProps {
+  mode: 'create' | 'edit';
+  story?: Story;
+  children: ReactNode;
+}
+
+export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [formData, setFormData] = useState<StoryFormData>({
+    companyName: story?.companyName || '',
+    logoUrl: story?.logoUrl || '',
+    industry: story?.industry || '',
+    website: story?.website || '',
+    quote: story?.quote || '',
+    quoteEn: story?.quoteEn || '',
+    personName: story?.personName || '',
+    personRole: story?.personRole || '',
+    personImage: story?.personImage || '',
+    slug: story?.slug || '',
+    fullStory: story?.fullStory || '',
+    projectLink: story?.projectLink || '',
+    collaborationDate: story?.collaborationDate || '',
+    programName: story?.programName || '',
+    order: story?.order || 0,
+    isActive: story?.isActive ?? true,
+    isFeatured: story?.isFeatured ?? false,
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    startTransition(async () => {
+      try {
+        if (mode === 'create') {
+          await createStoryAction(formData);
+        } else if (story) {
+          await updateStoryAction(story.id, formData);
+        }
+        setIsOpen(false);
+        // Reset form for create mode
+        if (mode === 'create') {
+          setFormData({
+            companyName: '',
+            logoUrl: '',
+            industry: '',
+            website: '',
+            quote: '',
+            quoteEn: '',
+            personName: '',
+            personRole: '',
+            personImage: '',
+            slug: '',
+            fullStory: '',
+            projectLink: '',
+            collaborationDate: '',
+            programName: '',
+            order: 0,
+            isActive: true,
+            isFeatured: false,
+          });
+        }
+      } catch (error) {
+        console.error('Error saving story:', error);
+        alert('שגיאה בשמירה');
+      }
+    });
+  };
+
+  const generateSlug = () => {
+    const slug = formData.companyName
+      .toLowerCase()
+      .replace(/[^a-z0-9\u0590-\u05FF]+/g, '-')
+      .replace(/^-|-$/g, '');
+    setFormData({ ...formData, slug });
+  };
+
+  return (
+    <>
+      <div onClick={() => setIsOpen(true)}>
+        {children}
+      </div>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50" 
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Dialog */}
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900">
+                {mode === 'create' ? 'סיפור הצלחה חדש' : 'עריכת סיפור'}
+              </h2>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Company Info */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-slate-900 border-b pb-2">פרטי החברה</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      שם החברה *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.companyName}
+                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                      onBlur={() => !formData.slug && generateSlug()}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Slug *
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        required
+                        value={formData.slug}
+                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                        placeholder="company-name"
+                      />
+                      <button
+                        type="button"
+                        onClick={generateSlug}
+                        className="px-3 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg"
+                      >
+                        צור
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      תעשייה
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.industry || ''}
+                      onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                      placeholder="HealthTech"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      אתר
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.website || ''}
+                      onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    לוגו (URL)
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.logoUrl || ''}
+                    onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                    placeholder="https://example.com/logo.png"
+                  />
+                </div>
+              </div>
+
+              {/* Testimonial */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-slate-900 border-b pb-2">המלצה</h3>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    ציטוט * (עברית)
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={formData.quote}
+                    onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                    placeholder="מה הם אמרו עלינו..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      שם הממליץ
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.personName || ''}
+                      onChange={(e) => setFormData({ ...formData, personName: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      תפקיד
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.personRole || ''}
+                      onChange={(e) => setFormData({ ...formData, personRole: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                      placeholder='מייסד ומנכ"ל'
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Program Info */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-slate-900 border-b pb-2">פרטי התוכנית</h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      שם התוכנית
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.programName || ''}
+                      onChange={(e) => setFormData({ ...formData, programName: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                      placeholder="מאיץ לאומית"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      שנת שיתוף פעולה
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.collaborationDate || ''}
+                      onChange={(e) => setFormData({ ...formData, collaborationDate: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                      placeholder="2024"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    סדר תצוגה
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                  />
+                </div>
+              </div>
+
+              {/* Settings */}
+              <div className="flex items-center gap-6 pt-4 border-t">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    className="w-4 h-4 rounded border-slate-300"
+                  />
+                  <span className="text-sm text-slate-700">פעיל</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isFeatured}
+                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                    className="w-4 h-4 rounded border-slate-300"
+                  />
+                  <span className="text-sm text-slate-700">מומלץ</span>
+                </label>
+              </div>
+
+              {/* Submit */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="flex-1 py-2 bg-royal-600 text-white rounded-lg hover:bg-royal-700 transition-colors disabled:opacity-50"
+                >
+                  {isPending ? 'שומר...' : mode === 'create' ? 'צור סיפור' : 'שמור שינויים'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="px-6 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  ביטול
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

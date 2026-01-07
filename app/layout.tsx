@@ -1,0 +1,225 @@
+/**
+ * Root Layout
+ * 
+ * Main application layout with comprehensive SEO/GEO optimization.
+ * Implements the "Golden SEO Strategy" for maximum visibility in
+ * both traditional search engines and AI-powered generative engines.
+ * 
+ * @module app/layout
+ */
+
+import type { Metadata, Viewport } from "next";
+import { Inter, Heebo } from "next/font/google";
+
+import { GeoSchema } from "@/components/seo/GeoSchema";
+import {
+  constructMetadata,
+  viewport as viewportConfig,
+  SITE_CONFIG,
+  BRAND,
+} from "@/lib/seo";
+import "./globals.css";
+
+// =============================================================================
+// FONTS
+// =============================================================================
+
+// Use local fallback approach for fonts to avoid build failures
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+  preload: false,
+});
+
+const heebo = Heebo({
+  subsets: ["hebrew", "latin"],
+  display: "swap",
+  variable: "--font-heebo",
+  preload: false,
+});
+
+// =============================================================================
+// METADATA (SEO) - Golden Keywords Strategy
+// =============================================================================
+
+export const metadata: Metadata = {
+  ...constructMetadata({
+    title: "הפלטפורמה המובילה לסטארטאפים רפואיים בישראל",
+    description: `וויסלרייט (WeCcelerate) בשיתוף לאומית שירותי בריאות - הפלטפורמה המובילה בישראל להקמת סטארטאפים רפואיים וטכנולוגיים. ליווי יזמים משלב הרעיון, פיתוח MVP, גישה לדאטה רפואי וחיבור למשקיעים.`,
+    keywords: [
+      // Brand variations (English)
+      "WeCcelerate",
+      "We Accelerate", 
+      "Weccelerate",
+      // Brand variations (Hebrew) - Critical for Hebrew SEO
+      "וויסלרייט",
+      "ויקלרייט",
+      "ווי אקסלרייט",
+      "וויסלרייט קידום עסקים",
+      // Primary Hebrew keywords (User Intent)
+      "הקמת סטארטאפ רפואי",
+      "איך מגייסים כסף למיזם",
+      "פיתוח MVP",
+      "ליווי יזמים משלב הרעיון",
+      "שותף תכנוני לאומית",
+      "אקסלרטור בישראל",
+      "האצת סטארטאפים",
+      // Primary English keywords
+      "MedTech startup Israel",
+      "healthcare innovation accelerator",
+      "startup accelerator Tel Aviv",
+      "medical technology incubator",
+      "Leumit innovation partner",
+      // Secondary keywords
+      "גישה לדאטה רפואי",
+      "ייעוץ רגולטורי FDA",
+      "משקיעים לסטארטאפ רפואי",
+      "חממה טכנולוגית",
+    ],
+    path: "/",
+    locale: "he",
+    authors: ["WeCcelerate Team", "Leumit Health Services"],
+  }),
+
+  // Manifest
+  manifest: "/manifest.json",
+
+  // Icons
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#1a365d" },
+    ],
+  },
+
+  // Apple Web App
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "WeCcelerate",
+  },
+
+  // Format detection
+  formatDetection: {
+    telephone: true,
+    date: true,
+    address: true,
+    email: true,
+  },
+};
+
+// =============================================================================
+// VIEWPORT
+// =============================================================================
+
+export const viewport: Viewport = viewportConfig;
+
+// =============================================================================
+// ROOT LAYOUT COMPONENT
+// =============================================================================
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="he"
+      dir="rtl"
+      className={`${inter.variable} ${heebo.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Preconnect to external resources */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+
+        {/* DNS Prefetch */}
+        <link rel="dns-prefetch" href="https://www.leumit.co.il" />
+        <link rel="dns-prefetch" href="https://api.weccelerate.co.il" />
+
+        {/* Canonical */}
+        <link rel="canonical" href={SITE_CONFIG.url} />
+
+        {/* Alternate languages */}
+        <link rel="alternate" hrefLang="he-IL" href={SITE_CONFIG.url} />
+        <link rel="alternate" hrefLang="en-US" href={`${SITE_CONFIG.url}/en`} />
+        <link rel="alternate" hrefLang="x-default" href={SITE_CONFIG.url} />
+
+        {/* RSS Feed */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="WeCcelerate Blog RSS"
+          href={`${SITE_CONFIG.url}/feed.xml`}
+        />
+
+        {/* Sitemap reference */}
+        <link rel="sitemap" type="application/xml" href={`${SITE_CONFIG.url}/sitemap.xml`} />
+
+        {/* GEO Schema - The Holy Grail JSON-LD for AI/LLM Optimization */}
+        <GeoSchema
+          path="/"
+          pageTitle="WeCcelerate - הפלטפורמה המובילה לסטארטאפים רפואיים"
+          includeFaq={true}
+        />
+
+        {/* Additional meta for Hebrew optimization */}
+        <meta name="language" content="Hebrew" />
+        <meta httpEquiv="content-language" content="he-IL" />
+
+        {/* Geo targeting for Israel */}
+        <meta name="geo.region" content="IL" />
+        <meta name="geo.placename" content="Tel Aviv" />
+        <meta name="geo.position" content="32.0636;34.7721" />
+        <meta name="ICBM" content="32.0636, 34.7721" />
+
+        {/* Dublin Core metadata for academic/enterprise search */}
+        <meta name="DC.title" content="WeCcelerate - Healthcare Innovation Platform" />
+        <meta name="DC.creator" content="WeCcelerate Team" />
+        <meta name="DC.subject" content="MedTech, Healthcare Innovation, Startups, Israel" />
+        <meta name="DC.description" content={BRAND.descriptions.medium.en} />
+        <meta name="DC.publisher" content="WeCcelerate" />
+        <meta name="DC.contributor" content="Leumit Health Services" />
+        <meta name="DC.type" content="Service" />
+        <meta name="DC.format" content="text/html" />
+        <meta name="DC.identifier" content={SITE_CONFIG.url} />
+        <meta name="DC.language" content="he" />
+        <meta name="DC.coverage" content="Israel" />
+
+        {/* OpenSearch */}
+        <link
+          rel="search"
+          type="application/opensearchdescription+xml"
+          title="WeCcelerate Search"
+          href={`${SITE_CONFIG.url}/opensearch.xml`}
+        />
+      </head>
+
+      <body className={`font-heebo antialiased bg-white text-slate-900`}>
+        {/* Skip to content link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-royal-600 focus:text-white focus:rounded-lg"
+        >
+          דלג לתוכן הראשי
+        </a>
+
+        {/* Main content */}
+        <div id="main-content">{children}</div>
+      </body>
+    </html>
+  );
+}

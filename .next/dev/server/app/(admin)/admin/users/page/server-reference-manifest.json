@@ -1,0 +1,65 @@
+{
+  "node": {
+    "6039eefcab615736b376bef0e59b9ecd009f0500c1": {
+      "workers": {
+        "app/(admin)/admin/users/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin)/admin/users/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin)/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "toggleUserActiveAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/users/page": "action-browser"
+      },
+      "exportedName": "toggleUserActiveAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "40ddcd56780be308d0ecaf61b2c791c4d816bdab75": {
+      "workers": {
+        "app/(admin)/admin/users/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin)/admin/users/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin)/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "resetUserPasswordAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/users/page": "action-browser"
+      },
+      "exportedName": "resetUserPasswordAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "40e240888895be694f8fbcd1eb82cb4838a850189a": {
+      "workers": {
+        "app/(admin)/admin/users/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin)/admin/users/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin)/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteUserAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/users/page": "action-browser"
+      },
+      "exportedName": "deleteUserAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "4003d4fb6d7a1cc86e1ffdbac8f5ad17963f33f20b": {
+      "workers": {
+        "app/(admin)/admin/users/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin)/admin/users/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin)/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createUserAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/users/page": "action-browser"
+      },
+      "exportedName": "createUserAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    }
+  },
+  "edge": {}
+}
