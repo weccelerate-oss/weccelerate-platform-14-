@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { generateSignedUrl, URL_EXPIRY, parseGCSPath, GCSError } from '@/lib/gcs';
 
