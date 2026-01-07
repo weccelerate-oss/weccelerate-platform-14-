@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40cd82834fd73041997ad60cdc220048a4cf03678d": {
+      "workers": {
+        "app/(admin)/admin/news/page": {
+          "moduleId": 13186,
+          "async": false,
+          "exportedName": "deleteNewsAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/news/page": "action-browser"
+      },
+      "exportedName": "deleteNewsAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "6083c21867fc2ebde94a9272616649abe7b3eb0a54": {
+      "workers": {
+        "app/(admin)/admin/news/page": {
+          "moduleId": 13186,
+          "async": false,
+          "exportedName": "updateNewsAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/news/page": "action-browser"
+      },
+      "exportedName": "updateNewsAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "40cf85da20fa53168897ef98523a90004d3a7b59f5": {
+      "workers": {
+        "app/(admin)/admin/news/page": {
+          "moduleId": 13186,
+          "async": false,
+          "exportedName": "createNewsAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/news/page": "action-browser"
+      },
+      "exportedName": "createNewsAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    }
+  },
+  "edge": {}
+}
