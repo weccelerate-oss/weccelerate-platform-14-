@@ -5,7 +5,8 @@
  */
 
 import bcrypt from 'bcryptjs';
-import { auth } from './auth.config';
+import { getServerSession } from 'next-auth';
+import { authOptions } from './auth.config';
 
 // Define UserRole type locally to avoid Prisma import issues
 export type UserRole = 'ADMIN' | 'ENTREPRENEUR' | 'MENTOR' | 'INVESTOR' | 'PARTNER';
@@ -16,19 +17,14 @@ export type UserRole = 'ADMIN' | 'ENTREPRENEUR' | 'MENTOR' | 'INVESTOR' | 'PARTN
 
 /**
  * Hash a password using bcrypt
- * @param password - Plain text password
- * @returns Hashed password
  */
 export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 12; // Higher = more secure but slower
+  const saltRounds = 12;
   return bcrypt.hash(password, saltRounds);
 }
 
 /**
  * Verify a password against a hash
- * @param password - Plain text password
- * @param hash - Hashed password
- * @returns Whether the password matches
  */
 export async function verifyPassword(
   password: string,
@@ -39,8 +35,6 @@ export async function verifyPassword(
 
 /**
  * Validate password strength
- * @param password - Password to validate
- * @returns Validation result
  */
 export function validatePasswordStrength(password: string): {
   isValid: boolean;
@@ -76,56 +70,48 @@ export function validatePasswordStrength(password: string): {
 
 /**
  * Get the current session (server-side)
- * @returns Current session or null
  */
 export async function getSession() {
-  return auth();
+  return getServerSession(authOptions);
 }
 
 /**
  * Get the current user (server-side)
- * @returns Current user from session or null
  */
 export async function getCurrentUser() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   return session?.user ?? null;
 }
 
 /**
  * Check if user is authenticated (server-side)
- * @returns Whether user is authenticated
  */
 export async function isAuthenticated(): Promise<boolean> {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   return !!session?.user;
 }
 
 /**
  * Check if user has a specific role (server-side)
- * @param role - Role to check
- * @returns Whether user has the role
  */
 export async function hasRole(role: UserRole): Promise<boolean> {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   return session?.user?.role === role;
 }
 
 /**
  * Check if user has any of the specified roles (server-side)
- * @param roles - Roles to check
- * @returns Whether user has any of the roles
  */
 export async function hasAnyRole(roles: UserRole[]): Promise<boolean> {
-  const session = await auth();
-  return !!session?.user?.role && roles.includes(session.user.role);
+  const session = await getServerSession(authOptions);
+  return !!session?.user?.role && roles.includes(session.user.role as UserRole);
 }
 
 /**
  * Require authentication - throws if not authenticated
- * Use in Server Components or Server Actions
  */
 export async function requireAuth() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   
   if (!session?.user) {
     throw new Error('Unauthorized: Authentication required');
@@ -136,7 +122,6 @@ export async function requireAuth() {
 
 /**
  * Require specific role - throws if not authorized
- * Use in Server Components or Server Actions
  */
 export async function requireRole(role: UserRole) {
   const user = await requireAuth();
@@ -154,13 +139,9 @@ export async function requireRole(role: UserRole) {
 export async function requireAnyRole(roles: UserRole[]) {
   const user = await requireAuth();
   
-  if (!roles.includes(user.role)) {
+  if (!roles.includes(user.role as UserRole)) {
     throw new Error(`Forbidden: One of [${roles.join(', ')}] roles required`);
   }
   
   return user;
 }
-
-// =============================================================================
-// TYPES - exported above
-// =============================================================================
