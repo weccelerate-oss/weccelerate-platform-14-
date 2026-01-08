@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/sites/layout,_N_T_/sites/main/layout,_N_T_/sites/main/tools/layout,_N_T_/sites/main/tools/mvp-calculator/layout,_N_T_/sites/main/tools/mvp-calculator/page,_N_T_/sites/main/tools/mvp-calculator"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/sites/main/tools/mvp-calculator/__PAGE__",
+    "/sites/main/tools/mvp-calculator",
+    "/sites/main/tools",
+    "/sites/main",
+    "/sites",
+    "/_index",
+    "/_head"
+  ]
+}

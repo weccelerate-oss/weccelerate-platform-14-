@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/sites/layout,_N_T_/sites/leumit/layout,_N_T_/sites/leumit/services/layout,_N_T_/sites/leumit/services/page,_N_T_/sites/leumit/services"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/sites/leumit/services/__PAGE__",
+    "/sites/leumit/services",
+    "/sites/leumit",
+    "/sites",
+    "/_index",
+    "/_head"
+  ]
+}

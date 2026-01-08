@@ -1,0 +1,28 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /portal/
+Disallow: /_next/
+Disallow: /private/
+
+User-Agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /portal/
+
+User-Agent: GPTBot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /portal/
+
+User-Agent: anthropic-ai
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /portal/
+
+Host: https://weccelerate.co.il
+Sitemap: https://weccelerate.co.il/sitemap.xml

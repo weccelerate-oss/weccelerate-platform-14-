@@ -1,0 +1,20 @@
+{
+  "node": {
+    "404a3188f0eb57f6e0f6be26febce49ce0615f0527": {
+      "workers": {
+        "app/sites/main/tools/mvp-calculator/page": {
+          "moduleId": 84871,
+          "async": false,
+          "exportedName": "createLeadAction",
+          "filename": "app/actions/leads.ts"
+        }
+      },
+      "layer": {
+        "app/sites/main/tools/mvp-calculator/page": "action-browser"
+      },
+      "exportedName": "createLeadAction",
+      "filename": "app/actions/leads.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,50 @@
+{
+  "node": {
+    "40c22eda640142d6d917644113566897c98a39614c": {
+      "workers": {
+        "app/(admin)/admin/events/page": {
+          "moduleId": 64763,
+          "async": false,
+          "exportedName": "deleteEventAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/events/page": "action-browser"
+      },
+      "exportedName": "deleteEventAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "606ded2238f5d77c9e986d853a409a72a236f56416": {
+      "workers": {
+        "app/(admin)/admin/events/page": {
+          "moduleId": 64763,
+          "async": false,
+          "exportedName": "updateEventAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/events/page": "action-browser"
+      },
+      "exportedName": "updateEventAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "40a6b3ab020fd034d19c96e53a81a94056d3582194": {
+      "workers": {
+        "app/(admin)/admin/events/page": {
+          "moduleId": 64763,
+          "async": false,
+          "exportedName": "createEventAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/events/page": "action-browser"
+      },
+      "exportedName": "createEventAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    }
+  },
+  "edge": {}
+}

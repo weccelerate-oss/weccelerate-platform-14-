@@ -1,0 +1,80 @@
+{
+  "node": {
+    "409b9867c46e05a45d54ab77fe62435a26baae16cd": {
+      "workers": {
+        "app/(admin)/admin/stories/page": {
+          "moduleId": 1740,
+          "async": false,
+          "exportedName": "createStoryAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/stories/page": "action-browser"
+      },
+      "exportedName": "createStoryAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "604230706bbb2069a3457c74583a6facdc24886387": {
+      "workers": {
+        "app/(admin)/admin/stories/page": {
+          "moduleId": 1740,
+          "async": false,
+          "exportedName": "updateStoryAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/stories/page": "action-browser"
+      },
+      "exportedName": "updateStoryAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "40040dd7081d97569552c5e679e62c6d0af35c6843": {
+      "workers": {
+        "app/(admin)/admin/stories/page": {
+          "moduleId": 1740,
+          "async": false,
+          "exportedName": "deleteStoryAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/stories/page": "action-browser"
+      },
+      "exportedName": "deleteStoryAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "40c6f878f0da83328c9cf49a63ab528e7928440ddb": {
+      "workers": {
+        "app/(admin)/admin/stories/page": {
+          "moduleId": 1740,
+          "async": false,
+          "exportedName": "toggleStoryActiveAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/stories/page": "action-browser"
+      },
+      "exportedName": "toggleStoryActiveAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "4023726fd6099c50bc7dba064865a9fa769e5cc80f": {
+      "workers": {
+        "app/(admin)/admin/stories/page": {
+          "moduleId": 1740,
+          "async": false,
+          "exportedName": "toggleStoryFeaturedAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/stories/page": "action-browser"
+      },
+      "exportedName": "toggleStoryFeaturedAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../app/%28portal%29/portal/page.tsx"],"sourcesContent":["import { redirect } from 'next/navigation';\n\nexport default function PortalPage() {\n  redirect('/portal/dashboard');\n}"],"names":[],"mappings":"gWAAA,EAAA,CAAA,CAAA,OAAA,IAAA,EAAA,EAAA,CAAA,CAAA,OAEe,SAAS,IACtB,CAAA,EAAA,EAAA,QAAA,AAAQ,EAAC,oBACX"}

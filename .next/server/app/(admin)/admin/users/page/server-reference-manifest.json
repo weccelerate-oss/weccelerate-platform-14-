@@ -1,0 +1,65 @@
+{
+  "node": {
+    "603eca510c89f8e53ab5324b0da326d805e14a71b1": {
+      "workers": {
+        "app/(admin)/admin/users/page": {
+          "moduleId": 3643,
+          "async": false,
+          "exportedName": "toggleUserActiveAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/users/page": "action-browser"
+      },
+      "exportedName": "toggleUserActiveAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "409d06e36d7a16d70f37d1f3fb5b8ee0f76caf627f": {
+      "workers": {
+        "app/(admin)/admin/users/page": {
+          "moduleId": 3643,
+          "async": false,
+          "exportedName": "resetUserPasswordAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/users/page": "action-browser"
+      },
+      "exportedName": "resetUserPasswordAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "40eab85f773cb7ccffbfa442cfbf879600faf0231c": {
+      "workers": {
+        "app/(admin)/admin/users/page": {
+          "moduleId": 3643,
+          "async": false,
+          "exportedName": "deleteUserAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/users/page": "action-browser"
+      },
+      "exportedName": "deleteUserAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    },
+    "40ea9561ea79fee127637292d1be5902a16530f816": {
+      "workers": {
+        "app/(admin)/admin/users/page": {
+          "moduleId": 3643,
+          "async": false,
+          "exportedName": "createUserAction",
+          "filename": "app/(admin)/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin)/admin/users/page": "action-browser"
+      },
+      "exportedName": "createUserAction",
+      "filename": "app/(admin)/admin/actions.ts"
+    }
+  },
+  "edge": {}
+}
