@@ -1,19 +1,6 @@
-/**
- * Authentication Module - NextAuth v4
- */
+export { auth, signIn, signOut, handlers } from './auth.config';
+export { authOptions, authConfig } from './auth.config';
 
-import { getServerSession } from 'next-auth';
-import { authOptions, authConfig } from './auth.config';
-
-// Export auth as a wrapper around getServerSession
-export async function auth() {
-  return await getServerSession(authOptions);
-}
-
-// Re-export config
-export { authOptions, authConfig };
-
-// Re-export utilities
 export {
   hashPassword,
   verifyPassword,

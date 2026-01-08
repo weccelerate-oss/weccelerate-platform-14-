@@ -1,6 +1,6 @@
 {
   "node": {
-    "409b9867c46e05a45d54ab77fe62435a26baae16cd": {
+    "40a1f1e1a9bf7077bec28ac27a6e17769d21aac29e": {
       "workers": {
         "app/(admin)/admin/stories/page": {
           "moduleId": 1740,
@@ -15,7 +15,7 @@
       "exportedName": "createStoryAction",
       "filename": "app/(admin)/admin/actions.ts"
     },
-    "604230706bbb2069a3457c74583a6facdc24886387": {
+    "600e3bd84631f8a4bbf7cceb48e7510990c7c0b71d": {
       "workers": {
         "app/(admin)/admin/stories/page": {
           "moduleId": 1740,
@@ -30,7 +30,7 @@
       "exportedName": "updateStoryAction",
       "filename": "app/(admin)/admin/actions.ts"
     },
-    "40040dd7081d97569552c5e679e62c6d0af35c6843": {
+    "406c162d58ca6a81ebfc3c23ed36bfc366a9d2ee00": {
       "workers": {
         "app/(admin)/admin/stories/page": {
           "moduleId": 1740,
@@ -45,7 +45,7 @@
       "exportedName": "deleteStoryAction",
       "filename": "app/(admin)/admin/actions.ts"
     },
-    "40c6f878f0da83328c9cf49a63ab528e7928440ddb": {
+    "4095414c7105d472857fc7b95c4f278371fa3d03b2": {
       "workers": {
         "app/(admin)/admin/stories/page": {
           "moduleId": 1740,
@@ -60,7 +60,7 @@
       "exportedName": "toggleStoryActiveAction",
       "filename": "app/(admin)/admin/actions.ts"
     },
-    "4023726fd6099c50bc7dba064865a9fa769e5cc80f": {
+    "408b567135341ea2ca259ad87100e6616d94a62d27": {
       "workers": {
         "app/(admin)/admin/stories/page": {
           "moduleId": 1740,

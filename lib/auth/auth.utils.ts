@@ -3,10 +3,9 @@
  * 
  * Helper functions for authentication and authorization.
  */
-
+import { auth } from './auth.config';
 import bcrypt from 'bcryptjs';
-import { getServerSession } from 'next-auth';
-import { authOptions } from './auth.config';
+
 
 // Define UserRole type locally to avoid Prisma import issues
 export type UserRole = 'ADMIN' | 'ENTREPRENEUR' | 'MENTOR' | 'INVESTOR' | 'PARTNER';
@@ -79,7 +78,7 @@ export async function getSession() {
  * Get the current user (server-side)
  */
 export async function getCurrentUser() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   return session?.user ?? null;
 }
 
@@ -87,7 +86,7 @@ export async function getCurrentUser() {
  * Check if user is authenticated (server-side)
  */
 export async function isAuthenticated(): Promise<boolean> {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   return !!session?.user;
 }
 
@@ -95,7 +94,7 @@ export async function isAuthenticated(): Promise<boolean> {
  * Check if user has a specific role (server-side)
  */
 export async function hasRole(role: UserRole): Promise<boolean> {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   return session?.user?.role === role;
 }
 
@@ -103,7 +102,7 @@ export async function hasRole(role: UserRole): Promise<boolean> {
  * Check if user has any of the specified roles (server-side)
  */
 export async function hasAnyRole(roles: UserRole[]): Promise<boolean> {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   return !!session?.user?.role && roles.includes(session.user.role as UserRole);
 }
 
@@ -111,7 +110,7 @@ export async function hasAnyRole(roles: UserRole[]): Promise<boolean> {
  * Require authentication - throws if not authenticated
  */
 export async function requireAuth() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   
   if (!session?.user) {
     throw new Error('Unauthorized: Authentication required');

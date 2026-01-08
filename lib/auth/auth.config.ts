@@ -1,179 +1,63 @@
-/**
- * NextAuth.js v4 Configuration
- * 
- * Authentication configuration for WeCcelerate platform.
- */
-
-import type { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 
-// =============================================================================
-// TYPE DEFINITIONS
-// =============================================================================
-
-type UserRole = 'ADMIN' | 'ENTREPRENEUR' | 'MENTOR' | 'INVESTOR' | 'PARTNER';
-
-// Extend the built-in session types
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      name: string;
-      role: UserRole;
-      image?: string | null;
-      company?: string | null;
-    };
-  }
-
-  interface User {
-    id: string;
-    email: string;
-    name: string;
-    role: UserRole;
-    image?: string | null;
-    company?: string | null;
-    isActive?: boolean;
-  }
-}
-
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string;
-    role: UserRole;
-    company?: string | null;
-  }
-}
-
-// =============================================================================
-// AUTH CONFIGURATION
-// =============================================================================
-
-export const authOptions: NextAuthOptions = {
-  // Session configuration
-  session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
-  },
-
-  // Pages configuration
-  pages: {
-    signIn: '/login',
-    signOut: '/login',
-    error: '/login',
-  },
-
-  // Providers
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
-    CredentialsProvider({
-      id: 'credentials',
-      name: 'Email & Password',
+    Credentials({
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
+        email: {},
+        password: {},
       },
-
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
-        const email = credentials.email;
-        const password = credentials.password;
-
-        if (!email.includes('@') || password.length < 6) {
-          return null;
-        }
+        const { PrismaClient } = await import('@prisma/client');
+        const { PrismaPg } = await import('@prisma/adapter-pg');
+        const pg = await import('pg');
+        
+        const pool = new pg.default.Pool({ connectionString: process.env.DATABASE_URL });
+        const adapter = new PrismaPg(pool);
+        const prisma = new PrismaClient({ adapter });
 
         try {
-          const { PrismaClient } = await import('@prisma/client');
-          const prisma = new PrismaClient();
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+          });
 
-          try {
-            const user = await prisma.user.findUnique({
-              where: { email: email.toLowerCase().trim() },
-              select: {
-                id: true,
-                email: true,
-                name: true,
-                password: true,
-                role: true,
-                image: true,
-                avatar: true,
-                company: true,
-                isActive: true,
-              },
-            });
+          if (!user?.password || !user.isActive) return null;
 
-            if (!user || !user.isActive || !user.password) {
-              return null;
-            }
+          const isValid = await bcrypt.compare(credentials.password as string, user.password);
+          if (!isValid) return null;
 
-            const isValidPassword = await bcrypt.compare(password, user.password);
-
-            if (!isValidPassword) {
-              return null;
-            }
-
-            // Update last login (non-blocking)
-            prisma.user.update({
-              where: { id: user.id },
-              data: { lastLoginAt: new Date() },
-            }).catch(() => {});
-
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              role: user.role as UserRole,
-              image: user.image || user.avatar,
-              company: user.company,
-              isActive: user.isActive,
-            };
-          } finally {
-            await prisma.$disconnect();
-          }
-        } catch (error) {
-          console.error('[Auth] Error:', error);
-          return null;
+          return { id: user.id, email: user.email, name: user.name, role: user.role };
+        } finally {
+          await prisma.$disconnect();
+          await pool.end();
         }
       },
     }),
   ],
-
-  // Callbacks
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/login' },
   callbacks: {
-    async jwt({ token, user }) {
+    jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
-        token.company = user.company;
+        token.role = (user as any).role;
       }
       return token;
     },
-
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.company = token.company;
+    session({ session, token }) {
+      if (session.user) {
+        (session.user as any).id = token.id;
+        (session.user as any).role = token.role;
       }
       return session;
     },
-
-    async signIn({ user }) {
-      if (user && 'isActive' in user && !user.isActive) {
-        return false;
-      }
-      return true;
-    },
   },
+  trustHost: true,
+});
 
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
-};
-
-// Alias for compatibility
-export const authConfig = authOptions;
+export const authOptions = {};
+export const authConfig = {};

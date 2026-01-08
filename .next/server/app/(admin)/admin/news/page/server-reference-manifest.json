@@ -1,6 +1,6 @@
 {
   "node": {
-    "40add86755dec89ad2d28b33ae64e202c606f0e62b": {
+    "400a5d304ae95d1559b15a9c2e25218df998cf6433": {
       "workers": {
         "app/(admin)/admin/news/page": {
           "moduleId": 13186,
@@ -15,7 +15,7 @@
       "exportedName": "deleteNewsAction",
       "filename": "app/(admin)/admin/actions.ts"
     },
-    "60a1867474910f745b5af75b39c8c65a105f8a9029": {
+    "60bee29c2c681b301960235acad17a9d8fe03f6794": {
       "workers": {
         "app/(admin)/admin/news/page": {
           "moduleId": 13186,
@@ -30,7 +30,7 @@
       "exportedName": "updateNewsAction",
       "filename": "app/(admin)/admin/actions.ts"
     },
-    "40329f817123192604dec4529f518572985c077fb0": {
+    "4074f460bffa99e1b20a602d788119b63cf09ba769": {
       "workers": {
         "app/(admin)/admin/news/page": {
           "moduleId": 13186,
