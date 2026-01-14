@@ -40,23 +40,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   session: { strategy: 'jwt' },
   pages: { signIn: '/login' },
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = (user as any).role;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
-      }
-      return session;
-    },
+callbacks: {
+  jwt({ token, user }) {
+    if (user) {
+      token.id = user.id;
+      token.role = (user as any).role;
+    }
+    return token;
   },
-  trustHost: true,
+  session({ session, token }) {
+    if (session.user) {
+      (session.user as any).id = token.id;
+      (session.user as any).role = token.role;
+    }
+    return session;
+  },
+  redirect({ url, baseUrl }) {
+    // After sign in, redirect to admin or portal based on role
+    if (url.includes('/login') || url === baseUrl) {
+      return `${baseUrl}/admin`;
+    }
+    return url;
+  },
+},  trustHost: true,
 });
 
 export const authOptions = {};
