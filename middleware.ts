@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { auth } from '@/lib/auth';
 
 const SUBDOMAIN_MAP: Record<string, string> = {
   leumit: 'leumit',
@@ -53,13 +53,10 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = matchesRoute(pathname, AUTH_ROUTES);
 
   if (isProtectedRoute || isAdminRoute || isAuthRoute) {
-    const token = await getToken({ 
-      req: request,
-      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-    });
-    
-    const isLoggedIn = !!token;
-    const userRole = token?.role as string | undefined;
+
+    const session = await auth();
+    const isLoggedIn = !!session?.user;
+    const userRole = (session?.user as any)?.role;
 
     if ((isProtectedRoute || isAdminRoute) && !isLoggedIn) {
       const loginUrl = new URL(`/login?callbackUrl=${encodeURIComponent(pathname)}`, request.url);
