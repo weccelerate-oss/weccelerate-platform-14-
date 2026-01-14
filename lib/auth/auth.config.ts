@@ -56,13 +56,28 @@ callbacks: {
     return session;
   },
   redirect({ url, baseUrl }) {
-    // After sign in, redirect to admin or portal based on role
-    if (url.includes('/login') || url === baseUrl) {
+    // Always redirect to portal/admin after login
+    if (url.includes('/api/auth')) {
       return `${baseUrl}/admin`;
     }
-    return url;
+    if (url.startsWith(baseUrl)) {
+      return url;
+    }
+    return `${baseUrl}/admin`;
   },
 },  trustHost: true,
+cookies: {
+  sessionToken: {
+    name: `__Secure-next-auth.session-token`,
+    options: {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      secure: true,
+    },
+  },
+},
+
 });
 
 export const authOptions = {};
