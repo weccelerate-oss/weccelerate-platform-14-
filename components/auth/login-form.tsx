@@ -129,13 +129,14 @@ export function LoginForm() {
     if (!validateForm()) return;
 
     startTransition(async () => {
-      try {
-        const result = await signIn('credentials', {
+
+        await signIn('credentials', {
           email: formData.email.toLowerCase().trim(),
           password: formData.password,
-          redirect: false,
-          callbackUrl,
+          redirect: true,
+          callbackUrl: '/admin',
         });
+        return; 
 
         if (result?.error) {
           // Handle specific error messages from the server
