@@ -21,7 +21,7 @@ export default async function AdminLayout({
     redirect('/login?callbackUrl=/admin');
   }
 
-  if (session.user.role !== 'ADMIN') {
+  if ((session.user as any).role !== 'ADMIN') {
     redirect('/portal/dashboard?error=unauthorized');
   }
 
