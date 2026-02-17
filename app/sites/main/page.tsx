@@ -239,38 +239,20 @@ const stats = [
 function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* ========== Z-INDEX LAYERING (DOM order only, NO negative z-index) =====
-       * IMPORTANT: overflow-hidden on this section creates a stacking context.
-       * Negative z-index renders elements BEHIND the section background,
-       * making them invisible. We use DOM order instead — later siblings
-       * paint on top of earlier siblings at the same z-index level.
-       *
-       *  1. Gradient fallback  (z-auto, bottom)
-       *  2. Video              (z-auto, on top of gradient)
-       *  3. Gradient overlays  (z-auto, dims video for readability)
-       *  4. Decorative orbs    (z-auto)
-       *  5. Content            (z-10, above everything)
-       * ====================================================================== */}
+      {/* Layers: 1) Video+poster bg  2) Light overlay  3) Content (z-10) */}
 
-      {/* 1) Gradient fallback — always visible as bottom layer */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#050810] via-[#0a1028] to-[#050810]" />
-
-      {/* 2) Video — client component, paints on top of gradient */}
-      <div className="absolute inset-0" aria-hidden="true">
+      {/* 1) Video background with poster fallback */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/hero-bg-poster.jpeg')" }}
+        aria-hidden="true"
+      >
         <HeroVideo />
       </div>
 
-      {/* 3) Semi-transparent overlays — dims video for text readability */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050810]/70 via-transparent to-[#050810]/70" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050810]/60 via-[#050810]/10 to-[#050810]/40" />
-      </div>
-
-      {/* 4) Decorative elements */}
-      <div className="absolute inset-0 network-bg pointer-events-none" aria-hidden="true" />
-      <div className="absolute top-[20%] right-[20%] w-[600px] h-[600px] bg-blue-600/[0.07] rounded-full blur-[150px] pointer-events-none hero-float-slow" aria-hidden="true" />
-      <div className="absolute bottom-[25%] left-[15%] w-[500px] h-[500px] bg-[#c8a951]/[0.04] rounded-full blur-[120px] pointer-events-none hero-float-medium" aria-hidden="true" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-indigo-500/[0.04] rounded-full blur-[100px] pointer-events-none hero-float-fast" aria-hidden="true" />
+      {/* 2) Light overlay — just enough to keep text readable */}
+      <div className="absolute inset-0 bg-[#050810]/40 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#050810]/50 via-transparent to-[#050810]/60 pointer-events-none" aria-hidden="true" />
 
       {/* Top gold accent line */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#c8a951]/30 to-transparent" aria-hidden="true" />
@@ -796,13 +778,13 @@ function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className="mb-6 inline-block bg-[#0a0e27] rounded-xl p-3 border border-white/[0.06]">
+            <div className="mb-6">
               <Image
                 src="/images/logos/weccelerate-logo.jpeg"
                 alt="WeCcelerate"
-                width={240}
-                height={60}
-                className="h-14 w-auto object-contain rounded-md"
+                width={200}
+                height={50}
+                className="h-10 w-auto object-contain"
               />
             </div>
             <p className="text-white/60 max-w-sm mb-8 text-sm leading-relaxed">
