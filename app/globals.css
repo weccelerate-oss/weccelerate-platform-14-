@@ -199,8 +199,9 @@
   --color-error-500: var(--error-500);
   --color-error-600: var(--error-600);
   
-  /* Typography - Heebo for Hebrew */
+  /* Typography */
   --font-heebo: 'Heebo', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter, 'Inter'), 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Heebo', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
@@ -224,10 +225,34 @@ body {
   text-align: right;
 }
 
-/* Focus styles - Corporate */
+/* =============================================================================
+   FOCUS STYLES — WCAG 2.1 AA Gold Focus Ring (Keyboard Only)
+   ============================================================================= */
+
+/* Remove default browser outline — replaced by custom focus ring */
+*:focus {
+  outline: none;
+}
+
+/* Custom Gold Focus Ring — visible only on keyboard navigation (:focus-visible) */
 *:focus-visible {
-  outline: 2px solid var(--yellow-500);
+  outline: 2px solid var(--gold-500);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+}
+
+/* Interactive elements: enhanced focus ring with inherited border-radius */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
 }
 
 /* Selection - Corporate Yellow */
@@ -511,6 +536,224 @@ body {
 }
 
 /* =============================================================================
+   PREMIUM DARK THEME — Glassmorphism & Gold Accents
+   ============================================================================= */
+
+/* Glassmorphism Card — Refined hover with depth layers */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(212, 175, 55, 0.25);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(212, 175, 55, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: translateY(-6px);
+}
+
+/* Gold Glow for Buttons */
+.gold-glow {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.25), 0 0 60px rgba(212, 175, 55, 0.08);
+  transition: all 0.3s ease;
+}
+
+.gold-glow:hover {
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), 0 0 80px rgba(212, 175, 55, 0.12);
+}
+
+/* Gold Gradient Text */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #c8a951, #e8d48b, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Network/Data Visualization Background */
+.network-bg {
+  position: relative;
+}
+
+.network-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(30, 58, 138, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(212, 175, 55, 0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 80%, rgba(30, 58, 138, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* =============================================================================
+   HERO — Entrance Animations & Floating Orbs
+   ============================================================================= */
+
+/* Staggered entrance: blur + slide + fade — cinematic feel */
+.hero-fade-in        { animation: heroEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+.hero-fade-in-delay-1 { animation: heroEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; opacity: 0; }
+.hero-fade-in-delay-2 { animation: heroEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards; opacity: 0; }
+.hero-fade-in-delay-3 { animation: heroEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; opacity: 0; }
+.hero-fade-in-delay-4 { animation: heroEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; opacity: 0; }
+
+@keyframes heroEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.97);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Ambient floating orbs — smooth organic paths with scale breathing */
+.hero-float-slow   { animation: heroFloatSlow 25s ease-in-out infinite; }
+.hero-float-medium { animation: heroFloatMedium 18s ease-in-out infinite; }
+.hero-float-fast   { animation: heroFloatFast 12s ease-in-out infinite; }
+
+@keyframes heroFloatSlow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  20%      { transform: translate(40px, -25px) scale(1.05); }
+  40%      { transform: translate(-15px, 35px) scale(0.95); }
+  60%      { transform: translate(25px, 15px) scale(1.08); }
+  80%      { transform: translate(-30px, -20px) scale(0.97); }
+}
+
+@keyframes heroFloatMedium {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(-35px, 20px) scale(1.06); }
+  50%      { transform: translate(20px, -30px) scale(0.94); }
+  75%      { transform: translate(-10px, 15px) scale(1.03); }
+}
+
+@keyframes heroFloatFast {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(15px, -20px) scale(1.1); }
+  66%      { transform: translate(-20px, 10px) scale(0.92); }
+}
+
+/* Scroll indicator — refined gold pulse line */
+.animate-scroll-line {
+  animation: scrollLine 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes scrollLine {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+/* =============================================================================
+   GOLD SHIMMER — Headline text shimmer effect
+   ============================================================================= */
+
+.text-gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    #c8a951 0%,
+    #e8d48b 25%,
+    #f5eac0 50%,
+    #e8d48b 75%,
+    #c8a951 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: goldShimmer 4s ease-in-out infinite;
+}
+
+@keyframes goldShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* =============================================================================
+   CARD MICRO-INTERACTIONS — Refined hover states
+   ============================================================================= */
+
+/* Soft glow pulse on hover for glass cards */
+.glass-card-glow:hover {
+  animation: cardGlowPulse 2s ease-in-out infinite;
+}
+
+@keyframes cardGlowPulse {
+  0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 30px rgba(212, 175, 55, 0.06); }
+  50%      { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 50px rgba(212, 175, 55, 0.12); }
+}
+
+/* Video play button breathe effect */
+.play-breathe {
+  animation: playBreathe 2.5s ease-in-out infinite;
+}
+
+@keyframes playBreathe {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+  50%      { transform: scale(1.08); box-shadow: 0 0 0 16px rgba(212, 175, 55, 0); }
+}
+
+/* Stat counter reveal — clip + slide */
+.stat-reveal {
+  animation: statReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes statReveal {
+  from { opacity: 0; transform: translateY(16px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Strategic Partnership Ribbon */
+.partnership-ribbon {
+  position: absolute;
+  top: 20px;
+  left: -2px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  padding: 6px 16px 6px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  z-index: 10;
+  border-radius: 0 6px 6px 0;
+}
+
+[dir="rtl"] .partnership-ribbon {
+  left: auto;
+  right: -2px;
+  border-radius: 6px 0 0 6px;
+}
+
+/* Hide scrollbar for horizontal scroll */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* =============================================================================
    SCROLL REVEAL (for JS enhancement)
    ============================================================================= */
 
@@ -523,6 +766,88 @@ body {
 .reveal.revealed {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Enhanced scroll reveal for premium sections — multiple variants */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: blur(4px);
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* Slide from right (for RTL — comes from reading direction) */
+.scroll-reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: blur(3px);
+}
+
+.scroll-reveal-right.revealed {
+  opacity: 1;
+  transform: translateX(0);
+  filter: blur(0);
+}
+
+/* Slide from left */
+.scroll-reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: blur(3px);
+}
+
+.scroll-reveal-left.revealed {
+  opacity: 1;
+  transform: translateX(0);
+  filter: blur(0);
+}
+
+/* Scale up — elegant zoom in */
+.scroll-reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: blur(6px);
+}
+
+.scroll-reveal-scale.revealed {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+
+/* Blur in only — no movement, pure focus reveal */
+.scroll-reveal-blur {
+  opacity: 0;
+  transition:
+    opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: blur(12px);
+}
+
+.scroll-reveal-blur.revealed {
+  opacity: 1;
+  filter: blur(0);
 }
 
 /* =============================================================================
@@ -545,7 +870,7 @@ body {
 }
 
 /* =============================================================================
-   ACCESSIBILITY
+   ACCESSIBILITY — WCAG 2.1 AA Compliance
    ============================================================================= */
 
 /* Reduced motion preference */
@@ -558,32 +883,112 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   .animate-marquee {
     animation: none;
   }
+
+  video[autoplay] {
+    display: none;
+  }
 }
 
-/* Focus visible for keyboard navigation */
-:focus-visible {
-  outline: 2px solid var(--yellow-500);
-  outline-offset: 2px;
-}
-
-/* Skip link */
-.skip-link {
-  position: absolute;
-  top: -100%;
+/* Skip to Content — Gold Accent, Centered, Works in RTL */
+.skip-to-content {
+  position: fixed;
+  top: 0;
   left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  padding: 1rem 2rem;
-  background: var(--black-900);
-  color: white;
-  font-weight: 600;
-  transition: top 0.3s ease;
+  transform: translate(-50%, -100%);
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: var(--black-950);
+  color: var(--gold-500);
+  border: 2px solid var(--gold-500);
+  border-top: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
 }
 
-.skip-link:focus {
-  top: 1rem;
+.skip-to-content:focus {
+  transform: translate(-50%, 0);
+  outline: none;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+}
+
+/* Screen-reader only utility (keep in DOM, hide visually) */
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* =============================================================================
+   ACCESSIBILITY WIDGET — Toggled Classes on <html>
+   ============================================================================= */
+
+/* High Contrast */
+.a11y-high-contrast {
+  filter: contrast(1.35);
+}
+
+.a11y-high-contrast body {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+.a11y-high-contrast img {
+  filter: contrast(1.2);
+}
+
+/* Grayscale */
+.a11y-grayscale {
+  filter: grayscale(1);
+}
+
+/* Combine both filters when both are active */
+.a11y-high-contrast.a11y-grayscale {
+  filter: contrast(1.35) grayscale(1);
+}
+
+/* Stop Animations */
+.a11y-stop-animations *,
+.a11y-stop-animations *::before,
+.a11y-stop-animations *::after {
+  animation-duration: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+.a11y-stop-animations video[autoplay] {
+  display: none;
+}
+
+/* Highlight Links */
+.a11y-highlight-links a {
+  outline: 2px solid var(--gold-500) !important;
+  outline-offset: 2px;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+/* Large Cursor */
+.a11y-large-cursor,
+.a11y-large-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M8 4l28 20H20l-4 16z' fill='%23000' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") 4 4, auto !important;
+}
+
+/* Reading Guide — overlay rendered by React; class acts as a flag */
+.a11y-reading-guide {
+  cursor: crosshair;
 }

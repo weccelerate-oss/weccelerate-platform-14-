@@ -1,12 +1,13 @@
 /**
  * SEO Configuration & Constants
- * 
- * WeCcelerate - General Tech & Business Accelerator
- * 
- * Strategy:
- * - CORE: General tech accelerator (AI, Apps, IoT, Physical Products, SaaS)
+ *
+ * WeCcelerate - Venture Builder & Startup Accelerator Israel
+ *
+ * Semantic Core:
+ * - PRIMARY: "Venture Builder Israel" / "Startup Accelerator"
+ * - SECONDARY: "Medical Accelerator" / "Innovation Hub Tel Aviv"
  * - SUPERPOWER: MedTech arm with Leumit partnership (unique differentiator)
- * 
+ *
  * @module lib/seo
  */
 
@@ -19,20 +20,26 @@ import type { Metadata, Viewport } from 'next';
 export const SITE_CONFIG = {
   name: 'WeCcelerate',
   url: 'https://weccelerate.co.il',
-  
-  // Broader description reflecting general tech + MedTech superpower
+
+  // Default description — Venture Builder positioning
+  defaultDescription: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
+
+  // Title template for all pages
+  titleTemplate: '%s | WeCcelerate - Venture Builder & Startup Accelerator Israel',
+
+  // Descriptions by length — Venture Builder framing
   description: {
     short: {
-      en: 'Israel\'s leading platform for startup acceleration, app development, and tech ventures. Unique MedTech track with Leumit Health Services.',
-      he: 'הפלטפורמה המובילה בישראל לפיתוח מיזמים, אפליקציות ומוצרים טכנולוגיים. זרוע חדשנות ייחודית בתחום הרפואי בשיתוף לאומית.',
+      en: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
+      he: 'וויסלרייט היא Venture Builder מוביל בתל אביב וירושלים, המתמחה ב-MedTech, AI ואסטרטגיית IP לסטארטאפים. בשותפות עם לאומית שירותי בריאות.',
     },
     medium: {
-      en: 'WeCcelerate accelerates startups across all tech sectors - AI, mobile apps, IoT, SaaS, and physical products. Our exclusive MedTech track with Leumit Health Services provides unmatched access to medical data and clinical validation.',
-      he: 'וויסלרייט מאיצה סטארטאפים בכל תחומי הטכנולוגיה - בינה מלאכותית, אפליקציות, IoT, SaaS ומוצרים פיזיים. מסלול ה-MedTech הייחודי שלנו בשיתוף לאומית מספק גישה חסרת תקדים לדאטה רפואי ותיקוף קליני.',
+      en: 'WeCcelerate is a leading Venture Builder and Startup Accelerator in Tel Aviv & Jerusalem. We specialize in MedTech, AI, and IP strategy, with an exclusive partnership with Leumit Health Care providing access to medical data and clinical validation.',
+      he: 'וויסלרייט היא Venture Builder ומאיץ סטארטאפים מוביל בתל אביב וירושלים. אנו מתמחים ב-MedTech, בינה מלאכותית ואסטרטגיית IP, עם שותפות בלעדית עם לאומית שירותי בריאות המספקת גישה לדאטה רפואי ותיקוף קליני.',
     },
     long: {
-      en: 'WeCcelerate is Israel\'s premier technology acceleration platform, supporting entrepreneurs across all sectors from AI and mobile apps to IoT and physical products. Our strategic partnership with Leumit Health Services creates an exclusive MedTech track offering access to anonymized medical data, clinical pilots, and regulatory guidance. Whether you\'re building the next breakthrough app or revolutionizing healthcare, WeCcelerate provides the expertise, resources, and connections to accelerate your success.',
-      he: 'וויסלרייט היא פלטפורמת האצת הטכנולוגיה המובילה בישראל, התומכת ביזמים בכל המגזרים - מבינה מלאכותית ואפליקציות מובייל ועד IoT ומוצרים פיזיים. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול MedTech בלעדי המציע גישה לדאטה רפואי אנונימי, פיילוטים קליניים והכוונה רגולטורית. בין אם אתם בונים את האפליקציה הפורצת הבאה או מחוללים מהפכה בתחום הבריאות, וויסלרייט מספקת את המומחיות, המשאבים והקשרים להאיץ את הצלחתכם.',
+      en: 'WeCcelerate is Israel\'s premier Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem. We guide entrepreneurs from idea to market across MedTech, AI, and deep-tech sectors. Our strategic partnership with Leumit Health Care creates an exclusive Medical Accelerator track with access to anonymized medical data, clinical pilots, Helsinki Committee guidance, and regulatory support. From MVP development and CTO services to IP strategy, patent registration, and investor matching — WeCcelerate is the Innovation Hub where startups become ventures.',
+      he: 'וויסלרייט הוא ה-Venture Builder ומאיץ הסטארטאפים המוביל בישראל, הפועל מתל אביב וירושלים. אנו מלווים יזמים מהרעיון לשוק בתחומי MedTech, בינה מלאכותית וטכנולוגיה עמוקה. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול Medical Accelerator בלעדי עם גישה לדאטה רפואי אנונימי, פיילוטים קליניים, הכוונה לוועדת הלסינקי ותמיכה רגולטורית. מפיתוח MVP ושירותי CTO ועד אסטרטגיית IP, רישום פטנטים וחיבור למשקיעים — וויסלרייט הוא מרכז החדשנות שבו סטארטאפים הופכים למיזמים.',
     },
   },
   
@@ -56,8 +63,8 @@ export const SITE_CONFIG = {
 export const BRAND = {
   name: 'WeCcelerate',
   legalName: 'WeCcelerate Ltd.',
-  tagline: 'From Idea to Impact',
-  taglineHe: 'מרעיון להשפעה',
+  tagline: 'Venture Builder & Startup Accelerator Israel',
+  taglineHe: 'Venture Builder ומאיץ סטארטאפים בישראל',
   
   // English brand identity
   english: {
@@ -141,7 +148,20 @@ export const PARENT_ORGANIZATION = {
 } as const;
 
 // =============================================================================
-// KEYWORDS - Hybrid Strategy (General Tech + MedTech Superpower)
+// SEMANTIC CORE - Primary Target Keywords
+// =============================================================================
+
+export const SEMANTIC_CORE = [
+  'Venture Builder Israel',
+  'Startup Accelerator',
+  'Medical Accelerator',
+  'Innovation Hub Tel Aviv',
+  'Weccelerate',
+  'וויסלרייט',
+] as const;
+
+// =============================================================================
+// KEYWORDS - Hybrid Strategy (Venture Builder + MedTech Superpower)
 // =============================================================================
 
 export const KEYWORDS = {
@@ -703,30 +723,58 @@ export const FAQ_DATA = FAQ_ITEMS;
 // =============================================================================
 
 export const SOCIAL_LINKS = {
-  facebook: 'https://www.facebook.com/WeCcelerate',
+  facebook: 'https://www.facebook.com/weccelerate',
   linkedin: 'https://www.linkedin.com/company/weccelerate',
+  youtube: 'https://www.youtube.com/@WeCcelerate.Ltd1',
   twitter: 'https://twitter.com/WeCcelerate',
   instagram: 'https://www.instagram.com/weccelerate',
-  youtube: 'https://www.youtube.com/@WeCcelerate',
   github: 'https://github.com/weccelerate',
   tiktok: 'https://www.tiktok.com/@weccelerate',
 } as const;
 
 export const CONTACT = {
-  email: 'info@weccelerate.co.il',
-  phone: '+972-3-555-1234',
-  phoneDisplay: '03-555-1234',
-  whatsapp: '+972-50-555-1234',
+  email: 'Raz@weccelerate.co.il',
+  phone: '+972-55-564-7538',
+  phoneDisplay: '055-564-7538',
+  whatsapp: '+972555647538',
+  whatsappLink: 'https://wa.me/972555647538',
+  googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=%D7%A8%D7%97%D7%95%D7%91+%D7%94%D7%A8%D7%9B%D7%91%D7%AA+58+%D7%AA%D7%9C+%D7%90%D7%91%D7%99%D7%91',
+  wazeUrl: 'https://waze.com/ul?q=%D7%A8%D7%97%D7%95%D7%91+%D7%94%D7%A8%D7%9B%D7%91%D7%AA+58+%D7%AA%D7%9C+%D7%90%D7%91%D7%99%D7%91',
+  locations: {
+    telAviv: {
+      street: 'HaRakevet 58',
+      streetHe: 'רחוב הרכבת 58',
+      city: 'Tel Aviv',
+      cityHe: 'תל אביב',
+      country: 'Israel',
+      countryHe: 'ישראל',
+      postalCode: '6777801',
+      full: 'HaRakevet 58, Tel Aviv, Israel',
+      fullHe: 'רחוב הרכבת 58, תל אביב, ישראל',
+    },
+    jerusalem: {
+      street: 'Jerusalem Branch',
+      streetHe: 'סניף ירושלים',
+      city: 'Jerusalem',
+      cityHe: 'ירושלים',
+      country: 'Israel',
+      countryHe: 'ישראל',
+      postalCode: '',
+      full: 'Jerusalem Branch, Jerusalem, Israel',
+      fullHe: 'סניף ירושלים, ירושלים, ישראל',
+    },
+  },
+  // Legacy alias — points to Tel Aviv (primary office)
   address: {
-    street: 'Rothschild Boulevard 1',
-    streetHe: 'שדרות רוטשילד 1',
+    street: 'HaRakevet 58',
+    streetHe: 'רחוב הרכבת 58',
     city: 'Tel Aviv',
     cityHe: 'תל אביב',
     country: 'Israel',
     countryHe: 'ישראל',
-    postalCode: '6688101',
-    full: 'Rothschild Boulevard 1, Tel Aviv, Israel 6688101',
-    fullHe: 'שדרות רוטשילד 1, תל אביב, ישראל 6688101',
+    postalCode: '6777801',
+    full: 'HaRakevet 58, Tel Aviv, Israel',
+    fullHe: 'רחוב הרכבת 58, תל אביב, ישראל',
   },
   hours: {
     weekdays: '09:00-18:00',
@@ -747,7 +795,7 @@ interface MetadataOptions {
   image?: string;
   noIndex?: boolean;
   locale?: 'he' | 'en';
-  type?: 'website' | 'article' | 'product';
+  type?: 'website' | 'article';
   publishedTime?: string;
   modifiedTime?: string;
   authors?: string[];
@@ -771,19 +819,12 @@ export function constructMetadata(options: MetadataOptions): Metadata {
     authors = ['WeCcelerate Team'],
   } = options;
 
-  const hebrewBrandVariation = getRandomBrandVariation('hebrew');
-  
-  const primaryKeyword = locale === 'he'
-    ? 'פיתוח אפליקציות | אקסלרטור סטארטאפים ישראל'
-    : 'App Development | Startup Accelerator Israel';
+  const fullTitle = `${title} | WeCcelerate - Venture Builder & Startup Accelerator Israel`;
 
-  const fullTitle = `${title} | WeCcelerate - ${primaryKeyword}`;
-  
-  const fullDescription = description || (locale === 'he'
-    ? `${hebrewBrandVariation} - ${SITE_CONFIG.description.medium.he}`
-    : `WeCcelerate - ${SITE_CONFIG.description.medium.en}`);
+  const fullDescription = description || SITE_CONFIG.defaultDescription;
 
   const allKeywords = [
+    ...SEMANTIC_CORE,
     ...BRAND.english.variations,
     ...BRAND.hebrew.variations,
     ...KEYWORDS.primary.he,
@@ -796,7 +837,7 @@ export function constructMetadata(options: MetadataOptions): Metadata {
   return {
     title: {
       default: fullTitle,
-      template: `%s | WeCcelerate - ${primaryKeyword}`,
+      template: '%s | WeCcelerate - Venture Builder & Startup Accelerator Israel',
     },
     description: fullDescription,
     keywords: allKeywords,
@@ -971,6 +1012,7 @@ export function isMedTechService(serviceId: string): boolean {
 
 export default {
   SITE_CONFIG,
+  SEMANTIC_CORE,
   BRAND,
   PARENT_ORGANIZATION,
   KEYWORDS,

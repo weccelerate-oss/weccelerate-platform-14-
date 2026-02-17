@@ -46,11 +46,11 @@ export default function MVPCalculatorPage() {
 
         {/* Trust signals */}
         <div className="mt-16 text-center">
-          <p className="text-slate-500 text-sm mb-4">מאושר על ידי</p>
-          <div className="flex items-center justify-center gap-8 opacity-50">
-            <div className="text-slate-400 font-semibold">Leumit</div>
-            <div className="text-slate-400 font-semibold">Innovation Authority</div>
-            <div className="text-slate-400 font-semibold">SNC</div>
+          <p className="text-slate-400 text-sm mb-4">מאושר על ידי</p>
+          <div className="flex items-center justify-center gap-8">
+            <div className="text-slate-300 font-semibold">Leumit</div>
+            <div className="text-slate-300 font-semibold">Innovation Authority</div>
+            <div className="text-slate-300 font-semibold">SNC</div>
           </div>
         </div>
       </div>

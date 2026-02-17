@@ -12,6 +12,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Heebo } from "next/font/google";
 
 import { GeoSchema } from "@/components/seo/GeoSchema";
+import { SkipToContent } from "@/components/ui/SkipToContent";
 import {
   constructMetadata,
   viewport as viewportConfig,
@@ -45,37 +46,17 @@ const heebo = Heebo({
 
 export const metadata: Metadata = {
   ...constructMetadata({
-    title: "הפלטפורמה המובילה לסטארטאפים רפואיים בישראל",
-    description: `וויסלרייט (WeCcelerate) בשיתוף לאומית שירותי בריאות - הפלטפורמה המובילה בישראל להקמת סטארטאפים רפואיים וטכנולוגיים. ליווי יזמים משלב הרעיון, פיתוח MVP, גישה לדאטה רפואי וחיבור למשקיעים.`,
+    title: "Venture Builder & Startup Accelerator Israel | וויסלרייט",
+    description:
+      "WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.",
     keywords: [
-      // Brand variations (English)
-      "WeCcelerate",
-      "We Accelerate", 
+      // Semantic Core
+      "Venture Builder Israel",
+      "Startup Accelerator",
+      "Medical Accelerator",
+      "Innovation Hub Tel Aviv",
       "Weccelerate",
-      // Brand variations (Hebrew) - Critical for Hebrew SEO
       "וויסלרייט",
-      "ויקלרייט",
-      "ווי אקסלרייט",
-      "וויסלרייט קידום עסקים",
-      // Primary Hebrew keywords (User Intent)
-      "הקמת סטארטאפ רפואי",
-      "איך מגייסים כסף למיזם",
-      "פיתוח MVP",
-      "ליווי יזמים משלב הרעיון",
-      "שותף תכנוני לאומית",
-      "אקסלרטור בישראל",
-      "האצת סטארטאפים",
-      // Primary English keywords
-      "MedTech startup Israel",
-      "healthcare innovation accelerator",
-      "startup accelerator Tel Aviv",
-      "medical technology incubator",
-      "Leumit innovation partner",
-      // Secondary keywords
-      "גישה לדאטה רפואי",
-      "ייעוץ רגולטורי FDA",
-      "משקיעים לסטארטאפ רפואי",
-      "חממה טכנולוגית",
     ],
     path: "/",
     locale: "he",
@@ -172,7 +153,7 @@ export default function RootLayout({
         {/* GEO Schema - The Holy Grail JSON-LD for AI/LLM Optimization */}
         <GeoSchema
           path="/"
-          pageTitle="WeCcelerate - הפלטפורמה המובילה לסטארטאפים רפואיים"
+          pageTitle="WeCcelerate - Venture Builder & Startup Accelerator Israel"
           includeFaq={true}
         />
 
@@ -187,9 +168,9 @@ export default function RootLayout({
         <meta name="ICBM" content="32.0636, 34.7721" />
 
         {/* Dublin Core metadata for academic/enterprise search */}
-        <meta name="DC.title" content="WeCcelerate - Healthcare Innovation Platform" />
+        <meta name="DC.title" content="WeCcelerate - Venture Builder & Startup Accelerator Israel" />
         <meta name="DC.creator" content="WeCcelerate Team" />
-        <meta name="DC.subject" content="MedTech, Healthcare Innovation, Startups, Israel" />
+        <meta name="DC.subject" content="Venture Builder, Startup Accelerator, MedTech, Innovation Hub, Israel" />
         <meta name="DC.description" content={BRAND.descriptions.medium.en} />
         <meta name="DC.publisher" content="WeCcelerate" />
         <meta name="DC.contributor" content="Leumit Health Services" />
@@ -209,16 +190,11 @@ export default function RootLayout({
       </head>
 
       <body className={`font-heebo antialiased bg-white text-slate-900`}>
-        {/* Skip to content link for accessibility */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-royal-600 focus:text-white focus:rounded-lg"
-        >
-          דלג לתוכן הראשי
-        </a>
+        {/* Skip to Content — first focusable element (WCAG 2.4.1) */}
+        <SkipToContent />
 
-        {/* Main content */}
-        <div id="main-content">{children}</div>
+        {/* Page content — #main-content target lives in each page's <main> */}
+        {children}
       </body>
     </html>
   );

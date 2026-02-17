@@ -107,9 +107,14 @@ function AnimatedCounter({
   const prefix = target.includes('$') ? '$' : '';
   
   return (
-    <span>
-      {prefix}{count}{suffix}
-    </span>
+    <>
+      {/* Visual animated number */}
+      <span aria-hidden="true">
+        {prefix}{count}{suffix}
+      </span>
+      {/* Screen reader: announce final value immediately */}
+      <span className="sr-only">{target}{suffix}</span>
+    </>
   );
 }
 
@@ -119,12 +124,12 @@ function AnimatedCounter({
 
 function FloatingElements() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Floating circles */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      {/* Floating circles — purely decorative */}
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl animate-float-slow" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-float-medium" />
       <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-royal-500/10 rounded-full blur-3xl animate-float-fast" />
-      
+
       {/* Decorative icons */}
       <Rocket className="absolute top-20 left-[10%] w-8 h-8 text-royal-300/30 animate-float-slow" />
       <Building2 className="absolute top-40 right-[15%] w-6 h-6 text-gold-300/30 animate-float-medium" />
@@ -203,6 +208,7 @@ export function HeroSection({
                 viewBox="0 0 300 12"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
               >
                 <path
                   d="M2 10C50 2 100 2 150 6C200 10 250 10 298 2"
@@ -297,7 +303,7 @@ export function HeroSection({
                           `${stat.value}${stat.suffix || ''}`
                         )}
                       </div>
-                      <div className="text-sm text-slate-400">
+                      <div className="text-sm text-slate-300">
                         {stat.label}
                       </div>
                     </div>
@@ -316,7 +322,7 @@ export function HeroSection({
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             )}
           >
-            <p className="text-center text-slate-500 text-sm mb-6">
+            <p className="text-center text-slate-300 text-sm mb-6">
               נתמכים על ידי משקיעים וחברות מובילים
             </p>
             <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
@@ -338,9 +344,9 @@ export function HeroSection({
         )}
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <ChevronDown className="w-6 h-6 text-white/40" />
+      {/* Scroll indicator — decorative */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce" aria-hidden="true">
+        <ChevronDown className="w-6 h-6 text-white/60" />
       </div>
     </section>
   );
@@ -378,10 +384,10 @@ export function HeroMinimal({
         )}
         <a
           href={ctaLink}
-          className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-slate-900 font-bold px-6 py-3 rounded-lg transition-all hover:scale-105"
+          className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-slate-900 font-bold px-6 py-3 rounded-lg transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-royal-900"
         >
           {ctaText}
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
         </a>
       </div>
     </section>

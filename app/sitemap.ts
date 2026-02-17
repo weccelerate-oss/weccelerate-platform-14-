@@ -18,8 +18,14 @@ import { SITE_CONFIG } from '@/lib/seo';
 // =============================================================================
 
 const STATIC_PAGES = [
+  // Core pages — Venture Builder & Startup Accelerator
   { path: '/', priority: 1.0, changeFreq: 'daily' as const },
   { path: '/about', priority: 0.9, changeFreq: 'monthly' as const },
+  { path: '/tech-development', priority: 0.9, changeFreq: 'monthly' as const },
+  { path: '/medtech', priority: 0.9, changeFreq: 'monthly' as const },
+  { path: '/ip-patents', priority: 0.8, changeFreq: 'monthly' as const },
+  { path: '/investors', priority: 0.8, changeFreq: 'monthly' as const },
+  { path: '/team', priority: 0.7, changeFreq: 'monthly' as const },
   { path: '/services', priority: 0.9, changeFreq: 'monthly' as const },
   { path: '/program', priority: 0.9, changeFreq: 'monthly' as const },
   { path: '/portfolio', priority: 0.8, changeFreq: 'weekly' as const },

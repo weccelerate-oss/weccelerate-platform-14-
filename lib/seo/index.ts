@@ -22,6 +22,8 @@ import type { Metadata, Viewport } from 'next';
 
 export const SITE_CONFIG = {
   url: 'https://weccelerate.co.il',
+  defaultDescription: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
+  titleTemplate: '%s | WeCcelerate - Venture Builder & Startup Accelerator Israel',
   subdomains: {
     main: 'https://weccelerate.co.il',
     leumit: 'https://leumit.weccelerate.co.il',
@@ -31,6 +33,19 @@ export const SITE_CONFIG = {
   defaultLocale: 'he_IL',
   supportedLocales: ['he_IL', 'en_US', 'en_IL'],
 } as const;
+
+// =============================================================================
+// SEMANTIC CORE - Primary Target Keywords
+// =============================================================================
+
+export const SEMANTIC_CORE = [
+  'Venture Builder Israel',
+  'Startup Accelerator',
+  'Medical Accelerator',
+  'Innovation Hub Tel Aviv',
+  'Weccelerate',
+  'וויסלרייט',
+] as const;
 
 // =============================================================================
 // BRAND ENTITY STRATEGY - The Complete Entity Graph
@@ -67,19 +82,19 @@ export const BRAND = {
     tagline: 'מהרעיון להשפעה',
   },
   
-  // Descriptions for different contexts
+  // Descriptions — Venture Builder positioning
   descriptions: {
     short: {
-      he: 'הפלטפורמה המובילה בישראל להקמת סטארטאפים רפואיים וטכנולוגיים',
-      en: 'Israel\'s Leading MedTech & Healthcare Startup Accelerator',
+      he: 'וויסלרייט — Venture Builder ומאיץ סטארטאפים מוביל בתל אביב וירושלים. MedTech, AI ואסטרטגיית IP.',
+      en: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
     },
     medium: {
-      he: 'וויסלרייט (WeCcelerate) בשיתוף לאומית שירותי בריאות - הפלטפורמה המובילה בישראל להקמת סטארטאפים רפואיים וטכנולוגיים. ליווי יזמים משלב הרעיון.',
-      en: 'WeCcelerate, in partnership with Leumit Health Services, is Israel\'s premier platform for launching MedTech and Healthcare startups. Guiding entrepreneurs from idea to market.',
+      he: 'וויסלרייט (WeCcelerate) היא Venture Builder ומאיץ סטארטאפים מוביל בתל אביב וירושלים. אנו מתמחים ב-MedTech, בינה מלאכותית ואסטרטגיית IP, עם שותפות בלעדית עם לאומית שירותי בריאות.',
+      en: 'WeCcelerate is a leading Venture Builder and Startup Accelerator in Tel Aviv & Jerusalem. We specialize in MedTech, AI, and IP strategy, with an exclusive partnership with Leumit Health Care.',
     },
     long: {
-      he: 'וויסלרייט (WeCcelerate) היא זרוע החדשנות וקידום העסקים של לאומית שירותי בריאות. אנו מספקים ליווי מלא ליזמים משלב הרעיון, דרך פיתוח MVP, גישה לדאטה רפואי ייחודי של לאומית, ועד חיבור למשקיעים וגיוס הון. הפלטפורמה המובילה בישראל לסטארטאפים בתחום הבריאות הדיגיטלית.',
-      en: 'WeCcelerate is the innovation and business development arm of Leumit Health Services. We provide comprehensive support for entrepreneurs from ideation, through MVP development, access to Leumit\'s unique medical data, to investor connections and fundraising. Israel\'s leading platform for digital health startups.',
+      he: 'וויסלרייט הוא ה-Venture Builder ומאיץ הסטארטאפים המוביל בישראל, הפועל מתל אביב וירושלים. אנו מלווים יזמים מהרעיון לשוק בתחומי MedTech, בינה מלאכותית וטכנולוגיה עמוקה. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול Medical Accelerator בלעדי עם גישה לדאטה רפואי, פיילוטים קליניים, הכוונה רגולטורית ותמיכה בוועדת הלסינקי.',
+      en: 'WeCcelerate is Israel\'s premier Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem. We guide entrepreneurs from idea to market across MedTech, AI, and deep-tech sectors. Our strategic partnership with Leumit Health Care creates an exclusive Medical Accelerator track with access to medical data, clinical pilots, and regulatory support.',
     },
   },
 } as const;
@@ -396,26 +411,14 @@ export function constructMetadata({
   authors = ['WeCcelerate Team', 'Leumit Health Services'],
   noIndex = false,
 }: ConstructMetadataParams): Metadata {
-  // Determine primary keyword based on page context
-  const primaryKeyword = locale === 'he' 
-    ? 'הפלטפורמה המובילה לסטארטאפים רפואיים'
-    : 'MedTech Startup Accelerator';
+  // Construct title with Venture Builder template
+  const fullTitle = `${title} | WeCcelerate - Venture Builder & Startup Accelerator Israel`;
+
+  const metaDescription = description || SITE_CONFIG.defaultDescription;
   
-  // Construct title with Golden Formula: {Page Title} | WeCcelerate - {Primary Keyword}
-  const fullTitle = `${title} | WeCcelerate - ${primaryKeyword}`;
-  
-  // Get rotating Hebrew brand variation for description
-  const hebrewBrand = getHebrewBrandVariation();
-  
-  // Construct description with brand variation injection
-  const defaultDescription = locale === 'he'
-    ? `${hebrewBrand} (WeCcelerate) בשיתוף לאומית שירותי בריאות - ${BRAND.descriptions.medium.he}`
-    : BRAND.descriptions.medium.en;
-  
-  const metaDescription = description || defaultDescription;
-  
-  // Compile all keywords (deduplicated)
+  // Compile all keywords (deduplicated) — semantic core first
   const allKeywords = [
+    ...SEMANTIC_CORE,
     ...BRAND.english.variations,
     ...BRAND.hebrew.variations,
     ...KEYWORDS.userIntent.hebrew,

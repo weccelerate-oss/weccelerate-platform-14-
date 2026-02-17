@@ -18,6 +18,7 @@
 
 import {
   SITE_CONFIG,
+  SEMANTIC_CORE,
   BRAND,
   PARENT_ORGANIZATION,
   SERVICES,
@@ -104,16 +105,16 @@ function buildOrganizationSchema() {
       '@type': 'Place',
       name: 'Tel Aviv, Israel',
     },
-    email: 'info@weccelerate.co.il',
-    telephone: '+972-3-XXX-XXXX',
-    
-    // Location
+    email: 'Raz@weccelerate.co.il',
+    telephone: '+972-55-564-7538',
+
+    // Primary Location — Tel Aviv
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Innovation Hub',
+      streetAddress: 'HaRakevet 58',
       addressLocality: 'Tel Aviv',
       addressRegion: 'Tel Aviv District',
-      postalCode: '6100000',
+      postalCode: '6777801',
       addressCountry: 'IL',
     },
     geo: {
@@ -121,6 +122,32 @@ function buildOrganizationSchema() {
       latitude: 32.0636,
       longitude: 34.7721,
     },
+
+    // Multiple locations
+    location: [
+      {
+        '@type': 'Place',
+        name: 'WeCcelerate Tel Aviv',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'HaRakevet 58',
+          addressLocality: 'Tel Aviv',
+          addressRegion: 'Tel Aviv District',
+          addressCountry: 'IL',
+        },
+      },
+      {
+        '@type': 'Place',
+        name: 'WeCcelerate Jerusalem',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Jerusalem Branch',
+          addressLocality: 'Jerusalem',
+          addressRegion: 'Jerusalem District',
+          addressCountry: 'IL',
+        },
+      },
+    ],
     
     // Area Served (Global reach)
     areaServed: [
@@ -143,10 +170,9 @@ function buildOrganizationSchema() {
     
     // Social Profiles
     sameAs: [
+      'https://www.youtube.com/@WeCcelerate.Ltd1',
       'https://www.linkedin.com/company/weccelerate',
       'https://www.facebook.com/weccelerate',
-      'https://twitter.com/weccelerate',
-      'https://www.youtube.com/@weccelerate',
     ],
     
     // Contact Points
@@ -154,8 +180,8 @@ function buildOrganizationSchema() {
       {
         '@type': 'ContactPoint',
         contactType: 'customer service',
-        telephone: '+972-3-XXX-XXXX',
-        email: 'info@weccelerate.co.il',
+        telephone: '+972-55-564-7538',
+        email: 'Raz@weccelerate.co.il',
         availableLanguage: ['Hebrew', 'English'],
         hoursAvailable: {
           '@type': 'OpeningHoursSpecification',
@@ -167,7 +193,7 @@ function buildOrganizationSchema() {
       {
         '@type': 'ContactPoint',
         contactType: 'sales',
-        email: 'startups@weccelerate.co.il',
+        email: 'Raz@weccelerate.co.il',
         availableLanguage: ['Hebrew', 'English'],
       },
     ],
@@ -178,14 +204,24 @@ function buildOrganizationSchema() {
     
     // Knowledge Graph Signals
     knowsAbout: [
+      ...SEMANTIC_CORE,
+      'Venture Building',
       'MedTech Startups',
       'Healthcare Innovation',
       'Digital Health',
       'MVP Development',
+      'CTO Services',
+      'App Development for Startups',
+      'IP Strategy',
+      'Patent Registration',
+      'Helsinki Committee Approval',
       'Startup Acceleration',
       'Medical Device Regulation',
       'FDA Approval Process',
       'Israeli Healthcare System',
+      'Pitch Deck Creation',
+      'Angel Investors',
+      'Fundraising',
       ...KEYWORDS.industry.english,
     ],
     
@@ -374,16 +410,16 @@ function buildLocalBusinessSchema() {
   return {
     '@type': 'LocalBusiness',
     '@id': `${SITE_CONFIG.url}/#localbusiness`,
-    name: 'WeCcelerate Innovation Hub',
+    name: 'WeCcelerate - Venture Builder & Startup Accelerator',
     image: `${SITE_CONFIG.url}/og-image.jpg`,
-    telephone: '+972-3-XXX-XXXX',
-    email: 'info@weccelerate.co.il',
+    telephone: '+972-55-564-7538',
+    email: 'Raz@weccelerate.co.il',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Innovation Hub',
+      streetAddress: 'HaRakevet 58',
       addressLocality: 'Tel Aviv',
       addressRegion: 'Tel Aviv District',
-      postalCode: '6100000',
+      postalCode: '6777801',
       addressCountry: 'IL',
     },
     geo: {
@@ -393,6 +429,7 @@ function buildLocalBusinessSchema() {
     },
     url: SITE_CONFIG.url,
     sameAs: [
+      'https://www.youtube.com/@WeCcelerate.Ltd1',
       'https://www.linkedin.com/company/weccelerate',
       'https://www.facebook.com/weccelerate',
     ],

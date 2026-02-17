@@ -1,18 +1,26 @@
 /**
- * Corporate Navbar Component - EY Style
- * 
- * Enterprise-grade navigation with:
- * - Clean, minimal design
+ * Corporate Navbar — Premium Dark Theme (WCAG 2.1 AA)
+ *
+ * Luxury-grade navigation with:
+ * - Transparent → dark blur on scroll
+ * - Gold accent hover states
  * - RTL Hebrew support
- * - Mega menu for services
+ * - Mega menu dropdowns
  * - Mobile responsive
- * - Sticky with backdrop blur
+ *
+ * Accessibility:
+ * - Keyboard-navigable dropdowns (Enter/Space/Escape/Tab)
+ * - aria-expanded, aria-haspopup on dropdown triggers
+ * - aria-label on nav landmark, icon-only links, mobile toggle
+ * - Focus trap in mobile menu
+ * - Proper contrast ratios (≥ 4.5:1 AA)
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Menu,
@@ -31,6 +39,7 @@ import {
   Calendar,
   Video,
   FileText,
+  MessageCircle,
 } from 'lucide-react';
 
 // =============================================================================
@@ -104,12 +113,14 @@ const navigation = {
     { name: 'צור קשר', href: '/contact' },
   ],
   cta: {
-    name: 'הגישו מועמדות',
+    name: 'פורטל יזמים',
     href: '/apply',
   },
   topBar: {
-    phone: '03-555-1234',
-    email: 'info@weccelerate.co.il',
+    phone: '055-564-7538',
+    phoneFull: '+972555647538',
+    email: 'Raz@weccelerate.co.il',
+    whatsapp: 'https://wa.me/972555647538',
     languages: [
       { code: 'he', name: 'עברית', href: '/' },
       { code: 'en', name: 'English', href: '/en' },
@@ -126,6 +137,8 @@ export function CorporateNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const pathname = usePathname();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
 
   // Handle scroll
   useEffect(() => {
@@ -142,41 +155,110 @@ export function CorporateNavbar() {
     setActiveDropdown(null);
   }, [pathname]);
 
+  // Mobile menu focus trap + Escape to close
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        mobileToggleRef.current?.focus();
+        return;
+      }
+
+      if (e.key !== 'Tab' || !mobileMenuRef.current) return;
+
+      const focusable = mobileMenuRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileMenuOpen]);
+
+  // Close dropdown on Escape (desktop)
+  const handleDropdownKeyDown = useCallback(
+    (e: React.KeyboardEvent, itemName: string) => {
+      if (e.key === 'Escape') {
+        setActiveDropdown(null);
+        // Return focus to the trigger button
+        (e.currentTarget.querySelector('button') as HTMLElement)?.focus();
+      }
+      if (e.key === 'ArrowDown' && activeDropdown !== itemName) {
+        e.preventDefault();
+        setActiveDropdown(itemName);
+      }
+    },
+    [activeDropdown]
+  );
+
   return (
     <>
       {/* Top Bar - Contact Info */}
-      <div className="bg-slate-900 text-white text-sm hidden lg:block">
+      <div className="bg-[#050810] text-white/70 text-sm hidden lg:block border-b border-white/5">
         <div className="container-corporate">
           <div className="flex items-center justify-between h-10">
             {/* Contact */}
             <div className="flex items-center gap-6">
               <a
-                href={`tel:${navigation.topBar.phone}`}
-                className="flex items-center gap-2 hover:text-yellow-400 transition-colors"
+                href={`tel:${navigation.topBar.phoneFull}`}
+                className="flex items-center gap-2 hover:text-gold-400 transition-colors"
+                aria-label={`התקשרו אלינו: ${navigation.topBar.phone}`}
               >
-                <Phone className="w-3.5 h-3.5" />
+                <Phone className="w-3.5 h-3.5" aria-hidden="true" />
                 <span dir="ltr">{navigation.topBar.phone}</span>
               </a>
               <a
-                href={`mailto:${navigation.topBar.email}`}
-                className="flex items-center gap-2 hover:text-yellow-400 transition-colors"
+                href={navigation.topBar.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-green-400 transition-colors"
+                aria-label="שלחו הודעת WhatsApp"
               >
-                <Mail className="w-3.5 h-3.5" />
+                <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>WhatsApp</span>
+              </a>
+              <a
+                href={`mailto:${navigation.topBar.email}`}
+                className="flex items-center gap-2 hover:text-gold-400 transition-colors"
+                aria-label={`שלחו אימייל: ${navigation.topBar.email}`}
+              >
+                <Mail className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>{navigation.topBar.email}</span>
               </a>
             </div>
-            
+
             {/* Language Switcher */}
-            <div className="flex items-center gap-4">
-              <Globe className="w-3.5 h-3.5 text-slate-400" />
+            <div className="flex items-center gap-4" role="group" aria-label="בחירת שפה">
+              <Globe className="w-3.5 h-3.5 text-white/30" aria-hidden="true" />
               {navigation.topBar.languages.map((lang, idx) => (
                 <span key={lang.code} className="flex items-center gap-2">
-                  {idx > 0 && <span className="text-slate-600">|</span>}
+                  {idx > 0 && <span className="text-white/20" aria-hidden="true">|</span>}
                   <Link
                     href={lang.href}
-                    className={`hover:text-yellow-400 transition-colors ${
+                    lang={lang.code}
+                    aria-label={`החלף שפה ל${lang.name}`}
+                    aria-current={
                       pathname === lang.href || (lang.code === 'he' && !pathname.startsWith('/en'))
-                        ? 'text-yellow-400 font-medium'
+                        ? 'true'
+                        : undefined
+                    }
+                    className={`hover:text-gold-400 transition-colors ${
+                      pathname === lang.href || (lang.code === 'he' && !pathname.startsWith('/en'))
+                        ? 'text-gold-400 font-medium'
                         : ''
                     }`}
                   >
@@ -192,70 +274,91 @@ export function CorporateNavbar() {
       {/* Main Navbar */}
       <header
         className={`
-          sticky top-0 z-50 transition-all duration-300
-          ${isScrolled 
-            ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100' 
-            : 'bg-white border-b border-slate-100'}
+          sticky top-0 z-50 transition-all duration-500
+          ${isScrolled
+            ? 'bg-[#0a0e27]/95 backdrop-blur-xl shadow-lg shadow-black/20 border-b border-white/5'
+            : 'bg-[#0a0e27]/80 backdrop-blur-md'}
         `}
       >
-        <nav className="container-corporate">
-          <div className="flex items-center justify-between h-20">
+        <nav className="container-corporate" aria-label="ניווט ראשי">
+          <div className="flex items-center justify-between h-24">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-slate-900 flex items-center justify-center">
-                <span className="text-yellow-400 font-bold text-xl">W</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-slate-900 tracking-tight">
-                  WeCcelerate
-                </span>
-                <span className="text-xs text-slate-500 -mt-0.5">
-                  וויסלרייט
-                </span>
+            <Link href="/" className="relative flex-shrink-0 group" aria-label="WeCcelerate — חזרה לדף הבית">
+              <div className="bg-[#0a0e27] rounded-xl p-3 transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] border border-white/[0.06] group-hover:border-gold-500/20">
+                <Image
+                  src="/images/logos/weccelerate-logo.jpeg"
+                  alt="WeCcelerate"
+                  width={280}
+                  height={70}
+                  priority
+                  className="h-14 md:h-16 w-auto object-contain rounded-md"
+                />
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1" role="list">
               {navigation.main.map((item) => (
                 <div
                   key={item.name}
                   className="relative"
+                  role="listitem"
                   onMouseEnter={() => item.children && setActiveDropdown(item.name)}
                   onMouseLeave={() => setActiveDropdown(null)}
+                  onKeyDown={(e) => item.children && handleDropdownKeyDown(e, item.name)}
+                  // Close dropdown when focus leaves the entire container
+                  onBlurCapture={(e) => {
+                    if (item.children && !e.currentTarget.contains(e.relatedTarget as Node)) {
+                      setActiveDropdown(null);
+                    }
+                  }}
+                  onFocusCapture={() => item.children && setActiveDropdown(item.name)}
                 >
                   {item.children ? (
                     <>
                       <button
                         className={`
                           flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors
-                          ${activeDropdown === item.name 
-                            ? 'text-slate-900' 
-                            : 'text-slate-600 hover:text-slate-900'}
+                          ${activeDropdown === item.name
+                            ? 'text-gold-400'
+                            : 'text-white/80 hover:text-gold-400'}
                         `}
+                        aria-expanded={activeDropdown === item.name}
+                        aria-haspopup="true"
+                        onClick={() =>
+                          setActiveDropdown(activeDropdown === item.name ? null : item.name)
+                        }
                       >
                         {item.name}
-                        <ChevronDown className={`
-                          w-4 h-4 transition-transform
-                          ${activeDropdown === item.name ? 'rotate-180' : ''}
-                        `} />
+                        <ChevronDown
+                          className={`
+                            w-4 h-4 transition-transform
+                            ${activeDropdown === item.name ? 'rotate-180' : ''}
+                          `}
+                          aria-hidden="true"
+                        />
                       </button>
-                      
+
                       {/* Dropdown Menu */}
                       {activeDropdown === item.name && (
-                        <div className="absolute top-full right-0 w-80 bg-white border border-slate-200 shadow-xl mt-0 py-2">
+                        <div
+                          className="absolute top-full right-0 w-80 bg-[#111b3c]/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/40 mt-0 py-2 rounded-lg"
+                          role="menu"
+                          aria-label={item.name}
+                        >
                           {item.children.map((child) => (
                             <Link
                               key={child.name}
                               href={child.href}
-                              className="flex items-start gap-4 px-5 py-3 hover:bg-slate-50 transition-colors"
+                              role="menuitem"
+                              className="flex items-start gap-4 px-5 py-3 hover:bg-white/5 transition-colors"
                             >
-                              <div className="p-2 bg-slate-100">
-                                <child.icon className="w-5 h-5 text-slate-700" />
+                              <div className="p-2 bg-white/5 rounded-md">
+                                <child.icon className="w-5 h-5 text-gold-400" aria-hidden="true" />
                               </div>
                               <div>
-                                <p className="font-medium text-slate-900">{child.name}</p>
-                                <p className="text-sm text-slate-500 mt-0.5">{child.description}</p>
+                                <p className="font-medium text-white">{child.name}</p>
+                                <p className="text-sm text-white/50 mt-0.5">{child.description}</p>
                               </div>
                             </Link>
                           ))}
@@ -265,11 +368,12 @@ export function CorporateNavbar() {
                   ) : (
                     <Link
                       href={item.href}
+                      aria-current={pathname === item.href ? 'page' : undefined}
                       className={`
                         px-4 py-2 text-sm font-medium transition-colors
-                        ${pathname === item.href 
-                          ? 'text-slate-900' 
-                          : 'text-slate-600 hover:text-slate-900'}
+                        ${pathname === item.href
+                          ? 'text-gold-400'
+                          : 'text-white/80 hover:text-gold-400'}
                       `}
                     >
                       {item.name}
@@ -284,31 +388,34 @@ export function CorporateNavbar() {
               {/* Desktop CTA */}
               <Link
                 href={navigation.cta.href}
-                className="hidden lg:inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-2.5 text-sm font-semibold hover:bg-slate-800 transition-colors"
+                className="hidden lg:inline-flex items-center gap-2 border border-gold-500/50 text-gold-400 px-6 py-2.5 text-sm font-semibold hover:bg-gold-500/10 hover:border-gold-400 transition-all rounded-sm"
               >
                 {navigation.cta.name}
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               </Link>
 
               {/* Portal Link */}
               <Link
                 href="/login"
-                className="hidden lg:inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900 transition-colors"
+                className="hidden lg:inline-flex items-center gap-1 text-sm text-white/60 hover:text-white/80 transition-colors"
               >
                 כניסה לפורטל
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
 
               {/* Mobile Menu Toggle */}
               <button
+                ref={mobileToggleRef}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 text-slate-700 hover:text-slate-900"
-                aria-label={isMobileMenuOpen ? 'סגור תפריט' : 'פתח תפריט'}
+                className="lg:hidden p-2 text-white/70 hover:text-white transition-colors"
+                aria-label={isMobileMenuOpen ? 'סגור תפריט ניווט' : 'פתח תפריט ניווט'}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-menu"
               >
                 {isMobileMenuOpen ? (
-                  <X className="w-6 h-6" />
+                  <X className="w-6 h-6" aria-hidden="true" />
                 ) : (
-                  <Menu className="w-6 h-6" />
+                  <Menu className="w-6 h-6" aria-hidden="true" />
                 )}
               </button>
             </div>
@@ -317,34 +424,48 @@ export function CorporateNavbar() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-white border-t border-slate-100">
-            <div className="container-corporate py-4">
+          <div
+            id="mobile-menu"
+            ref={mobileMenuRef}
+            className="lg:hidden bg-[#0a0e27]/98 backdrop-blur-xl border-t border-white/5"
+            role="dialog"
+            aria-label="תפריט ניווט"
+          >
+            <nav className="container-corporate py-4" aria-label="ניווט מובייל">
               {navigation.main.map((item) => (
-                <div key={item.name} className="border-b border-slate-100 last:border-b-0">
+                <div key={item.name} className="border-b border-white/5 last:border-b-0">
                   {item.children ? (
                     <div className="py-3">
                       <button
-                        onClick={() => setActiveDropdown(
-                          activeDropdown === item.name ? null : item.name
-                        )}
+                        onClick={() =>
+                          setActiveDropdown(
+                            activeDropdown === item.name ? null : item.name
+                          )
+                        }
                         className="flex items-center justify-between w-full text-right"
+                        aria-expanded={activeDropdown === item.name}
+                        aria-haspopup="true"
                       >
-                        <span className="font-medium text-slate-900">{item.name}</span>
-                        <ChevronDown className={`
-                          w-5 h-5 text-slate-400 transition-transform
-                          ${activeDropdown === item.name ? 'rotate-180' : ''}
-                        `} />
+                        <span className="font-medium text-white">{item.name}</span>
+                        <ChevronDown
+                          className={`
+                            w-5 h-5 text-white/30 transition-transform
+                            ${activeDropdown === item.name ? 'rotate-180' : ''}
+                          `}
+                          aria-hidden="true"
+                        />
                       </button>
-                      
+
                       {activeDropdown === item.name && (
-                        <div className="mt-3 mr-4 space-y-2">
+                        <div className="mt-3 mr-4 space-y-2" role="menu" aria-label={item.name}>
                           {item.children.map((child) => (
                             <Link
                               key={child.name}
                               href={child.href}
-                              className="flex items-center gap-3 py-2 text-slate-600 hover:text-slate-900"
+                              role="menuitem"
+                              className="flex items-center gap-3 py-2 text-white/60 hover:text-gold-400 transition-colors"
                             >
-                              <child.icon className="w-4 h-4" />
+                              <child.icon className="w-4 h-4" aria-hidden="true" />
                               <span>{child.name}</span>
                             </Link>
                           ))}
@@ -354,39 +475,54 @@ export function CorporateNavbar() {
                   ) : (
                     <Link
                       href={item.href}
-                      className="block py-3 font-medium text-slate-900"
+                      aria-current={pathname === item.href ? 'page' : undefined}
+                      className="block py-3 font-medium text-white"
                     >
                       {item.name}
                     </Link>
                   )}
                 </div>
               ))}
-              
+
               {/* Mobile CTA */}
               <div className="pt-4 space-y-3">
                 <Link
                   href={navigation.cta.href}
-                  className="flex items-center justify-center gap-2 w-full bg-slate-900 text-white py-3 font-semibold"
+                  className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-gold-500 to-gold-600 text-[#0a0e27] py-3 font-semibold rounded-sm"
                 >
                   {navigation.cta.name}
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                 </Link>
                 <Link
                   href="/login"
-                  className="flex items-center justify-center gap-2 w-full border-2 border-slate-200 text-slate-700 py-3 font-medium"
+                  className="flex items-center justify-center gap-2 w-full border border-white/20 text-white/70 py-3 font-medium rounded-sm"
                 >
                   כניסה לפורטל
                 </Link>
               </div>
 
               {/* Mobile Contact */}
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-center gap-6 text-sm text-slate-500">
-                <a href={`tel:${navigation.topBar.phone}`} className="flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
+              <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-center gap-6 text-sm text-white/60">
+                <a
+                  href={`tel:${navigation.topBar.phoneFull}`}
+                  className="flex items-center gap-2 hover:text-white/80 transition-colors"
+                  aria-label={`התקשרו: ${navigation.topBar.phone}`}
+                >
+                  <Phone className="w-4 h-4" aria-hidden="true" />
                   <span dir="ltr">{navigation.topBar.phone}</span>
                 </a>
+                <a
+                  href={navigation.topBar.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-green-500/70 hover:text-green-400 transition-colors"
+                  aria-label="שלחו הודעת WhatsApp"
+                >
+                  <MessageCircle className="w-4 h-4" aria-hidden="true" />
+                  <span>WhatsApp</span>
+                </a>
               </div>
-            </div>
+            </nav>
           </div>
         )}
       </header>

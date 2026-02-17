@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Bell, AlertTriangle, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRef, useEffect, useState } from 'react';
+import { Flame, AlertTriangle, Bell } from 'lucide-react';
 import { NewsUpdate, UrgencyLevel, LiveTickerProps } from '@/types/content';
 import { cn } from '@/lib/utils';
 
@@ -11,203 +11,179 @@ import { cn } from '@/lib/utils';
 
 const urgencyConfig: Record<UrgencyLevel, {
   icon: typeof Bell;
-  bgClass: string;
+  dotClass: string;
   textClass: string;
-  badgeClass: string;
-  label: string;
 }> = {
   breaking: {
     icon: Flame,
-    bgClass: 'bg-gradient-to-r from-red-600 to-red-500',
-    textClass: 'text-white',
-    badgeClass: 'bg-white/20 text-white animate-pulse',
-    label: 'חדשות בזק',
+    dotClass: 'bg-red-500 animate-pulse',
+    textClass: 'text-gold-300 font-semibold',
   },
   urgent: {
     icon: AlertTriangle,
-    bgClass: 'bg-gradient-to-r from-orange-500 to-amber-500',
-    textClass: 'text-white',
-    badgeClass: 'bg-white/20 text-white',
-    label: 'דחוף',
+    dotClass: 'bg-amber-500 animate-pulse',
+    textClass: 'text-gold-300',
   },
   important: {
     icon: Bell,
-    bgClass: 'bg-gradient-to-r from-royal-600 to-royal-500',
-    textClass: 'text-white',
-    badgeClass: 'bg-white/20 text-white',
-    label: 'חשוב',
+    dotClass: 'bg-gold-500',
+    textClass: 'text-white/90',
   },
   normal: {
     icon: Bell,
-    bgClass: 'bg-slate-800',
-    textClass: 'text-slate-100',
-    badgeClass: 'bg-slate-700 text-slate-300',
-    label: 'עדכון',
+    dotClass: 'bg-white/40',
+    textClass: 'text-white/70',
   },
 };
 
 // =============================================================================
-// LIVE TICKER COMPONENT
+// LIVE TICKER — Continuous Marquee Scroller
 // =============================================================================
 
 export function LiveTicker({
   updates,
-  speed = 5,
+  speed = 6,
   pauseOnHover = true,
-  mode = 'fade',
 }: LiveTickerProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const animationRef = useRef<number | null>(null);
+  const positionRef = useRef(0);
+  const contentWidthRef = useRef(0);
 
-  const currentUpdate = updates[currentIndex];
-  const config = urgencyConfig[currentUpdate?.urgencyLevel || 'normal'];
-  const Icon = config.icon;
+  // Calculate pixels per frame based on speed (lower speed = faster)
+  const pixelsPerFrame = (1 / speed) * 1.5;
 
-  // Auto-advance updates
   useEffect(() => {
-    if (isPaused || updates.length <= 1) return;
+    const scrollEl = scrollRef.current;
+    const innerEl = innerRef.current;
+    if (!scrollEl || !innerEl) return;
 
-    const interval = setInterval(() => {
-      if (mode === 'fade') {
-        setIsVisible(false);
-        setTimeout(() => {
-          setCurrentIndex((prev) => (prev + 1) % updates.length);
-          setIsVisible(true);
-        }, 300);
-      } else {
-        setCurrentIndex((prev) => (prev + 1) % updates.length);
+    // Measure the width of one set of items
+    const children = innerEl.children;
+    if (children.length === 0) return;
+
+    // Half the children are duplicates, measure first half
+    const halfCount = Math.floor(children.length / 2);
+    let totalWidth = 0;
+    for (let i = 0; i < halfCount; i++) {
+      totalWidth += (children[i] as HTMLElement).offsetWidth;
+    }
+    contentWidthRef.current = totalWidth;
+    positionRef.current = 0;
+
+    const animate = () => {
+      if (!isPaused) {
+        // RTL: scroll moves content to the right (positive translateX)
+        positionRef.current += pixelsPerFrame;
+
+        // Reset when we've scrolled past one full set
+        if (positionRef.current >= contentWidthRef.current) {
+          positionRef.current = 0;
+        }
+
+        innerEl.style.transform = `translateX(${positionRef.current}px)`;
       }
-    }, speed * 1000);
+      animationRef.current = requestAnimationFrame(animate);
+    };
 
-    return () => clearInterval(interval);
-  }, [isPaused, updates.length, speed, mode]);
+    animationRef.current = requestAnimationFrame(animate);
 
-  const goToNext = useCallback(() => {
-    setIsVisible(false);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % updates.length);
-      setIsVisible(true);
-    }, 150);
-  }, [updates.length]);
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isPaused, pixelsPerFrame, updates]);
 
-  const goToPrev = useCallback(() => {
-    setIsVisible(false);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + updates.length) % updates.length);
-      setIsVisible(true);
-    }, 150);
-  }, [updates.length]);
+  if (!updates.length) return null;
 
-  if (!updates.length || !currentUpdate) {
-    return null;
-  }
+  // Duplicate items for seamless loop
+  const items = [...updates, ...updates];
 
   return (
     <div
-      className={cn(
-        'relative overflow-hidden transition-all duration-300',
-        config.bgClass
-      )}
+      className="relative bg-gradient-to-r from-[#0a0e27] via-[#0f1629] to-[#0a0e27] border-b border-white/[0.06] overflow-hidden"
       onMouseEnter={() => pauseOnHover && setIsPaused(true)}
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
       role="region"
       aria-label="עדכונים חמים"
-      aria-live="polite"
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-12 md:h-10">
-          {/* Navigation - Left */}
-          <button
-            onClick={goToPrev}
-            className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
-            aria-label="עדכון קודם"
-          >
-            <ChevronRight className="w-4 h-4 text-white/70" />
-          </button>
-
-          {/* Content */}
-          <div className="flex-1 flex items-center justify-center gap-3 overflow-hidden">
-            {/* Badge */}
-            <span
-              className={cn(
-                'hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap',
-                config.badgeClass
-              )}
-            >
-              <Icon className="w-3 h-3" />
-              {config.label}
-            </span>
-
-            {/* Mobile icon */}
-            <Icon className={cn('sm:hidden w-4 h-4 flex-shrink-0', config.textClass)} />
-
-            {/* Headline */}
-            <div
-              className={cn(
-                'flex-1 min-w-0 transition-all duration-300',
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-              )}
-            >
-              {currentUpdate.link ? (
-                <a
-                  href={currentUpdate.link}
-                  className={cn(
-                    'block truncate text-sm font-medium hover:underline underline-offset-2',
-                    config.textClass
-                  )}
-                >
-                  {currentUpdate.title}
-                </a>
-              ) : (
-                <span className={cn('block truncate text-sm font-medium', config.textClass)}>
-                  {currentUpdate.title}
-                </span>
-              )}
-            </div>
-
-            {/* Counter */}
-            {updates.length > 1 && (
-              <span className="hidden md:inline-flex text-xs text-white/60 whitespace-nowrap">
-                {currentIndex + 1} / {updates.length}
-              </span>
-            )}
-          </div>
-
-          {/* Navigation - Right */}
-          <button
-            onClick={goToNext}
-            className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
-            aria-label="עדכון הבא"
-          >
-            <ChevronLeft className="w-4 h-4 text-white/70" />
-          </button>
+      {/* Left fixed badge */}
+      <div className="absolute right-0 top-0 bottom-0 z-20 flex items-center pe-4 ps-8 bg-gradient-to-l from-transparent via-[#0a0e27] to-[#0a0e27]">
+        <div className="flex items-center gap-2 bg-gold-500/15 border border-gold-500/20 rounded-full px-3.5 py-1">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-500 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-gold-500" />
+          </span>
+          <span className="text-gold-400 text-xs font-bold tracking-wide whitespace-nowrap">
+            חדשות בזק
+          </span>
         </div>
       </div>
 
-      {/* Progress bar */}
-      {!isPaused && updates.length > 1 && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10">
-          <div
-            className="h-full bg-white/40 animate-progress-bar"
-            style={{
-              animationDuration: `${speed}s`,
-            }}
-          />
+      {/* Left fade gradient */}
+      <div className="absolute left-0 top-0 bottom-0 z-10 w-16 bg-gradient-to-r from-[#0a0e27] to-transparent pointer-events-none" />
+
+      {/* Scrolling content */}
+      <div ref={scrollRef} className="overflow-hidden h-11">
+        <div
+          ref={innerRef}
+          className="flex items-center h-full whitespace-nowrap will-change-transform"
+          style={{ direction: 'rtl' }}
+        >
+          {items.map((update, index) => {
+            const config = urgencyConfig[update.urgencyLevel || 'normal'];
+            return (
+              <div
+                key={`${update.id}-${index}`}
+                className="inline-flex items-center gap-3 px-6 flex-shrink-0"
+              >
+                {/* Urgency dot */}
+                <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', config.dotClass)} />
+
+                {/* Separator diamond */}
+                {index > 0 && (
+                  <span className="w-1 h-1 rotate-45 bg-gold-500/30 flex-shrink-0 -me-1" aria-hidden="true" />
+                )}
+
+                {/* Title */}
+                {update.link ? (
+                  <a
+                    href={update.link}
+                    className={cn(
+                      'text-sm hover:text-gold-400 transition-colors duration-200 hover:underline underline-offset-2',
+                      config.textClass
+                    )}
+                  >
+                    {update.title}
+                  </a>
+                ) : (
+                  <span className={cn('text-sm', config.textClass)}>
+                    {update.title}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
+
+      {/* Subtle top/bottom border accents */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/10 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/10 to-transparent" />
     </div>
   );
 }
 
 // =============================================================================
-// SCROLLING TICKER VARIANT
+// SCROLLING TICKER VARIANT (kept for backwards compatibility)
 // =============================================================================
 
 export function ScrollingTicker({ updates }: { updates: NewsUpdate[] }) {
   if (!updates.length) return null;
 
-  // Duplicate for seamless loop
   const duplicatedUpdates = [...updates, ...updates];
 
   return (
@@ -229,11 +205,7 @@ export function ScrollingTicker({ updates }: { updates: NewsUpdate[] }) {
                     <span
                       className={cn(
                         'inline-block w-2 h-2 rounded-full',
-                        update.urgencyLevel === 'breaking'
-                          ? 'bg-red-500 animate-pulse'
-                          : update.urgencyLevel === 'urgent'
-                          ? 'bg-orange-500'
-                          : 'bg-teal-500'
+                        cfg.dotClass
                       )}
                     />
                     {update.link ? (

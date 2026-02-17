@@ -35,15 +35,21 @@ export const SITE_KEYWORDS: Record<SiteKey, { en: string[]; he: string[] }> = {
   main: {
     en: [
       ...BRAND_KEYWORDS.english,
+      'Venture Builder Israel',
+      'Startup Accelerator',
+      'Medical Accelerator',
+      'Innovation Hub Tel Aviv',
       'startup acceleration',
       'business growth Israel',
-      'manufacturing partners',
     ],
     he: [
       ...BRAND_KEYWORDS.hebrew,
+      'Venture Builder ישראל',
+      'מאיץ סטארטאפים',
+      'מאיץ רפואי',
+      'מרכז חדשנות תל אביב',
       'סטארטאפ',
       'צמיחה עסקית',
-      'שותפי ייצור',
     ],
   },
   leumit: {
@@ -105,8 +111,8 @@ export const COMPANY_INFO = {
   url: 'https://weccelerate.co.il',
   logo: 'https://weccelerate.co.il/logo.png',
   image: 'https://weccelerate.co.il/og-image.jpg',
-  email: 'info@weccelerate.co.il',
-  telephone: '+972-3-XXX-XXXX', // Update with real number
+  email: 'Raz@weccelerate.co.il',
+  telephone: '+972-55-564-7538',
   foundingDate: '2020', // Update with real date
   founders: [
     {
@@ -147,9 +153,9 @@ export const COMPANY_INFO = {
 // =============================================================================
 
 export const SEO_DEFAULTS = {
-  titleTemplate: '%s | WeCcelerate',
-  defaultTitle: 'WeCcelerate | Business Acceleration & Entrepreneurial Services',
-  defaultDescription: 'WeCcelerate provides business acceleration, entrepreneurial services, factory sourcing, and consulting to help businesses grow. האצת עסקים וייעוץ אסטרטגי.',
+  titleTemplate: '%s | WeCcelerate - Venture Builder & Startup Accelerator Israel',
+  defaultTitle: 'WeCcelerate | Venture Builder & Startup Accelerator Israel',
+  defaultDescription: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
   siteName: 'WeCcelerate',
   locale: 'he_IL',
   alternateLocales: ['en_US', 'en_IL'],

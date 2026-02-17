@@ -3,6 +3,8 @@ import { CorporateNavbar } from '@/components/layout/CorporateNavbar';
 import { OrganizationSchema } from '@/components/seo/organization-schema';
 import { ServiceSchema } from '@/components/seo/service-schema';
 import { FAQSchema } from '@/components/seo/faq-schema';
+import { WhatsAppFloat } from '@/components/ui/WhatsAppFloat';
+import { AccessibilityWidget } from '@/components/ui/AccessibilityWidget';
 
 interface MainSiteLayoutProps {
   children: ReactNode;
@@ -26,19 +28,17 @@ export default function MainSiteLayout({ children }: MainSiteLayoutProps) {
         lang="he"
       />
 
-      {/* Skip to main content - Accessibility */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-yellow-500 focus:text-slate-900 focus:px-4 focus:py-2"
-      >
-        דלג לתוכן הראשי
-      </a>
-
-      {/* Corporate Navbar */}
+      {/* Corporate Navbar — skip link handled globally in root layout */}
       <CorporateNavbar />
 
       {/* Main content */}
       {children}
+
+      {/* Floating WhatsApp CTA */}
+      <WhatsAppFloat />
+
+      {/* Accessibility Widget — חוק נגישות ישראל */}
+      <AccessibilityWidget />
     </div>
   );
 }
