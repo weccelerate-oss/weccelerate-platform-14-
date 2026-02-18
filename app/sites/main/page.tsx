@@ -14,16 +14,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   ArrowLeft,
-  Rocket,
   Globe,
-  HeartHandshake,
   Phone,
   Mail,
   MapPin,
   Play,
-  Shield,
   Quote,
-  Lightbulb,
   ExternalLink,
   Navigation,
   Map,
@@ -32,6 +28,7 @@ import {
 // Components
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { LiveTicker } from '@/components/ui';
+import { ServiceEcosystem } from '@/components/sections/ServiceEcosystem';
 import { VideoShowcase } from './VideoShowcase';
 import { EventsShowcase } from './EventsShowcase';
 import { HeroVideo } from './HeroVideo';
@@ -190,33 +187,6 @@ export const metadata: Metadata = constructMetadata({
 // DATA (Hebrew)
 // =============================================================================
 
-const features = [
-  {
-    icon: Rocket,
-    title: 'בניית מיזמים',
-    description: 'בניית מיזמים מקצה לקצה — מאסטרטגיה עסקית ותיקוף שוק, דרך גיוס הון ועד הרחבה. SaaS, Consumer, Low-Tech ועוד.',
-    href: '/services/acceleration',
-  },
-  {
-    icon: Lightbulb,
-    title: 'טכנולוגיה ו-AI',
-    description: 'פיתוח אפליקציות ברמה עולמית, שילוב AI וארכיטקטורה טכנית. מ-MVP ועד מוצר מוכן לשוק עם צוות הפיתוח שלנו.',
-    href: '/tech-development',
-  },
-  {
-    icon: HeartHandshake,
-    title: 'מסלול MedTech',
-    description: 'מסלול ייחודי למיזמי בריאות: גישה לנתונים רפואיים, אישורי ועדת הלסינקי וסביבות פיילוט קליניות.',
-    href: '/medtech',
-    ribbon: 'שותפות אסטרטגית',
-  },
-  {
-    icon: Shield,
-    title: 'אסטרטגיית IP',
-    description: 'הגנה מקיפה על קניין רוחני — רישום פטנטים, פיתוח אבות טיפוס ומיצוב אסטרטגי של IP למקסום ערך המיזם.',
-    href: '/ip-patents',
-  },
-];
 
 const partners = [
   { name: 'לאומית שירותי בריאות' },
@@ -241,23 +211,23 @@ function HeroSection() {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Layers: 1) Video+poster bg  2) Light overlay  3) Content (z-10) */}
 
-      {/* 1a) Mobile — poster image, fits screen */}
-      <div className="absolute inset-0 md:hidden" aria-hidden="true">
+      {/* 1a) Mobile — full image, no crop */}
+      <div className="absolute inset-0 bg-[#050810] md:hidden" aria-hidden="true">
         <img
           src="/corporate-hero.jpeg"
           alt=""
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
       </div>
 
-      {/* 1b) Desktop — video background */}
-      <div className="absolute inset-0 hidden md:block" aria-hidden="true">
+      {/* 1b) Desktop — video background only */}
+      <div className="absolute inset-0 hidden md:block bg-[#050810]" aria-hidden="true">
         <HeroVideo />
       </div>
 
-      {/* 2) Light overlay — just enough to keep text readable */}
-      <div className="absolute inset-0 bg-[#050810]/40 pointer-events-none" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050810]/50 via-transparent to-[#050810]/60 pointer-events-none" aria-hidden="true" />
+      {/* 2) Light overlay for text readability */}
+      <div className="absolute inset-0 bg-[#050810]/30 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#050810]/40 via-transparent to-[#050810]/50 pointer-events-none" aria-hidden="true" />
 
       {/* Top gold accent line */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#c8a951]/30 to-transparent" aria-hidden="true" />
@@ -338,71 +308,6 @@ function HeroSection() {
         <span className="text-white/25 text-[11px] tracking-[0.25em] uppercase">גלול</span>
         <div className="w-px h-8 bg-white/[0.08] relative overflow-hidden rounded-full">
           <div className="absolute inset-0 bg-gradient-to-b from-[#c8a951] to-transparent animate-scroll-line" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// =============================================================================
-// FEATURE CARDS — 4 Glassmorphism Cards (Hebrew)
-// =============================================================================
-
-function FeatureCardsSection() {
-  return (
-    <section className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e] via-[#0d1321] to-[#070b1e]" />
-
-      <div className="container-corporate relative z-10">
-        {/* Section Header */}
-        <ScrollReveal variant="blur">
-          <div className="text-center mb-16 sm:mb-20">
-            <p className="text-gold-500 text-sm font-semibold uppercase tracking-[0.2em] mb-4">
-              מה אנחנו עושים
-            </p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-              ארבעת עמודי הצמיחה
-            </h2>
-          </div>
-        </ScrollReveal>
-
-        {/* Cards Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, idx) => (
-            <ScrollReveal key={feature.title} delay={idx * 120} variant="scale">
-              <Link
-                href={feature.href}
-                className="glass-card p-8 relative group block h-full"
-              >
-                {/* Ribbon for MedTech */}
-                {feature.ribbon && (
-                  <div className="partnership-ribbon">
-                    {feature.ribbon}
-                  </div>
-                )}
-
-                {/* Icon */}
-                <div className="w-14 h-14 rounded-xl bg-gold-500/10 flex items-center justify-center mb-6 group-hover:bg-gold-500/20 transition-colors">
-                  <feature.icon className="w-7 h-7 text-gold-400" />
-                </div>
-
-                {/* Content */}
-                <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
-                  {feature.title}
-                </h3>
-                <p className="text-white/60 text-sm leading-relaxed mb-6">
-                  {feature.description}
-                </p>
-
-                {/* Link */}
-                <span className="inline-flex items-center gap-2 text-gold-400 text-sm font-semibold group-hover:text-gold-300 transition-colors">
-                  למידע נוסף
-                  <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                </span>
-              </Link>
-            </ScrollReveal>
-          ))}
         </div>
       </div>
     </section>
@@ -928,8 +833,8 @@ export default async function MainHomePage() {
         {/* Hero — Full Viewport Dark Luxury */}
         <HeroSection />
 
-        {/* Feature Cards — 4 Glassmorphism Boxes */}
-        <FeatureCardsSection />
+        {/* Service Ecosystem — Interactive Glassmorphism Cards */}
+        <ServiceEcosystem />
 
         {/* Partners — Monochrome Logo Bar */}
         <PartnersSection />
