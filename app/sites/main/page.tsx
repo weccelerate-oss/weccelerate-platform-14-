@@ -241,12 +241,17 @@ function HeroSection() {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Layers: 1) Video+poster bg  2) Light overlay  3) Content (z-10) */}
 
-      {/* 1) Video background with poster fallback */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/hero-bg-poster.jpeg')" }}
-        aria-hidden="true"
-      >
+      {/* 1a) Mobile — poster image, fits screen */}
+      <div className="absolute inset-0 md:hidden" aria-hidden="true">
+        <img
+          src="/corporate-hero.jpeg"
+          alt=""
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* 1b) Desktop — video background */}
+      <div className="absolute inset-0 hidden md:block" aria-hidden="true">
         <HeroVideo />
       </div>
 
