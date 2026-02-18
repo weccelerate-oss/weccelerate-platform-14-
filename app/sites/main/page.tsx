@@ -194,12 +194,6 @@ const partners = [
   { name: 'הרצוג פוקס נאמן' },
 ];
 
-const stats = [
-  { value: '150+', label: 'מיזמים הואצו' },
-  { value: '$50M+', label: 'הון גויס' },
-  { value: '85%', label: 'הצלחה בגיוס' },
-  { value: '10+', label: 'שנות ניסיון' },
-];
 
 
 // =============================================================================
@@ -220,9 +214,16 @@ function HeroSection() {
         />
       </div>
 
-      {/* 1b) Desktop — video background only */}
-      <div className="absolute inset-0 hidden md:block bg-[#050810]" aria-hidden="true">
-        <HeroVideo />
+      {/* 1b) Desktop — video with poster fallback */}
+      <div className="absolute inset-0 hidden md:block" aria-hidden="true">
+        <img
+          src="/hero-bg-poster.jpeg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0">
+          <HeroVideo />
+        </div>
       </div>
 
       {/* 2) Light overlay for text readability */}
@@ -233,7 +234,7 @@ function HeroSection() {
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#c8a951]/30 to-transparent" aria-hidden="true" />
 
       {/* 5) Content — z-10 ensures it's above all background layers */}
-      <div className="relative z-10 container-corporate w-full py-24 md:py-32">
+      <div className="relative z-10 container-corporate w-full py-24 md:py-36">
         <div className="max-w-5xl">
           {/* Animated Badge */}
           <div className="hero-fade-in inline-flex items-center gap-3 bg-white/[0.04] backdrop-blur-sm border border-white/[0.08] rounded-full px-5 py-2.5 mb-10">
@@ -282,22 +283,6 @@ function HeroSection() {
           </div>
         </div>
 
-        {/* Stats Row — Glassmorphism Cards */}
-        <div className="hero-fade-in-delay-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-24 pt-10 border-t border-white/[0.06]">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="group bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-lg p-5 md:p-6 hover:bg-white/[0.06] hover:border-white/[0.12] transition-all duration-300"
-            >
-              <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-gold-gradient tracking-tight" dir="ltr">
-                {stat.value}
-              </p>
-              <p className="text-sm text-white/60 mt-2 font-medium group-hover:text-white/80 transition-colors">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Bottom gradient fade to next section */}

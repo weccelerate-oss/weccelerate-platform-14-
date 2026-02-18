@@ -8,8 +8,9 @@ const SUBDOMAIN_MAP: Record<string, string> = {
 
 const ROOT_DOMAINS = ['weccelerate.co.il', 'www.weccelerate.co.il', 'localhost:3000', 'localhost', 'vercel.app'];
 
+// Only run middleware on page routes — skip ALL static files
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|mp4|webm|ogg|mp3|wav|pdf|woff|woff2|ttf|eot)$).*)'],
+  matcher: ['/((?!api|_next|favicon\\.ico|.*\\..+$).*)'],
 };
 
 function getSubdomain(hostname: string): string | null {
@@ -29,11 +30,13 @@ export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const pathname = url.pathname;
 
-  const subdomain = getSubdomain(hostname);
-  const siteFolder = subdomain ? SUBDOMAIN_MAP[subdomain] : 'main';
+  // Skip any path that has a file extension (static assets)
+  if (/\.\w+$/.test(pathname)) {
+    return NextResponse.next();
+  }
 
-  // Skip for auth, admin, portal, login routes - let the pages handle auth
-  if (pathname.startsWith('/api/') || 
+  // Skip for auth, admin, portal, login routes
+  if (pathname.startsWith('/api/') ||
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/admin') ||
       pathname.startsWith('/portal') ||
@@ -46,6 +49,9 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/sites/')) {
     return NextResponse.next();
   }
+
+  const subdomain = getSubdomain(hostname);
+  const siteFolder = subdomain ? SUBDOMAIN_MAP[subdomain] : 'main';
 
   // Rewrite to site folder
   url.pathname = `/sites/${siteFolder}${pathname === '/' ? '' : pathname}`;
