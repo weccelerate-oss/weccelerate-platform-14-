@@ -207,7 +207,9 @@ function HeroSection() {
       {/* Background — client component handles mobile/desktop switch */}
       <HeroBackground />
 
-      {/* Light overlay for text readability — temporarily removed for video debugging */}
+      {/* Light overlay for text readability */}
+      <div className="absolute inset-0 bg-[#050810]/25 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#050810]/35 via-transparent to-[#050810]/45 pointer-events-none" aria-hidden="true" />
 
       {/* Top gold accent line */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#c8a951]/30 to-transparent" aria-hidden="true" />
