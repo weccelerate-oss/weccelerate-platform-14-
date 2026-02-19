@@ -30,6 +30,7 @@ import { VideoShowcase } from './VideoShowcase';
 import { EventsShowcase } from './EventsShowcase';
 import { HeroBackground } from './HeroVideo';
 import { NavigationButtons, LocationMap } from '@/components/ui/NavigationButtons';
+import { TrackedLink } from '@/components/ui/TrackedLink';
 
 // Mock data
 import {
@@ -206,9 +207,7 @@ function HeroSection() {
       {/* Background — client component handles mobile/desktop switch */}
       <HeroBackground />
 
-      {/* Light overlay for text readability */}
-      <div className="absolute inset-0 bg-[#050810]/30 pointer-events-none" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050810]/40 via-transparent to-[#050810]/50 pointer-events-none" aria-hidden="true" />
+      {/* Light overlay for text readability — temporarily removed for video debugging */}
 
       {/* Top gold accent line */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#c8a951]/30 to-transparent" aria-hidden="true" />
@@ -572,22 +571,26 @@ function CTASection() {
 
           {/* Contact Info */}
           <div className="flex flex-wrap items-center justify-center gap-8 text-white/60 text-sm">
-            <a
+            <TrackedLink
+              trackAction="click.phone"
+              trackMeta={{ location: 'homepage-cta' }}
               href="tel:+972555647538"
               className="flex items-center gap-2 hover:text-white/80 transition-colors"
               aria-label="התקשרו: 055-564-7538"
             >
               <Phone className="w-4 h-4" aria-hidden="true" />
               <span dir="ltr">055-564-7538</span>
-            </a>
-            <a
+            </TrackedLink>
+            <TrackedLink
+              trackAction="click.email"
+              trackMeta={{ location: 'homepage-cta' }}
               href="mailto:Raz@weccelerate.co.il"
               className="flex items-center gap-2 hover:text-white/80 transition-colors"
               aria-label="שלחו אימייל: Raz@weccelerate.co.il"
             >
               <Mail className="w-4 h-4" aria-hidden="true" />
               <span dir="ltr">Raz@weccelerate.co.il</span>
-            </a>
+            </TrackedLink>
             <span className="flex items-center gap-2">
               <MapPin className="w-4 h-4" aria-hidden="true" />
               <span>רחוב הרכבת 58, תל אביב</span>
@@ -634,11 +637,11 @@ function Footer() {
           <div className="lg:col-span-2">
             <div className="mb-6">
               <Image
-                src="/images/logos/weccelerate-logo.jpeg"
+                src="/images/logos/weccelerate-logo-wide.jpeg"
                 alt="WeCcelerate"
-                width={200}
-                height={50}
-                className="h-10 w-auto object-contain"
+                width={240}
+                height={60}
+                className="h-12 w-auto object-contain"
               />
             </div>
             <p className="text-white/60 max-w-sm mb-8 text-sm leading-relaxed">

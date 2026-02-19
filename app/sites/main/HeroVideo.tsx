@@ -1,11 +1,9 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function HeroBackground() {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
     const mql = window.matchMedia('(max-width: 767px)');
@@ -14,24 +12,6 @@ export function HeroBackground() {
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
   }, []);
-
-  useEffect(() => {
-    if (isMobile) return;
-
-    fetch('/hero-bg.mp4', { credentials: 'include' })
-      .then((r) => r.blob())
-      .then((blob) => {
-        const video = videoRef.current;
-        if (!video) return;
-        const url = URL.createObjectURL(blob);
-        video.src = url;
-        video.load();
-        video.play()
-          .then(() => setVideoPlaying(true))
-          .catch(() => {});
-      })
-      .catch(() => {});
-  }, [isMobile]);
 
   if (isMobile) {
     return (
@@ -45,31 +25,34 @@ export function HeroBackground() {
     );
   }
 
+  // Desktop: plain video, no blob, no tricks
   return (
-    <div className="absolute inset-0">
-      {/* Poster fallback — hidden once video plays */}
-      {!videoPlaying && (
-        <img
-          src="/hero-bg-poster.jpeg"
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      )}
-
-      {/* Video */}
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: 'hidden',
+      }}
+    >
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
-        ref={videoRef}
         autoPlay
         loop
         muted
         playsInline
+        src="/hero-bg.mp4"
+        poster="/hero-bg-poster.jpeg"
         style={{
+          display: 'block',
           position: 'absolute',
-          inset: 0,
+          top: 0,
+          left: 0,
           width: '100%',
           height: '100%',
           objectFit: 'cover',
-          zIndex: 1,
         }}
       />
     </div>
