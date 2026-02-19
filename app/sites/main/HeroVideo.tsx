@@ -5,11 +5,10 @@ import { useRef, useEffect, useState } from 'react';
 export function HeroBackground() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [videoError, setVideoError] = useState<string | null>(null);
-  const [videoReady, setVideoReady] = useState(false);
+  const [debugInfo, setDebugInfo] = useState('initializing...');
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
-    // Check screen size
     const mql = window.matchMedia('(max-width: 767px)');
     setIsMobile(mql.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
@@ -18,40 +17,44 @@ export function HeroBackground() {
   }, []);
 
   useEffect(() => {
-    if (isMobile) return; // Don't load video on mobile
-    const video = videoRef.current;
-    if (!video) return;
+    if (isMobile) return;
 
-    const onCanPlay = () => {
-      setVideoReady(true);
-      video.play().catch((e) => setVideoError('play blocked: ' + e.message));
-    };
-    const onPlaying = () => {
-      setVideoReady(true);
-      setVideoError(null);
-    };
-    const onError = () => {
-      const e = video.error;
-      setVideoError(`error ${e?.code}: ${e?.message}`);
-    };
+    // Step 1: Test if the video URL is accessible via fetch
+    setDebugInfo('Fetching /hero-bg.mp4 ...');
 
-    video.addEventListener('canplay', onCanPlay);
-    video.addEventListener('playing', onPlaying);
-    video.addEventListener('error', onError);
+    fetch('/hero-bg.mp4', { method: 'HEAD', credentials: 'include' })
+      .then((res) => {
+        setDebugInfo(`Fetch: ${res.status} ${res.statusText}, type=${res.headers.get('content-type')}`);
 
-    // If already ready
-    if (video.readyState >= 3) {
-      onCanPlay();
-    }
+        if (!res.ok) {
+          setDebugInfo(`BLOCKED: server returned ${res.status}. Deployment Protection?`);
+          return;
+        }
 
-    return () => {
-      video.removeEventListener('canplay', onCanPlay);
-      video.removeEventListener('playing', onPlaying);
-      video.removeEventListener('error', onError);
-    };
+        // Step 2: Fetch the video as blob and create object URL
+        setDebugInfo('Downloading video blob...');
+        return fetch('/hero-bg.mp4', { credentials: 'include' })
+          .then((r) => r.blob())
+          .then((blob) => {
+            setDebugInfo(`Blob ready: ${(blob.size / 1024 / 1024).toFixed(1)}MB, type=${blob.type}`);
+            const url = URL.createObjectURL(blob);
+            const video = videoRef.current;
+            if (video) {
+              video.src = url;
+              video.play()
+                .then(() => {
+                  setVideoPlaying(true);
+                  setDebugInfo('PLAYING!');
+                })
+                .catch((e) => setDebugInfo(`Play error: ${e.message}`));
+            }
+          });
+      })
+      .catch((e) => {
+        setDebugInfo(`Fetch failed: ${e.message}`);
+      });
   }, [isMobile]);
 
-  // Mobile: show image
   if (isMobile) {
     return (
       <div className="absolute inset-0 bg-[#050810]">
@@ -64,32 +67,27 @@ export function HeroBackground() {
     );
   }
 
-  // Desktop: show video (with poster fallback)
   return (
     <div className="absolute inset-0 bg-[#050810]">
-      {/* Poster image as fallback — visible until video plays */}
+      {/* Poster fallback */}
       <img
         src="/hero-bg-poster.jpeg"
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* Video on top */}
+      {/* Video — src set via blob URL in useEffect */}
       <video
         ref={videoRef}
         autoPlay
         loop
         muted
         playsInline
-        preload="auto"
-        poster="/hero-bg-poster.jpeg"
         className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src="/hero-bg.mp4" type="video/mp4" />
-      </video>
+      />
 
-      {/* Debug banner — TEMPORARY, remove after video confirmed working */}
-      {!videoReady && (
+      {/* Debug banner — TEMPORARY */}
+      {!videoPlaying && (
         <div
           style={{
             position: 'fixed',
@@ -97,31 +95,21 @@ export function HeroBackground() {
             left: 10,
             background: 'red',
             color: 'white',
-            padding: '10px 16px',
-            borderRadius: 6,
+            padding: '12px 18px',
+            borderRadius: 8,
             fontSize: 14,
             zIndex: 99999,
             direction: 'ltr',
             fontFamily: 'monospace',
+            maxWidth: '80vw',
+            wordBreak: 'break-all',
           }}
         >
-          {videoError
-            ? `VIDEO ERROR: ${videoError}`
-            : 'Video loading...'}
-          {' | '}
-          <a
-            href="/hero-bg.mp4"
-            target="_blank"
-            rel="noopener"
-            style={{ color: 'yellow', textDecoration: 'underline' }}
-          >
-            Click to test video URL
-          </a>
+          {debugInfo}
         </div>
       )}
     </div>
   );
 }
 
-// Keep old export name for backwards compat
 export const HeroVideo = HeroBackground;
