@@ -207,9 +207,10 @@ function HeroSection() {
       {/* Background — client component handles mobile/desktop switch */}
       <HeroBackground />
 
-      {/* Light overlay for text readability */}
-      <div className="absolute inset-0 bg-[#050810]/25 pointer-events-none" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050810]/35 via-transparent to-[#050810]/45 pointer-events-none" aria-hidden="true" />
+      {/* Overlays: navbar color fade from top + bottom fade + general tint */}
+      <div className="absolute inset-0 bg-[#050810]/20 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-[#0a0e27] via-[#0a0e27]/70 to-transparent pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#050810]/60 to-transparent pointer-events-none" aria-hidden="true" />
 
       {/* Top gold accent line */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#c8a951]/30 to-transparent" aria-hidden="true" />
