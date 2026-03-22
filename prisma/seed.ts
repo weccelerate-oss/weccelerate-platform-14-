@@ -257,7 +257,7 @@ async function seedEvents() {
       capacity: 200,
       registeredCount: 45,
       isFree: true,
-      imageUrl: '/images/events/demo-day-2025.jpg',
+      imageUrl: null,
       category: 'Demo Day',
       tags: ['demo-day', 'investors', 'pitching', 'networking'],
       host: 'וויסלרייט',

@@ -26,6 +26,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { compressImage } from '@/lib/compress-image';
 import { createEventAction, updateEventAction, type EventFormData } from '../actions';
 
 // =============================================================================
@@ -171,8 +172,9 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
     setError(null);
 
     try {
+      const compressed = await compressImage(file);
       const body = new FormData();
-      body.append('file', file);
+      body.append('file', compressed);
 
       const res = await fetch('/api/upload', { method: 'POST', body });
       const data = await res.json();

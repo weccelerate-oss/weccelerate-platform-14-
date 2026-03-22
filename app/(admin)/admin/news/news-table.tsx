@@ -23,6 +23,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { compressImage } from '@/lib/compress-image';
 import { deleteNewsAction, updateNewsAction, type NewsFormData } from '../actions';
 import type { NewsUpdate, UrgencyLevel } from '@prisma/client';
 
@@ -66,8 +67,9 @@ function NewsEditDialog({
     setIsUploading(true);
     setError(null);
     try {
+      const compressed = await compressImage(file);
       const body = new FormData();
-      body.append('file', file);
+      body.append('file', compressed);
       const res = await fetch('/api/upload', { method: 'POST', body });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'שגיאה בהעלאה'); return; }
