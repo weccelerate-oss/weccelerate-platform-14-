@@ -42,10 +42,8 @@ export interface NewsFormData {
 }
 
 export async function createNewsAction(data: NewsFormData) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const news = await prisma.newsUpdate.create({
       data: {
         title: data.title,
@@ -70,10 +68,8 @@ export async function createNewsAction(data: NewsFormData) {
 }
 
 export async function updateNewsAction(id: string, data: Partial<NewsFormData>) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const news = await prisma.newsUpdate.update({
       where: { id },
       data,
@@ -90,10 +86,8 @@ export async function updateNewsAction(id: string, data: Partial<NewsFormData>) 
 }
 
 export async function deleteNewsAction(id: string) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     await prisma.newsUpdate.delete({
       where: { id },
     });
@@ -139,10 +133,8 @@ export interface EventFormData {
 }
 
 export async function createEventAction(data: EventFormData) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const event = await prisma.event.create({
       data: {
         name: data.name,
@@ -183,10 +175,8 @@ export async function createEventAction(data: EventFormData) {
 }
 
 export async function updateEventAction(id: string, data: Partial<EventFormData>) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const updateData: Record<string, unknown> = { ...data };
     if (data.date) {
       updateData.date = new Date(data.date);
@@ -209,10 +199,8 @@ export async function updateEventAction(id: string, data: Partial<EventFormData>
 }
 
 export async function deleteEventAction(id: string) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     await prisma.event.delete({
       where: { id },
     });
@@ -249,10 +237,8 @@ export interface VideoFormData {
 }
 
 export async function createVideoAction(data: VideoFormData) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const video = await prisma.video.create({
       data: {
         title: data.title,
@@ -283,10 +269,8 @@ export async function createVideoAction(data: VideoFormData) {
 }
 
 export async function updateVideoAction(id: string, data: Partial<VideoFormData>) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const video = await prisma.video.update({
       where: { id },
       data,
@@ -303,10 +287,8 @@ export async function updateVideoAction(id: string, data: Partial<VideoFormData>
 }
 
 export async function deleteVideoAction(id: string) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     await prisma.video.delete({
       where: { id },
     });
@@ -336,10 +318,8 @@ export interface CreateUserFormData {
 }
 
 export async function createUserAction(data: CreateUserFormData) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: data.email.toLowerCase() },
@@ -400,10 +380,8 @@ export async function createUserAction(data: CreateUserFormData) {
 }
 
 export async function updateUserAction(id: string, data: Partial<CreateUserFormData>) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const user = await prisma.user.update({
       where: { id },
       data: {
@@ -425,10 +403,8 @@ export async function updateUserAction(id: string, data: Partial<CreateUserFormD
 }
 
 export async function toggleUserActiveAction(id: string, isActive: boolean) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     await prisma.user.update({
       where: { id },
       data: { isActive },
@@ -444,10 +420,8 @@ export async function toggleUserActiveAction(id: string, isActive: boolean) {
 }
 
 export async function resetUserPasswordAction(id: string) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const tempPassword = generateTempPassword();
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
 
@@ -466,10 +440,8 @@ export async function resetUserPasswordAction(id: string) {
 }
 
 export async function deleteUserAction(id: string) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     // Soft delete - just deactivate
     await prisma.user.update({
       where: { id },
@@ -510,10 +482,8 @@ export interface StoryFormData {
 }
 
 export async function createStoryAction(data: StoryFormData) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const story = await prisma.successStory.create({
       data: {
         companyName: data.companyName,
@@ -584,10 +554,8 @@ export async function updateStoryAction(id: string, data: StoryFormData) {
 }
 
 export async function deleteStoryAction(id: string) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     await prisma.successStory.delete({
       where: { id },
     });
@@ -603,10 +571,8 @@ export async function deleteStoryAction(id: string) {
 }
 
 export async function toggleStoryActiveAction(id: string) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const story = await prisma.successStory.findUnique({ where: { id } });
     if (!story) throw new Error('Story not found');
 
@@ -626,10 +592,8 @@ export async function toggleStoryActiveAction(id: string) {
 }
 
 export async function toggleStoryFeaturedAction(id: string) {
-  await verifyAdmin();
-
-
   try {
+    await verifyAdmin();
     const story = await prisma.successStory.findUnique({ where: { id } });
     if (!story) throw new Error('Story not found');
 
