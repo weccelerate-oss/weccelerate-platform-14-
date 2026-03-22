@@ -22,24 +22,24 @@ export const SITE_CONFIG = {
   url: 'https://weccelerate.co.il',
 
   // Default description — Venture Builder positioning
-  defaultDescription: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
+  defaultDescription: 'WeCcelerate — 360° wrap-around support from idea to successful global startup. Israel\'s leading Venture Builder, specializing in MedTech, AI, and IP strategy. Partnered with Leumit Health Care.',
 
   // Title template for all pages
   titleTemplate: '%s | WeCcelerate - Venture Builder & Startup Accelerator Israel',
 
-  // Descriptions by length — Venture Builder framing
+  // Descriptions by length — 360° wrap-around support framing
   description: {
     short: {
-      en: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
-      he: 'וויסלרייט היא Venture Builder מוביל בתל אביב וירושלים, המתמחה ב-MedTech, AI ואסטרטגיית IP לסטארטאפים. בשותפות עם לאומית שירותי בריאות.',
+      en: 'WeCcelerate — 360° wrap-around support from idea to successful global startup. Israel\'s leading Venture Builder, specializing in MedTech, AI, and IP strategy. Partnered with Leumit Health Care.',
+      he: 'וויסלרייט — ליווי מעטפת 360° מרעיון לסטארט-אפ מצליח. ה-Venture Builder המוביל בישראל, המתמחה ב-MedTech, AI ואסטרטגיית IP. בשותפות עם לאומית שירותי בריאות.',
     },
     medium: {
-      en: 'WeCcelerate is a leading Venture Builder and Startup Accelerator in Tel Aviv & Jerusalem. We specialize in MedTech, AI, and IP strategy, with an exclusive partnership with Leumit Health Care providing access to medical data and clinical validation.',
-      he: 'וויסלרייט היא Venture Builder ומאיץ סטארטאפים מוביל בתל אביב וירושלים. אנו מתמחים ב-MedTech, בינה מלאכותית ואסטרטגיית IP, עם שותפות בלעדית עם לאומית שירותי בריאות המספקת גישה לדאטה רפואי ותיקוף קליני.',
+      en: 'WeCcelerate provides 360° wrap-around support for startups — from idea to successful global venture. We help early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor matching, and an exclusive MedTech track with Leumit Health Care.',
+      he: 'וויסלרייט מספקת ליווי מעטפת 360° לסטארטאפים — מרעיון לסטארט-אפ מצליח בכל העולם. עוזרים לסטארט-אפים בתחילת הדרך לקבל מעטפת של סטארט-אפ בשלב בוגר: ייעוץ עסקי, פיתוח מוצר, שיווק, חיבור למשקיעים ומסלול MedTech בלעדי עם לאומית.',
     },
     long: {
-      en: 'WeCcelerate is Israel\'s premier Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem. We guide entrepreneurs from idea to market across MedTech, AI, and deep-tech sectors. Our strategic partnership with Leumit Health Care creates an exclusive Medical Accelerator track with access to anonymized medical data, clinical pilots, Helsinki Committee guidance, and regulatory support. From MVP development and CTO services to IP strategy, patent registration, and investor matching — WeCcelerate is the Innovation Hub where startups become ventures.',
-      he: 'וויסלרייט הוא ה-Venture Builder ומאיץ הסטארטאפים המוביל בישראל, הפועל מתל אביב וירושלים. אנו מלווים יזמים מהרעיון לשוק בתחומי MedTech, בינה מלאכותית וטכנולוגיה עמוקה. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול Medical Accelerator בלעדי עם גישה לדאטה רפואי אנונימי, פיילוטים קליניים, הכוונה לוועדת הלסינקי ותמיכה רגולטורית. מפיתוח MVP ושירותי CTO ועד אסטרטגיית IP, רישום פטנטים וחיבור למשקיעים — וויסלרייט הוא מרכז החדשנות שבו סטארטאפים הופכים למיזמים.',
+      en: 'WeCcelerate is Israel\'s premier Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem. We provide 360° wrap-around support — guiding entrepreneurs from idea to successful global startup. We help early-stage startups access enterprise-grade resources across MedTech, AI, and deep-tech sectors. Our strategic partnership with Leumit Health Care creates an exclusive Medical Accelerator track with access to anonymized medical data, clinical pilots, Helsinki Committee guidance, and regulatory support. From MVP development and CTO services to IP strategy, patent registration, investor preparation, and investor matching — WeCcelerate is the Innovation Hub where startups become ventures.',
+      he: 'וויסלרייט הוא ה-Venture Builder ומאיץ הסטארטאפים המוביל בישראל, הפועל מתל אביב וירושלים. אנו מספקים ליווי מעטפת 360° — מרעיון לסטארט-אפ מצליח בכל העולם. עוזרים לסטארט-אפים בתחילת הדרך לקבל מעטפת של סטארט-אפ בשלב בוגר בתחומי MedTech, בינה מלאכותית וטכנולוגיה עמוקה. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול Medical Accelerator בלעדי עם גישה לדאטה רפואי אנונימי, פיילוטים קליניים, הכוונה לוועדת הלסינקי ותמיכה רגולטורית. מפיתוח MVP ושירותי CTO ועד אסטרטגיית IP, רישום פטנטים, הכנה למשקיעים וחיבור למשקיעים — וויסלרייט הוא מרכז החדשנות שבו סטארטאפים הופכים למיזמים.',
     },
   },
   
@@ -325,9 +325,8 @@ export const KEYWORDS = {
   // Regulatory keywords
   regulatory: {
     english: [
-      'FDA Approval Process',
-      'FDA 510(k)',
       'CE Marking',
+      'Regulatory Approval Process',
       'Medical Device Regulation',
       'Israeli MOH Approval',
       'Regulatory Consulting',
@@ -339,9 +338,8 @@ export const KEYWORDS = {
       'Clinical Validation',
     ],
     hebrew: [
-      'אישור FDA',
-      'תהליך FDA',
       'סימון CE',
+      'תהליך רגולטורי',
       'רגולציה מכשור רפואי',
       'אישור משרד הבריאות',
       'ייעוץ רגולטורי',
@@ -615,8 +613,8 @@ export const SERVICES = [
       he: 'ייעוץ רגולטורי',
     },
     description: {
-      en: 'Expert guidance through FDA, CE, and Israeli MOH regulatory pathways for medical devices and digital health products.',
-      he: 'הכוונה מקצועית בנתיבי הרגולציה של FDA, CE ומשרד הבריאות למכשור רפואי ומוצרי בריאות דיגיטליים.',
+      en: 'Expert guidance through CE and Israeli MOH regulatory pathways for medical devices and digital health products.',
+      he: 'הכוונה מקצועית בנתיבי הרגולציה של CE ומשרד הבריאות למכשור רפואי ומוצרי בריאות דיגיטליים.',
     },
     url: '/services/regulatory',
     priceRange: '₪₪₪₪',
@@ -669,8 +667,8 @@ export const FAQ_ITEMS = [
       en: 'What is the advantage of the MedTech track with Leumit?',
     },
     answer: {
-      he: 'מסלול ה-MedTech בשיתוף לאומית מספק יתרונות בלעדיים: גישה לדאטה רפואי אנונימי של מאות אלפי מבוטחים, אפשרות לפיילוטים קליניים במרפאות, התייעצות עם רופאים ומומחים, הכוונה רגולטורית (FDA, CE) ואמינות מוגברת מול משקיעים.',
-      en: 'The MedTech track with Leumit provides exclusive advantages: access to anonymized medical data from hundreds of thousands of patients, clinical pilot opportunities in clinics, consultation with physicians and experts, regulatory guidance (FDA, CE), and enhanced credibility with investors.',
+      he: 'מסלול ה-MedTech בשיתוף לאומית מספק יתרונות בלעדיים: גישה לדאטה רפואי אנונימי של מאות אלפי מבוטחים, אפשרות לפיילוטים קליניים במרפאות, התייעצות עם רופאים ומומחים, הכוונה רגולטורית (CE, משרד הבריאות) ואמינות מוגברת מול משקיעים.',
+      en: 'The MedTech track with Leumit provides exclusive advantages: access to anonymized medical data from hundreds of thousands of patients, clinical pilot opportunities in clinics, consultation with physicians and experts, regulatory guidance (CE, Ministry of Health), and enhanced credibility with investors.',
     },
   },
   {
@@ -713,6 +711,36 @@ export const FAQ_ITEMS = [
       en: 'A typical MVP development takes 6-12 weeks, depending on complexity. At WeCcelerate we use Agile and Lean Startup methodologies to deliver a working product quickly, get market feedback, and continuously improve.',
     },
   },
+  {
+    question: {
+      he: 'מה כולל הייעוץ העסקי של WeCcelerate?',
+      en: 'What does WeCcelerate business consulting include?',
+    },
+    answer: {
+      he: 'הייעוץ העסקי כולל מחקר שוק וניתוח תחרות, בניית תוכנית שיווקית, תוכנית פיננסית מפורטת, תקציר מנהלים מקצועי ותוכנית עסקית מלאה. כל מסמך מותאם לסטנדרטים שמשקיעים מצפים לראות.',
+      en: 'Business consulting includes market research and competitive analysis, marketing plan, detailed financial plan, executive summary, and full business plan. Every document is tailored to investor-grade standards.',
+    },
+  },
+  {
+    question: {
+      he: 'איך WeCcelerate עוזרת בשיווק ויח"צ?',
+      en: 'How does WeCcelerate help with marketing and PR?',
+    },
+    answer: {
+      he: 'WeCcelerate מספקת מעטפת שיווקית מלאה: אסטרטגיית שיווק, ניהול קמפיינים בגוגל ובמדיה חברתית, יחסי ציבור מול כלי תקשורת ישראליים ובינלאומיים, בניית מותג ועיצוב חומרי שיווק.',
+      en: 'WeCcelerate provides a full marketing suite: marketing strategy, Google & social media campaign management, PR with Israeli and international media, brand building, and marketing materials design.',
+    },
+  },
+  {
+    question: {
+      he: 'איך להגיש מועמדות ל-WeCcelerate?',
+      en: 'How to apply to WeCcelerate?',
+    },
+    answer: {
+      he: 'הגשת מועמדות פשוטה — מלאו את טופס יצירת קשר באתר weccelerate.co.il/contact ונציג יחזור אליכם תוך 48 שעות לתיאום פגישת הכרות ראשונית (ללא עלות). אנו מלווים יזמים בכל שלב — מרעיון גולמי ועד חברות בצמיחה.',
+      en: 'Applying is simple — fill out the contact form at weccelerate.co.il/contact and a representative will get back to you within 48 hours to schedule a free introductory meeting. We support entrepreneurs at every stage — from raw idea to growth-stage companies.',
+    },
+  },
 ] as const;
 
 // Alias for backward compatibility
@@ -733,7 +761,7 @@ export const SOCIAL_LINKS = {
 } as const;
 
 export const CONTACT = {
-  email: 'Raz@weccelerate.co.il',
+  email: 'info@weccelerate.co.il',
   phone: '+972-55-564-7538',
   phoneDisplay: '055-564-7538',
   whatsapp: '+972555647538',
@@ -778,7 +806,7 @@ export const CONTACT = {
   },
   hours: {
     weekdays: '09:00-18:00',
-    friday: '09:00-14:00',
+    friday: 'Closed',
     saturday: 'Closed',
   },
 } as const;

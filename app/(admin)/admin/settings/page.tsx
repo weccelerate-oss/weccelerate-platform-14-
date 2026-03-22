@@ -4,6 +4,8 @@
  * Admin interface for managing site-wide settings.
  */
 
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { Settings, Globe, Bell, Shield, Database } from 'lucide-react';
 
@@ -33,11 +35,11 @@ export default async function SettingsPage() {
   const registrationOpen = settings.find(s => s.key === 'site.registration_open');
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 pt-14 lg:pt-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">הגדרות מערכת</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">הגדרות מערכת</h1>
           <p className="text-slate-500 mt-1">
             ניהול הגדרות האתר והמערכת
           </p>

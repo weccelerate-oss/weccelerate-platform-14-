@@ -78,31 +78,19 @@ function StoryCard({ story, variant = 'default' }: StoryCardProps) {
 
       {/* Author info */}
       <div className="flex items-center gap-4">
-        {/* Logo or person image */}
-        <div className="flex-shrink-0">
-          {story.personImage ? (
-            <img
-              src={story.personImage}
-              alt={story.personName || story.companyName}
-              className={cn(
-                'rounded-full object-cover bg-slate-100',
-                isCompact ? 'w-10 h-10' : 'w-14 h-14'
-              )}
-            />
-          ) : (
-            <div
-              className={cn(
-                'bg-slate-100 rounded-full flex items-center justify-center',
-                isCompact ? 'w-10 h-10' : 'w-14 h-14'
-              )}
-            >
-              <img
-                src={story.logoUrl || '/images/logo-placeholder.svg'}
-                alt={story.companyName}
-                className="w-3/4 h-3/4 object-contain"
-              />
-            </div>
+        {/* Initials avatar */}
+        <div
+          className={cn(
+            'rounded-full bg-gradient-to-br from-[#c8a951]/25 to-[#e8d48b]/10 border border-[#c8a951]/30 flex items-center justify-center flex-shrink-0',
+            isCompact ? 'w-10 h-10' : 'w-14 h-14'
           )}
+        >
+          <span className={cn(
+            'text-[#c8a951] font-bold',
+            isCompact ? 'text-xs' : 'text-sm'
+          )}>
+            {(story.personName || story.companyName).split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
+          </span>
         </div>
 
         {/* Name and role */}

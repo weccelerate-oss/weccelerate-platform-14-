@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
@@ -99,6 +99,11 @@ function formatDate(date: Date): string {
 export function EventsTable({ events: initialEvents }: EventsTableProps) {
   const [events, setEvents] = useState(initialEvents);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync local state when server data changes (after router.refresh)
+  useEffect(() => {
+    setEvents(initialEvents);
+  }, [initialEvents]);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -180,8 +185,133 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
         </select>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="lg:hidden divide-y divide-slate-100">
+        <AnimatePresence>
+          {filteredEvents.map((event) => {
+            const LocationIcon = LOCATION_TYPE_CONFIG[event.locationType].icon;
+
+            return (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={cn(
+                  'p-4 hover:bg-slate-50 transition-colors active:bg-slate-100',
+                  !event.isActive && 'opacity-60'
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-lg bg-royal-100 text-royal-600 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-slate-900 truncate text-sm">
+                          {event.name}
+                        </p>
+                        {event.isFeatured && (
+                          <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      {event.host && (
+                        <p className="text-xs text-slate-500 truncate mt-0.5">{event.host}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="relative flex-shrink-0">
+                    <button
+                      onClick={() => setOpenMenuId(openMenuId === event.id ? null : event.id)}
+                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      <MoreVertical className="w-4 h-4 text-slate-500" />
+                    </button>
+
+                    <AnimatePresence>
+                      {openMenuId === event.id && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="absolute left-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-20"
+                          >
+                            <EventFormDialog mode="edit" event={event}>
+                              <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                <Edit className="w-4 h-4" />
+                                <span>עריכה</span>
+                              </button>
+                            </EventFormDialog>
+                            <button
+                              onClick={() => handleToggleActive(event)}
+                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                            >
+                              {event.isActive ? <><EyeOff className="w-4 h-4" /><span>הסתר</span></> : <><Eye className="w-4 h-4" /><span>הצג</span></>}
+                            </button>
+                            <button
+                              onClick={() => handleToggleFeatured(event)}
+                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                            >
+                              {event.isFeatured ? <><StarOff className="w-4 h-4" /><span>הסר מומלץ</span></> : <><Star className="w-4 h-4" /><span>סמן כמומלץ</span></>}
+                            </button>
+                            {event.registrationLink && (
+                              <a href={event.registrationLink} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                <ExternalLink className="w-4 h-4" /><span>עמוד הרשמה</span>
+                              </a>
+                            )}
+                            <div className="border-t border-slate-100 my-1" />
+                            <button
+                              onClick={() => handleDelete(event.id)}
+                              disabled={isDeleting === event.id}
+                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span>{isDeleting === event.id ? 'מוחק...' : 'מחיקה'}</span>
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                {/* Meta row */}
+                <div className="flex flex-wrap items-center gap-3 mt-2.5 mr-[52px]">
+                  <span className="text-xs text-slate-600 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-slate-400" />
+                    {formatDate(event.date)} • {event.time}
+                  </span>
+                  <span className="text-xs text-slate-600 flex items-center gap-1">
+                    <LocationIcon className={cn('w-3 h-3', LOCATION_TYPE_CONFIG[event.locationType].color)} />
+                    {LOCATION_TYPE_CONFIG[event.locationType].label}
+                    {event.city && ` • ${event.city}`}
+                  </span>
+                  <span className={cn(
+                    'inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium',
+                    STATUS_CONFIG[event.status].color
+                  )}>
+                    {STATUS_CONFIG[event.status].label}
+                  </span>
+                  {event.capacity && (
+                    <span className="text-xs text-slate-500 flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      {event.registeredCount}/{event.capacity}
+                    </span>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
@@ -197,7 +327,7 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
             <AnimatePresence>
               {filteredEvents.map((event) => {
                 const LocationIcon = LOCATION_TYPE_CONFIG[event.locationType].icon;
-                
+
                 return (
                   <motion.tr
                     key={event.id}
@@ -209,7 +339,6 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
                       !event.isActive && 'opacity-60'
                     )}
                   >
-                    {/* Event Info */}
                     <td className="px-4 py-3">
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-lg bg-royal-100 text-royal-600 flex items-center justify-center flex-shrink-0">
@@ -217,85 +346,46 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="font-medium text-slate-900 truncate">
-                              {event.name}
-                            </p>
-                            {event.isFeatured && (
-                              <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />
-                            )}
+                            <p className="font-medium text-slate-900 truncate">{event.name}</p>
+                            {event.isFeatured && <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />}
                           </div>
-                          {event.host && (
-                            <p className="text-xs text-slate-500 truncate">
-                              {event.host}
-                            </p>
-                          )}
+                          {event.host && <p className="text-xs text-slate-500 truncate">{event.host}</p>}
                         </div>
                       </div>
                     </td>
-
-                    {/* Date */}
                     <td className="px-4 py-3">
-                      <div>
-                        <p className="font-medium text-slate-900">
-                          {formatDate(event.date)}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {event.time}
-                          {event.endTime && ` - ${event.endTime}`}
-                        </p>
-                      </div>
+                      <p className="font-medium text-slate-900">{formatDate(event.date)}</p>
+                      <p className="text-xs text-slate-500">{event.time}{event.endTime && ` - ${event.endTime}`}</p>
                     </td>
-
-                    {/* Location */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <LocationIcon className={cn('w-4 h-4', LOCATION_TYPE_CONFIG[event.locationType].color)} />
                         <div>
-                          <p className="text-sm text-slate-700">
-                            {LOCATION_TYPE_CONFIG[event.locationType].label}
-                          </p>
-                          {event.city && (
-                            <p className="text-xs text-slate-500">{event.city}</p>
-                          )}
+                          <p className="text-sm text-slate-700">{LOCATION_TYPE_CONFIG[event.locationType].label}</p>
+                          {event.city && <p className="text-xs text-slate-500">{event.city}</p>}
                         </div>
                       </div>
                     </td>
-
-                    {/* Registrations */}
                     <td className="px-4 py-3">
                       {event.capacity ? (
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <Users className="w-4 h-4 text-slate-400" />
-                            <span className="text-sm font-medium text-slate-700">
-                              {event.registeredCount}/{event.capacity}
-                            </span>
+                            <span className="text-sm font-medium text-slate-700">{event.registeredCount}/{event.capacity}</span>
                           </div>
                           <div className="w-20 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-royal-500 rounded-full"
-                              style={{
-                                width: `${Math.min(100, (event.registeredCount / event.capacity) * 100)}%`,
-                              }}
-                            />
+                            <div className="h-full bg-royal-500 rounded-full" style={{ width: `${Math.min(100, (event.registeredCount / event.capacity) * 100)}%` }} />
                           </div>
                         </div>
                       ) : (
                         <span className="text-sm text-slate-400">ללא הגבלה</span>
                       )}
                     </td>
-
-                    {/* Status */}
                     <td className="px-4 py-3">
-                      <span className={cn(
-                        'inline-flex px-2.5 py-1 rounded-full text-xs font-medium',
-                        STATUS_CONFIG[event.status].color
-                      )}>
+                      <span className={cn('inline-flex px-2.5 py-1 rounded-full text-xs font-medium', STATUS_CONFIG[event.status].color)}>
                         {STATUS_CONFIG[event.status].label}
                       </span>
                     </td>
-
-                    {/* Actions */}
                     <td className="px-4 py-3">
                       <div className="relative">
                         <button
@@ -304,7 +394,6 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
                         >
                           <MoreVertical className="w-4 h-4 text-slate-500" />
                         </button>
-
                         <AnimatePresence>
                           {openMenuId === event.id && (
                             <motion.div
@@ -315,66 +404,23 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
                             >
                               <EventFormDialog mode="edit" event={event}>
                                 <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                                  <Edit className="w-4 h-4" />
-                                  <span>עריכה</span>
+                                  <Edit className="w-4 h-4" /><span>עריכה</span>
                                 </button>
                               </EventFormDialog>
-
-                              <button
-                                onClick={() => handleToggleActive(event)}
-                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                              >
-                                {event.isActive ? (
-                                  <>
-                                    <EyeOff className="w-4 h-4" />
-                                    <span>הסתר</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Eye className="w-4 h-4" />
-                                    <span>הצג</span>
-                                  </>
-                                )}
+                              <button onClick={() => handleToggleActive(event)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                {event.isActive ? <><EyeOff className="w-4 h-4" /><span>הסתר</span></> : <><Eye className="w-4 h-4" /><span>הצג</span></>}
                               </button>
-
-                              <button
-                                onClick={() => handleToggleFeatured(event)}
-                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                              >
-                                {event.isFeatured ? (
-                                  <>
-                                    <StarOff className="w-4 h-4" />
-                                    <span>הסר מומלץ</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Star className="w-4 h-4" />
-                                    <span>סמן כמומלץ</span>
-                                  </>
-                                )}
+                              <button onClick={() => handleToggleFeatured(event)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                {event.isFeatured ? <><StarOff className="w-4 h-4" /><span>הסר מומלץ</span></> : <><Star className="w-4 h-4" /><span>סמן כמומלץ</span></>}
                               </button>
-
                               {event.registrationLink && (
-                                <a
-                                  href={event.registrationLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                                >
-                                  <ExternalLink className="w-4 h-4" />
-                                  <span>עמוד הרשמה</span>
+                                <a href={event.registrationLink} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                  <ExternalLink className="w-4 h-4" /><span>עמוד הרשמה</span>
                                 </a>
                               )}
-
                               <div className="border-t border-slate-100 my-1" />
-
-                              <button
-                                onClick={() => handleDelete(event.id)}
-                                disabled={isDeleting === event.id}
-                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                                <span>{isDeleting === event.id ? 'מוחק...' : 'מחיקה'}</span>
+                              <button onClick={() => handleDelete(event.id)} disabled={isDeleting === event.id} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                <Trash2 className="w-4 h-4" /><span>{isDeleting === event.id ? 'מוחק...' : 'מחיקה'}</span>
                               </button>
                             </motion.div>
                           )}

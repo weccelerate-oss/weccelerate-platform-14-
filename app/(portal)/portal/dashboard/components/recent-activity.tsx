@@ -1,15 +1,13 @@
 /**
  * Recent Activity Component
- * 
- * Displays a timeline of recent project activities and updates.
- * Shows actions like file uploads, status changes, notes added, etc.
+ *
+ * Clean activity timeline with color-coded entries and relative timestamps.
  */
 
 'use client';
 
 import { motion } from 'framer-motion';
 import {
-  FileText,
   Upload,
   MessageSquare,
   RefreshCw,
@@ -38,65 +36,61 @@ interface ActivityConfig {
 }
 
 // =============================================================================
-// ACTIVITY TYPE MAPPING
+// CONFIG
 // =============================================================================
 
 const ACTIVITY_CONFIG: Record<string, ActivityConfig> = {
   'project.created': {
-    icon: <CheckCircle className="w-4 h-4" />,
+    icon: <CheckCircle className="w-3.5 h-3.5" />,
     color: 'text-emerald-600',
-    bgColor: 'bg-emerald-100',
+    bgColor: 'bg-emerald-50',
     label: 'פרויקט נוצר',
   },
   'project.updated': {
-    icon: <RefreshCw className="w-4 h-4" />,
+    icon: <RefreshCw className="w-3.5 h-3.5" />,
     color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
+    bgColor: 'bg-blue-50',
     label: 'פרויקט עודכן',
   },
   'project.status_changed': {
-    icon: <ArrowUpRight className="w-4 h-4" />,
+    icon: <ArrowUpRight className="w-3.5 h-3.5" />,
     color: 'text-royal-600',
-    bgColor: 'bg-royal-100',
+    bgColor: 'bg-royal-50',
     label: 'סטטוס שונה',
   },
   'file.uploaded': {
-    icon: <Upload className="w-4 h-4" />,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100',
+    icon: <Upload className="w-3.5 h-3.5" />,
+    color: 'text-violet-600',
+    bgColor: 'bg-violet-50',
     label: 'קובץ הועלה',
   },
   'note.added': {
-    icon: <MessageSquare className="w-4 h-4" />,
+    icon: <MessageSquare className="w-3.5 h-3.5" />,
     color: 'text-amber-600',
-    bgColor: 'bg-amber-100',
+    bgColor: 'bg-amber-50',
     label: 'הערה נוספה',
   },
   'meeting.scheduled': {
-    icon: <Calendar className="w-4 h-4" />,
+    icon: <Calendar className="w-3.5 h-3.5" />,
     color: 'text-pink-600',
-    bgColor: 'bg-pink-100',
+    bgColor: 'bg-pink-50',
     label: 'פגישה נקבעה',
   },
   'user.login': {
-    icon: <User className="w-4 h-4" />,
-    color: 'text-slate-600',
-    bgColor: 'bg-slate-100',
+    icon: <User className="w-3.5 h-3.5" />,
+    color: 'text-slate-500',
+    bgColor: 'bg-slate-50',
     label: 'התחברות',
   },
   default: {
-    icon: <Clock className="w-4 h-4" />,
-    color: 'text-slate-600',
-    bgColor: 'bg-slate-100',
+    icon: <Clock className="w-3.5 h-3.5" />,
+    color: 'text-slate-500',
+    bgColor: 'bg-slate-50',
     label: 'פעולה',
   },
 };
 
-// =============================================================================
-// HELPERS
-// =============================================================================
-
-function getActivityConfig(action: string): ActivityConfig {
+function getConfig(action: string): ActivityConfig {
   return ACTIVITY_CONFIG[action] || ACTIVITY_CONFIG.default;
 }
 
@@ -108,11 +102,11 @@ function formatRelativeTime(date: Date): string {
   const diffDays = Math.floor(diffMs / 86400000);
 
   if (diffMins < 1) return 'עכשיו';
-  if (diffMins < 60) return `לפני ${diffMins} דקות`;
-  if (diffHours < 24) return `לפני ${diffHours} שעות`;
+  if (diffMins < 60) return `לפני ${diffMins} דק׳`;
+  if (diffHours < 24) return `לפני ${diffHours} שע׳`;
   if (diffDays === 1) return 'אתמול';
   if (diffDays < 7) return `לפני ${diffDays} ימים`;
-  
+
   return new Date(date).toLocaleDateString('he-IL', {
     day: 'numeric',
     month: 'short',
@@ -124,37 +118,34 @@ function formatRelativeTime(date: Date): string {
 // =============================================================================
 
 export function RecentActivity({ activities }: RecentActivityProps) {
-  // Empty state
   if (!activities || activities.length === 0) {
     return (
       <div className="text-center py-8">
-        <Clock className="w-8 h-8 mx-auto text-slate-300 mb-3" />
-        <p className="text-slate-500 text-sm">אין פעילות אחרונה</p>
+        <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-slate-50 flex items-center justify-center">
+          <Clock className="w-5 h-5 text-slate-300" />
+        </div>
+        <p className="text-sm text-slate-500">אין פעילות אחרונה</p>
+        <p className="text-xs text-slate-400 mt-1">הפעילות שלך תופיע כאן</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-1">
-      {activities.slice(0, 8).map((activity, index) => {
-        const config = getActivityConfig(activity.action);
-        
+    <div className="space-y-0.5">
+      {activities.slice(0, 6).map((activity, index) => {
+        const config = getConfig(activity.action);
+
         return (
           <motion.div
             key={activity.id}
-            initial={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, x: -6 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="relative flex items-start gap-3 p-2 -mx-2 rounded-lg hover:bg-slate-50 transition-colors group"
+            transition={{ delay: 0.2 + index * 0.04 }}
+            className="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50/50 transition-colors group"
           >
-            {/* Timeline line */}
-            {index < activities.length - 1 && (
-              <div className="absolute right-5 top-10 w-0.5 h-full bg-slate-100" />
-            )}
-
             {/* Icon */}
             <div className={cn(
-              'relative z-10 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
+              'w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5',
               config.bgColor,
               config.color
             )}>
@@ -162,35 +153,33 @@ export function RecentActivity({ activities }: RecentActivityProps) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0 pt-1">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">
-                    {config.label}
-                  </p>
-                  {activity.description && (
-                    <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
-                      {activity.description}
-                    </p>
-                  )}
-                </div>
-                <span className="text-xs text-slate-400 whitespace-nowrap flex-shrink-0">
-                  {formatRelativeTime(activity.createdAt)}
-                </span>
-              </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-slate-800 leading-snug">
+                <span className="font-medium">{config.label}</span>
+              </p>
+              {activity.description && (
+                <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                  {activity.description}
+                </p>
+              )}
             </div>
+
+            {/* Time */}
+            <span className="text-[10px] text-slate-400 whitespace-nowrap flex-shrink-0 mt-0.5 font-medium">
+              {formatRelativeTime(activity.createdAt)}
+            </span>
           </motion.div>
         );
       })}
 
-      {/* View all link */}
-      {activities.length > 8 && (
-        <div className="pt-3 text-center">
+      {/* View all */}
+      {activities.length > 6 && (
+        <div className="pt-2 text-center">
           <a
             href="/portal/activity"
-            className="text-sm text-royal-600 hover:text-royal-700 font-medium"
+            className="text-xs text-royal-600 hover:text-royal-700 font-medium hover:underline"
           >
-            צפייה בכל הפעילות ←
+            צפייה בכל הפעילות
           </a>
         </div>
       )}

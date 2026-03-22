@@ -1,7 +1,7 @@
 {
   "name": "WeCcelerate",
   "short_name": "WeCcelerate",
-  "description": "Business Acceleration & Entrepreneurial Services",
+  "description": "WeCcelerate — Venture Builder & Startup Accelerator Israel. Business consulting, product development, marketing & MedTech acceleration.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FAFBFC",
@@ -23,5 +23,5 @@
   ],
   "categories": ["business", "productivity"],
   "lang": "he",
-  "dir": "ltr"
+  "dir": "rtl"
 }

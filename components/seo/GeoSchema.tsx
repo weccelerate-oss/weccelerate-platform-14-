@@ -105,7 +105,7 @@ function buildOrganizationSchema() {
       '@type': 'Place',
       name: 'Tel Aviv, Israel',
     },
-    email: 'Raz@weccelerate.co.il',
+    email: 'info@weccelerate.co.il',
     telephone: '+972-55-564-7538',
 
     // Primary Location — Tel Aviv
@@ -173,19 +173,21 @@ function buildOrganizationSchema() {
       'https://www.youtube.com/@WeCcelerate.Ltd1',
       'https://www.linkedin.com/company/weccelerate',
       'https://www.facebook.com/weccelerate',
+      'https://www.instagram.com/weccelerate',
+      'https://www.tiktok.com/@weccelerate',
     ],
-    
+
     // Contact Points
     contactPoint: [
       {
         '@type': 'ContactPoint',
         contactType: 'customer service',
         telephone: '+972-55-564-7538',
-        email: 'Raz@weccelerate.co.il',
+        email: 'info@weccelerate.co.il',
         availableLanguage: ['Hebrew', 'English'],
         hoursAvailable: {
           '@type': 'OpeningHoursSpecification',
-          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+          dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
           opens: '09:00',
           closes: '18:00',
         },
@@ -193,7 +195,7 @@ function buildOrganizationSchema() {
       {
         '@type': 'ContactPoint',
         contactType: 'sales',
-        email: 'Raz@weccelerate.co.il',
+        email: 'info@weccelerate.co.il',
         availableLanguage: ['Hebrew', 'English'],
       },
     ],
@@ -344,11 +346,11 @@ function buildWebSiteSchema() {
 }
 
 /**
- * Build WebPage Schema
+ * Build WebPage Schema with Speakable (AEO: AI & Voice Search Optimization)
  */
 function buildWebPageSchema(path: string, pageTitle: string) {
   const pageUrl = `${SITE_CONFIG.url}${path}`;
-  
+
   return {
     '@type': 'WebPage',
     '@id': `${pageUrl}/#webpage`,
@@ -367,6 +369,71 @@ function buildWebPageSchema(path: string, pageTitle: string) {
     },
     datePublished: '2024-01-01T00:00:00+02:00',
     dateModified: new Date().toISOString(),
+
+    // Speakable — tells voice assistants & AI which content to read aloud
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', 'h2', '[data-speakable]', 'main p:first-of-type'],
+    },
+  };
+}
+
+/**
+ * Build HowTo Schema — makes WeCcelerate appear in "how to start a startup" queries
+ */
+function buildHowToSchema() {
+  return {
+    '@type': 'HowTo',
+    '@id': `${SITE_CONFIG.url}/#howto-startup`,
+    name: 'איך להקים סטארטאפ בישראל עם WeCcelerate',
+    description: 'מדריך שלב-אחר-שלב להקמת סטארטאפ מוצלח בישראל דרך WeCcelerate — מהרעיון הראשוני ועד גיוס הון והשקה לשוק.',
+    totalTime: 'P6M',
+    estimatedCost: {
+      '@type': 'MonetaryAmount',
+      currency: 'ILS',
+      value: '0',
+    },
+    step: [
+      {
+        '@type': 'HowToStep',
+        position: 1,
+        name: 'הגשת מועמדות',
+        text: 'הגישו מועמדות לתוכנית ההאצה של WeCcelerate דרך טופס יצירת קשר באתר. הצוות יחזור אליכם תוך 48 שעות.',
+        url: `${SITE_CONFIG.url}/contact`,
+      },
+      {
+        '@type': 'HowToStep',
+        position: 2,
+        name: 'אבחון ואפיון',
+        text: 'פגישת אבחון עם הצוות לבחינת הרעיון, ניתוח שוק ראשוני, והתאמת מסלול מתאים — ייעוץ עסקי, פיתוח מוצר או מסלול MedTech.',
+        url: `${SITE_CONFIG.url}/services`,
+      },
+      {
+        '@type': 'HowToStep',
+        position: 3,
+        name: 'בניית תוכנית עסקית',
+        text: 'עבודה עם צוות הייעוץ של WeCcelerate על מחקר שוק, תוכנית פיננסית ותקציר מנהלים.',
+        url: `${SITE_CONFIG.url}/services/business-consulting`,
+      },
+      {
+        '@type': 'HowToStep',
+        position: 4,
+        name: 'פיתוח MVP',
+        text: 'פיתוח מוצר ראשוני (MVP) — דיגיטלי או פיזי — עם צוות הפיתוח הטכני של WeCcelerate.',
+        url: `${SITE_CONFIG.url}/tech-development`,
+      },
+      {
+        '@type': 'HowToStep',
+        position: 5,
+        name: 'שיווק וגיוס הון',
+        text: 'הכנת חומרי שיווק, פיץ׳ דק, וחיבור למשקיעים מרשת הקשרים של WeCcelerate.',
+        url: `${SITE_CONFIG.url}/investors`,
+      },
+    ],
+    tool: [
+      { '@type': 'HowToTool', name: 'מחשבון עלות MVP' },
+      { '@type': 'HowToTool', name: 'תוכנית עסקית' },
+    ],
   };
 }
 
@@ -376,7 +443,7 @@ function buildWebPageSchema(path: string, pageTitle: string) {
 function buildBreadcrumbSchema(path: string, pageTitle: string) {
   const segments = path.split('/').filter(Boolean);
   
-  const items = [
+  const items: { '@type': string; position: number; name: string; item: string }[] = [
     {
       '@type': 'ListItem',
       position: 1,
@@ -413,7 +480,7 @@ function buildLocalBusinessSchema() {
     name: 'WeCcelerate - Venture Builder & Startup Accelerator',
     image: `${SITE_CONFIG.url}/og-image.jpg`,
     telephone: '+972-55-564-7538',
-    email: 'Raz@weccelerate.co.il',
+    email: 'info@weccelerate.co.il',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'HaRakevet 58',
@@ -432,19 +499,15 @@ function buildLocalBusinessSchema() {
       'https://www.youtube.com/@WeCcelerate.Ltd1',
       'https://www.linkedin.com/company/weccelerate',
       'https://www.facebook.com/weccelerate',
+      'https://www.instagram.com/weccelerate',
+      'https://www.tiktok.com/@weccelerate',
     ],
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+        dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
         opens: '09:00',
         closes: '18:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: 'Friday',
-        opens: '09:00',
-        closes: '14:00',
       },
     ],
     priceRange: '₪₪₪',
@@ -490,12 +553,13 @@ export function GeoSchema({
     buildWebPageSchema(path, pageTitle),
     buildBreadcrumbSchema(path, pageTitle),
     buildLocalBusinessSchema(),
+    buildHowToSchema(),
   ];
-  
+
   if (includeServices) {
     graphItems.push(buildServicesSchema());
   }
-  
+
   if (includeFaq) {
     graphItems.push(buildFaqSchema(locale));
   }

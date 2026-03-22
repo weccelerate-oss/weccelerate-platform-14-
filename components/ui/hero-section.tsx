@@ -248,7 +248,7 @@ export function HeroSection({
             )}
           >
             <a
-              href="/apply"
+              href="/contact?source=apply"
               className={cn(
                 'group relative inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300',
                 'bg-gradient-to-l from-gold-500 to-gold-400 text-slate-900',

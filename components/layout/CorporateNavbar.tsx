@@ -27,6 +27,7 @@ import {
   X,
   ChevronDown,
   ArrowLeft,
+  ArrowRight,
   Phone,
   Mail,
   Globe,
@@ -34,99 +35,116 @@ import {
   Rocket,
   Building2,
   Target,
-  Users,
+  Megaphone,
   HeartHandshake,
+  TrendingUp,
+  Handshake,
   Calendar,
   Video,
   FileText,
   MessageCircle,
 } from 'lucide-react';
+import { TrackedLink } from '@/components/ui/TrackedLink';
+import { useLanguage } from '@/lib/i18n';
 
 // =============================================================================
-// NAVIGATION DATA
+// NAVIGATION DATA — built dynamically using translation keys
 // =============================================================================
 
-const navigation = {
-  main: [
-    { name: 'ראשי', href: '/' },
-    {
-      name: 'שירותים',
-      href: '/services',
-      children: [
-        {
-          name: 'האצת עסקים',
-          href: '/services/acceleration',
-          description: 'תוכניות האצה מותאמות אישית',
-          icon: Rocket,
-        },
-        {
-          name: 'מציאת מפעלים',
-          href: '/services/sourcing',
-          description: 'חיבור לשותפי ייצור מובילים',
-          icon: Building2,
-        },
-        {
-          name: 'ייעוץ אסטרטגי',
-          href: '/services/consulting',
-          description: 'בניית אסטרטגיה ומודל עסקי',
-          icon: Target,
-        },
-        {
-          name: 'גישה למשקיעים',
-          href: '/services/investors',
-          description: 'רשת של מעל 500 משקיעים',
-          icon: Users,
-        },
-        {
-          name: 'מנטורינג אישי',
-          href: '/services/mentoring',
-          description: 'ליווי ממומחים ויזמים מנוסים',
-          icon: HeartHandshake,
-        },
-      ],
-    },
-    { name: 'אודות', href: '/about' },
-    {
-      name: 'תוכן',
-      href: '#',
-      children: [
-        {
-          name: 'אירועים',
-          href: '/events',
-          description: 'מפגשים, וובינרים ודמו דייס',
-          icon: Calendar,
-        },
-        {
-          name: 'סרטונים',
-          href: '/videos',
-          description: 'תוכן וידאו והדרכות',
-          icon: Video,
-        },
-        {
-          name: 'בלוג',
-          href: '/blog',
-          description: 'מאמרים ותובנות',
-          icon: FileText,
-        },
-      ],
-    },
-    { name: 'צור קשר', href: '/contact' },
-  ],
-  cta: {
-    name: 'פורטל יזמים',
-    href: '/apply',
-  },
-  topBar: {
-    phone: '055-564-7538',
-    phoneFull: '+972555647538',
-    email: 'Raz@weccelerate.co.il',
-    whatsapp: 'https://wa.me/972555647538',
-    languages: [
-      { code: 'he', name: 'עברית', href: '/' },
-      { code: 'en', name: 'English', href: '/en' },
-    ],
-  },
+const topBar = {
+  phone: '055-564-7538',
+  phoneFull: '+972555647538',
+  email: 'info@weccelerate.co.il',
+  whatsapp: 'https://wa.me/972555647538',
 };
+
+function useNavigation() {
+  const { t } = useLanguage();
+
+  return {
+    main: [
+      { name: t('nav.home'), href: '/' },
+      {
+        name: t('nav.services'),
+        href: '/services',
+        children: [
+          {
+            name: t('nav.services.consulting'),
+            href: '/services/business-consulting',
+            description: t('nav.services.consulting.desc'),
+            icon: Target,
+          },
+          {
+            name: t('nav.services.physical'),
+            href: '/services/physical-product',
+            description: t('nav.services.physical.desc'),
+            icon: Building2,
+          },
+          {
+            name: t('nav.services.digital'),
+            href: '/services/digital-product',
+            description: t('nav.services.digital.desc'),
+            icon: Rocket,
+          },
+          {
+            name: t('nav.services.marketing'),
+            href: '/services/marketing',
+            description: t('nav.services.marketing.desc'),
+            icon: Megaphone,
+          },
+          {
+            name: t('nav.services.medtech'),
+            href: '/services/medtech-leumit',
+            description: t('nav.services.medtech.desc'),
+            icon: HeartHandshake,
+          },
+          {
+            name: t('nav.services.investors'),
+            href: '/services/investors',
+            description: t('nav.services.investors.desc'),
+            icon: TrendingUp,
+          },
+          {
+            name: t('nav.services.investorPrep'),
+            href: '/services/investor-preparation',
+            description: t('nav.services.investorPrep.desc'),
+            icon: Handshake,
+          },
+        ],
+      },
+      { name: t('nav.about'), href: '/about' },
+      {
+        name: t('nav.content'),
+        href: '#',
+        children: [
+          {
+            name: t('nav.content.events'),
+            href: '/events',
+            description: t('nav.content.events.desc'),
+            icon: Calendar,
+          },
+          {
+            name: t('nav.content.videos'),
+            href: '/videos',
+            description: t('nav.content.videos.desc'),
+            icon: Video,
+          },
+          {
+            name: t('nav.content.blog'),
+            href: '/blog',
+            description: t('nav.content.blog.desc'),
+            icon: FileText,
+          },
+        ],
+      },
+      { name: t('nav.contact'), href: '/contact' },
+    ],
+    cta: {
+      name: t('nav.portal'),
+      href: '/apply',
+    },
+  };
+}
 
 // =============================================================================
 // NAVBAR COMPONENT
@@ -139,6 +157,9 @@ export function CorporateNavbar() {
   const pathname = usePathname();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
+  const { lang, dir, setLang, t } = useLanguage();
+  const navigation = useNavigation();
+  const DirArrow = dir === 'rtl' ? ArrowLeft : ArrowRight;
 
   // Handle scroll
   useEffect(() => {
@@ -208,64 +229,71 @@ export function CorporateNavbar() {
   return (
     <>
       {/* Top Bar - Contact Info */}
-      <div className="bg-[#050810] text-white/70 text-sm hidden lg:block border-b border-white/5">
+      <div className="bg-black text-white/70 text-sm hidden lg:block border-b border-white/5">
         <div className="container-corporate">
           <div className="flex items-center justify-between h-10">
             {/* Contact */}
             <div className="flex items-center gap-6">
-              <a
-                href={`tel:${navigation.topBar.phoneFull}`}
+              <TrackedLink
+                trackAction="click.phone"
+                trackMeta={{ location: 'navbar-desktop' }}
+                href={`tel:${topBar.phoneFull}`}
                 className="flex items-center gap-2 hover:text-gold-400 transition-colors"
-                aria-label={`התקשרו אלינו: ${navigation.topBar.phone}`}
+                aria-label={`${t('nav.callUs')}: ${topBar.phone}`}
               >
                 <Phone className="w-3.5 h-3.5" aria-hidden="true" />
-                <span dir="ltr">{navigation.topBar.phone}</span>
-              </a>
-              <a
-                href={navigation.topBar.whatsapp}
+                <span dir="ltr">{topBar.phone}</span>
+              </TrackedLink>
+              <TrackedLink
+                trackAction="click.whatsapp"
+                trackMeta={{ location: 'navbar-desktop' }}
+                href={topBar.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 hover:text-green-400 transition-colors"
-                aria-label="שלחו הודעת WhatsApp"
+                aria-label={t('nav.sendWhatsApp')}
               >
                 <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>WhatsApp</span>
-              </a>
-              <a
-                href={`mailto:${navigation.topBar.email}`}
+              </TrackedLink>
+              <TrackedLink
+                trackAction="click.email"
+                trackMeta={{ location: 'navbar-desktop' }}
+                href={`mailto:${topBar.email}`}
                 className="flex items-center gap-2 hover:text-gold-400 transition-colors"
-                aria-label={`שלחו אימייל: ${navigation.topBar.email}`}
+                aria-label={`${t('nav.sendEmail')}: ${topBar.email}`}
               >
                 <Mail className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>{navigation.topBar.email}</span>
-              </a>
+                <span>{topBar.email}</span>
+              </TrackedLink>
             </div>
 
             {/* Language Switcher */}
-            <div className="flex items-center gap-4" role="group" aria-label="בחירת שפה">
+            <div className="flex items-center gap-4" role="group" aria-label={t('nav.langLabel')}>
               <Globe className="w-3.5 h-3.5 text-white/30" aria-hidden="true" />
-              {navigation.topBar.languages.map((lang, idx) => (
-                <span key={lang.code} className="flex items-center gap-2">
-                  {idx > 0 && <span className="text-white/20" aria-hidden="true">|</span>}
-                  <Link
-                    href={lang.href}
-                    lang={lang.code}
-                    aria-label={`החלף שפה ל${lang.name}`}
-                    aria-current={
-                      pathname === lang.href || (lang.code === 'he' && !pathname.startsWith('/en'))
-                        ? 'true'
-                        : undefined
-                    }
-                    className={`hover:text-gold-400 transition-colors ${
-                      pathname === lang.href || (lang.code === 'he' && !pathname.startsWith('/en'))
-                        ? 'text-gold-400 font-medium'
-                        : ''
-                    }`}
-                  >
-                    {lang.name}
-                  </Link>
-                </span>
-              ))}
+              <button
+                onClick={() => setLang('he')}
+                lang="he"
+                aria-label={`${t('nav.switchLang')} עברית`}
+                aria-current={lang === 'he' ? 'true' : undefined}
+                className={`hover:text-gold-400 transition-colors ${
+                  lang === 'he' ? 'text-gold-400 font-medium' : ''
+                }`}
+              >
+                עברית
+              </button>
+              <span className="text-white/20" aria-hidden="true">|</span>
+              <button
+                onClick={() => setLang('en')}
+                lang="en"
+                aria-label={`${t('nav.switchLang')} English`}
+                aria-current={lang === 'en' ? 'true' : undefined}
+                className={`hover:text-gold-400 transition-colors ${
+                  lang === 'en' ? 'text-gold-400 font-medium' : ''
+                }`}
+              >
+                English
+              </button>
             </div>
           </div>
         </div>
@@ -276,24 +304,26 @@ export function CorporateNavbar() {
         className={`
           sticky top-0 z-50 transition-all duration-500
           ${isScrolled
-            ? 'bg-[#0a0e27]/95 backdrop-blur-xl shadow-lg shadow-black/20 border-b border-white/5'
-            : 'bg-[#0a0e27]/80 backdrop-blur-md'}
+            ? 'bg-black shadow-lg shadow-black/20 border-b border-white/5'
+            : 'bg-black'}
         `}
       >
-        <nav className="container-corporate" aria-label="ניווט ראשי">
+        <nav className="container-corporate" aria-label={t('nav.mainNav')}>
           <div className="flex items-center justify-between h-24">
             {/* Logo */}
-            <Link href="/" className="relative flex-shrink-0 group" aria-label="WeCcelerate — חזרה לדף הבית">
-              <div className="bg-[#0a0e27] rounded-xl p-3 transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] border border-white/[0.06] group-hover:border-gold-500/20">
-                <Image
-                  src="/images/logos/weccelerate-logo.jpeg"
-                  alt="WeCcelerate"
-                  width={280}
-                  height={70}
-                  priority
-                  className="h-14 md:h-16 w-auto object-contain rounded-md"
-                />
-              </div>
+            <Link href="/" className="relative flex-shrink-0 group" aria-label={t('nav.backToHome')}>
+              <Image
+                src="/images/logos/weccelerate-logo-wide.jpeg"
+                alt="WeCcelerate"
+                width={320}
+                height={96}
+                priority
+                className="h-24 w-auto object-contain transition-all duration-300 group-hover:brightness-110"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
+                }}
+              />
             </Link>
 
             {/* Desktop Navigation */}
@@ -391,7 +421,7 @@ export function CorporateNavbar() {
                 className="hidden lg:inline-flex items-center gap-2 border border-gold-500/50 text-gold-400 px-6 py-2.5 text-sm font-semibold hover:bg-gold-500/10 hover:border-gold-400 transition-all rounded-sm"
               >
                 {navigation.cta.name}
-                <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                <DirArrow className="w-4 h-4" aria-hidden="true" />
               </Link>
 
               {/* Portal Link */}
@@ -399,7 +429,7 @@ export function CorporateNavbar() {
                 href="/login"
                 className="hidden lg:inline-flex items-center gap-1 text-sm text-white/60 hover:text-white/80 transition-colors"
               >
-                כניסה לפורטל
+                {t('nav.portalLogin')}
                 <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
 
@@ -408,7 +438,7 @@ export function CorporateNavbar() {
                 ref={mobileToggleRef}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-2 text-white/70 hover:text-white transition-colors"
-                aria-label={isMobileMenuOpen ? 'סגור תפריט ניווט' : 'פתח תפריט ניווט'}
+                aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-menu"
               >
@@ -427,11 +457,12 @@ export function CorporateNavbar() {
           <div
             id="mobile-menu"
             ref={mobileMenuRef}
-            className="lg:hidden bg-[#0a0e27]/98 backdrop-blur-xl border-t border-white/5"
+            className="lg:hidden bg-black border-t border-white/5"
             role="dialog"
-            aria-label="תפריט ניווט"
+            aria-modal="true"
+            aria-label={t('nav.menuDialog')}
           >
-            <nav className="container-corporate py-4" aria-label="ניווט מובייל">
+            <nav className="container-corporate py-4" aria-label={t('nav.mobileNav')}>
               {navigation.main.map((item) => (
                 <div key={item.name} className="border-b border-white/5 last:border-b-0">
                   {item.children ? (
@@ -442,7 +473,7 @@ export function CorporateNavbar() {
                             activeDropdown === item.name ? null : item.name
                           )
                         }
-                        className="flex items-center justify-between w-full text-right"
+                        className="flex items-center justify-between w-full text-start"
                         aria-expanded={activeDropdown === item.name}
                         aria-haspopup="true"
                       >
@@ -457,7 +488,7 @@ export function CorporateNavbar() {
                       </button>
 
                       {activeDropdown === item.name && (
-                        <div className="mt-3 mr-4 space-y-2" role="menu" aria-label={item.name}>
+                        <div className="mt-3 ms-4 space-y-2" role="menu" aria-label={item.name}>
                           {item.children.map((child) => (
                             <Link
                               key={child.name}
@@ -491,36 +522,40 @@ export function CorporateNavbar() {
                   className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-gold-500 to-gold-600 text-[#0a0e27] py-3 font-semibold rounded-sm"
                 >
                   {navigation.cta.name}
-                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                  <DirArrow className="w-4 h-4" aria-hidden="true" />
                 </Link>
                 <Link
                   href="/login"
                   className="flex items-center justify-center gap-2 w-full border border-white/20 text-white/70 py-3 font-medium rounded-sm"
                 >
-                  כניסה לפורטל
+                  {t('nav.portalLogin')}
                 </Link>
               </div>
 
               {/* Mobile Contact */}
               <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-center gap-6 text-sm text-white/60">
-                <a
-                  href={`tel:${navigation.topBar.phoneFull}`}
+                <TrackedLink
+                  trackAction="click.phone"
+                  trackMeta={{ location: 'navbar-mobile' }}
+                  href={`tel:${topBar.phoneFull}`}
                   className="flex items-center gap-2 hover:text-white/80 transition-colors"
-                  aria-label={`התקשרו: ${navigation.topBar.phone}`}
+                  aria-label={`${t('nav.callUs')}: ${topBar.phone}`}
                 >
                   <Phone className="w-4 h-4" aria-hidden="true" />
-                  <span dir="ltr">{navigation.topBar.phone}</span>
-                </a>
-                <a
-                  href={navigation.topBar.whatsapp}
+                  <span dir="ltr">{topBar.phone}</span>
+                </TrackedLink>
+                <TrackedLink
+                  trackAction="click.whatsapp"
+                  trackMeta={{ location: 'navbar-mobile' }}
+                  href={topBar.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-green-500/70 hover:text-green-400 transition-colors"
-                  aria-label="שלחו הודעת WhatsApp"
+                  aria-label={t('nav.sendWhatsApp')}
                 >
                   <MessageCircle className="w-4 h-4" aria-hidden="true" />
                   <span>WhatsApp</span>
-                </a>
+                </TrackedLink>
               </div>
             </nav>
           </div>

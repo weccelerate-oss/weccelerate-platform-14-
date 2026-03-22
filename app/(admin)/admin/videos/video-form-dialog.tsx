@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -78,6 +79,7 @@ function getYouTubeThumbnail(url: string): string {
 // =============================================================================
 
 export function VideoFormDialog({ mode, video, children }: VideoFormDialogProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -151,6 +153,7 @@ export function VideoFormDialog({ mode, video, children }: VideoFormDialogProps)
 
         if (result.success) {
           setIsSuccess(true);
+          router.refresh();
           setTimeout(() => {
             setIsOpen(false);
             setIsSuccess(false);

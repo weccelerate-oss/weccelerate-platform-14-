@@ -1,18 +1,3 @@
-/**
- * Login Form Component
- * 
- * Secure login form with:
- * - Client-side validation
- * - Server action for authentication
- * - CSRF protection (handled by NextAuth)
- * - Rate limiting feedback
- * - Password visibility toggle
- * - Loading states
- * - Error handling
- * 
- * @module components/auth/login-form
- */
-
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -30,6 +15,7 @@ import {
   LogIn,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/lib/i18n';
 
 // =============================================================================
 // TYPES
@@ -47,33 +33,16 @@ interface FormErrors {
 }
 
 // =============================================================================
-// VALIDATION
-// =============================================================================
-
-function validateEmail(email: string): string | undefined {
-  if (!email) return 'נדרש אימייל';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return 'אימייל לא תקין';
-  }
-  return undefined;
-}
-
-function validatePassword(password: string): string | undefined {
-  if (!password) return 'נדרשת סיסמה';
-  if (password.length < 6) return 'סיסמה חייבת להכיל לפחות 6 תווים';
-  return undefined;
-}
-
-// =============================================================================
 // COMPONENT
 // =============================================================================
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t, dir } = useLanguage();
   const callbackUrl = searchParams.get('callbackUrl') || '/portal';
   const errorParam = searchParams.get('error');
-  
+
   const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -83,13 +52,30 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  const isRtl = dir === 'rtl';
+
+  // Validation
+  function validateEmail(email: string): string | undefined {
+    if (!email) return t('login.form.error.emailRequired');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return t('login.form.error.emailInvalid');
+    }
+    return undefined;
+  }
+
+  function validatePassword(password: string): string | undefined {
+    if (!password) return t('login.form.error.passwordRequired');
+    if (password.length < 6) return t('login.form.error.passwordShort');
+    return undefined;
+  }
+
   // Handle OAuth error from URL
   const getInitialError = (): string | undefined => {
     if (errorParam === 'OAuthAccountNotLinked') {
-      return 'אימייל זה כבר רשום עם שיטת התחברות אחרת';
+      return t('login.form.error.oauthLinked');
     }
     if (errorParam === 'CredentialsSignin') {
-      return 'אימייל או סיסמה שגויים';
+      return t('login.form.error.wrongCredentials');
     }
     return undefined;
   };
@@ -115,7 +101,7 @@ export function LoginForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Clear error on change
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -125,7 +111,7 @@ export function LoginForm() {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     startTransition(async () => {
@@ -136,20 +122,19 @@ export function LoginForm() {
           redirect: false,
           callbackUrl,
         });
-        
+
 
         if (result?.error) {
-          // Handle specific error messages from the server
-          let errorMessage = 'אימייל או סיסמה שגויים';
-          
-          if (result.error.includes('נסיונות התחברות רבים')) {
-            errorMessage = 'נסיונות התחברות רבים מדי. נסה שוב בעוד 15 דקות';
-          } else if (result.error.includes('החשבון אינו פעיל')) {
-            errorMessage = 'החשבון אינו פעיל. אנא פנה לתמיכה';
+          let errorMessage = t('login.form.error.wrongCredentials');
+
+          if (result.error.includes('נסיונות התחברות רבים') || result.error.includes('Too many')) {
+            errorMessage = t('login.form.error.tooManyAttempts');
+          } else if (result.error.includes('החשבון אינו פעיל') || result.error.includes('inactive')) {
+            errorMessage = t('login.form.error.accountInactive');
           } else if (result.error.includes('Google')) {
-            errorMessage = 'משתמש זה רשום באמצעות חשבון Google';
-          } else if (result.error.includes('שגיאה בשרת')) {
-            errorMessage = 'שגיאה בשרת. נסה שוב מאוחר יותר';
+            errorMessage = t('login.form.error.googleAccount');
+          } else if (result.error.includes('שגיאה בשרת') || result.error.includes('server')) {
+            errorMessage = t('login.form.error.serverError');
           }
 
           setErrors({ general: errorMessage });
@@ -158,27 +143,19 @@ export function LoginForm() {
 
         if (result?.ok) {
           setIsSuccess(true);
-          // Short delay for success animation
           await new Promise((resolve) => setTimeout(resolve, 500));
           router.push(callbackUrl);
           router.refresh();
         }
       } catch (error) {
         console.error('Login error:', error);
-        setErrors({ general: 'שגיאה בהתחברות. נסה שוב' });
+        setErrors({ general: t('login.form.error.loginError') });
       }
     });
   };
 
-  // Handle Google sign in
-  const handleGoogleSignIn = () => {
-    startTransition(async () => {
-      await signIn('google', { callbackUrl });
-    });
-  };
-
   return (
-    <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
+    <div className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl overflow-hidden">
       {/* Form */}
       <form onSubmit={handleSubmit} className="p-8 space-y-6">
         {/* General Error */}
@@ -189,8 +166,9 @@ export function LoginForm() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3"
+              role="alert"
             >
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" aria-hidden="true" />
               <span className="text-red-400 text-sm">
                 {errors.general || getInitialError()}
               </span>
@@ -205,10 +183,11 @@ export function LoginForm() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3"
+              role="status"
             >
-              <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" aria-hidden="true" />
               <span className="text-emerald-400 text-sm">
-                התחברת בהצלחה! מעביר אותך...
+                {t('login.form.redirecting')}
               </span>
             </motion.div>
           )}
@@ -216,11 +195,11 @@ export function LoginForm() {
 
         {/* Email Field */}
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-slate-300">
-            אימייל
+          <label htmlFor="email" className="block text-sm font-medium text-white/70">
+            {t('login.form.email')}
           </label>
           <div className="relative">
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
+            <div className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-white/30`}>
               <Mail className="w-5 h-5" />
             </div>
             <input
@@ -232,37 +211,39 @@ export function LoginForm() {
               value={formData.email}
               onChange={handleChange}
               disabled={isPending || isSuccess}
+              aria-invalid={errors.email ? 'true' : undefined}
+              aria-describedby={errors.email ? 'email-error' : undefined}
               className={cn(
-                'w-full pr-10 pl-4 py-3 rounded-xl',
-                'bg-slate-800/50 border text-white placeholder-slate-500',
-                'focus:outline-none focus:ring-2 focus:ring-cyan-500/50',
+                'w-full py-3 rounded-xl',
+                isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4',
+                'bg-white/[0.05] border text-white placeholder-white/30',
+                'focus:outline-none focus:ring-2 focus:ring-[#c8a951]/50',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
-                'text-right', // RTL alignment for Hebrew
-                errors.email ? 'border-red-500' : 'border-slate-700'
+                errors.email ? 'border-red-500' : 'border-white/[0.08]'
               )}
               placeholder="your@email.com"
             />
           </div>
           {errors.email && (
-            <p className="text-red-400 text-sm">{errors.email}</p>
+            <p id="email-error" className="text-red-400 text-sm" role="alert">{errors.email}</p>
           )}
         </div>
 
         {/* Password Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="block text-sm font-medium text-slate-300">
-              סיסמה
+            <label htmlFor="password" className="block text-sm font-medium text-white/70">
+              {t('login.form.password')}
             </label>
-            <a 
-              href="/forgot-password" 
-              className="text-sm text-cyan-400 hover:text-cyan-300"
+            <a
+              href="/forgot-password"
+              className="text-sm text-[#c8a951] hover:text-[#e8d48b] transition-colors"
             >
-              שכחת סיסמה?
+              {t('login.form.forgotPassword')}
             </a>
           </div>
           <div className="relative">
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
+            <div className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-white/30`}>
               <Lock className="w-5 h-5" />
             </div>
             <input
@@ -274,30 +255,33 @@ export function LoginForm() {
               value={formData.password}
               onChange={handleChange}
               disabled={isPending || isSuccess}
+              aria-invalid={errors.password ? 'true' : undefined}
+              aria-describedby={errors.password ? 'password-error' : undefined}
               className={cn(
-                'w-full pr-10 pl-12 py-3 rounded-xl',
-                'bg-slate-800/50 border text-white placeholder-slate-500',
-                'focus:outline-none focus:ring-2 focus:ring-cyan-500/50',
+                'w-full py-3 rounded-xl',
+                isRtl ? 'pr-10 pl-12' : 'pl-10 pr-12',
+                'bg-white/[0.05] border text-white placeholder-white/30',
+                'focus:outline-none focus:ring-2 focus:ring-[#c8a951]/50',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
-                errors.password ? 'border-red-500' : 'border-slate-700'
+                errors.password ? 'border-red-500' : 'border-white/[0.08]'
               )}
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-              tabIndex={-1}
+              className={`absolute ${isRtl ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors`}
+              aria-label={showPassword ? t('login.form.hidePassword') : t('login.form.showPassword')}
             >
               {showPassword ? (
-                <EyeOff className="w-5 h-5" />
+                <EyeOff className="w-5 h-5" aria-hidden="true" />
               ) : (
-                <Eye className="w-5 h-5" />
+                <Eye className="w-5 h-5" aria-hidden="true" />
               )}
             </button>
           </div>
           {errors.password && (
-            <p className="text-red-400 text-sm">{errors.password}</p>
+            <p id="password-error" className="text-red-400 text-sm" role="alert">{errors.password}</p>
           )}
         </div>
 
@@ -306,10 +290,10 @@ export function LoginForm() {
           <input
             type="checkbox"
             id="remember"
-            className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500/50"
+            className="w-4 h-4 rounded border-white/[0.1] bg-white/[0.05] text-[#c8a951] focus:ring-[#c8a951]/50"
           />
-          <label htmlFor="remember" className="text-sm text-slate-400">
-            זכור אותי
+          <label htmlFor="remember" className="text-sm text-white/50">
+            {t('login.form.rememberMe')}
           </label>
         </div>
 
@@ -317,43 +301,43 @@ export function LoginForm() {
         <motion.button
           type="submit"
           disabled={isPending || isSuccess}
-          whileHover={{ scale: isPending || isSuccess ? 1 : 1.01 }}
-          whileTap={{ scale: isPending || isSuccess ? 1 : 0.99 }}
+          whileHover={{ scale: isPending || isSuccess ? 1 : 1.02 }}
+          whileTap={{ scale: isPending || isSuccess ? 1 : 0.98 }}
           className={cn(
-            'w-full py-4 rounded-xl font-semibold text-white',
+            'w-full py-4 rounded-xl font-bold',
             'flex items-center justify-center gap-2',
             'transition-all duration-300',
             isSuccess
-              ? 'bg-emerald-600'
-              : 'bg-gradient-to-l from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/25',
+              ? 'bg-emerald-600 text-white'
+              : 'bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] shadow-lg shadow-[#c8a951]/25',
             'disabled:opacity-70 disabled:cursor-not-allowed'
           )}
         >
           {isPending ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>מתחבר...</span>
+              <span>{t('login.form.connecting')}</span>
             </>
           ) : isSuccess ? (
             <>
               <CheckCircle className="w-5 h-5" />
-              <span>התחברת בהצלחה!</span>
+              <span>{t('login.form.successMsg')}</span>
             </>
           ) : (
             <>
               <LogIn className="w-5 h-5" />
-              <span>התחבר</span>
+              <span>{t('login.form.submit')}</span>
             </>
           )}
         </motion.button>
       </form>
 
       {/* Security Notice */}
-      <div className="px-8 py-6 border-t border-slate-800">
-        <p className="text-xs text-slate-500 text-center">
-          ההתחברות מאובטחת באמצעות הצפנת SSL.{' '}
+      <div className="px-8 py-6 border-t border-white/[0.06]">
+        <p className="text-xs text-white/30 text-center">
+          {t('login.form.security1')}{' '}
           <br />
-          לעולם לא נשתף את המידע שלך עם צד שלישי.
+          {t('login.form.security2')}
         </p>
       </div>
     </div>

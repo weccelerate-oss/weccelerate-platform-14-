@@ -7,6 +7,8 @@
  * Design: Sharp borders, generous whitespace, strict grid system
  */
 
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Plus, Calendar, MapPin, Video, Users, ArrowLeft, Clock, Filter } from 'lucide-react';
@@ -155,12 +157,12 @@ export default async function EventsPage() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white border-b border-slate-200">
-        <div className="px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-8 py-4 sm:py-6 pt-14 lg:pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <Calendar className="w-6 h-6 text-slate-400" />
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                   ניהול אירועים
                 </h1>
               </div>
@@ -168,9 +170,9 @@ export default async function EventsPage() {
                 צור וערוך אירועים, מפגשים ווובינרים
               </p>
             </div>
-            
+
             <EventFormDialog mode="create">
-              <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
+              <button className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white text-sm sm:text-base font-medium hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center">
                 <Plus className="w-4 h-4" />
                 אירוע חדש
               </button>
@@ -179,9 +181,9 @@ export default async function EventsPage() {
         </div>
       </header>
 
-      <main className="p-8">
+      <main className="p-4 sm:p-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div className="bg-white border border-slate-200 p-5">
             <p className="text-sm text-slate-500 mb-1">סה"כ אירועים</p>
             <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
@@ -218,9 +220,9 @@ export default async function EventsPage() {
 
 function FormSkeleton() {
   return (
-    <div className="bg-white border border-slate-200 p-6 animate-pulse">
+    <div className="bg-white border border-slate-200 p-4 sm:p-6 animate-pulse">
       <div className="h-6 w-32 bg-slate-200 mb-6" />
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="h-10 bg-slate-100" />
         <div className="h-10 bg-slate-100" />
         <div className="h-10 bg-slate-100" />

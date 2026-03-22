@@ -259,8 +259,8 @@ export const SERVICES = [
       en: 'Regulatory Consulting',
     },
     description: {
-      he: 'ליווי בתהליכי רגולציה - FDA, CE, משרד הבריאות',
-      en: 'Guidance through FDA, CE marking, and Israeli Ministry of Health approvals',
+      he: 'ליווי בתהליכי רגולציה - CE, משרד הבריאות',
+      en: 'Guidance through CE marking and Israeli Ministry of Health approvals',
     },
     price: 'Custom',
     duration: 'Ongoing',
@@ -495,6 +495,9 @@ export function constructMetadata({
     verification: {
       google: process.env.GOOGLE_SITE_VERIFICATION,
       yandex: process.env.YANDEX_VERIFICATION,
+      other: {
+        ...(process.env.BING_VERIFICATION ? { 'msvalidate.01': process.env.BING_VERIFICATION } : {}),
+      },
     },
     
     applicationName: 'WeCcelerate',

@@ -5,7 +5,7 @@
  * Defines WeCcelerate's core service offerings with rich metadata.
  * 
  * Services covered:
- * - Medical Regulation Consulting (FDA, CE, ISO)
+ * - Medical Regulation Consulting (CE, ISO)
  * - MVP Development
  * - Funding Strategy
  * - Business Acceleration
@@ -74,8 +74,8 @@ export const SERVICES: Record<string, ServiceData> = {
     id: 'medical-regulation',
     name: 'ייעוץ רגולציה רפואית',
     nameEn: 'Medical Regulation Consulting',
-    description: 'ליווי מקצועי בתהליכי אישור FDA, סימון CE, והסמכת ISO 13485 למכשור רפואי וטכנולוגיות בריאות דיגיטלית. הצוות שלנו כולל מומחים עם ניסיון של עשרות שנים ברגולציה רפואית בינלאומית.',
-    descriptionEn: 'Professional guidance through FDA approval, CE marking, and ISO 13485 certification for medical devices and digital health technologies. Our team includes experts with decades of international medical regulatory experience.',
+    description: 'ליווי מקצועי בתהליכי סימון CE, והסמכת ISO 13485 למכשור רפואי וטכנולוגיות בריאות דיגיטלית. הצוות שלנו כולל מומחים עם ניסיון של עשרות שנים ברגולציה רפואית בינלאומית.',
+    descriptionEn: 'Professional guidance through CE marking, and ISO 13485 certification for medical devices and digital health technologies. Our team includes experts with decades of international medical regulatory experience.',
     category: 'Medical Regulatory Services',
     provider: PROVIDER_NAME,
     areaServed: ['Israel', 'United States', 'European Union', 'Canada'],
@@ -91,8 +91,8 @@ export const SERVICES: Record<string, ServiceData> = {
       name: 'Medical Regulation Services',
       itemListElement: [
         {
-          name: 'FDA 510(k) Submission Support',
-          description: 'Complete guidance through the FDA 510(k) premarket notification process',
+          name: 'Regulatory Submission Support',
+          description: 'Complete guidance through regulatory submission processes for medical devices',
         },
         {
           name: 'CE Marking (MDR/IVDR)',
@@ -266,8 +266,8 @@ export const SERVICES: Record<string, ServiceData> = {
     id: 'factory-sourcing',
     name: 'איתור מפעלים ויצרנים',
     nameEn: 'Factory Sourcing',
-    description: 'שירותי איתור מפעלים ויצרנים בסין ובעולם, ניהול משא ומתן, בקרת איכות, ופיקוח על ייצור. חיסכון של עד 40% בעלויות ייצור וקיצור זמני השקה משמעותי.',
-    descriptionEn: 'Factory and manufacturer sourcing services in China and worldwide, negotiation management, quality control, and production oversight. Up to 40% savings in manufacturing costs and significant time-to-market reduction.',
+    description: 'שירותי איתור מפעלים ויצרנים בעולם, ניהול משא ומתן, בקרת איכות, ופיקוח על ייצור. חיסכון של עד 40% בעלויות ייצור וקיצור זמני השקה משמעותי.',
+    descriptionEn: 'Factory and manufacturer sourcing services worldwide, negotiation management, quality control, and production oversight. Up to 40% savings in manufacturing costs and significant time-to-market reduction.',
     category: 'Manufacturing Consulting Services',
     provider: PROVIDER_NAME,
     areaServed: ['China', 'Taiwan', 'Vietnam', 'India', 'Mexico'],

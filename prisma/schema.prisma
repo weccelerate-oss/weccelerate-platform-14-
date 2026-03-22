@@ -69,6 +69,9 @@ enum VideoCategory {
   TUTORIAL
   TESTIMONIAL
   HIGHLIGHT
+  PODCAST
+  REELS
+  TV_INTERVIEW
 }
 
 enum FileType {
@@ -391,6 +394,7 @@ model Video {
   
   // Video source
   youtubeUrl    String?       // YouTube video URL or ID
+  youtubeVideoId String?      @unique // YouTube video ID for dedup (e.g. "npcROfJT5Hg")
   vimeoUrl      String?       // Vimeo URL
   videoUrl      String?       // Direct video URL
   embedUrl      String?       // Pre-formatted embed URL

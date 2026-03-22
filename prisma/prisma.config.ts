@@ -20,8 +20,8 @@ import { config } from 'dotenv';
 config({ path: path.join(process.cwd(), '.env') });
 config({ path: path.join(process.cwd(), '.env.local') });
 
-// Get database URL from environment
-const databaseUrl = process.env.DATABASE_URL;
+// Get database URL from environment — prefer DIRECT_URL for CLI operations (avoids PgBouncer)
+const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
 // Validate DATABASE_URL exists
 if (!databaseUrl) {
@@ -46,7 +46,7 @@ export default defineConfig({
   },
   
   // Migration settings
-  migrate: {
+  migrations: {
     // Seed command
     seed: 'npx tsx prisma/seed.ts',
   },

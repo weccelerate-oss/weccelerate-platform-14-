@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>WeCcelerate</ShortName>
+  <Description>Search WeCcelerate — Venture Builder &amp; Startup Accelerator Israel</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Language>he-IL</Language>
+  <Image width="16" height="16" type="image/x-icon">https://weccelerate.co.il/favicon.ico</Image>
+  <Url type="text/html" template="https://weccelerate.co.il/search?q={searchTerms}" />
+  <Url type="application/opensearchdescription+xml" rel="self" template="https://weccelerate.co.il/opensearch.xml" />
+</OpenSearchDescription>

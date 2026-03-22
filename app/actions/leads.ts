@@ -24,8 +24,8 @@ const ContactFormSchema = z.object({
   email: z.string()
     .email('כתובת אימייל לא תקינה'),
   phone: z.string()
-    .optional()
-    .refine((val) => !val || /^[\d\s\-+()]{7,20}$/.test(val), {
+    .min(1, 'טלפון הוא שדה חובה')
+    .refine((val) => /^[\d\s\-+()]{7,20}$/.test(val), {
       message: 'מספר טלפון לא תקין',
     }),
   company: z.string()
@@ -102,6 +102,28 @@ export async function submitContactForm(
 
   const validData = validationResult.data;
 
+  // Send to Zapier webhook (fire-and-forget, never block form submission)
+  try {
+    const now = new Date();
+    const zapierPayload = {
+      'תאריך': now.toLocaleDateString('he-IL') + ' ' + now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+      'שם מלא': validData.name,
+      'טלפון': validData.phone || '',
+      'אימייל': validData.email,
+      'מודעה': 'אתר החברה',
+      'מקור': 'אתר',
+      'הודעה': validData.message || '',
+      'חברה': validData.company || '',
+    };
+    fetch('https://hooks.zapier.com/hooks/catch/7280045/ucs3rvp/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(zapierPayload),
+    }).catch((err) => console.error('[Zapier] webhook failed:', err));
+  } catch (zapErr) {
+    console.error('[Zapier] error:', zapErr);
+  }
+
   // Create lead in Pipedrive
   const leadData: LeadData = {
     name: validData.name,
@@ -119,18 +141,29 @@ export async function submitContactForm(
     site: site || 'main',
   };
 
-  const result = await createLead(leadData);
+  let result: { success: boolean; dealId?: number; errorCode?: string; error?: string };
 
-  // Log submission to database
-  await logFormSubmission({
-    formType: 'contact',
-    email: validData.email,
-    success: result.success,
-    pipedriveId: result.dealId,
-    errorCode: result.errorCode,
-    site: site || 'main',
-    sourceUrl: sourceUrl || undefined,
-  });
+  try {
+    result = await createLead(leadData);
+  } catch (err) {
+    console.error('[Contact] createLead threw:', err);
+    result = { success: false, errorCode: 'CRM_EXCEPTION' };
+  }
+
+  // Log submission to database (never let logging break the response)
+  try {
+    await logFormSubmission({
+      formType: 'contact',
+      email: validData.email,
+      success: result.success,
+      pipedriveId: result.dealId,
+      errorCode: result.errorCode,
+      site: site || 'main',
+      sourceUrl: sourceUrl || undefined,
+    });
+  } catch (logErr) {
+    console.error('[Contact] logFormSubmission failed:', logErr);
+  }
 
   if (result.success) {
     return {
@@ -140,7 +173,34 @@ export async function submitContactForm(
     };
   }
 
-  // Friendly error message for user
+  // Even if Pipedrive failed, try to save the lead to DB directly
+  try {
+    await prisma.activityLog.create({
+      data: {
+        action: 'lead.contact_fallback',
+        description: `Contact form fallback: ${validData.email}`,
+        metadata: {
+          name: validData.name,
+          email: validData.email,
+          phone: validData.phone || null,
+          company: validData.company || null,
+          message: validData.message || null,
+          site: site || 'main',
+          sourceUrl: sourceUrl || null,
+          errorCode: result.errorCode,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+    // Lead was saved to DB — report success to user
+    return {
+      success: true,
+      message: 'תודה על פנייתך! ניצור איתך קשר בהקדם.',
+    };
+  } catch (dbErr) {
+    console.error('[Contact] DB fallback also failed:', dbErr);
+  }
+
   return {
     success: false,
     message: 'אירעה שגיאה בשליחת הטופס. נא לנסות שוב.',
@@ -195,6 +255,28 @@ export async function submitApplicationForm(
   }
 
   const validData = validationResult.data;
+
+  // Send to Zapier webhook (fire-and-forget)
+  try {
+    const now = new Date();
+    const zapierPayload = {
+      'תאריך': now.toLocaleDateString('he-IL') + ' ' + now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+      'שם מלא': validData.name,
+      'טלפון': validData.phone || '',
+      'אימייל': validData.email,
+      'מודעה': 'אתר החברה',
+      'מקור': 'אתר',
+      'הודעה': validData.message || '',
+      'חברה': validData.company || '',
+    };
+    fetch('https://hooks.zapier.com/hooks/catch/7280045/ucs3rvp/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(zapierPayload),
+    }).catch((err) => console.error('[Zapier] webhook failed:', err));
+  } catch (zapErr) {
+    console.error('[Zapier] error:', zapErr);
+  }
 
   // Build message with additional info
   const additionalInfo = [];

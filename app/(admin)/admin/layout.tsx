@@ -16,7 +16,7 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-slate-100" dir="rtl">
       <div className="flex">
         <AdminSidebar user={mockUser} />
-        <main className="flex-1 mr-64">
+        <main className="flex-1 mr-0 lg:mr-64">
           {children}
         </main>
       </div>

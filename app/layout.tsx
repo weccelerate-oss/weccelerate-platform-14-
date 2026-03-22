@@ -13,6 +13,8 @@ import { Inter, Heebo } from "next/font/google";
 
 import { GeoSchema } from "@/components/seo/GeoSchema";
 import { SkipToContent } from "@/components/ui/SkipToContent";
+import { LanguageProvider } from "@/lib/i18n";
+import { HtmlAttrs } from "@/components/providers/HtmlAttrs";
 import {
   constructMetadata,
   viewport as viewportConfig,
@@ -64,7 +66,7 @@ export const metadata: Metadata = {
   }),
 
   // Manifest
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
 
   // Icons
   icons: {
@@ -187,14 +189,26 @@ export default function RootLayout({
           title="WeCcelerate Search"
           href={`${SITE_CONFIG.url}/opensearch.xml`}
         />
+
+        {/* LLMs.txt — AI/LLM discovery */}
+        <link
+          rel="llms"
+          type="text/plain"
+          href={`${SITE_CONFIG.url}/llms.txt`}
+        />
       </head>
 
       <body className={`font-heebo antialiased bg-white text-slate-900`}>
-        {/* Skip to Content — first focusable element (WCAG 2.4.1) */}
-        <SkipToContent />
+        <LanguageProvider>
+          {/* Dynamically sets <html lang/dir> based on selected language */}
+          <HtmlAttrs />
 
-        {/* Page content — #main-content target lives in each page's <main> */}
-        {children}
+          {/* Skip to Content — first focusable element (WCAG 2.4.1) */}
+          <SkipToContent />
+
+          {/* Page content — #main-content target lives in each page's <main> */}
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

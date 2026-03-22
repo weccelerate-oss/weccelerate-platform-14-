@@ -870,6 +870,35 @@ textarea:focus-visible,
 }
 
 /* =============================================================================
+   PREMIUM BORDER — Animated conic gradient for MedTech card
+   ============================================================================= */
+
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.premium-border-wrapper {
+  background: conic-gradient(
+    from var(--border-angle),
+    #c8a951 0%,
+    #3b82f6 25%,
+    #c8a951 50%,
+    #3b82f6 75%,
+    #c8a951 100%
+  );
+  border-radius: 0.75rem;
+  animation: rotateBorder 4s linear infinite;
+}
+
+@keyframes rotateBorder {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+/* =============================================================================
    ACCESSIBILITY — WCAG 2.1 AA Compliance
    ============================================================================= */
 
@@ -991,4 +1020,9 @@ textarea:focus-visible,
 /* Reading Guide — overlay rendered by React; class acts as a flag */
 .a11y-reading-guide {
   cursor: crosshair;
+}
+
+/* Safe area padding for mobile bottom nav (notched devices) */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

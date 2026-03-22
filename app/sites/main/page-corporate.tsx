@@ -127,7 +127,7 @@ function HeroSection() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
-              href="/apply"
+              href="/contact?source=apply"
               className="inline-flex items-center justify-center gap-2 bg-yellow-500 text-slate-900 px-8 py-4 font-semibold hover:bg-yellow-400 transition-colors"
             >
               הגישו מועמדות
@@ -187,7 +187,7 @@ const services = [
   {
     icon: Target,
     title: 'ייעוץ רגולטורי',
-    description: 'ליווי בתהליכי רגולציה - FDA, CE, משרד הבריאות',
+    description: 'ליווי בתהליכי רגולציה - CE, משרד הבריאות',
     href: '/services/regulatory',
   },
   {
@@ -454,7 +454,7 @@ function CTASection() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
           <Link
-            href="/apply"
+            href="/contact?source=apply"
             className="inline-flex items-center gap-2 bg-yellow-500 text-slate-900 px-8 py-4 font-semibold hover:bg-yellow-400 transition-colors"
           >
             הגישו מועמדות

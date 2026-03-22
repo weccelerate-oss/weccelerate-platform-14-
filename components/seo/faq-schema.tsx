@@ -209,6 +209,54 @@ WeCcelerate has on-ground teams in Shenzhen and Shanghai with relationships with
     lang: 'en',
   },
   
+  // Business Consulting
+  {
+    id: 'business-consulting-what',
+    question: 'What business consulting services does WeCcelerate offer?',
+    answer: 'WeCcelerate provides comprehensive business consulting including: market research and competitive analysis, business plan development, financial modeling and projections, executive summary writing, marketing strategy, and fundraising preparation. Our consultants have helped over 100 startups build investor-ready business plans.',
+    category: 'consulting',
+    lang: 'en',
+  },
+  {
+    id: 'business-consulting-what-hebrew',
+    question: 'מה כולל הייעוץ העסקי של WeCcelerate?',
+    answer: 'WeCcelerate מציעה ייעוץ עסקי מקיף הכולל: מחקר שוק וניתוח תחרות, בניית תוכנית עסקית, מודל פיננסי ותחזיות, כתיבת תקציר מנהלים, אסטרטגיית שיווק, והכנה לגיוס הון. היועצים שלנו סייעו ליותר מ-100 סטארטאפים לבנות תוכניות עסקיות מוכנות למשקיעים.',
+    category: 'consulting',
+    lang: 'he',
+  },
+
+  // Digital Product Development
+  {
+    id: 'mvp-cost-israel',
+    question: 'How much does it cost to develop an MVP in Israel?',
+    answer: 'MVP development costs in Israel vary by complexity. A basic mobile app MVP typically costs $15,000-$50,000. A web platform with user dashboard: $40,000-$120,000. A complex SaaS with integrations: $80,000+. WeCcelerate offers a free MVP cost calculator on our website and provides CTO-as-a-Service to optimize your development budget.',
+    category: 'development',
+    lang: 'en',
+  },
+  {
+    id: 'mvp-cost-hebrew',
+    question: 'כמה עולה לפתח MVP בישראל?',
+    answer: 'עלות פיתוח MVP בישראל משתנה לפי מורכבות. אפליקציית מובייל בסיסית: 50,000-150,000 ₪. פלטפורמת WEB עם דשבורד: 120,000-400,000 ₪. מערכת SaaS מורכבת: 250,000 ₪ ומעלה. WeCcelerate מציעה מחשבון עלויות MVP חינמי באתר ושירות CTO-as-a-Service לאופטימיזציה של תקציב הפיתוח.',
+    category: 'development',
+    lang: 'he',
+  },
+
+  // Marketing
+  {
+    id: 'startup-marketing',
+    question: 'How should a startup approach marketing on a limited budget?',
+    answer: 'WeCcelerate recommends a phased approach: Phase 1 (Pre-launch): Build social media presence, create content, PR outreach. Phase 2 (Launch): Targeted Facebook/Google Ads with $2,000-5,000/month, influencer partnerships. Phase 3 (Growth): Scale proven channels, add retargeting, expand to LinkedIn for B2B. Key metrics to track: CAC, LTV, and conversion rates at each stage.',
+    category: 'marketing',
+    lang: 'en',
+  },
+  {
+    id: 'startup-marketing-hebrew',
+    question: 'איך סטארטאפ צריך לגשת לשיווק עם תקציב מוגבל?',
+    answer: 'WeCcelerate ממליצה על גישה מדורגת: שלב 1 (לפני השקה): בניית נוכחות ברשתות חברתיות, יצירת תוכן, יחסי ציבור. שלב 2 (השקה): קמפיינים ממוקדים בפייסבוק/גוגל עם 5,000-15,000 ₪ לחודש. שלב 3 (צמיחה): הגדלת ערוצים מוכחים, ריטרגטינג, הוספת LinkedIn ל-B2B. מדדים מרכזיים: עלות רכישת לקוח, ערך חיי לקוח, ושיעורי המרה.',
+    category: 'marketing',
+    lang: 'he',
+  },
+
   // Leumit Partnership
   {
     id: 'leumit-partnership',

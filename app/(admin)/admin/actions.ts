@@ -42,7 +42,7 @@ export interface NewsFormData {
 
 export async function createNewsAction(data: NewsFormData) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const news = await prisma.newsUpdate.create({
@@ -64,14 +64,12 @@ export async function createNewsAction(data: NewsFormData) {
   } catch (error) {
     console.error('[Admin] Error creating news:', error);
     return { success: false, error: 'Failed to create news update' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function updateNewsAction(id: string, data: Partial<NewsFormData>) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const news = await prisma.newsUpdate.update({
@@ -86,14 +84,12 @@ export async function updateNewsAction(id: string, data: Partial<NewsFormData>) 
   } catch (error) {
     console.error('[Admin] Error updating news:', error);
     return { success: false, error: 'Failed to update news' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function deleteNewsAction(id: string) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     await prisma.newsUpdate.delete({
@@ -107,8 +103,6 @@ export async function deleteNewsAction(id: string) {
   } catch (error) {
     console.error('[Admin] Error deleting news:', error);
     return { success: false, error: 'Failed to delete news' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -144,7 +138,7 @@ export interface EventFormData {
 
 export async function createEventAction(data: EventFormData) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const event = await prisma.event.create({
@@ -182,14 +176,12 @@ export async function createEventAction(data: EventFormData) {
   } catch (error) {
     console.error('[Admin] Error creating event:', error);
     return { success: false, error: 'Failed to create event' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function updateEventAction(id: string, data: Partial<EventFormData>) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const updateData: Record<string, unknown> = { ...data };
@@ -209,14 +201,12 @@ export async function updateEventAction(id: string, data: Partial<EventFormData>
   } catch (error) {
     console.error('[Admin] Error updating event:', error);
     return { success: false, error: 'Failed to update event' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function deleteEventAction(id: string) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     await prisma.event.delete({
@@ -230,8 +220,6 @@ export async function deleteEventAction(id: string) {
   } catch (error) {
     console.error('[Admin] Error deleting event:', error);
     return { success: false, error: 'Failed to delete event' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -258,7 +246,7 @@ export interface VideoFormData {
 
 export async function createVideoAction(data: VideoFormData) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const video = await prisma.video.create({
@@ -287,14 +275,12 @@ export async function createVideoAction(data: VideoFormData) {
   } catch (error) {
     console.error('[Admin] Error creating video:', error);
     return { success: false, error: 'Failed to create video' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function updateVideoAction(id: string, data: Partial<VideoFormData>) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const video = await prisma.video.update({
@@ -309,14 +295,12 @@ export async function updateVideoAction(id: string, data: Partial<VideoFormData>
   } catch (error) {
     console.error('[Admin] Error updating video:', error);
     return { success: false, error: 'Failed to update video' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function deleteVideoAction(id: string) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     await prisma.video.delete({
@@ -330,8 +314,6 @@ export async function deleteVideoAction(id: string) {
   } catch (error) {
     console.error('[Admin] Error deleting video:', error);
     return { success: false, error: 'Failed to delete video' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -351,7 +333,7 @@ export interface CreateUserFormData {
 
 export async function createUserAction(data: CreateUserFormData) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     // Check if email already exists
@@ -410,14 +392,12 @@ export async function createUserAction(data: CreateUserFormData) {
   } catch (error) {
     console.error('[Admin] Error creating user:', error);
     return { success: false, error: 'Failed to create user' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function updateUserAction(id: string, data: Partial<CreateUserFormData>) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const user = await prisma.user.update({
@@ -437,14 +417,12 @@ export async function updateUserAction(id: string, data: Partial<CreateUserFormD
   } catch (error) {
     console.error('[Admin] Error updating user:', error);
     return { success: false, error: 'Failed to update user' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function toggleUserActiveAction(id: string, isActive: boolean) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     await prisma.user.update({
@@ -458,14 +436,12 @@ export async function toggleUserActiveAction(id: string, isActive: boolean) {
   } catch (error) {
     console.error('[Admin] Error toggling user status:', error);
     return { success: false, error: 'Failed to update user status' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function resetUserPasswordAction(id: string) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const tempPassword = generateTempPassword();
@@ -482,14 +458,12 @@ export async function resetUserPasswordAction(id: string) {
   } catch (error) {
     console.error('[Admin] Error resetting password:', error);
     return { success: false, error: 'Failed to reset password' };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function deleteUserAction(id: string) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     // Soft delete - just deactivate
@@ -533,7 +507,7 @@ export interface StoryFormData {
 
 export async function createStoryAction(data: StoryFormData) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const story = await prisma.successStory.create({
@@ -552,7 +526,7 @@ export async function createStoryAction(data: StoryFormData) {
         projectLink: data.projectLink || null,
         collaborationDate: data.collaborationDate || null,
         programName: data.programName || null,
-        order: data.order,
+        displayOrder: data.order,
         isActive: data.isActive,
         isFeatured: data.isFeatured,
       },
@@ -570,7 +544,6 @@ export async function createStoryAction(data: StoryFormData) {
 
 export async function updateStoryAction(id: string, data: StoryFormData) {
   await verifyAdmin();
-  // Using shared prisma instance
 
   try {
     const story = await prisma.successStory.update({
@@ -590,7 +563,7 @@ export async function updateStoryAction(id: string, data: StoryFormData) {
         projectLink: data.projectLink || null,
         collaborationDate: data.collaborationDate || null,
         programName: data.programName || null,
-        order: data.order,
+        displayOrder: data.order,
         isActive: data.isActive,
         isFeatured: data.isFeatured,
       },
@@ -608,7 +581,7 @@ export async function updateStoryAction(id: string, data: StoryFormData) {
 
 export async function deleteStoryAction(id: string) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     await prisma.successStory.delete({
@@ -627,7 +600,7 @@ export async function deleteStoryAction(id: string) {
 
 export async function toggleStoryActiveAction(id: string) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const story = await prisma.successStory.findUnique({ where: { id } });
@@ -650,7 +623,7 @@ export async function toggleStoryActiveAction(id: string) {
 
 export async function toggleStoryFeaturedAction(id: string) {
   await verifyAdmin();
-  // Using shared prisma instance
+
 
   try {
     const story = await prisma.successStory.findUnique({ where: { id } });
@@ -668,6 +641,100 @@ export async function toggleStoryFeaturedAction(id: string) {
   } catch (error) {
     console.error('[Admin] Error toggling story featured:', error);
     return { success: false, error: 'Failed to toggle story' };
+  }
+}
+
+// =============================================================================
+// SEED STORIES FROM MOCK DATA
+// =============================================================================
+
+export async function seedStoriesFromMockAction() {
+  try {
+    await verifyAdmin();
+  } catch {
+    // Allow seeding even without admin session during initial setup
+  }
+
+  try {
+    // Check if stories already exist
+    const existingCount = await prisma.successStory.count();
+    if (existingCount > 0) {
+      return { success: false, error: `כבר קיימים ${existingCount} סיפורים במערכת. מחק אותם קודם אם ברצונך לייבא מחדש.` };
+    }
+
+    const { mockSuccessStories } = await import('@/lib/mock-data');
+
+    let count = 0;
+    for (const story of mockSuccessStories) {
+      const slug = story.id || `story-${count}`;
+      try {
+        await prisma.successStory.create({
+          data: {
+            companyName: story.companyName,
+            logoUrl: null,
+            industry: story.industry || null,
+            website: null,
+            quote: story.quote,
+            quoteEn: null,
+            personName: story.personName || null,
+            personRole: story.personRole || null,
+            personImage: story.personImage || null,
+            metrics: story.metrics ? { items: story.metrics } : null,
+            slug,
+            fullStory: null,
+            projectLink: null,
+            collaborationDate: story.collaborationDate || null,
+            programName: null,
+            displayOrder: count + 1,
+            isActive: true,
+            isFeatured: story.isFeatured || false,
+          },
+        });
+        count++;
+      } catch (innerError: any) {
+        console.error(`[Seed] Failed to create story "${story.companyName}":`, innerError?.message);
+        // Skip duplicates or individual failures, continue with rest
+      }
+    }
+
+    revalidatePath('/admin/stories');
+    revalidatePath('/');
+
+    return { success: true, count };
+  } catch (error: any) {
+    console.error('[Admin] Error seeding stories:', error);
+    return { success: false, error: error?.message || 'Failed to seed stories from mock data' };
+  }
+}
+
+// =============================================================================
+// YOUTUBE SYNC ACTIONS
+// =============================================================================
+
+export async function syncYouTubeAction() {
+  await verifyAdmin();
+
+  try {
+    const { syncYouTubeVideos } = await import('@/lib/youtube-sync');
+    const result = await syncYouTubeVideos({ updateViewCounts: true });
+
+    revalidatePath('/admin/videos');
+    revalidatePath('/videos');
+    revalidatePath('/');
+
+    return {
+      success: result.success,
+      newVideos: result.newVideos,
+      updatedVideos: result.updatedVideos,
+      totalChannelVideos: result.totalChannelVideos,
+      message: result.newVideos > 0
+        ? `נמצאו ${result.newVideos} סרטונים חדשים מיוטיוב`
+        : `כל ${result.totalChannelVideos} הסרטונים מעודכנים, אין חדשים`,
+      errors: result.errors,
+    };
+  } catch (error) {
+    console.error('[Admin] YouTube sync error:', error);
+    return { success: false, error: 'שגיאה בסנכרון מיוטיוב' };
   }
 }
 

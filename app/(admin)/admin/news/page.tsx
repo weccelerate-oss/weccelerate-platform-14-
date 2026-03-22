@@ -4,6 +4,8 @@
  * CRUD interface for managing news ticker updates.
  */
 
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { NewsTable } from './news-table';
@@ -31,19 +33,19 @@ export default async function NewsManagementPage() {
   const news = await getNewsUpdates();
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8 pt-14 lg:pt-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">ניהול עדכונים</h1>
-          <p className="text-slate-500 mt-1">נהל את עדכוני הטיקר באתר</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">ניהול עדכונים</h1>
+          <p className="text-sm text-slate-500 mt-1">נהל את עדכוני הטיקר באתר</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
         {/* News Form */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sticky top-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 sticky top-8">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
               הוספת עדכון חדש
             </h2>

@@ -4,11 +4,14 @@
  * CRUD interface for managing video content.
  */
 
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Plus } from 'lucide-react';
 import { VideosTable } from './videos-table';
 import { VideoFormDialog } from './video-form-dialog';
+import { YouTubeSyncButton } from './youtube-sync-button';
 
 export const metadata: Metadata = {
   title: 'ניהול סרטונים | Admin',
@@ -133,24 +136,27 @@ export default async function VideosPage() {
   const videos = await getVideos();
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 pt-14 lg:pt-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">ניהול סרטונים</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">ניהול סרטונים</h1>
           <p className="text-slate-500 mt-1">
             {videos.length} סרטונים במערכת
           </p>
         </div>
         
-        <Suspense fallback={<div className="h-10 w-32 bg-slate-200 rounded-lg animate-pulse" />}>
-          <VideoFormDialog mode="create">
-            <button className="flex items-center gap-2 px-4 py-2 bg-royal-600 text-white rounded-lg hover:bg-royal-700 transition-colors">
-              <Plus className="w-4 h-4" />
-              <span>סרטון חדש</span>
-            </button>
-          </VideoFormDialog>
-        </Suspense>
+        <div className="flex items-center gap-3">
+          <YouTubeSyncButton />
+          <Suspense fallback={<div className="h-10 w-32 bg-slate-200 rounded-lg animate-pulse" />}>
+            <VideoFormDialog mode="create">
+              <button className="flex items-center gap-2 px-4 py-2 bg-royal-600 text-white rounded-lg hover:bg-royal-700 transition-colors">
+                <Plus className="w-4 h-4" />
+                <span>סרטון חדש</span>
+              </button>
+            </VideoFormDialog>
+          </Suspense>
+        </div>
       </div>
 
       {/* Table */}

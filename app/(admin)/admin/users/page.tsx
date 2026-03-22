@@ -4,6 +4,8 @@
  * List and manage entrepreneurs and other users.
  */
 
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { UsersTable } from './users-table';
@@ -51,12 +53,12 @@ export default async function UsersManagementPage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8 pt-14 lg:pt-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">ניהול משתמשים</h1>
-          <p className="text-slate-500 mt-1">נהל יזמים, מנטורים ומשתמשים אחרים</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">ניהול משתמשים</h1>
+          <p className="text-sm text-slate-500 mt-1">נהל יזמים, מנטורים ומשתמשים אחרים</p>
         </div>
         <CreateUserDialog />
       </div>

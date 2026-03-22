@@ -1,0 +1,103 @@
+# WeCcelerate — 360° Wrap-Around Support from Idea to Successful Global Startup
+
+> WeCcelerate (וויסלרייט) is Israel's leading Venture Builder and Startup Accelerator, headquartered in Tel Aviv (HaRakevet 58) with offices in Jerusalem. We provide 360° wrap-around support — helping early-stage startups access enterprise-grade resources so they can operate like a mature-stage startup from day one. Our strategic partnership with Leumit Health Services provides an exclusive Medical Accelerator track.
+
+## Company Overview
+
+- **Legal Name**: WeCcelerate Ltd.
+- **Hebrew Name**: וויסלרייט
+- **Founded**: 2020
+- **Locations**: Tel Aviv (HaRakevet 58) & Jerusalem
+- **Website**: https://weccelerate.co.il
+- **Contact**: info@weccelerate.co.il | +972-55-564-7538
+- **Languages**: Hebrew, English
+
+## Services
+
+### 1. Business Consulting & Strategy
+Full business consulting for entrepreneurs: market research, competitive analysis, business plan development, financial modeling, executive summary, and marketing strategy. We help founders build investor-ready documents and go-to-market plans.
+- URL: https://weccelerate.co.il/services/business-consulting
+
+### 2. Physical Product Development
+End-to-end engineering process from industrial design through prototyping (3D printing, CNC) to mass manufacturing. We manage the entire product lifecycle including supplier sourcing, quality assurance, and certification.
+- URL: https://weccelerate.co.il/services/physical-product
+
+### 3. Digital Product Development
+Full-stack app and web development: UX/UI design, frontend and backend development, MVP builds, SaaS platforms, mobile apps (React Native, Flutter), and cloud infrastructure. CTO-as-a-Service for startups without a technical co-founder.
+- URL: https://weccelerate.co.il/services/digital-product
+
+### 4. Marketing, Advertising & PR
+Comprehensive marketing suite: digital advertising (Google Ads, Facebook/Instagram), social media management, public relations (Israeli and international media), content marketing, brand identity design, and growth hacking for startups.
+- URL: https://weccelerate.co.il/services/marketing
+
+### 5. MedTech Accelerator Track (with Leumit Health Services)
+Exclusive healthcare innovation track in partnership with Leumit Health Services (700,000+ members). Includes: expert physician opinions, regulatory guidance (CE marking, Israeli Ministry of Health), access to anonymized medical data, clinical pilot opportunities in Leumit clinics, and Helsinki Committee support.
+- URL: https://weccelerate.co.il/services/medtech-leumit
+
+### 6. For Investors
+Investment-ready startups, smart matching, and direct access to portfolio companies. We connect investors with vetted startups across all tech sectors.
+- URL: https://weccelerate.co.il/services/investors
+
+### 7. Investor Preparation
+Comprehensive preparation for fundraising: pitch deck creation, pitch practice, investor simulations, valuation strategy, term sheet guidance, and direct connections to our network of 200+ investors.
+- URL: https://weccelerate.co.il/services/investor-preparation
+
+## Strategic Partnership
+
+WeCcelerate has an exclusive partnership with **Leumit Health Services** (לאומית שירותי בריאות), one of Israel's four public health funds. This partnership provides:
+- Access to anonymized medical data from hundreds of thousands of patients
+- Clinical pilot programs within Leumit's clinic network
+- Medical expert consultations
+- Regulatory pathway guidance
+- Enhanced credibility with healthcare investors
+
+## Key Facts
+
+- Portfolio companies have raised over $150M collectively
+- Network of 200+ specialized investors (VCs, angels, strategic partners)
+- Recognized by Israel Innovation Authority
+- Member of Start-Up Nation Central and IATI
+- Active in Tel Aviv and Jerusalem startup ecosystems
+- Working hours: Sunday-Thursday, 09:00-18:00 (Israel Time)
+
+## Tools
+
+- **MVP Cost Calculator**: Free tool to estimate development costs — https://weccelerate.co.il/tools/mvp-calculator
+
+## Content & Media
+
+- **Videos**: Podcast episodes, entrepreneur testimonials, TV interviews, and quick tips — https://weccelerate.co.il/videos
+- **Events**: Networking meetups, Demo Days, webinars, and workshops — https://weccelerate.co.il/events
+- **Blog**: Articles about entrepreneurship, fundraising, and tech — https://weccelerate.co.il/blog
+
+## How to Apply
+
+Entrepreneurs at any stage can apply through the contact form at https://weccelerate.co.il/contact. A representative will respond within 48 hours to schedule a free introductory meeting. WeCcelerate supports founders from raw idea stage through growth-stage companies.
+
+## Social Media
+
+- YouTube: https://www.youtube.com/@WeCcelerate.Ltd1
+- LinkedIn: https://www.linkedin.com/company/weccelerate
+- Facebook: https://www.facebook.com/weccelerate
+- Instagram: https://www.instagram.com/weccelerate
+- TikTok: https://www.tiktok.com/@weccelerate
+
+## Frequently Asked Questions
+
+**Q: What is WeCcelerate?**
+A: WeCcelerate is Israel's leading Venture Builder providing 360° wrap-around support for startups. We help early-stage startups access enterprise-grade resources — business consulting, product development, marketing, investor matching, and an exclusive MedTech track with Leumit Health Services.
+
+**Q: How do I start a startup with WeCcelerate?**
+A: Apply through our website, attend a free consultation, and we'll match you with the right track — business consulting, product development, investor preparation, or MedTech accelerator.
+
+**Q: How much does MVP development cost?**
+A: Costs vary by complexity. Basic mobile app MVP: 50,000-150,000 ILS. Web platform: 120,000-400,000 ILS. Complex SaaS: 250,000+ ILS. Use our free calculator at /tools/mvp-calculator.
+
+**Q: What advantage does the Leumit partnership provide?**
+A: Access to anonymized medical data, clinical pilots in Leumit clinics, physician consultations, regulatory guidance, and enhanced investor credibility.
+
+**Q: Is the program suitable for early-stage entrepreneurs?**
+A: Yes, WeCcelerate helps early-stage startups get the wrap-around support of a mature-stage startup — from ideation through development, fundraising, and global market launch.
+
+**Q: How does WeCcelerate help with fundraising?**
+A: We offer complete investor preparation: professional pitch deck creation, pitch practice sessions, investor simulations, valuation strategy, and direct connections to 200+ specialized investors including VCs, angel investors, and strategic partners.

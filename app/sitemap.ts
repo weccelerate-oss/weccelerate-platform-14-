@@ -26,22 +26,25 @@ const STATIC_PAGES = [
   { path: '/ip-patents', priority: 0.8, changeFreq: 'monthly' as const },
   { path: '/investors', priority: 0.8, changeFreq: 'monthly' as const },
   { path: '/team', priority: 0.7, changeFreq: 'monthly' as const },
-  { path: '/services', priority: 0.9, changeFreq: 'monthly' as const },
-  { path: '/program', priority: 0.9, changeFreq: 'monthly' as const },
-  { path: '/portfolio', priority: 0.8, changeFreq: 'weekly' as const },
+  { path: '/contact', priority: 0.7, changeFreq: 'monthly' as const },
   { path: '/events', priority: 0.8, changeFreq: 'weekly' as const },
   { path: '/videos', priority: 0.8, changeFreq: 'weekly' as const },
   { path: '/blog', priority: 0.7, changeFreq: 'weekly' as const },
-  { path: '/contact', priority: 0.7, changeFreq: 'monthly' as const },
-  { path: '/apply', priority: 0.9, changeFreq: 'monthly' as const },
-  { path: '/faq', priority: 0.7, changeFreq: 'monthly' as const },
   { path: '/privacy', priority: 0.3, changeFreq: 'yearly' as const },
   { path: '/terms', priority: 0.3, changeFreq: 'yearly' as const },
-  { path: '/services/incubation', priority: 0.8, changeFreq: 'monthly' as const },
-  { path: '/services/mvp-development', priority: 0.8, changeFreq: 'monthly' as const },
-  { path: '/services/regulatory', priority: 0.8, changeFreq: 'monthly' as const },
-  { path: '/services/funding', priority: 0.8, changeFreq: 'monthly' as const },
-  { path: '/services/data-access', priority: 0.8, changeFreq: 'monthly' as const },
+
+  // Services hub + individual service pages
+  { path: '/services', priority: 0.9, changeFreq: 'monthly' as const },
+  { path: '/services/business-consulting', priority: 0.85, changeFreq: 'monthly' as const },
+  { path: '/services/physical-product', priority: 0.85, changeFreq: 'monthly' as const },
+  { path: '/services/digital-product', priority: 0.85, changeFreq: 'monthly' as const },
+  { path: '/services/marketing', priority: 0.85, changeFreq: 'monthly' as const },
+  { path: '/services/medtech-leumit', priority: 0.85, changeFreq: 'monthly' as const },
+  { path: '/services/investors', priority: 0.8, changeFreq: 'monthly' as const },
+  { path: '/services/investor-preparation', priority: 0.8, changeFreq: 'monthly' as const },
+
+  // Tools & resources
+  { path: '/tools/mvp-calculator', priority: 0.7, changeFreq: 'monthly' as const },
 ];
 
 const SUBDOMAIN_PAGES = {

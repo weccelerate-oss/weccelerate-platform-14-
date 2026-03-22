@@ -151,7 +151,6 @@ const WECCELERATE_BASE: OrganizationData = {
     'Product Development',
     'Factory Sourcing',
     'Medical Device Regulation',
-    'FDA Approval Process',
     'CE Marking',
     'HealthTech Innovation',
   ],
@@ -222,7 +221,7 @@ export function OrganizationSchema({
     
     // Add medical-specific description
     organizationSchema.description = 
-      'WeCcelerate, בשותפות עם לאומית שירותי בריאות, מתמחה בהאצת סטארטאפים בתחום הבריאות הדיגיטלית והמכשור הרפואי. אנו מספקים ליווי מקצועי בתהליכי רגולציה (FDA, CE), פיתוח מוצר, וגיוס הון.';
+      'WeCcelerate, בשותפות עם לאומית שירותי בריאות, מתמחה בהאצת סטארטאפים בתחום הבריאות הדיגיטלית והמכשור הרפואי. אנו מספקים ליווי מקצועי בתהליכי רגולציה (CE, משרד הבריאות), פיתוח מוצר, וגיוס הון.';
   }
 
   // Add medical authority indicators
@@ -232,7 +231,7 @@ export function OrganizationSchema({
     // Expand knowsAbout for medical expertise
     organizationSchema.knowsAbout = [
       ...(WECCELERATE_BASE.knowsAbout || []),
-      'FDA 510(k) Submission',
+      'CE Marking Submission',
       'Medical Device Classification',
       'Clinical Trials Design',
       'ISO 13485 Certification',
@@ -254,7 +253,7 @@ export function OrganizationSchema({
       {
         '@type': 'EducationalOccupationalCredential',
         credentialCategory: 'Professional Certification', 
-        name: 'FDA Registered Establishment Consultant',
+        name: 'Certified Medical Regulatory Consultant',
       },
     ];
   }

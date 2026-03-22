@@ -1,0 +1,285 @@
+# WeCcelerate — Full Content for AI Engines
+# This is the extended version of llms.txt with complete service details
+
+> WeCcelerate (וויסלרייט) is Israel's leading Venture Builder providing 360° wrap-around support from idea to successful global startup. Headquartered in Tel Aviv (HaRakevet 58) with offices in Jerusalem, we help early-stage startups access enterprise-grade resources so they can operate like a mature-stage startup from day one. Our strategic partnership with Leumit Health Services (one of Israel's four public health funds, 700,000+ members) provides an exclusive Medical Accelerator track.
+
+---
+
+## Service 1: Business Consulting & Strategy
+**URL**: https://weccelerate.co.il/services/business-consulting
+**Hebrew**: ייעוץ עסקי ואסטרטגי
+
+Full-service business consulting providing 360° support for founders. Includes:
+
+### Market Research & Consumer Surveys
+The first and most significant milestone. Gathering information on markets, competitors and the business environment, including in-depth consumer surveys, to establish marketing ability and differentiation for investors.
+
+### Marketing Plan
+A roadmap for achieving goals. Defining customer touchpoints, competitors and the strategy for achieving objectives within a defined timeframe.
+
+### Financial Plan
+Forecasting the economic future. Calculating required investments in R&D, marketing and operations to understand breakeven and ROI.
+
+### Investor Pitch Deck
+Building a professional investor presentation that tells your story and convinces investors. Including design, financial model and pitch practice.
+
+### Executive Summary (One Pager)
+The most important document for investors. Summarizing the problem, solution, market and advantages into a readable document that leads to an investor pitch.
+
+### Investor Preparation & Investment Process Support
+Comprehensive preparation for investor meetings, support throughout the investment process, pitch practice and connecting with relevant investors.
+
+### Business Plan
+A detailed work plan for proper and efficient planning. Investors and funds examine it to make an investment decision. Includes: capital requirements, pricing, team, market entry and milestones.
+
+---
+
+## Service 2: Physical Product Development
+**URL**: https://weccelerate.co.il/services/physical-product
+**Hebrew**: פיתוח מוצר פיזי
+
+Recognized as an R&D company by the Israel Innovation Authority. Engineering and design process with two development methods:
+
+### Traditional Method — Development from Scratch
+Full development process including target audience analysis, concept development, engineering design, prototyping and mass production.
+
+### Shortcut Method — Global Factory Sourcing
+Locating factories and suppliers worldwide for manufacturing and development based on pre-defined requirements. Significantly reducing time and costs.
+
+### Engineering & Design
+Utilizing engineers and industrial designers to create blueprints and 3D renderings.
+
+### Prototyping
+A crucial stage for real-world testing. Creating the model closest to the final product for feasibility assessment and improvements.
+
+### Mass Production
+Planning production lines, product files, manufacturing instructions and preparations for Mass Production.
+
+---
+
+## Service 3: Digital Product Development
+**URL**: https://weccelerate.co.il/services/digital-product
+**Hebrew**: פיתוח מוצר דיגיטלי
+
+End-to-end technology development for apps, web systems, and SaaS platforms:
+
+### Design & UX/UI
+Creating logos, brand books, and full user experience design. Visuals that speak to investors.
+
+### Technical Specification
+Precise documentation for developers to prevent mistakes and define budget and timeline.
+
+### Development
+Recruiting team (Front, Back, Full Stack), coding under project manager supervision and thorough QA testing.
+
+### Go-to-Market
+App Store/Google Play submission, user pilots, and continued feature development.
+
+---
+
+## Service 4: Marketing, Advertising & PR
+**URL**: https://weccelerate.co.il/services/marketing
+**Hebrew**: שיווק, פרסום ויח"צ
+
+Full marketing suite for ventures — from strategy to execution:
+
+### Digital Advertising
+Managing sponsored campaigns on social networks (Facebook, Instagram, LinkedIn, TikTok), Google Ads and additional platforms.
+
+### Public Relations (PR)
+Building PR strategy, writing press releases, creating media relationships, and managing the venture's reputation.
+
+### Social Media Marketing
+Ongoing management of venture's social media pages — content creation, graphic design, community building and engagement.
+
+### Marketing Strategy
+Building a comprehensive marketing plan including target audience mapping, marketing messages, distribution channels and success metrics.
+
+---
+
+## Service 5: MedTech Accelerator Track (Leumit Partnership)
+**URL**: https://weccelerate.co.il/services/medtech-leumit
+**Hebrew**: מסלול MedTech (לאומית)
+**Premium Track**: Yes
+
+The Leumit WeCcelerate accelerator helps early-stage startups access enterprise-grade resources. We made Leumit's health fund assets accessible at affordable pricing so startups can build their venture correctly from day one.
+
+### End-to-End Support
+Supporting entrepreneurs from the idea stage to a working product, with emphasis on early-stage help — expert opinions, regulation and market reviews.
+
+### Expert Physician Opinions
+Expert medical opinions to examine the venture's clinical relevance, and professional advice for early stages.
+
+### Full Regulatory Guidance
+Help throughout the entire regulatory process — assisting entrepreneurs to navigate the regulatory world simply and correctly, including CE marking and Ministry of Health requirements.
+
+---
+
+## Service 6: For Investors
+**URL**: https://weccelerate.co.il/services/investors
+**Hebrew**: למשקיעים
+
+Investment-ready startups, smart matching, and direct access to portfolio companies. We connect investors with vetted startups across all tech sectors — MedTech, AI, SaaS, IoT, FinTech, and more.
+
+---
+
+## Service 7: Investor Preparation
+**URL**: https://weccelerate.co.il/services/investor-preparation
+**Hebrew**: מעטפת הכנה למשקיעים
+
+Comprehensive preparation for fundraising: pitch deck creation, pitch practice, investor simulations, valuation strategy, term sheet guidance, and direct connections to our network of 200+ investors (VCs, angels, strategic partners).
+
+---
+
+## About WeCcelerate
+
+### Company Information
+- **Legal Name**: WeCcelerate Ltd.
+- **Hebrew**: וויסלרייט
+- **Founded**: 2020
+- **Type**: Venture Builder & Startup Accelerator
+- **Locations**: Tel Aviv (HaRakevet 58, 6777801) & Jerusalem
+- **Working Hours**: Sunday-Thursday, 09:00-18:00 (Israel Time)
+
+### Contact
+- **Email**: info@weccelerate.co.il
+- **Phone**: +972-55-564-7538
+- **Website**: https://weccelerate.co.il
+- **Contact Form**: https://weccelerate.co.il/contact
+
+### Leumit Health Services Partnership
+WeCcelerate has an exclusive strategic partnership with Leumit Health Services (לאומית שירותי בריאות), one of Israel's four public health funds serving 700,000+ members. Benefits include:
+- Anonymized medical data access for R&D
+- Clinical pilot programs in Leumit clinics
+- Expert physician consultations
+- Helsinki Committee guidance
+- Regulatory pathway support (CE, Ministry of Health)
+- Enhanced credibility with healthcare investors
+
+### Recognition & Memberships
+- Recognized as R&D company by Israel Innovation Authority
+- Member of Start-Up Nation Central
+- Member of IATI (Israel Advanced Technology Industries)
+- Top Israeli Business Accelerator
+
+### Track Record
+- Portfolio companies raised over $150M collectively
+- Network of 200+ specialized investors
+- Active across all tech sectors: AI, MedTech, SaaS, IoT, FinTech, FoodTech, RetailTech, Cybersecurity
+
+### Industries Served
+WeCcelerate works across all technology sectors including:
+- MedTech / HealthTech / Digital Health
+- Artificial Intelligence (AI)
+- Mobile Applications
+- SaaS (Software as a Service)
+- IoT (Internet of Things)
+- FinTech
+- EdTech
+- FoodTech
+- RetailTech
+- Cybersecurity
+- Physical Consumer Products
+- Industrial Products
+
+### Team
+The WeCcelerate team includes experienced professionals in:
+- Business strategy and consulting
+- Product development (physical and digital)
+- Marketing and PR
+- Financial planning and investor relations
+- Regulatory affairs (medical devices)
+- Technology development (CTO-as-a-Service)
+
+---
+
+## Tools & Resources
+
+### MVP Cost Calculator
+Free online tool to estimate development costs for your MVP.
+URL: https://weccelerate.co.il/tools/mvp-calculator
+
+### Video Content
+Podcast episodes with ecosystem leaders, entrepreneur testimonials, TV interviews, and quick tips.
+URL: https://weccelerate.co.il/videos
+
+### Events
+Networking meetups, Demo Days, webinars, and entrepreneurship workshops in Tel Aviv and Jerusalem.
+URL: https://weccelerate.co.il/events
+
+### Blog & News
+Articles about entrepreneurship, fundraising strategies, tech development, and WeCcelerate updates.
+URL: https://weccelerate.co.il/blog
+
+---
+
+## Comprehensive FAQ
+
+**Q: What is WeCcelerate?**
+A: WeCcelerate (וויסלרייט) is Israel's leading Venture Builder providing 360° wrap-around support for startups — from idea to successful global venture. We help early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor preparation and matching, and an exclusive MedTech track in partnership with Leumit Health Services.
+
+**Q: How do I start a startup with WeCcelerate?**
+A: Fill out the contact form at weccelerate.co.il/contact. A representative will respond within 48 hours to schedule a free introductory meeting. We support founders from the idea stage through growth companies.
+
+**Q: How much does it cost to develop an MVP?**
+A: Costs vary by complexity. Basic mobile app MVP: 50,000-150,000 ILS ($15K-$40K). Web platform: 120,000-400,000 ILS ($30K-$100K). Complex SaaS: 250,000+ ILS ($65K+). Use our free calculator at /tools/mvp-calculator.
+
+**Q: How long does MVP development take?**
+A: Typical MVP development takes 6-12 weeks depending on complexity. We use Agile and Lean Startup methodologies to deliver a working product quickly and iterate based on market feedback.
+
+**Q: What does business consulting include?**
+A: Market research, competitive analysis, marketing plan, financial plan, executive summary, investor pitch deck, and full business plan — all tailored to investor-grade standards.
+
+**Q: How does WeCcelerate help with marketing?**
+A: We provide a full marketing suite: strategy, Google & social media campaigns, PR with Israeli and international media, brand building, and marketing materials design.
+
+**Q: What advantage does the Leumit partnership provide?**
+A: Access to anonymized medical data from hundreds of thousands of patients, clinical pilot opportunities, physician consultations, regulatory guidance (CE, Ministry of Health), and enhanced investor credibility.
+
+**Q: Is the program suitable for early-stage entrepreneurs?**
+A: Yes, WeCcelerate supports entrepreneurs from the earliest stage — from ideation through specification, development, fundraising, and market launch.
+
+**Q: What is the difference between an accelerator and an incubator?**
+A: An incubator focuses on the earliest stages and provides time and space to develop the idea. An accelerator like WeCcelerate is designed for startups with a defined concept and accelerates growth through intensive mentoring, resources, and investor connections.
+
+**Q: What industries does WeCcelerate work with?**
+A: All tech sectors: AI, mobile apps, SaaS, IoT, FinTech, EdTech, FoodTech, RetailTech, Cybersecurity, MedTech, physical products, and more.
+
+**Q: How does WeCcelerate help with fundraising?**
+A: We prepare professional pitch decks, provide pitch practice, connect founders with our network of 200+ specialized investors (VCs, angels, strategic partners), and support the entire fundraising process from preparation to deal closing.
+
+**Q: Do I need to be a doctor to apply for the MedTech track?**
+A: No, you don't need to be a doctor. WeCcelerate looks for teams with a combination of technological and clinical expertise. If you don't have a physician on your team, WeCcelerate can connect you with medical advisors from Leumit's network.
+
+---
+
+## Social Media
+- YouTube: https://www.youtube.com/@WeCcelerate.Ltd1
+- LinkedIn: https://www.linkedin.com/company/weccelerate
+- Facebook: https://www.facebook.com/weccelerate
+- Instagram: https://www.instagram.com/weccelerate
+- TikTok: https://www.tiktok.com/@weccelerate
+
+---
+
+## Site Structure
+- Homepage: https://weccelerate.co.il
+- About: https://weccelerate.co.il/about
+- Services: https://weccelerate.co.il/services
+- Business Consulting: https://weccelerate.co.il/services/business-consulting
+- Physical Product: https://weccelerate.co.il/services/physical-product
+- Digital Product: https://weccelerate.co.il/services/digital-product
+- Marketing: https://weccelerate.co.il/services/marketing
+- MedTech (Leumit): https://weccelerate.co.il/services/medtech-leumit
+- For Investors: https://weccelerate.co.il/services/investors
+- Investor Preparation: https://weccelerate.co.il/services/investor-preparation
+- Team: https://weccelerate.co.il/team
+- Blog: https://weccelerate.co.il/blog
+- Events: https://weccelerate.co.il/events
+- Videos: https://weccelerate.co.il/videos
+- Contact: https://weccelerate.co.il/contact
+- Tech Development: https://weccelerate.co.il/tech-development
+- Investors Hub: https://weccelerate.co.il/investors
+- IP & Patents: https://weccelerate.co.il/ip-patents
+- MedTech Track: https://weccelerate.co.il/medtech
+- MVP Calculator: https://weccelerate.co.il/tools/mvp-calculator

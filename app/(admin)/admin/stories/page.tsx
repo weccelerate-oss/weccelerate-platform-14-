@@ -4,10 +4,13 @@
  * Admin interface for managing success stories and testimonials.
  */
 
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { Plus, Star, Building2, Quote } from 'lucide-react';
 import { StoriesTable } from './stories-table';
 import { StoryFormDialog } from './story-form-dialog';
+import { SeedStoriesButton } from './seed-stories-button';
 
 export const metadata: Metadata = {
   title: 'סיפורי הצלחה | Admin',
@@ -48,28 +51,28 @@ async function getStories() {
     const stories = await prisma.successStory.findMany({
       orderBy: { displayOrder: 'asc' },
     });
-    return stories;
+    return { stories, fromDb: true, dbEmpty: stories.length === 0 };
   } catch (error) {
     console.warn('[Admin Stories] Database error, using mock data:', error);
-    return MOCK_STORIES;
+    return { stories: MOCK_STORIES, fromDb: false, dbEmpty: true };
   }
 }
 
 export default async function StoriesPage() {
-  const stories = await getStories();
+  const { stories, dbEmpty } = await getStories();
 
   const stats = {
     total: stories.length,
-    featured: stories.filter(s => s.isFeatured).length,
-    active: stories.filter(s => s.isActive).length,
+    featured: stories.filter((s: any) => s.isFeatured).length,
+    active: stories.filter((s: any) => s.isActive).length,
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 pt-14 lg:pt-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">סיפורי הצלחה</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">סיפורי הצלחה</h1>
           <p className="text-slate-500 mt-1">
             {stats.total} סיפורים • {stats.featured} מומלצים • {stats.active} פעילים
           </p>
@@ -84,7 +87,7 @@ export default async function StoriesPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -121,6 +124,11 @@ export default async function StoriesPage() {
           </div>
         </div>
       </div>
+
+      {/* Import prompt when DB is empty */}
+      {dbEmpty ? (
+        <SeedStoriesButton />
+      ) : null}
 
       {/* Stories Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">

@@ -15,27 +15,78 @@ import { SITE_CONFIG } from '@/lib/seo';
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = SITE_CONFIG.url;
   
+  const publicDisallow = ['/api/', '/admin/', '/portal/'];
+
   return {
     rules: [
+      // Default — all crawlers
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/portal/', '/_next/', '/private/'],
+        disallow: [...publicDisallow, '/_next/', '/private/'],
       },
+      // Google (search + AI Overviews)
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/portal/'],
+        disallow: publicDisallow,
       },
+      {
+        userAgent: 'Google-Extended',
+        allow: '/',
+        disallow: publicDisallow,
+      },
+      // Bing (search + Copilot)
+      {
+        userAgent: 'Bingbot',
+        allow: '/',
+        disallow: publicDisallow,
+      },
+      // OpenAI (ChatGPT, GPT search)
       {
         userAgent: 'GPTBot',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/portal/'],
+        disallow: publicDisallow,
       },
+      {
+        userAgent: 'ChatGPT-User',
+        allow: '/',
+        disallow: publicDisallow,
+      },
+      // Anthropic (Claude)
       {
         userAgent: 'anthropic-ai',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/portal/'],
+        disallow: publicDisallow,
+      },
+      {
+        userAgent: 'ClaudeBot',
+        allow: '/',
+        disallow: publicDisallow,
+      },
+      // Perplexity AI
+      {
+        userAgent: 'PerplexityBot',
+        allow: '/',
+        disallow: publicDisallow,
+      },
+      // Meta AI
+      {
+        userAgent: 'FacebookBot',
+        allow: '/',
+        disallow: publicDisallow,
+      },
+      // Apple (Siri, Spotlight)
+      {
+        userAgent: 'Applebot',
+        allow: '/',
+        disallow: publicDisallow,
+      },
+      // Yandex
+      {
+        userAgent: 'YandexBot',
+        allow: '/',
+        disallow: publicDisallow,
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

@@ -17,9 +17,9 @@ export function HeroBackground() {
     return (
       <div className="absolute inset-0 bg-[#050810]">
         <img
-          src="/corporate-hero.jpeg"
+          src="/hero-bg-poster.jpeg"
           alt=""
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       </div>
     );
@@ -43,7 +43,7 @@ export function HeroBackground() {
         loop
         muted
         playsInline
-        src="/hero-bg.mp4"
+        src="/hero-bg3.mp4"
         poster="/hero-bg-poster.jpeg"
         style={{
           display: 'block',

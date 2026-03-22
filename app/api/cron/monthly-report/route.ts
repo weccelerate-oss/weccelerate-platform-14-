@@ -1,0 +1,135 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+const ACTION_LABELS: Record<string, string> = {
+  'click.phone': 'שיחות טלפון',
+  'click.whatsapp': 'הודעות WhatsApp',
+  'click.email': 'אימיילים',
+  'click.maps': 'ניווט Google Maps',
+  'click.waze': 'ניווט Waze',
+  'form.contact_submit': 'שליחת טופס',
+  'lead.contact_fallback': 'טופס (גיבוי)',
+};
+
+const TRACKED_ACTIONS = Object.keys(ACTION_LABELS);
+
+export async function GET(request: NextRequest) {
+  // Verify cron secret (Vercel sets this automatically)
+  const authHeader = request.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { prisma } = await import('@/lib/db');
+
+    // Calculate previous month range
+    const now = new Date();
+    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    const monthName = prevMonthStart.toLocaleDateString('he-IL', {
+      month: 'long',
+      year: 'numeric',
+    });
+
+    // Get all logs from previous month
+    const logs = await prisma.activityLog.findMany({
+      where: {
+        action: { in: TRACKED_ACTIONS },
+        createdAt: {
+          gte: prevMonthStart,
+          lte: prevMonthEnd,
+        },
+      },
+      select: { action: true },
+    });
+
+    // Aggregate by action
+    const byAction: Record<string, number> = {};
+    for (const a of TRACKED_ACTIONS) {
+      byAction[a] = 0;
+    }
+    for (const log of logs) {
+      byAction[log.action] = (byAction[log.action] || 0) + 1;
+    }
+
+    const totalContacts = logs.length;
+
+    // Build HTML email
+    const rows = TRACKED_ACTIONS
+      .map((action) => {
+        const count = byAction[action] || 0;
+        return `<tr>
+          <td style="padding: 10px 16px; border-bottom: 1px solid #e2e8f0; text-align: right;">${ACTION_LABELS[action]}</td>
+          <td style="padding: 10px 16px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: bold;">${count}</td>
+        </tr>`;
+      })
+      .join('');
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="he">
+      <head><meta charset="UTF-8"></head>
+      <body style="font-family: Arial, sans-serif; background: #f8fafc; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <div style="background: linear-gradient(135deg, #0a0e27, #1e293b); padding: 30px; text-align: center;">
+            <h1 style="color: #c8a951; margin: 0; font-size: 24px;">WeCcelerate</h1>
+            <p style="color: #94a3b8; margin: 8px 0 0;">סיכום חודשי — פניות מהאתר</p>
+          </div>
+          <div style="padding: 30px;">
+            <h2 style="color: #1e293b; margin: 0 0 20px;">סיכום ${monthName}</h2>
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 24px;">
+              <p style="color: #166534; font-size: 36px; font-weight: bold; margin: 0;">${totalContacts}</p>
+              <p style="color: #15803d; margin: 4px 0 0;">סה״כ פניות</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f1f5f9;">
+                  <th style="padding: 10px 16px; text-align: right; font-size: 14px; color: #64748b;">ערוץ</th>
+                  <th style="padding: 10px 16px; text-align: center; font-size: 14px; color: #64748b;">כמות</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+            <p style="color: #94a3b8; font-size: 12px; margin-top: 24px; text-align: center;">
+              דוח זה נוצר אוטומטית ממערכת WeCcelerate
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Send email via Resend
+    if (process.env.RESEND_API_KEY) {
+      const { Resend } = await import('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+        to: 'weccelerate@gmail.com',
+        subject: `סיכום חודשי — פניות מהאתר — ${monthName}`,
+        html: emailHtml,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Monthly report sent for ${monthName}`,
+        totalContacts,
+      });
+    }
+
+    return NextResponse.json({
+      success: false,
+      message: 'RESEND_API_KEY not configured',
+    });
+  } catch (error) {
+    console.error('[Monthly Report]', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to generate report' },
+      { status: 500 }
+    );
+  }
+}

@@ -21,6 +21,7 @@ import {
   Menu,
   X,
 } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { UserRole } from '@prisma/client';
 
@@ -67,11 +68,14 @@ export function PortalNavigation({ user }: PortalNavigationProps) {
           {/* Logo */}
           <div className="flex items-center gap-4">
             <a href="/portal" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                <span className="text-lg font-bold text-white">W</span>
-              </div>
+              <Image
+                src="/images/logos/weccelerate-logo.jpeg"
+                alt="WeCcelerate"
+                width={140}
+                height={35}
+                className="h-8 w-auto object-contain"
+              />
               <div className="hidden sm:block">
-                <div className="text-white font-semibold">WeCcelerate</div>
                 <div className="text-xs text-slate-400">פורטל יזמים</div>
               </div>
             </a>

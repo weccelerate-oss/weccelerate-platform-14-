@@ -198,10 +198,10 @@ export function UsersTable({ users }: UsersTableProps) {
                 isPending && actionId === user.id && 'opacity-50'
               )}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-start sm:items-center gap-3 sm:gap-4">
                 {/* Avatar */}
                 <div className={cn(
-                  'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold',
+                  'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0',
                   user.isActive
                     ? 'bg-gradient-to-br from-royal-500 to-cyan-500'
                     : 'bg-slate-400'
@@ -211,9 +211,9 @@ export function UsersTable({ users }: UsersTableProps) {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className={cn(
-                      'font-medium',
+                      'font-medium text-sm sm:text-base',
                       user.isActive ? 'text-slate-900' : 'text-slate-400'
                     )}>
                       {user.name}
@@ -230,44 +230,50 @@ export function UsersTable({ users }: UsersTableProps) {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <Mail className="w-3 h-3" />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-xs sm:text-sm text-slate-500">
+                    <span className="flex items-center gap-1 truncate">
+                      <Mail className="w-3 h-3 flex-shrink-0" />
                       {user.email}
                     </span>
                     {user.company && (
                       <span className="flex items-center gap-1">
-                        <Building2 className="w-3 h-3" />
+                        <Building2 className="w-3 h-3 flex-shrink-0" />
                         {user.company}
                       </span>
                     )}
                     {user.phone && (
-                      <span className="flex items-center gap-1">
+                      <span className="hidden sm:flex items-center gap-1">
                         <Phone className="w-3 h-3" />
                         {user.phone}
                       </span>
                     )}
                   </div>
+
+                  {/* Mobile-only meta row */}
+                  <div className="flex items-center gap-3 mt-2 sm:hidden text-xs text-slate-400">
+                    <span>{user._count.projects} פרויקטים</span>
+                    <span>הצטרף: {new Date(user.createdAt).toLocaleDateString('he-IL')}</span>
+                  </div>
                 </div>
 
-                {/* Projects count */}
-                <div className="text-center px-4">
+                {/* Desktop-only: Projects count */}
+                <div className="hidden sm:block text-center px-4">
                   <p className="text-lg font-semibold text-slate-900">
                     {user._count.projects}
                   </p>
                   <p className="text-xs text-slate-500">פרויקטים</p>
                 </div>
 
-                {/* Join date */}
-                <div className="text-center px-4">
+                {/* Desktop-only: Join date */}
+                <div className="hidden lg:block text-center px-4">
                   <p className="text-sm text-slate-900">
                     {new Date(user.createdAt).toLocaleDateString('he-IL')}
                   </p>
                   <p className="text-xs text-slate-500">הצטרף</p>
                 </div>
 
-                {/* Last login */}
-                <div className="text-center px-4">
+                {/* Desktop-only: Last login */}
+                <div className="hidden lg:block text-center px-4">
                   <p className="text-sm text-slate-900">
                     {user.lastLoginAt
                       ? new Date(user.lastLoginAt).toLocaleDateString('he-IL')
@@ -278,7 +284,7 @@ export function UsersTable({ users }: UsersTableProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <button
                     onClick={() => setOpenMenu(openMenu === user.id ? null : user.id)}
                     className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
@@ -298,15 +304,9 @@ export function UsersTable({ users }: UsersTableProps) {
                           className="w-full px-4 py-2 text-sm text-right hover:bg-slate-50 flex items-center gap-2"
                         >
                           {user.isActive ? (
-                            <>
-                              <UserX className="w-4 h-4 text-slate-500" />
-                              <span>השבת משתמש</span>
-                            </>
+                            <><UserX className="w-4 h-4 text-slate-500" /><span>השבת משתמש</span></>
                           ) : (
-                            <>
-                              <UserCheck className="w-4 h-4 text-emerald-500" />
-                              <span>הפעל משתמש</span>
-                            </>
+                            <><UserCheck className="w-4 h-4 text-emerald-500" /><span>הפעל משתמש</span></>
                           )}
                         </button>
                         <button

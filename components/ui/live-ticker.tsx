@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react';
 import { Flame, AlertTriangle, Bell } from 'lucide-react';
 import { NewsUpdate, UrgencyLevel, LiveTickerProps } from '@/types/content';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/lib/i18n';
 
 // =============================================================================
 // URGENCY STYLING
@@ -45,6 +46,7 @@ export function LiveTicker({
   speed = 6,
   pauseOnHover = true,
 }: LiveTickerProps) {
+  const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -108,7 +110,7 @@ export function LiveTicker({
       onMouseEnter={() => pauseOnHover && setIsPaused(true)}
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
       role="region"
-      aria-label="עדכונים חמים"
+      aria-label={t('ticker.label')}
     >
       {/* Left fixed badge */}
       <div className="absolute right-0 top-0 bottom-0 z-20 flex items-center pe-4 ps-8 bg-gradient-to-l from-transparent via-[#0a0e27] to-[#0a0e27]">
@@ -118,7 +120,7 @@ export function LiveTicker({
             <span className="relative inline-flex rounded-full h-2 w-2 bg-gold-500" />
           </span>
           <span className="text-gold-400 text-xs font-bold tracking-wide whitespace-nowrap">
-            חדשות בזק
+            {t('ticker.breaking')}
           </span>
         </div>
       </div>

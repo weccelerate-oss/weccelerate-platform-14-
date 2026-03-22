@@ -125,8 +125,8 @@ export function WhatsAppButton({
 
       {/* Floating Button & Panel */}
       <div className={cn(
-        'fixed bottom-6 z-50',
-        position === 'left' ? 'left-6' : 'right-6'
+        'fixed z-50 bottom-[88px] lg:bottom-6',
+        position === 'left' ? 'left-4 lg:left-6' : 'right-4 lg:right-6'
       )}>
         <AnimatePresence>
           {isOpen && (
@@ -134,7 +134,7 @@ export function WhatsAppButton({
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              className="absolute bottom-16 left-0 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden"
+              className="absolute bottom-16 left-0 w-[calc(100vw-2rem)] sm:w-80 max-w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden"
             >
               {/* Header */}
               <div className="bg-gradient-to-l from-green-500 to-green-600 p-4 text-white">

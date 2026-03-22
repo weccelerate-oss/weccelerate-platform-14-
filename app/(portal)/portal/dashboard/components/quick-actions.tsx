@@ -1,8 +1,8 @@
 /**
  * Quick Actions Component
- * 
- * Card with quick action buttons for common portal tasks.
- * Contextual actions based on project status.
+ *
+ * Prominent action cards with contextual filtering based on project stage.
+ * Clean, interactive design with visual hierarchy.
  */
 
 'use client';
@@ -14,12 +14,12 @@ import {
   MessageSquare,
   FileText,
   Video,
-  ExternalLink,
-  Sparkles,
+  BookOpen,
   Users,
   TrendingUp,
-  BookOpen,
-  ArrowRight,
+  ArrowLeft,
+  Sparkles,
+  ChevronLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Project, ProjectStatus } from '@prisma/client';
@@ -38,56 +38,55 @@ interface ActionItem {
   description?: string;
   icon: React.ReactNode;
   href?: string;
-  onClick?: () => void;
   color: string;
-  bgColor: string;
+  iconBg: string;
   priority?: number;
-  stages?: ProjectStatus[]; // Only show for these stages
+  stages?: ProjectStatus[];
 }
 
 // =============================================================================
-// ACTION DEFINITIONS
+// ACTIONS
 // =============================================================================
 
 const ALL_ACTIONS: ActionItem[] = [
   {
     id: 'upload',
     label: 'העלאת מסמך',
-    description: 'הוסף מסמך חדש לפרויקט',
-    icon: <Upload className="w-5 h-5" />,
+    description: 'הוסף מסמך חדש',
+    icon: <Upload className="w-4 h-4" />,
     href: '/portal/documents/upload',
     color: 'text-blue-600',
-    bgColor: 'bg-blue-50 hover:bg-blue-100',
+    iconBg: 'bg-blue-50',
     priority: 1,
   },
   {
     id: 'schedule',
     label: 'תיאום פגישה',
-    description: 'קבע פגישה עם המנטור שלך',
-    icon: <Calendar className="w-5 h-5" />,
+    description: 'קבע פגישה עם המנטור',
+    icon: <Calendar className="w-4 h-4" />,
     href: '/portal/calendar/schedule',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 hover:bg-purple-100',
+    color: 'text-violet-600',
+    iconBg: 'bg-violet-50',
     priority: 2,
   },
   {
     id: 'message',
     label: 'שליחת הודעה',
     description: 'צור קשר עם הצוות',
-    icon: <MessageSquare className="w-5 h-5" />,
+    icon: <MessageSquare className="w-4 h-4" />,
     href: '/portal/messages/new',
     color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50 hover:bg-emerald-100',
+    iconBg: 'bg-emerald-50',
     priority: 3,
   },
   {
     id: 'business-plan',
-    label: 'תבנית תוכנית עסקית',
+    label: 'תוכנית עסקית',
     description: 'התחל לבנות את התוכנית',
-    icon: <FileText className="w-5 h-5" />,
+    icon: <FileText className="w-4 h-4" />,
     href: '/portal/templates/business-plan',
     color: 'text-amber-600',
-    bgColor: 'bg-amber-50 hover:bg-amber-100',
+    iconBg: 'bg-amber-50',
     priority: 4,
     stages: ['CHARACTERIZATION', 'MARKET_RESEARCH', 'BUSINESS_MODEL'],
   },
@@ -95,10 +94,10 @@ const ALL_ACTIONS: ActionItem[] = [
     id: 'pitch-deck',
     label: 'מצגת משקיעים',
     description: 'הכן את הפיץ׳ שלך',
-    icon: <Video className="w-5 h-5" />,
+    icon: <Video className="w-4 h-4" />,
     href: '/portal/templates/pitch-deck',
     color: 'text-pink-600',
-    bgColor: 'bg-pink-50 hover:bg-pink-100',
+    iconBg: 'bg-pink-50',
     priority: 5,
     stages: ['FUNDING_PREP', 'ACTIVE_FUNDING'],
   },
@@ -106,31 +105,31 @@ const ALL_ACTIONS: ActionItem[] = [
     id: 'learning',
     label: 'מרכז הלמידה',
     description: 'קורסים וחומרי לימוד',
-    icon: <BookOpen className="w-5 h-5" />,
+    icon: <BookOpen className="w-4 h-4" />,
     href: '/portal/learning',
     color: 'text-royal-600',
-    bgColor: 'bg-royal-50 hover:bg-royal-100',
+    iconBg: 'bg-royal-50',
     priority: 6,
   },
   {
     id: 'investors',
     label: 'רשימת משקיעים',
     description: 'גש לרשימת המשקיעים',
-    icon: <Users className="w-5 h-5" />,
+    icon: <Users className="w-4 h-4" />,
     href: '/portal/investors',
     color: 'text-teal-600',
-    bgColor: 'bg-teal-50 hover:bg-teal-100',
+    iconBg: 'bg-teal-50',
     priority: 7,
     stages: ['FUNDING_PREP', 'ACTIVE_FUNDING', 'POST_FUNDING'],
   },
   {
     id: 'progress',
     label: 'דיווח התקדמות',
-    description: 'עדכן את הסטטוס שלך',
-    icon: <TrendingUp className="w-5 h-5" />,
+    description: 'עדכן את הסטטוס',
+    icon: <TrendingUp className="w-4 h-4" />,
     href: '/portal/progress/update',
     color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50 hover:bg-indigo-100',
+    iconBg: 'bg-indigo-50',
     priority: 8,
   },
 ];
@@ -140,7 +139,6 @@ const ALL_ACTIONS: ActionItem[] = [
 // =============================================================================
 
 export function QuickActions({ project }: QuickActionsProps) {
-  // Filter actions based on project status
   const relevantActions = ALL_ACTIONS
     .filter((action) => {
       if (!action.stages) return true;
@@ -150,33 +148,32 @@ export function QuickActions({ project }: QuickActionsProps) {
     .slice(0, 4);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-slate-100">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-slate-900">פעולות מהירות</h2>
-          <Sparkles className="w-5 h-5 text-amber-500" />
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-[15px] font-semibold text-slate-900">פעולות מהירות</h2>
+        </div>
+        <div className="p-1.5 bg-amber-50 rounded-lg">
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
         </div>
       </div>
 
-      {/* Actions grid */}
-      <div className="p-4 space-y-2">
+      {/* Actions */}
+      <div className="p-3 space-y-1">
         {relevantActions.map((action, index) => (
           <motion.a
             key={action.id}
             href={action.href}
-            initial={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className={cn(
-              'flex items-center gap-3 p-3 rounded-xl transition-all',
-              action.bgColor,
-              'group'
-            )}
+            transition={{ delay: 0.15 + index * 0.04 }}
+            className="flex items-center gap-3 p-3 sm:p-2.5 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all group cursor-pointer"
           >
             {/* Icon */}
             <div className={cn(
-              'p-2 rounded-lg bg-white shadow-sm',
+              'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105',
+              action.iconBg,
               action.color
             )}>
               {action.icon}
@@ -184,30 +181,26 @@ export function QuickActions({ project }: QuickActionsProps) {
 
             {/* Text */}
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-slate-900 text-sm">
-                {action.label}
-              </p>
+              <p className="font-medium text-slate-900 text-sm">{action.label}</p>
               {action.description && (
-                <p className="text-xs text-slate-500 line-clamp-1">
-                  {action.description}
-                </p>
+                <p className="text-[11px] text-slate-400 truncate">{action.description}</p>
               )}
             </div>
 
             {/* Arrow */}
-            <ArrowRight className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
+            <ChevronLeft className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all flex-shrink-0" />
           </motion.a>
         ))}
       </div>
 
       {/* View all */}
-      <div className="px-4 pb-4">
+      <div className="px-5 pb-4">
         <a
           href="/portal/actions"
-          className="flex items-center justify-center gap-2 w-full py-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+          className="flex items-center justify-center gap-1.5 w-full py-2 text-xs text-slate-500 hover:text-slate-700 font-medium transition-colors rounded-lg hover:bg-slate-50"
         >
           <span>כל הפעולות</span>
-          <ExternalLink className="w-3 h-3" />
+          <ArrowLeft className="w-3 h-3" />
         </a>
       </div>
     </div>

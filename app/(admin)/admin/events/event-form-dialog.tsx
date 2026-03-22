@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -84,6 +85,7 @@ function formatDateForInput(date: Date): string {
 // =============================================================================
 
 export function EventFormDialog({ mode, event, children }: EventFormDialogProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -139,6 +141,7 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
 
         if (result.success) {
           setIsSuccess(true);
+          router.refresh();
           setTimeout(() => {
             setIsOpen(false);
             setIsSuccess(false);
@@ -194,8 +197,9 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
                 </button>
               </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
+              {/* Form — wraps both fields and footer so the submit button triggers validation */}
+              <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-6">
                   {/* Error */}
                   {error && (
@@ -481,9 +485,9 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
                     </div>
                   </div>
                 </div>
-              </form>
+              </div>
 
-              {/* Footer */}
+              {/* Footer — inside <form> so submit triggers HTML validation */}
               <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50">
                 <button
                   type="button"
@@ -494,7 +498,7 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
                   ביטול
                 </button>
                 <button
-                  onClick={handleSubmit}
+                  type="submit"
                   disabled={isPending || isSuccess}
                   className={cn(
                     'flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors',
@@ -518,6 +522,7 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
                   )}
                 </button>
               </div>
+              </form>
             </motion.div>
           </>
         )}

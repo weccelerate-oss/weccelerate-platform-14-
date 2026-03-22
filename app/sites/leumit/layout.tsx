@@ -79,7 +79,7 @@ export default function LeumitLayout({ children }: LeumitLayoutProps) {
               </Link>
             </nav>
             <Link
-              href="/apply"
+              href="/contact?source=apply"
               className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg transition-colors text-sm"
             >
               הגשת מועמדות
@@ -110,7 +110,7 @@ export default function LeumitLayout({ children }: LeumitLayoutProps) {
               <div className="flex items-center gap-4 text-sm">
                 <span className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
-                  FDA Consulting
+                  Regulatory Consulting
                 </span>
                 <span className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
@@ -128,7 +128,7 @@ export default function LeumitLayout({ children }: LeumitLayoutProps) {
               <h3 className="text-white font-semibold mb-4">שירותים</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/services/medical-regulation" className="hover:text-teal-400 transition-colors">ייעוץ רגולציה רפואית</Link></li>
-                <li><Link href="/services/fda-consulting" className="hover:text-teal-400 transition-colors">הכנה ל-FDA 510(k)</Link></li>
+                <li><Link href="/services/regulatory-consulting" className="hover:text-teal-400 transition-colors">ייעוץ רגולטורי</Link></li>
                 <li><Link href="/services/ce-marking" className="hover:text-teal-400 transition-colors">תקן CE והתאמה ל-MDR</Link></li>
                 <li><Link href="/services/clinical-trials" className="hover:text-teal-400 transition-colors">ניסויים קליניים</Link></li>
                 <li><Link href="/services/digital-health" className="hover:text-teal-400 transition-colors">בריאות דיגיטלית</Link></li>

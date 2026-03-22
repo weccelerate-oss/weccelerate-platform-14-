@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Video,
@@ -108,6 +108,11 @@ function getYouTubeThumbnail(url: string | null | undefined): string {
 export function VideosTable({ videos: initialVideos }: VideosTableProps) {
   const [videos, setVideos] = useState(initialVideos);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync local state when server data changes (after router.refresh)
+  useEffect(() => {
+    setVideos(initialVideos);
+  }, [initialVideos]);
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -389,12 +394,12 @@ export function VideosTable({ videos: initialVideos }: VideosTableProps) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className={cn(
-                  'flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors',
+                  'flex items-start sm:items-center gap-3 sm:gap-4 p-4 hover:bg-slate-50 transition-colors',
                   !video.isActive && 'opacity-60'
                 )}
               >
                 {/* Thumbnail */}
-                <div className="relative w-32 aspect-video bg-slate-200 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="relative w-20 sm:w-32 aspect-video bg-slate-200 rounded-lg overflow-hidden flex-shrink-0">
                   <img
                     src={video.thumbnail || getYouTubeThumbnail(video.youtubeUrl)}
                     alt={video.title}

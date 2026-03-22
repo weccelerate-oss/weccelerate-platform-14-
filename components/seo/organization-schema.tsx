@@ -94,7 +94,7 @@ const WECCELERATE_DATA: OrganizationData = {
   url: 'https://weccelerate.co.il',
   logo: 'https://weccelerate.co.il/images/logos/weccelerate-logo.png',
   image: 'https://weccelerate.co.il/images/og/weccelerate-office.jpg',
-  email: 'Raz@weccelerate.co.il',
+  email: 'info@weccelerate.co.il',
   telephone: '+972-55-564-7538',
   address: {
     streetAddress: 'רחוב הרכבת 58',
@@ -465,7 +465,7 @@ export function LeumitPartnerSchema() {
       addressCountry: 'IL',
     },
     telephone: '+972-55-564-7538',
-    email: 'Raz@weccelerate.co.il',
+    email: 'info@weccelerate.co.il',
     
     // Social and same as
     sameAs: [
