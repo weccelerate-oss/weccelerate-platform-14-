@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma db push --config prisma/prisma.config.ts --skip-generate && next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
@@ -22,6 +22,8 @@
     "@google-cloud/storage": "^7.14.0",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "@supabase/supabase-js": "^2.99.1",
+    "@vercel/blob": "^2.3.1",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
@@ -31,6 +33,8 @@
     "pg": "^8.13.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "recharts": "^3.7.0",
+    "resend": "^6.9.2",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.3.5"
   },

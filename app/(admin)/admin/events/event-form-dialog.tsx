@@ -18,10 +18,12 @@ import {
   Link as LinkIcon,
   Users,
   Tag,
-  Image,
+  Image as ImageIcon,
   Loader2,
   CheckCircle,
   Globe,
+  Upload,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createEventAction, updateEventAction, type EventFormData } from '../actions';
@@ -90,6 +92,7 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
   const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<EventFormData>({
@@ -157,6 +160,34 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
 
   const handleChange = (field: keyof EventFormData, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Image upload handler
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      const body = new FormData();
+      body.append('file', file);
+
+      const res = await fetch('/api/upload', { method: 'POST', body });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'שגיאה בהעלאת התמונה');
+        return;
+      }
+
+      handleChange('imageUrl', data.url);
+    } catch {
+      setError('שגיאה בהעלאת התמונה');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -427,6 +458,58 @@ export function EventFormDialog({ mode, event, children }: EventFormDialogProps)
                         placeholder="ללא הגבלה"
                       />
                     </div>
+                  </div>
+
+                  {/* Event Image */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      <ImageIcon className="w-4 h-4 inline ml-1" />
+                      תמונת האירוע
+                    </label>
+
+                    {formData.imageUrl ? (
+                      <div className="relative w-full aspect-video max-w-xs bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+                        <img
+                          src={formData.imageUrl}
+                          alt="תמונת אירוע"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleChange('imageUrl', '')}
+                          className="absolute top-2 left-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-lg"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className={cn(
+                        'flex flex-col items-center justify-center w-full aspect-video max-w-xs border-2 border-dashed rounded-xl cursor-pointer transition-colors',
+                        isUploading
+                          ? 'border-royal-400 bg-royal-50'
+                          : 'border-slate-300 hover:border-royal-400 hover:bg-slate-50'
+                      )}>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+                          onChange={handleImageUpload}
+                          disabled={isUploading}
+                          className="hidden"
+                        />
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="w-8 h-8 text-royal-500 animate-spin mb-2" />
+                            <span className="text-sm text-royal-600">מעלה תמונה...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                            <span className="text-sm text-slate-500">לחץ להעלאת תמונה</span>
+                            <span className="text-xs text-slate-400 mt-1">JPG, PNG, WebP • עד 5MB</span>
+                          </>
+                        )}
+                      </label>
+                    )}
                   </div>
 
                   {/* Host */}

@@ -35,6 +35,7 @@ export interface NewsFormData {
   titleEn?: string;
   excerpt?: string;
   link?: string;
+  imageUrl?: string;
   urgencyLevel: UrgencyLevel;
   isActive: boolean;
   isPinned: boolean;
@@ -51,6 +52,7 @@ export async function createNewsAction(data: NewsFormData) {
         titleEn: data.titleEn,
         excerpt: data.excerpt,
         link: data.link,
+        imageUrl: data.imageUrl,
         urgencyLevel: data.urgencyLevel,
         isActive: data.isActive,
         isPinned: data.isPinned,

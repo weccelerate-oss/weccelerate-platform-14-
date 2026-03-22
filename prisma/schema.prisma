@@ -295,7 +295,8 @@ model NewsUpdate {
   titleEn       String?      // English version
   excerpt       String?      @db.Text
   link          String?      // Optional link to full article
-  
+  imageUrl      String?      // Cover image
+
   // Display settings
   urgencyLevel  UrgencyLevel @default(NORMAL)
   isActive      Boolean      @default(true)
