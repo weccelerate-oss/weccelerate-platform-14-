@@ -62,7 +62,7 @@ export async function createNewsAction(data: NewsFormData) {
     revalidatePath('/admin/news');
     revalidatePath('/'); // Revalidate homepage for ticker
 
-    return { success: true, news };
+    return { success: true };
   } catch (error) {
     console.error('[Admin] Error creating news:', error);
     return { success: false, error: 'Failed to create news update' };
@@ -82,7 +82,7 @@ export async function updateNewsAction(id: string, data: Partial<NewsFormData>) 
     revalidatePath('/admin/news');
     revalidatePath('/');
 
-    return { success: true, news };
+    return { success: true };
   } catch (error) {
     console.error('[Admin] Error updating news:', error);
     return { success: false, error: 'Failed to update news' };
@@ -175,7 +175,7 @@ export async function createEventAction(data: EventFormData) {
     revalidatePath('/events');
     revalidatePath('/');
 
-    return { success: true, event };
+    return { success: true, id: event.id };
   } catch (error) {
     console.error('[Admin] Error creating event:', error);
     return { success: false, error: 'Failed to create event' };
@@ -201,7 +201,7 @@ export async function updateEventAction(id: string, data: Partial<EventFormData>
     revalidatePath('/events');
     revalidatePath('/');
 
-    return { success: true, event };
+    return { success: true, id: event.id };
   } catch (error) {
     console.error('[Admin] Error updating event:', error);
     return { success: false, error: 'Failed to update event' };
@@ -275,7 +275,7 @@ export async function createVideoAction(data: VideoFormData) {
     revalidatePath('/admin/videos');
     revalidatePath('/videos');
 
-    return { success: true, video };
+    return { success: true };
   } catch (error) {
     console.error('[Admin] Error creating video:', error);
     return { success: false, error: 'Failed to create video' };
@@ -295,7 +295,7 @@ export async function updateVideoAction(id: string, data: Partial<VideoFormData>
     revalidatePath('/admin/videos');
     revalidatePath('/videos');
 
-    return { success: true, video };
+    return { success: true };
   } catch (error) {
     console.error('[Admin] Error updating video:', error);
     return { success: false, error: 'Failed to update video' };
@@ -539,7 +539,7 @@ export async function createStoryAction(data: StoryFormData) {
     revalidatePath('/admin/stories');
     revalidatePath('/');
 
-    return { success: true, story };
+    return { success: true };
   } catch (error) {
     console.error('[Admin] Error creating story:', error);
     return { success: false, error: 'Failed to create story' };
@@ -576,7 +576,7 @@ export async function updateStoryAction(id: string, data: StoryFormData) {
     revalidatePath('/admin/stories');
     revalidatePath('/');
 
-    return { success: true, story };
+    return { success: true };
   } catch (error) {
     console.error('[Admin] Error updating story:', error);
     return { success: false, error: 'Failed to update story' };
