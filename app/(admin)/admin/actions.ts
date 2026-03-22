@@ -173,6 +173,7 @@ export async function createEventAction(data: EventFormData) {
 
     revalidatePath('/admin/events');
     revalidatePath('/events');
+    revalidatePath('/');
 
     return { success: true, event };
   } catch (error) {
@@ -198,6 +199,7 @@ export async function updateEventAction(id: string, data: Partial<EventFormData>
 
     revalidatePath('/admin/events');
     revalidatePath('/events');
+    revalidatePath('/');
 
     return { success: true, event };
   } catch (error) {
