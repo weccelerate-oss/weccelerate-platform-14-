@@ -50,6 +50,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Redirect legacy/alternate paths to canonical URLs
+  const REDIRECTS: Record<string, string> = {
+    '/news': '/blog',
+    '/leads': '/contact',
+  };
+  if (REDIRECTS[pathname]) {
+    url.pathname = REDIRECTS[pathname];
+    return NextResponse.redirect(url, 301);
+  }
+
   const subdomain = getSubdomain(hostname);
   const siteFolder = subdomain ? SUBDOMAIN_MAP[subdomain] : 'main';
 

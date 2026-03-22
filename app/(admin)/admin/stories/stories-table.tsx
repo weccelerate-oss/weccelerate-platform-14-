@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { 
-  MoreHorizontal, 
-  Pencil, 
-  Trash2, 
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
   Star,
   StarOff,
   Eye,
@@ -38,22 +39,33 @@ interface StoriesTableProps {
 }
 
 export function StoriesTable({ stories }: StoriesTableProps) {
+  const router = useRouter();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const handleDelete = async (id: string, companyName: string) => {
+  const handleDelete = (id: string, companyName: string) => {
     if (confirm(`האם למחוק את "${companyName}"?`)) {
-      await deleteStoryAction(id);
+      startTransition(async () => {
+        await deleteStoryAction(id);
+        router.refresh();
+      });
     }
     setOpenMenuId(null);
   };
 
-  const handleToggleActive = async (id: string) => {
-    await toggleStoryActiveAction(id);
+  const handleToggleActive = (id: string) => {
+    startTransition(async () => {
+      await toggleStoryActiveAction(id);
+      router.refresh();
+    });
     setOpenMenuId(null);
   };
 
-  const handleToggleFeatured = async (id: string) => {
-    await toggleStoryFeaturedAction(id);
+  const handleToggleFeatured = (id: string) => {
+    startTransition(async () => {
+      await toggleStoryFeaturedAction(id);
+      router.refresh();
+    });
     setOpenMenuId(null);
   };
 
@@ -68,170 +80,172 @@ export function StoriesTable({ stories }: StoriesTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead className="bg-slate-50 border-b border-slate-200">
-          <tr>
-            <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">חברה</th>
-            <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">תעשייה</th>
-            <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">ציטוט</th>
-            <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">תוכנית</th>
-            <th className="text-center px-4 py-3 text-sm font-medium text-slate-600">סטטוס</th>
-            <th className="text-center px-4 py-3 text-sm font-medium text-slate-600">פעולות</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {stories.map((story) => (
-            <tr key={story.id} className="hover:bg-slate-50">
-              {/* Company */}
-              <td className="px-4 py-4">
-                <div className="flex items-center gap-3">
-                  {story.logoUrl ? (
-                    <img 
-                      src={story.logoUrl} 
-                      alt={story.companyName}
-                      className="w-10 h-10 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-slate-400" />
-                    </div>
+    <>
+      {/* Mobile Card View */}
+      <div className="lg:hidden divide-y divide-slate-100">
+        {stories.map((story) => (
+          <div key={story.id} className="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                {story.logoUrl ? (
+                  <img src={story.logoUrl} alt={story.companyName} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-5 h-5 text-slate-400" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-slate-900 text-sm">{story.companyName}</p>
+                  {story.personName && (
+                    <p className="text-xs text-slate-500">{story.personName}{story.personRole && ` • ${story.personRole}`}</p>
                   )}
-                  <div>
-                    <p className="font-medium text-slate-900">{story.companyName}</p>
-                    {story.personName && (
-                      <p className="text-sm text-slate-500">{story.personName}</p>
+                  <p className="text-xs text-slate-600 line-clamp-2 mt-1">{story.quote}</p>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {story.industry && (
+                      <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">{story.industry}</span>
+                    )}
+                    {story.isActive ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px]">
+                        <Eye className="w-2.5 h-2.5" /> פעיל
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px]">
+                        <EyeOff className="w-2.5 h-2.5" /> מוסתר
+                      </span>
+                    )}
+                    {story.isFeatured && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-[10px]">
+                        <Star className="w-2.5 h-2.5" /> מומלץ
+                      </span>
                     )}
                   </div>
                 </div>
-              </td>
-
-              {/* Industry */}
-              <td className="px-4 py-4">
-                <span className="text-sm text-slate-600">{story.industry || '-'}</span>
-              </td>
-
-              {/* Quote */}
-              <td className="px-4 py-4 max-w-xs">
-                <p className="text-sm text-slate-600 line-clamp-2">{story.quote}</p>
-              </td>
-
-              {/* Program */}
-              <td className="px-4 py-4">
-                <span className="text-sm text-slate-600">{story.programName || '-'}</span>
-              </td>
-
-              {/* Status */}
-              <td className="px-4 py-4">
-                <div className="flex items-center justify-center gap-2">
-                  {story.isActive ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                      <Eye className="w-3 h-3" />
-                      פעיל
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-600 rounded-full text-xs">
-                      <EyeOff className="w-3 h-3" />
-                      מוסתר
-                    </span>
-                  )}
-                  {story.isFeatured && (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
-                      <Star className="w-3 h-3" />
-                      מומלץ
-                    </span>
-                  )}
-                </div>
-              </td>
+              </div>
 
               {/* Actions */}
-              <td className="px-4 py-4">
-                <div className="relative flex items-center justify-center">
-                  <button
-                    onClick={() => setOpenMenuId(openMenuId === story.id ? null : story.id)}
-                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                  >
-                    <MoreHorizontal className="w-4 h-4 text-slate-500" />
-                  </button>
-
-                  {openMenuId === story.id && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-10" 
-                        onClick={() => setOpenMenuId(null)}
-                      />
-                      <div className="absolute left-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-20">
-                        <StoryFormDialog mode="edit" story={story}>
-                          <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                            <Pencil className="w-4 h-4" />
-                            ערוך
-                          </button>
-                        </StoryFormDialog>
-
-                        <button
-                          onClick={() => handleToggleActive(story.id)}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                        >
-                          {story.isActive ? (
-                            <>
-                              <EyeOff className="w-4 h-4" />
-                              הסתר
-                            </>
-                          ) : (
-                            <>
-                              <Eye className="w-4 h-4" />
-                              הצג
-                            </>
-                          )}
+              <div className="relative flex-shrink-0">
+                <button
+                  onClick={() => setOpenMenuId(openMenuId === story.id ? null : story.id)}
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <MoreHorizontal className="w-4 h-4 text-slate-500" />
+                </button>
+                {openMenuId === story.id && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                    <div className="absolute left-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-20">
+                      <StoryFormDialog mode="edit" story={story}>
+                        <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                          <Pencil className="w-4 h-4" /> ערוך
                         </button>
+                      </StoryFormDialog>
+                      <button onClick={() => handleToggleActive(story.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                        {story.isActive ? <><EyeOff className="w-4 h-4" /> הסתר</> : <><Eye className="w-4 h-4" /> הצג</>}
+                      </button>
+                      <button onClick={() => handleToggleFeatured(story.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                        {story.isFeatured ? <><StarOff className="w-4 h-4" /> הסר מומלץ</> : <><Star className="w-4 h-4" /> סמן כמומלץ</>}
+                      </button>
+                      {story.website && (
+                        <a href={story.website} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                          <ExternalLink className="w-4 h-4" /> לאתר החברה
+                        </a>
+                      )}
+                      <hr className="my-1" />
+                      <button onClick={() => handleDelete(story.id, story.companyName)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                        <Trash2 className="w-4 h-4" /> מחק
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-                        <button
-                          onClick={() => handleToggleFeatured(story.id)}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                        >
-                          {story.isFeatured ? (
-                            <>
-                              <StarOff className="w-4 h-4" />
-                              הסר מומלץ
-                            </>
-                          ) : (
-                            <>
-                              <Star className="w-4 h-4" />
-                              סמן כמומלץ
-                            </>
-                          )}
-                        </button>
-
-                        {story.website && (
-                          <a
-                            href={story.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            לאתר החברה
-                          </a>
-                        )}
-
-                        <hr className="my-1" />
-
-                        <button
-                          onClick={() => handleDelete(story.id, story.companyName)}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          מחק
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </td>
+      {/* Desktop Table */}
+      <div className="hidden lg:block overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">חברה</th>
+              <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">תעשייה</th>
+              <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">ציטוט</th>
+              <th className="text-right px-4 py-3 text-sm font-medium text-slate-600">תוכנית</th>
+              <th className="text-center px-4 py-3 text-sm font-medium text-slate-600">סטטוס</th>
+              <th className="text-center px-4 py-3 text-sm font-medium text-slate-600">פעולות</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {stories.map((story) => (
+              <tr key={story.id} className="hover:bg-slate-50">
+                <td className="px-4 py-4">
+                  <div className="flex items-center gap-3">
+                    {story.logoUrl ? (
+                      <img src={story.logoUrl} alt={story.companyName} className="w-10 h-10 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-slate-400" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-slate-900">{story.companyName}</p>
+                      {story.personName && <p className="text-sm text-slate-500">{story.personName}</p>}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-4"><span className="text-sm text-slate-600">{story.industry || '-'}</span></td>
+                <td className="px-4 py-4 max-w-xs"><p className="text-sm text-slate-600 line-clamp-2">{story.quote}</p></td>
+                <td className="px-4 py-4"><span className="text-sm text-slate-600">{story.programName || '-'}</span></td>
+                <td className="px-4 py-4">
+                  <div className="flex items-center justify-center gap-2">
+                    {story.isActive ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs"><Eye className="w-3 h-3" /> פעיל</span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-600 rounded-full text-xs"><EyeOff className="w-3 h-3" /> מוסתר</span>
+                    )}
+                    {story.isFeatured && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs"><Star className="w-3 h-3" /> מומלץ</span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="relative flex items-center justify-center">
+                    <button onClick={() => setOpenMenuId(openMenuId === story.id ? null : story.id)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                      <MoreHorizontal className="w-4 h-4 text-slate-500" />
+                    </button>
+                    {openMenuId === story.id && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                        <div className="absolute left-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-20">
+                          <StoryFormDialog mode="edit" story={story}>
+                            <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><Pencil className="w-4 h-4" /> ערוך</button>
+                          </StoryFormDialog>
+                          <button onClick={() => handleToggleActive(story.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                            {story.isActive ? <><EyeOff className="w-4 h-4" /> הסתר</> : <><Eye className="w-4 h-4" /> הצג</>}
+                          </button>
+                          <button onClick={() => handleToggleFeatured(story.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                            {story.isFeatured ? <><StarOff className="w-4 h-4" /> הסר מומלץ</> : <><Star className="w-4 h-4" /> סמן כמומלץ</>}
+                          </button>
+                          {story.website && (
+                            <a href={story.website} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                              <ExternalLink className="w-4 h-4" /> לאתר החברה
+                            </a>
+                          )}
+                          <hr className="my-1" />
+                          <button onClick={() => handleDelete(story.id, story.companyName)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <Trash2 className="w-4 h-4" /> מחק
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

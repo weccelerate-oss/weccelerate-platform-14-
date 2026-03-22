@@ -405,7 +405,6 @@ export function VideoFormDialog({ mode, video, children }: VideoFormDialogProps)
                     </label>
                   </div>
                 </div>
-              </form>
 
               {/* Footer */}
               <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50">
@@ -418,7 +417,7 @@ export function VideoFormDialog({ mode, video, children }: VideoFormDialogProps)
                   ביטול
                 </button>
                 <button
-                  onClick={handleSubmit}
+                  type="submit"
                   disabled={isPending || isSuccess}
                   className={cn(
                     'flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors',
@@ -442,6 +441,7 @@ export function VideoFormDialog({ mode, video, children }: VideoFormDialogProps)
                   )}
                 </button>
               </div>
+              </form>
             </motion.div>
           </>
         )}

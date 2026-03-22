@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition, ReactNode } from 'react';
-import { X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { X, AlertCircle } from 'lucide-react';
 import { createStoryAction, updateStoryAction } from '../actions';
 
 interface StoryFormData {
@@ -35,8 +36,10 @@ interface StoryFormDialogProps {
 }
 
 export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<StoryFormData>({
     companyName: story?.companyName || '',
     logoUrl: story?.logoUrl || '',
@@ -59,15 +62,21 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError(null);
+
     startTransition(async () => {
       try {
-        if (mode === 'create') {
-          await createStoryAction(formData);
-        } else if (story) {
-          await updateStoryAction(story.id, formData);
+        const result = mode === 'create'
+          ? await createStoryAction(formData)
+          : story ? await updateStoryAction(story.id, formData) : null;
+
+        if (!result || !result.success) {
+          setError(result?.error || 'שגיאה בשמירה');
+          return;
         }
+
         setIsOpen(false);
+        router.refresh();
         // Reset form for create mode
         if (mode === 'create') {
           setFormData({
@@ -90,9 +99,9 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
             isFeatured: false,
           });
         }
-      } catch (error) {
-        console.error('Error saving story:', error);
-        alert('שגיאה בשמירה');
+      } catch (err) {
+        console.error('Error saving story:', err);
+        setError('שגיאה בשמירה');
       }
     });
   };
@@ -136,6 +145,12 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {error && (
+                <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
               {/* Company Info */}
               <div className="space-y-4">
                 <h3 className="font-medium text-slate-900 border-b pb-2">פרטי החברה</h3>
