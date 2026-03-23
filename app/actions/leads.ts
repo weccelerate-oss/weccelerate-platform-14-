@@ -1,15 +1,12 @@
 /**
  * Lead Generation Server Actions
- * 
- * Server actions for handling form submissions and creating leads in Pipedrive.
- * These actions are called from client components and handle all server-side logic.
- * 
- * @module actions/leads
+ *
+ * Server actions for handling form submissions.
+ * Sends data to Zapier webhook and logs to database.
  */
 
 'use server';
 
-import { createLead, LEAD_SOURCES, type LeadData } from '@/lib/pipedrive';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
@@ -56,23 +53,52 @@ export interface FormState {
   success: boolean;
   message: string;
   errors?: Record<string, string[]>;
-  leadId?: number;
+}
+
+// =============================================================================
+// ZAPIER WEBHOOK
+// =============================================================================
+
+const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/7280045/ucs3rvp/';
+
+async function sendToZapier(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  message?: string;
+  formType?: string;
+}): Promise<void> {
+  try {
+    const now = new Date();
+    const payload = {
+      'תאריך': now.toLocaleDateString('he-IL') + ' ' + now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+      'שם מלא': data.name,
+      'טלפון': data.phone || '',
+      'אימייל': data.email,
+      'מודעה': 'אתר החברה',
+      'מקור': 'אתר',
+      'הודעה': data.message || '',
+      'חברה': data.company || '',
+    };
+    await fetch(ZAPIER_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    console.error('[Zapier] webhook failed:', err);
+  }
 }
 
 // =============================================================================
 // CONTACT FORM ACTION
 // =============================================================================
 
-/**
- * Handle contact form submission
- * 
- * Creates a lead in Pipedrive with source tracking.
- */
 export async function submitContactForm(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  // Extract form data
   const rawData = {
     name: formData.get('name'),
     email: formData.get('email'),
@@ -81,17 +107,11 @@ export async function submitContactForm(
     message: formData.get('message'),
   };
 
-  // Extract tracking data
   const sourceUrl = formData.get('sourceUrl') as string | null;
-  const referrerUrl = formData.get('referrerUrl') as string | null;
-  const utmSource = formData.get('utm_source') as string | null;
-  const utmMedium = formData.get('utm_medium') as string | null;
-  const utmCampaign = formData.get('utm_campaign') as string | null;
   const site = formData.get('site') as string | null;
 
-  // Validate
   const validationResult = ContactFormSchema.safeParse(rawData);
-  
+
   if (!validationResult.success) {
     return {
       success: false,
@@ -102,83 +122,15 @@ export async function submitContactForm(
 
   const validData = validationResult.data;
 
-  // Send to Zapier webhook (fire-and-forget, never block form submission)
-  try {
-    const now = new Date();
-    const zapierPayload = {
-      'תאריך': now.toLocaleDateString('he-IL') + ' ' + now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
-      'שם מלא': validData.name,
-      'טלפון': validData.phone || '',
-      'אימייל': validData.email,
-      'מודעה': 'אתר החברה',
-      'מקור': 'אתר',
-      'הודעה': validData.message || '',
-      'חברה': validData.company || '',
-    };
-    fetch('https://hooks.zapier.com/hooks/catch/7280045/ucs3rvp/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(zapierPayload),
-    }).catch((err) => console.error('[Zapier] webhook failed:', err));
-  } catch (zapErr) {
-    console.error('[Zapier] error:', zapErr);
-  }
+  // Send to Zapier (fire-and-forget)
+  sendToZapier({ ...validData, formType: 'contact' });
 
-  // Create lead in Pipedrive
-  const leadData: LeadData = {
-    name: validData.name,
-    email: validData.email,
-    phone: validData.phone,
-    company: validData.company,
-    message: validData.message,
-    sourceUrl: sourceUrl || undefined,
-    referrerUrl: referrerUrl || undefined,
-    utmSource: utmSource || undefined,
-    utmMedium: utmMedium || undefined,
-    utmCampaign: utmCampaign || undefined,
-    leadSource: LEAD_SOURCES.WEBSITE,
-    formType: 'contact',
-    site: site || 'main',
-  };
-
-  let result: { success: boolean; dealId?: number; errorCode?: string; error?: string };
-
-  try {
-    result = await createLead(leadData);
-  } catch (err) {
-    console.error('[Contact] createLead threw:', err);
-    result = { success: false, errorCode: 'CRM_EXCEPTION' };
-  }
-
-  // Log submission to database (never let logging break the response)
-  try {
-    await logFormSubmission({
-      formType: 'contact',
-      email: validData.email,
-      success: result.success,
-      pipedriveId: result.dealId,
-      errorCode: result.errorCode,
-      site: site || 'main',
-      sourceUrl: sourceUrl || undefined,
-    });
-  } catch (logErr) {
-    console.error('[Contact] logFormSubmission failed:', logErr);
-  }
-
-  if (result.success) {
-    return {
-      success: true,
-      message: 'תודה על פנייתך! ניצור איתך קשר בהקדם.',
-      leadId: result.dealId,
-    };
-  }
-
-  // Even if Pipedrive failed, try to save the lead to DB directly
+  // Log to database
   try {
     await prisma.activityLog.create({
       data: {
-        action: 'lead.contact_fallback',
-        description: `Contact form fallback: ${validData.email}`,
+        action: 'form.contact',
+        description: `Contact form: ${validData.email}`,
         metadata: {
           name: validData.name,
           email: validData.email,
@@ -187,23 +139,17 @@ export async function submitContactForm(
           message: validData.message || null,
           site: site || 'main',
           sourceUrl: sourceUrl || null,
-          errorCode: result.errorCode,
           timestamp: new Date().toISOString(),
         },
       },
     });
-    // Lead was saved to DB — report success to user
-    return {
-      success: true,
-      message: 'תודה על פנייתך! ניצור איתך קשר בהקדם.',
-    };
-  } catch (dbErr) {
-    console.error('[Contact] DB fallback also failed:', dbErr);
+  } catch (err) {
+    console.error('[Contact] DB log failed:', err);
   }
 
   return {
-    success: false,
-    message: 'אירעה שגיאה בשליחת הטופס. נא לנסות שוב.',
+    success: true,
+    message: 'תודה על פנייתך! ניצור איתך קשר בהקדם.',
   };
 }
 
@@ -211,16 +157,10 @@ export async function submitContactForm(
 // APPLICATION FORM ACTION
 // =============================================================================
 
-/**
- * Handle program application form submission
- * 
- * Creates a lead in Pipedrive with additional business information.
- */
 export async function submitApplicationForm(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  // Extract form data
   const rawData = {
     name: formData.get('name'),
     email: formData.get('email'),
@@ -230,22 +170,16 @@ export async function submitApplicationForm(
     industry: formData.get('industry'),
     companySize: formData.get('companySize'),
     stage: formData.get('stage'),
-    fundingNeeded: formData.get('fundingNeeded') 
-      ? parseInt(formData.get('fundingNeeded') as string) 
+    fundingNeeded: formData.get('fundingNeeded')
+      ? parseInt(formData.get('fundingNeeded') as string)
       : undefined,
   };
 
-  // Extract tracking data
   const sourceUrl = formData.get('sourceUrl') as string | null;
-  const referrerUrl = formData.get('referrerUrl') as string | null;
-  const utmSource = formData.get('utm_source') as string | null;
-  const utmMedium = formData.get('utm_medium') as string | null;
-  const utmCampaign = formData.get('utm_campaign') as string | null;
   const site = formData.get('site') as string | null;
 
-  // Validate
   const validationResult = ApplicationFormSchema.safeParse(rawData);
-  
+
   if (!validationResult.success) {
     return {
       success: false,
@@ -256,84 +190,38 @@ export async function submitApplicationForm(
 
   const validData = validationResult.data;
 
-  // Send to Zapier webhook (fire-and-forget)
+  // Send to Zapier
+  sendToZapier({ ...validData, formType: 'application' });
+
+  // Log to database
   try {
-    const now = new Date();
-    const zapierPayload = {
-      'תאריך': now.toLocaleDateString('he-IL') + ' ' + now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
-      'שם מלא': validData.name,
-      'טלפון': validData.phone || '',
-      'אימייל': validData.email,
-      'מודעה': 'אתר החברה',
-      'מקור': 'אתר',
-      'הודעה': validData.message || '',
-      'חברה': validData.company || '',
-    };
-    fetch('https://hooks.zapier.com/hooks/catch/7280045/ucs3rvp/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(zapierPayload),
-    }).catch((err) => console.error('[Zapier] webhook failed:', err));
-  } catch (zapErr) {
-    console.error('[Zapier] error:', zapErr);
-  }
-
-  // Build message with additional info
-  const additionalInfo = [];
-  if (validData.industry) additionalInfo.push(`תעשייה: ${validData.industry}`);
-  if (validData.companySize) additionalInfo.push(`גודל חברה: ${validData.companySize}`);
-  if (validData.stage) additionalInfo.push(`שלב: ${validData.stage}`);
-  if (validData.fundingNeeded) additionalInfo.push(`גיוס נדרש: $${validData.fundingNeeded.toLocaleString()}`);
-  
-  const fullMessage = [
-    validData.message || '',
-    additionalInfo.length > 0 ? '\n\n--- פרטים נוספים ---\n' + additionalInfo.join('\n') : '',
-  ].filter(Boolean).join('');
-
-  // Create lead in Pipedrive
-  const leadData: LeadData = {
-    name: validData.name,
-    email: validData.email,
-    phone: validData.phone,
-    company: validData.company,
-    message: fullMessage,
-    sourceUrl: sourceUrl || undefined,
-    referrerUrl: referrerUrl || undefined,
-    utmSource: utmSource || undefined,
-    utmMedium: utmMedium || undefined,
-    utmCampaign: utmCampaign || undefined,
-    leadSource: LEAD_SOURCES.WEBSITE,
-    formType: 'application',
-    site: site || 'main',
-    industry: validData.industry,
-    companySize: validData.companySize,
-    budget: validData.fundingNeeded,
-  };
-
-  const result = await createLead(leadData);
-
-  // Log submission
-  await logFormSubmission({
-    formType: 'application',
-    email: validData.email,
-    success: result.success,
-    pipedriveId: result.dealId,
-    errorCode: result.errorCode,
-    site: site || 'main',
-    sourceUrl: sourceUrl || undefined,
-  });
-
-  if (result.success) {
-    return {
-      success: true,
-      message: 'תודה על הגשת המועמדות! נבדוק את הפרטים ונחזור אליך בהקדם.',
-      leadId: result.dealId,
-    };
+    await prisma.activityLog.create({
+      data: {
+        action: 'form.application',
+        description: `Application form: ${validData.email}`,
+        metadata: {
+          name: validData.name,
+          email: validData.email,
+          phone: validData.phone || null,
+          company: validData.company || null,
+          message: validData.message || null,
+          industry: validData.industry || null,
+          companySize: validData.companySize || null,
+          stage: validData.stage || null,
+          fundingNeeded: validData.fundingNeeded || null,
+          site: site || 'main',
+          sourceUrl: sourceUrl || null,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+  } catch (err) {
+    console.error('[Application] DB log failed:', err);
   }
 
   return {
-    success: false,
-    message: 'אירעה שגיאה בשליחת הטופס. נא לנסות שוב.',
+    success: true,
+    message: 'תודה על הגשת המועמדות! נבדוק את הפרטים ונחזור אליך בהקדם.',
   };
 }
 
@@ -341,9 +229,6 @@ export async function submitApplicationForm(
 // NEWSLETTER SIGNUP ACTION
 // =============================================================================
 
-/**
- * Handle newsletter signup
- */
 export async function submitNewsletterSignup(
   prevState: FormState,
   formData: FormData
@@ -353,12 +238,10 @@ export async function submitNewsletterSignup(
     name: formData.get('name') || undefined,
   };
 
-  const sourceUrl = formData.get('sourceUrl') as string | null;
   const site = formData.get('site') as string | null;
 
-  // Validate
   const validationResult = NewsletterSchema.safeParse(rawData);
-  
+
   if (!validationResult.success) {
     return {
       success: false,
@@ -369,38 +252,30 @@ export async function submitNewsletterSignup(
 
   const validData = validationResult.data;
 
-  // Create minimal lead in Pipedrive
-  const leadData: LeadData = {
-    name: validData.name || validData.email.split('@')[0],
-    email: validData.email,
-    sourceUrl: sourceUrl || undefined,
-    leadSource: LEAD_SOURCES.BLOG,
-    formType: 'newsletter',
-    site: site || 'main',
-  };
+  // Send to Zapier
+  sendToZapier({ name: validData.name || validData.email.split('@')[0], email: validData.email, formType: 'newsletter' });
 
-  const result = await createLead(leadData);
-
-  // Log submission
-  await logFormSubmission({
-    formType: 'newsletter',
-    email: validData.email,
-    success: result.success,
-    pipedriveId: result.dealId,
-    errorCode: result.errorCode,
-    site: site || 'main',
-  });
-
-  if (result.success) {
-    return {
-      success: true,
-      message: 'תודה! נרשמת בהצלחה לניוזלטר.',
-    };
+  // Log to database
+  try {
+    await prisma.activityLog.create({
+      data: {
+        action: 'form.newsletter',
+        description: `Newsletter signup: ${validData.email}`,
+        metadata: {
+          email: validData.email,
+          name: validData.name || null,
+          site: site || 'main',
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+  } catch (err) {
+    console.error('[Newsletter] DB log failed:', err);
   }
 
   return {
-    success: false,
-    message: 'אירעה שגיאה בהרשמה. נא לנסות שוב.',
+    success: true,
+    message: 'תודה! נרשמת בהצלחה לניוזלטר.',
   };
 }
 
@@ -408,9 +283,6 @@ export async function submitNewsletterSignup(
 // EVENT REGISTRATION ACTION
 // =============================================================================
 
-/**
- * Handle event registration
- */
 export async function submitEventRegistration(
   prevState: FormState,
   formData: FormData
@@ -424,12 +296,10 @@ export async function submitEventRegistration(
 
   const eventId = formData.get('eventId') as string | null;
   const eventName = formData.get('eventName') as string | null;
-  const sourceUrl = formData.get('sourceUrl') as string | null;
   const site = formData.get('site') as string | null;
 
-  // Validate
   const validationResult = ContactFormSchema.safeParse(rawData);
-  
+
   if (!validationResult.success) {
     return {
       success: false,
@@ -440,23 +310,15 @@ export async function submitEventRegistration(
 
   const validData = validationResult.data;
 
-  // Create lead with event context
-  const leadData: LeadData = {
-    name: validData.name,
-    email: validData.email,
-    phone: validData.phone,
-    company: validData.company,
+  // Send to Zapier
+  sendToZapier({
+    ...validData,
     message: eventName ? `הרשמה לאירוע: ${eventName}` : 'הרשמה לאירוע',
-    sourceUrl: sourceUrl || undefined,
-    leadSource: LEAD_SOURCES.EVENT_REGISTRATION,
     formType: 'event',
-    site: site || 'main',
-  };
+  });
 
-  const result = await createLead(leadData);
-
-  // Update event registration count if we have the event ID
-  if (result.success && eventId) {
+  // Update event registration count
+  if (eventId) {
     try {
       await prisma.event.update({
         where: { id: eventId },
@@ -467,39 +329,38 @@ export async function submitEventRegistration(
     }
   }
 
-  // Log submission
-  await logFormSubmission({
-    formType: 'event',
-    email: validData.email,
-    success: result.success,
-    pipedriveId: result.dealId,
-    errorCode: result.errorCode,
-    site: site || 'main',
-    metadata: { eventId, eventName },
-  });
-
-  if (result.success) {
-    return {
-      success: true,
-      message: 'נרשמת בהצלחה לאירוע! נשלח אליך אישור במייל.',
-      leadId: result.dealId,
-    };
+  // Log to database
+  try {
+    await prisma.activityLog.create({
+      data: {
+        action: 'form.event',
+        description: `Event registration: ${validData.email}`,
+        metadata: {
+          name: validData.name,
+          email: validData.email,
+          phone: validData.phone || null,
+          company: validData.company || null,
+          eventId,
+          eventName,
+          site: site || 'main',
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+  } catch (err) {
+    console.error('[Event] DB log failed:', err);
   }
 
   return {
-    success: false,
-    message: 'אירעה שגיאה בהרשמה. נא לנסות שוב.',
+    success: true,
+    message: 'נרשמת בהצלחה לאירוע! נשלח אליך אישור במייל.',
   };
 }
 
 // =============================================================================
-// QUICK LEAD ACTION (API-style for client components)
+// QUICK LEAD ACTION
 // =============================================================================
 
-/**
- * Create a lead from client-side data
- * This is a more flexible action for programmatic lead creation.
- */
 export async function createLeadAction(data: {
   name: string;
   email: string;
@@ -507,17 +368,9 @@ export async function createLeadAction(data: {
   company?: string;
   message?: string;
   sourceUrl?: string;
-  referrerUrl?: string;
-  leadSource?: string;
   formType?: string;
   site?: string;
-  utmParams?: {
-    source?: string;
-    medium?: string;
-    campaign?: string;
-  };
 }): Promise<FormState> {
-  // Basic validation
   if (!data.name?.trim() || !data.email?.trim()) {
     return {
       success: false,
@@ -525,84 +378,27 @@ export async function createLeadAction(data: {
     };
   }
 
-  const leadData: LeadData = {
-    name: data.name,
-    email: data.email,
-    phone: data.phone,
-    company: data.company,
-    message: data.message,
-    sourceUrl: data.sourceUrl,
-    referrerUrl: data.referrerUrl,
-    utmSource: data.utmParams?.source,
-    utmMedium: data.utmParams?.medium,
-    utmCampaign: data.utmParams?.campaign,
-    leadSource: (data.leadSource as typeof LEAD_SOURCES[keyof typeof LEAD_SOURCES]) || LEAD_SOURCES.WEBSITE,
-    formType: data.formType || 'api',
-    site: data.site || 'main',
-  };
+  // Send to Zapier
+  sendToZapier(data);
 
-  const result = await createLead(leadData);
-
-  // Log submission
-  await logFormSubmission({
-    formType: data.formType || 'api',
-    email: data.email,
-    success: result.success,
-    pipedriveId: result.dealId,
-    errorCode: result.errorCode,
-    site: data.site || 'main',
-    sourceUrl: data.sourceUrl,
-  });
-
-  if (result.success) {
-    return {
-      success: true,
-      message: 'הפנייה נשלחה בהצלחה',
-      leadId: result.dealId,
-    };
-  }
-
-  return {
-    success: false,
-    message: 'אירעה שגיאה. נא לנסות שוב.',
-  };
-}
-
-// =============================================================================
-// HELPER FUNCTIONS
-// =============================================================================
-
-/**
- * Log form submission to database for analytics
- */
-async function logFormSubmission(data: {
-  formType: string;
-  email: string;
-  success: boolean;
-  pipedriveId?: number;
-  errorCode?: string;
-  site: string;
-  sourceUrl?: string;
-  metadata?: Record<string, unknown>;
-}): Promise<void> {
+  // Log to database
   try {
     await prisma.activityLog.create({
       data: {
-        action: `form.${data.formType}`,
-        description: `Form submission: ${data.formType} (${data.success ? 'success' : 'failed'})`,
+        action: `form.${data.formType || 'api'}`,
+        description: `Lead: ${data.email}`,
         metadata: {
-          email: data.email,
-          success: data.success,
-          pipedriveId: data.pipedriveId,
-          errorCode: data.errorCode,
-          site: data.site,
-          sourceUrl: data.sourceUrl,
+          ...data,
           timestamp: new Date().toISOString(),
-          ...data.metadata,
         },
       },
     });
-  } catch (error) {
-    console.error('[Forms] Failed to log submission:', error);
+  } catch (err) {
+    console.error('[Lead] DB log failed:', err);
   }
+
+  return {
+    success: true,
+    message: 'הפנייה נשלחה בהצלחה',
+  };
 }
