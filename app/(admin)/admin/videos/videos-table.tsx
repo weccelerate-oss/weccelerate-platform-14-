@@ -130,22 +130,34 @@ export function VideosTable({ videos: initialVideos }: VideosTableProps) {
 
   // Toggle active status
   const handleToggleActive = async (video: VideoItem) => {
-    const result = await updateVideoAction(video.id, { isActive: !video.isActive });
-    if (result.success) {
-      setVideos((prev) =>
-        prev.map((v) => (v.id === video.id ? { ...v, isActive: !v.isActive } : v))
-      );
+    try {
+      const result = await updateVideoAction(video.id, { isActive: !video.isActive });
+      if (result.success) {
+        setVideos((prev) =>
+          prev.map((v) => (v.id === video.id ? { ...v, isActive: !v.isActive } : v))
+        );
+      } else {
+        alert(result.error || 'שגיאה בעדכון הנראות');
+      }
+    } catch (err) {
+      alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
     }
     setOpenMenuId(null);
   };
 
   // Toggle featured
   const handleToggleFeatured = async (video: VideoItem) => {
-    const result = await updateVideoAction(video.id, { isFeatured: !video.isFeatured });
-    if (result.success) {
-      setVideos((prev) =>
-        prev.map((v) => (v.id === video.id ? { ...v, isFeatured: !v.isFeatured } : v))
-      );
+    try {
+      const result = await updateVideoAction(video.id, { isFeatured: !video.isFeatured });
+      if (result.success) {
+        setVideos((prev) =>
+          prev.map((v) => (v.id === video.id ? { ...v, isFeatured: !v.isFeatured } : v))
+        );
+      } else {
+        alert(result.error || 'שגיאה בעדכון מומלץ');
+      }
+    } catch (err) {
+      alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
     }
     setOpenMenuId(null);
   };
@@ -155,10 +167,15 @@ export function VideosTable({ videos: initialVideos }: VideosTableProps) {
     if (!confirm('האם אתה בטוח שברצונך למחוק סרטון זה?')) return;
 
     setIsDeleting(videoId);
-    const result = await deleteVideoAction(videoId);
-
-    if (result.success) {
-      setVideos((prev) => prev.filter((v) => v.id !== videoId));
+    try {
+      const result = await deleteVideoAction(videoId);
+      if (result.success) {
+        setVideos((prev) => prev.filter((v) => v.id !== videoId));
+      } else {
+        alert(result.error || 'שגיאה במחיקת הסרטון');
+      }
+    } catch (err) {
+      alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
     }
     setIsDeleting(null);
     setOpenMenuId(null);

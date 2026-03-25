@@ -120,22 +120,34 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
 
   // Toggle active status
   const handleToggleActive = async (event: Event) => {
-    const result = await updateEventAction(event.id, { isActive: !event.isActive });
-    if (result.success) {
-      setEvents((prev) =>
-        prev.map((e) => (e.id === event.id ? { ...e, isActive: !e.isActive } : e))
-      );
+    try {
+      const result = await updateEventAction(event.id, { isActive: !event.isActive });
+      if (result.success) {
+        setEvents((prev) =>
+          prev.map((e) => (e.id === event.id ? { ...e, isActive: !e.isActive } : e))
+        );
+      } else {
+        alert(result.error || 'שגיאה בעדכון הנראות');
+      }
+    } catch (err) {
+      alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
     }
     setOpenMenuId(null);
   };
 
   // Toggle featured
   const handleToggleFeatured = async (event: Event) => {
-    const result = await updateEventAction(event.id, { isFeatured: !event.isFeatured });
-    if (result.success) {
-      setEvents((prev) =>
-        prev.map((e) => (e.id === event.id ? { ...e, isFeatured: !e.isFeatured } : e))
-      );
+    try {
+      const result = await updateEventAction(event.id, { isFeatured: !event.isFeatured });
+      if (result.success) {
+        setEvents((prev) =>
+          prev.map((e) => (e.id === event.id ? { ...e, isFeatured: !e.isFeatured } : e))
+        );
+      } else {
+        alert(result.error || 'שגיאה בעדכון מומלץ');
+      }
+    } catch (err) {
+      alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
     }
     setOpenMenuId(null);
   };
@@ -143,12 +155,17 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
   // Delete event
   const handleDelete = async (eventId: string) => {
     if (!confirm('האם אתה בטוח שברצונך למחוק אירוע זה?')) return;
-    
+
     setIsDeleting(eventId);
-    const result = await deleteEventAction(eventId);
-    
-    if (result.success) {
-      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+    try {
+      const result = await deleteEventAction(eventId);
+      if (result.success) {
+        setEvents((prev) => prev.filter((e) => e.id !== eventId));
+      } else {
+        alert(result.error || 'שגיאה במחיקת האירוע');
+      }
+    } catch (err) {
+      alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
     }
     setIsDeleting(null);
     setOpenMenuId(null);

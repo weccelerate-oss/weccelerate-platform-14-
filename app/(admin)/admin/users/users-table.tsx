@@ -85,7 +85,14 @@ export function UsersTable({ users }: UsersTableProps) {
     setActionId(user.id);
     setOpenMenu(null);
     startTransition(async () => {
-      await toggleUserActiveAction(user.id, !user.isActive);
+      try {
+        const result = await toggleUserActiveAction(user.id, !user.isActive);
+        if (!result.success) {
+          alert(result.error || 'שגיאה בעדכון סטטוס המשתמש');
+        }
+      } catch (err) {
+        alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
+      }
       router.refresh();
       setActionId(null);
     });
@@ -93,13 +100,19 @@ export function UsersTable({ users }: UsersTableProps) {
 
   const handleResetPassword = (userId: string) => {
     if (!confirm('האם אתה בטוח שברצונך לאפס את הסיסמה?')) return;
-    
+
     setActionId(userId);
     setOpenMenu(null);
     startTransition(async () => {
-      const result = await resetUserPasswordAction(userId);
-      if (result.success && result.tempPassword) {
-        setShowTempPassword({ id: userId, password: result.tempPassword });
+      try {
+        const result = await resetUserPasswordAction(userId);
+        if (result.success && result.tempPassword) {
+          setShowTempPassword({ id: userId, password: result.tempPassword });
+        } else if (!result.success) {
+          alert(result.error || 'שגיאה באיפוס הסיסמה');
+        }
+      } catch (err) {
+        alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
       }
       setActionId(null);
     });
@@ -107,11 +120,18 @@ export function UsersTable({ users }: UsersTableProps) {
 
   const handleDelete = (userId: string) => {
     if (!confirm('האם אתה בטוח שברצונך למחוק משתמש זה? (המשתמש יושבת)')) return;
-    
+
     setActionId(userId);
     setOpenMenu(null);
     startTransition(async () => {
-      await deleteUserAction(userId);
+      try {
+        const result = await deleteUserAction(userId);
+        if (!result.success) {
+          alert(result.error || 'שגיאה במחיקת המשתמש');
+        }
+      } catch (err) {
+        alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
+      }
       router.refresh();
       setActionId(null);
     });
