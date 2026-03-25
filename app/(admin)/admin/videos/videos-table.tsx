@@ -43,7 +43,7 @@ interface VideoItem {
   vimeoUrl?: string | null;
   thumbnail?: string | null;
   duration?: number | null;
-  category: 'INTERVIEW' | 'SUMMARY' | 'WEBINAR' | 'TUTORIAL' | 'TESTIMONIAL' | 'HIGHLIGHT';
+  category: 'INTERVIEW' | 'SUMMARY' | 'WEBINAR' | 'TUTORIAL' | 'TESTIMONIAL' | 'HIGHLIGHT' | 'PODCAST' | 'REELS' | 'TV_INTERVIEW';
   tags: string[];
   speaker?: string | null;
   speakerTitle?: string | null;
@@ -64,13 +64,16 @@ type ViewMode = 'grid' | 'list';
 // HELPERS
 // =============================================================================
 
-const CATEGORY_CONFIG = {
+const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
   INTERVIEW: { label: 'ראיון', color: 'bg-purple-100 text-purple-700' },
   SUMMARY: { label: 'סיכום', color: 'bg-blue-100 text-blue-700' },
   WEBINAR: { label: 'וובינר', color: 'bg-emerald-100 text-emerald-700' },
   TUTORIAL: { label: 'מדריך', color: 'bg-amber-100 text-amber-700' },
   TESTIMONIAL: { label: 'עדות', color: 'bg-pink-100 text-pink-700' },
   HIGHLIGHT: { label: 'הייליט', color: 'bg-cyan-100 text-cyan-700' },
+  PODCAST: { label: 'פודקאסט', color: 'bg-yellow-100 text-yellow-700' },
+  REELS: { label: 'ריל', color: 'bg-rose-100 text-rose-700' },
+  TV_INTERVIEW: { label: 'ראיון טלוויזיה', color: 'bg-indigo-100 text-indigo-700' },
 };
 
 function formatDuration(seconds: number | null | undefined): string {
@@ -210,6 +213,9 @@ export function VideosTable({ videos: initialVideos }: VideosTableProps) {
           <option value="TUTORIAL">מדריך</option>
           <option value="TESTIMONIAL">עדות</option>
           <option value="HIGHLIGHT">הייליט</option>
+          <option value="PODCAST">פודקאסט</option>
+          <option value="REELS">ריל</option>
+          <option value="TV_INTERVIEW">ראיון טלוויזיה</option>
         </select>
 
         {/* View Toggle */}
@@ -295,10 +301,10 @@ export function VideosTable({ videos: initialVideos }: VideosTableProps) {
                     <span
                       className={cn(
                         'px-2 py-0.5 rounded-full text-xs font-medium',
-                        CATEGORY_CONFIG[video.category].color
+                        (CATEGORY_CONFIG[video.category] || { color: 'bg-slate-100 text-slate-700' }).color
                       )}
                     >
-                      {CATEGORY_CONFIG[video.category].label}
+                      {(CATEGORY_CONFIG[video.category] || { label: video.category }).label}
                     </span>
 
                     {/* Menu */}
@@ -444,10 +450,10 @@ export function VideosTable({ videos: initialVideos }: VideosTableProps) {
                     <span
                       className={cn(
                         'px-2 py-0.5 rounded-full text-xs font-medium',
-                        CATEGORY_CONFIG[video.category].color
+                        (CATEGORY_CONFIG[video.category] || { color: 'bg-slate-100 text-slate-700' }).color
                       )}
                     >
-                      {CATEGORY_CONFIG[video.category].label}
+                      {(CATEGORY_CONFIG[video.category] || { label: video.category }).label}
                     </span>
                     <span className="flex items-center gap-1 text-xs text-slate-400">
                       <Eye className="w-3 h-3" />

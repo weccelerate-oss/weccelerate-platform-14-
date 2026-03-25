@@ -37,7 +37,7 @@ interface VideoItem {
   vimeoUrl?: string | null;
   thumbnail?: string | null;
   duration?: number | null;
-  category: 'INTERVIEW' | 'SUMMARY' | 'WEBINAR' | 'TUTORIAL' | 'TESTIMONIAL' | 'HIGHLIGHT';
+  category: 'INTERVIEW' | 'SUMMARY' | 'WEBINAR' | 'TUTORIAL' | 'TESTIMONIAL' | 'HIGHLIGHT' | 'PODCAST' | 'REELS' | 'TV_INTERVIEW';
   tags: string[];
   speaker?: string | null;
   speakerTitle?: string | null;
@@ -273,6 +273,9 @@ export function VideoFormDialog({ mode, video, children }: VideoFormDialogProps)
                         <option value="TUTORIAL">מדריך</option>
                         <option value="TESTIMONIAL">עדות</option>
                         <option value="HIGHLIGHT">הייליט</option>
+                        <option value="PODCAST">פודקאסט</option>
+                        <option value="REELS">ריל</option>
+                        <option value="TV_INTERVIEW">ראיון טלוויזיה</option>
                       </select>
                     </div>
                   </div>
