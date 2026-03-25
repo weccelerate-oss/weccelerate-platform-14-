@@ -61,7 +61,7 @@ export default function ServiceFullSections({ serviceId }: ServiceFullSectionsPr
                   whileHover={{ scale: 1.02 }}
                   className={`relative group overflow-hidden rounded-2xl border border-white/[0.06] cursor-default ${
                     hasImages
-                      ? isFullWidth ? 'h-[220px] sm:h-[260px]' : 'h-[280px] sm:h-[320px]'
+                      ? isFullWidth ? 'h-[280px] sm:h-[260px]' : 'h-[340px] sm:h-[320px]'
                       : ''
                   }`}
                 >
@@ -75,7 +75,7 @@ export default function ServiceFullSections({ serviceId }: ServiceFullSectionsPr
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, 50vw"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 group-hover:from-black/70 group-hover:via-black/40 transition-all duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/40 to-black/20 group-hover:from-black/65 group-hover:via-black/30 transition-all duration-500" />
                       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ boxShadow: 'inset 0 0 0 1px rgba(200,169,81,0.3), 0 0 20px rgba(200,169,81,0.08)' }} />
                     </>
                   )}
