@@ -91,6 +91,7 @@ const partnersLogos = [
   { name: 'Leumit WeCcelerate', logo: '/images/logos/leumit-weccelerate-logo.png' },
   { name: 'Leumit Health Services', logo: '/images/logos/leumit-logo.png' },
   { name: 'Herzog Fox Neeman', logo: '/images/logos/herzog-logo.png' },
+  { name: 'Israel Innovation Authority', logo: '/images/logos/harashut-logo.png' },
   { name: 'Jerusalem Development Authority', logo: '/images/logos/jerusalem-development-authority.png' },
   { name: 'Har Hotzvim', logo: '/images/logos/har-hozvim-logo.png' },
 ];
@@ -231,8 +232,8 @@ function PartnersSection() {
             {t('sections.partners')}
           </p>
 
-          {/* Logo grid — responsive: 2 cols mobile, 3 cols tablet, 4-5 cols desktop */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 max-w-6xl mx-auto">
+          {/* Logo grid — responsive: 2 cols mobile, 3 cols tablet, 6 cols desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5 max-w-6xl mx-auto">
             {partnersLogos.map((partner, i) => (
               <div
                 key={partner.name}
