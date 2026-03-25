@@ -1,16 +1,33 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 uploads per minute per IP
+    const ip = getClientIp(request);
+    const rl = rateLimit(`upload:${ip}`, { limit: 10, windowSeconds: 60 });
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many uploads. Try again later.' }, { status: 429 });
+    }
+
+    // Verify authenticated user
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     if (!supabaseUrl || !supabaseServiceKey) {
-      return NextResponse.json(
-        { error: 'Supabase not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.' },
-        { status: 500 }
-      );
+      console.error('[Upload] Supabase not configured');
+      return NextResponse.json({ error: 'Storage service unavailable' }, { status: 500 });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -23,24 +40,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
+    if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
         { error: 'File type not allowed. Use JPG, PNG, WebP, AVIF or GIF.' },
         { status: 400 }
       );
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         { error: 'File too large. Max 5MB.' },
         { status: 400 }
       );
     }
 
-    // Generate a clean filename
-    const ext = file.name.split('.').pop() || 'jpg';
+    // Generate a clean filename with validated extension
+    const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const ext = ALLOWED_EXTENSIONS.includes(rawExt) ? rawExt : 'jpg';
     const timestamp = Date.now();
     const filePath = `uploads/${timestamp}.${ext}`;
 
@@ -57,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('[Upload] Supabase error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
     }
 
     // Get public URL
@@ -68,7 +85,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: urlData.publicUrl });
   } catch (error) {
     console.error('[Upload] Error:', error);
-    const message = error instanceof Error ? error.message : 'Upload failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
 }

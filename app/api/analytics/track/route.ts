@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 const VALID_ACTIONS = [
   'click.phone',
@@ -8,9 +9,36 @@ const VALID_ACTIONS = [
   'click.waze',
 ];
 
+const METADATA_MAX_KEYS = 10;
+const METADATA_MAX_VALUE_LENGTH = 500;
+
+function sanitizeMetadata(metadata: unknown): Record<string, string> | undefined {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return undefined;
+  const sanitized: Record<string, string> = {};
+  let keyCount = 0;
+  for (const [key, value] of Object.entries(metadata as Record<string, unknown>)) {
+    if (keyCount >= METADATA_MAX_KEYS) break;
+    if (typeof key !== 'string' || key.length > 100) continue;
+    const strValue = typeof value === 'string' ? value : String(value ?? '');
+    sanitized[key] = strValue.slice(0, METADATA_MAX_VALUE_LENGTH);
+    keyCount++;
+  }
+  return sanitized;
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 30 tracking events per minute per IP
+    const ip = getClientIp(request);
+    const rl = rateLimit(`analytics:${ip}`, { limit: 30, windowSeconds: 60 });
+    if (!rl.allowed) {
+      return new NextResponse(null, { status: 429 });
+    }
+
     const body = await request.text();
+    if (body.length > 10000) {
+      return new NextResponse(null, { status: 400 });
+    }
     const data = JSON.parse(body);
 
     const { action, metadata } = data;
@@ -19,12 +47,8 @@ export async function POST(request: NextRequest) {
       return new NextResponse(null, { status: 400 });
     }
 
-    // Extract tracking info from headers
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      request.headers.get('x-real-ip') ||
-      'unknown';
     const userAgent = request.headers.get('user-agent') || '';
+    const safeMetadata = sanitizeMetadata(metadata);
 
     // Write to ActivityLog via Prisma
     const { prisma } = await import('@/lib/db');
@@ -32,13 +56,13 @@ export async function POST(request: NextRequest) {
     await prisma.activityLog.create({
       data: {
         action,
-        description: `${action} from ${metadata?.page || '/'}`,
+        description: `${action} from ${safeMetadata?.page || '/'}`,
         metadata: {
-          ...metadata,
+          ...safeMetadata,
           timestamp: new Date().toISOString(),
         },
         ipAddress: ip,
-        userAgent,
+        userAgent: userAgent.slice(0, 500),
       },
     });
 

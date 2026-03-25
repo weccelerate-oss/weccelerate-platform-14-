@@ -66,7 +66,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const { searchParams } = new URL(request.url);
     
     // Query parameters
-    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50);
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '10') || 10, 1), 50);
     const featured = searchParams.get('featured') === 'true';
     const industry = searchParams.get('industry');
 

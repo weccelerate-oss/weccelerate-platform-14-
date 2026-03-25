@@ -313,10 +313,13 @@ export function NewsTable({ news }: NewsTableProps) {
 
   const handleDelete = (id: string) => {
     if (!confirm('האם אתה בטוח שברצונך למחוק עדכון זה?')) return;
-    
+
     setActionId(id);
     startTransition(async () => {
-      await deleteNewsAction(id);
+      const result = await deleteNewsAction(id);
+      if (!result.success) {
+        alert(result.error || 'שגיאה במחיקת העדכון');
+      }
       router.refresh();
       setActionId(null);
     });

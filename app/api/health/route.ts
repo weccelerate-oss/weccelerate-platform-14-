@@ -23,11 +23,8 @@ interface HealthStatus {
     database: {
       status: 'ok' | 'error';
       latency?: number;
-      error?: string;
     };
     memory: {
-      used: number;
-      total: number;
       percentage: number;
     };
   };
@@ -55,6 +52,7 @@ export async function GET(): Promise<NextResponse<HealthStatus>> {
   } catch (error) {
     dbStatus = 'error';
     dbError = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[Health] Database check failed:', error);
   }
 
   // Check memory usage
@@ -84,9 +82,10 @@ export async function GET(): Promise<NextResponse<HealthStatus>> {
       database: {
         status: dbStatus,
         latency: dbLatency,
-        error: dbError,
       },
-      memory: memoryInfo,
+      memory: {
+        percentage: memoryInfo.percentage,
+      },
     },
   };
 

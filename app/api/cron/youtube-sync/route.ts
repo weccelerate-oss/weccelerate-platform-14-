@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[YouTube Sync Cron]', error);
     return NextResponse.json(
-      { success: false, error: 'Sync failed', details: error instanceof Error ? error.message : String(error) },
+      { success: false, error: 'Sync failed' },
       { status: 500 },
     );
   }

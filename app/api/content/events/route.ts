@@ -88,8 +88,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const { searchParams } = new URL(request.url);
     
     // Query parameters
-    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50);
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '10') || 10, 1), 50);
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0') || 0, 0);
     const status = searchParams.get('status'); // upcoming, past, ongoing
     const category = searchParams.get('category');
     const featured = searchParams.get('featured') === 'true';

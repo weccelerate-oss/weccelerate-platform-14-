@@ -361,6 +361,19 @@ export async function submitEventRegistration(
 // QUICK LEAD ACTION
 // =============================================================================
 
+const VALID_FORM_TYPES = ['contact', 'application', 'newsletter', 'event', 'api'] as const;
+
+const LeadSchema = z.object({
+  name: z.string().min(1).max(200),
+  email: z.string().email().max(320),
+  phone: z.string().max(30).optional(),
+  company: z.string().max(200).optional(),
+  message: z.string().max(2000).optional(),
+  sourceUrl: z.string().max(2048).optional(),
+  formType: z.enum(VALID_FORM_TYPES).optional(),
+  site: z.string().max(50).optional(),
+});
+
 export async function createLeadAction(data: {
   name: string;
   email: string;
@@ -371,24 +384,34 @@ export async function createLeadAction(data: {
   formType?: string;
   site?: string;
 }): Promise<FormState> {
-  if (!data.name?.trim() || !data.email?.trim()) {
+  const parsed = LeadSchema.safeParse(data);
+  if (!parsed.success) {
     return {
       success: false,
       message: 'שם ואימייל הם שדות חובה',
     };
   }
 
+  const validData = parsed.data;
+  const formType = validData.formType || 'api';
+
   // Send to Zapier
-  sendToZapier(data);
+  sendToZapier(validData);
 
   // Log to database
   try {
     await prisma.activityLog.create({
       data: {
-        action: `form.${data.formType || 'api'}`,
-        description: `Lead: ${data.email}`,
+        action: `form.${formType}`,
+        description: `Lead: ${validData.email}`,
         metadata: {
-          ...data,
+          name: validData.name,
+          email: validData.email,
+          phone: validData.phone || null,
+          company: validData.company || null,
+          message: validData.message || null,
+          sourceUrl: validData.sourceUrl || null,
+          site: validData.site || 'main',
           timestamp: new Date().toISOString(),
         },
       },
