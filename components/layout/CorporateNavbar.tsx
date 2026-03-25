@@ -141,7 +141,7 @@ function useNavigation() {
     ],
     cta: {
       name: t('nav.portal'),
-      href: '/apply',
+      href: '/contact',
     },
   };
 }
