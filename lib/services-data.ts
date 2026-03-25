@@ -195,22 +195,27 @@ export const servicesHe: Service[] = [
         {
           title: 'סינון חכם שחוסך זמן',
           text: 'תפסיקו לבזבז שעות על מיזמים לא מתאימים. אנחנו מבצעים עבורכם את כל תהליך הסינון ומציגים רק מיזמים איכותיים שעברו אקסלרציה מלאה — מותאמים בדיוק לתחומי העניין והחוזקות שלכם.',
+          image: '/images/investors-smart-screening.png',
         },
         {
           title: 'מילוי שאלון והתאמה אישית',
           text: 'תקבלו רשימת מיזמים שנבחרו בדיוק עבורכם. שאלון קצר שעוזר לנו להבין מה מעניין אתכם, מה התקציב ומה התחום — ואנחנו מתאימים את המיזם הספציפי מתוך המאגר הייחודי שלנו.',
+          image: '/images/investors-questionnaire.png',
         },
         {
           title: 'פגישת יזם-משקיע',
           text: 'תפגשו יזמים שמוכנים ומקצועיים. אנחנו מארגנים פגישה אישית בינכם לבין היזם — הכנה מלאה, ירידה לפרטים וחיבור אנושי. מהניסיון שלנו, משקיעים שמים את הכסף על היזם לפני המיזם.',
+          image: '/images/investors-meeting.png',
         },
         {
           title: 'סגירת חוזה השקעה',
           text: 'תסגרו עסקה עם ראש שקט. אנחנו מובילים את תהליך החוזה מול עורכי הדין הרלוונטיים. עובדים עם הרצוג-פוקס-נאמן ממחלקת הייטק — המסמכים הטובים ביותר שמגנים עליכם כמשקיעים.',
+          image: '/images/investors-contract.png',
         },
         {
           title: 'ליווי לאחר השקעה',
           text: 'ההשקעה שלכם בידיים טובות. גם אחרי שחתמתם, אנחנו ממשיכים ללוות את המיזם בתהליך הגיוס בפועל — כדי להגדיל את סיכויי ההצלחה ולשמור על ראש שקט.',
+          image: '/images/investors-post-investment.png',
         },
       ],
     },
@@ -435,22 +440,27 @@ export const servicesEn: Service[] = [
         {
           title: 'Smart Screening That Saves Time',
           text: 'Stop wasting hours on unsuitable ventures. We handle the entire screening process and present only quality ventures that completed full acceleration — matched precisely to your interests and strengths.',
+          image: '/images/investors-smart-screening.png',
         },
         {
           title: 'Questionnaire & Personal Matching',
           text: 'Receive a curated list of ventures selected specifically for you. A brief questionnaire helps us understand your interests, budget and domain — and we match the specific venture from our unique portfolio.',
+          image: '/images/investors-questionnaire.png',
         },
         {
           title: 'Founder-Investor Meeting',
           text: 'Meet prepared and professional founders. We organize a personal meeting between you and the founder — full preparation, deep-dive into details and human connection.',
+          image: '/images/investors-meeting.png',
         },
         {
           title: 'Investment Agreement',
           text: 'Close deals with peace of mind. We lead the contract process with relevant attorneys. Working with Herzog Fox & Neeman from the high-tech department — the best documents to protect you as an investor.',
+          image: '/images/investors-contract.png',
         },
         {
           title: 'Post-Investment Support',
           text: 'Your investment is in good hands. Even after signing, we continue to support the venture through the fundraising process — to maximize success rates and give you peace of mind.',
+          image: '/images/investors-post-investment.png',
         },
       ],
     },
