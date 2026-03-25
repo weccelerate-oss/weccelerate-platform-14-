@@ -316,9 +316,13 @@ export function NewsTable({ news }: NewsTableProps) {
 
     setActionId(id);
     startTransition(async () => {
-      const result = await deleteNewsAction(id);
-      if (!result.success) {
-        alert(result.error || 'שגיאה במחיקת העדכון');
+      try {
+        const result = await deleteNewsAction(id);
+        if (!result.success) {
+          alert(result.error || 'שגיאה במחיקת העדכון');
+        }
+      } catch (err) {
+        alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
       }
       router.refresh();
       setActionId(null);

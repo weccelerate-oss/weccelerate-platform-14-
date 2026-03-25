@@ -87,7 +87,14 @@ export async function updateNewsAction(id: string, data: Partial<NewsFormData>) 
 
 export async function deleteNewsAction(id: string) {
   try {
-    await verifyAdmin();
+    const session = await auth();
+    if (!session?.user) {
+      return { success: false, error: 'לא מחובר - יש להתחבר מחדש' };
+    }
+    if ((session.user as any).role !== 'ADMIN') {
+      return { success: false, error: `אין הרשאת מנהל (role: ${(session.user as any).role || 'undefined'})` };
+    }
+
     await prisma.newsUpdate.delete({
       where: { id },
     });
@@ -98,7 +105,8 @@ export async function deleteNewsAction(id: string) {
     return { success: true };
   } catch (error) {
     console.error('[Admin] Error deleting news:', error);
-    return { success: false, error: 'Failed to delete news' };
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: `שגיאה במחיקה: ${msg}` };
   }
 }
 
