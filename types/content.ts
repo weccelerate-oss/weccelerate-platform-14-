@@ -9,6 +9,8 @@
 
 export type UrgencyLevel = 'normal' | 'important' | 'urgent' | 'breaking';
 
+export type NewsCategory = 'press' | 'announcement' | 'partnership' | 'opinion' | 'profile';
+
 export interface NewsUpdate {
   /** Unique identifier */
   id: string;
@@ -24,6 +26,12 @@ export interface NewsUpdate {
   excerpt?: string;
   /** Whether this should be pinned/featured */
   isPinned?: boolean;
+  /** Optional article thumbnail / OG image */
+  imageUrl?: string;
+  /** Publication / source name */
+  source?: string;
+  /** Content category for filtering */
+  category?: NewsCategory;
 }
 
 // =============================================================================
@@ -88,13 +96,16 @@ export interface Event {
 // VIDEO CONTENT
 // =============================================================================
 
-export type VideoCategory = 
-  | 'interview' 
-  | 'summary' 
-  | 'webinar' 
-  | 'tutorial' 
-  | 'testimonial' 
-  | 'highlight';
+export type VideoCategory =
+  | 'interview'
+  | 'summary'
+  | 'webinar'
+  | 'tutorial'
+  | 'testimonial'
+  | 'highlight'
+  | 'podcast'
+  | 'reels'
+  | 'tv_interview';
 
 export type VideoProvider = 'youtube' | 'vimeo' | 'wistia' | 'custom' | 'other';
 

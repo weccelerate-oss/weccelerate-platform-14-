@@ -1,0 +1,17 @@
+{
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--max-old-space-size=4096"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/monthly-report",
+      "schedule": "0 8 1 * *"
+    },
+    {
+      "path": "/api/cron/youtube-sync",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}

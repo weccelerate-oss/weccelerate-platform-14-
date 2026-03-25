@@ -111,7 +111,7 @@ export const COMPANY_INFO = {
   url: 'https://weccelerate.co.il',
   logo: 'https://weccelerate.co.il/logo.png',
   image: 'https://weccelerate.co.il/og-image.jpg',
-  email: 'Raz@weccelerate.co.il',
+  email: 'info@weccelerate.co.il',
   telephone: '+972-55-564-7538',
   foundingDate: '2020', // Update with real date
   founders: [
@@ -136,7 +136,7 @@ export const COMPANY_INFO = {
     'https://www.facebook.com/weccelerate',
     // Add more social profiles
   ],
-  openingHours: ['Mo-Th 09:00-18:00', 'Fr 09:00-14:00'],
+  openingHours: ['Su-Th 09:00-18:00'],
   priceRange: '₪₪₪',
   areaServed: ['Israel', 'IL'],
   serviceTypes: [
