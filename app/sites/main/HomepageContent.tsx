@@ -91,7 +91,7 @@ const partnersLogos = [
   { name: 'Leumit WeCcelerate', logo: '/images/logos/leumit-weccelerate-logo.png' },
   { name: 'Leumit Health Services', logo: '/images/logos/leumit-logo.png' },
   { name: 'Herzog Fox Neeman', logo: '/images/logos/herzog-logo.png' },
-  { name: 'Jerusalem Development Authority', logo: '/images/logos/harashut-logo.png' },
+  { name: 'Jerusalem Development Authority', logo: '/images/logos/jerusalem-development-authority.png' },
   { name: 'Har Hotzvim', logo: '/images/logos/har-hozvim-logo.png' },
 ];
 
