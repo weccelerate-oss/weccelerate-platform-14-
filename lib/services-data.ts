@@ -5,6 +5,7 @@
 export interface ServiceSection {
   title: string;
   text: string;
+  image?: string;
 }
 
 export interface Service {
@@ -187,7 +188,7 @@ export const servicesHe: Service[] = [
     shortDescription:
       'תמצאו את ההשקעה הבאה שלכם — בלי לבזבז זמן על סינון. מיזמים שעברו תהליך אקסלרציה מלא, מוכנים להשקעה ומותאמים בדיוק לתחומי העניין שלכם.',
     isPremium: false,
-    imageSrc: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&h=600&fit=crop',
+    imageSrc: '/images/investors-hero.png',
     fullContent: {
       intro: 'חוסכים לכם כ-80% מפעולת הסינון. מיזמים שעברו אקסלרציה מלאה, מוכנים להשקעה ומותאמים לתחומים שלכם.',
       sections: [
@@ -220,33 +221,39 @@ export const servicesHe: Service[] = [
     shortDescription:
       'תיכנסו לפגישת המשקיעים עם ביטחון מלא. סימולציות, תרגול Pitch, הכנה ל-100 השאלות הקשות וחיבור ישיר למשקיעים רלוונטיים.',
     isPremium: false,
-    imageSrc: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=600&fit=crop',
+    imageSrc: '/images/investor-prep-hero.png',
     fullContent: {
       intro: 'ככל שההכנה המוקדמת מקצועית יותר, כך אתם קרובים יותר לגיוס הכסף. תהליך שמכשיר אתכם לעולם העסקי ומגדיל את אחוזי הגיוס.',
       sections: [
         {
           title: 'הכרת החומרים והמונחים',
           text: 'תדברו בשפה של משקיעים מיום ראשון. קריאה והבנה של מילון מונחים, תהליכי פיתוח, הליכי פטנט — כל מה שצריך לדעת כדי לא להיתפס לא מוכנים.',
+          image: '/images/investor-prep-terms.png',
         },
         {
           title: 'כתיבת נאום מעלית',
           text: 'תשכנעו כל משקיע ב-60 שניות. הזמן מול המשקיע יקר — נלמד אתכם למקסם כל שנייה עם נאום מעלית חד שגורם למשקיע לרצות לשמוע עוד.',
+          image: '/images/investor-prep-elevator.png',
         },
         {
           title: 'הכנה ל-100 השאלות הקשות',
           text: 'תהיו מוכנים לכל שאלה שמשקיע יזרוק עליכם. מאגר של 100 שאלות לפי נושאים וקטגוריות — עם תשובות מוכנות שמראות שאתם שולטים בחומר.',
+          image: '/images/investor-prep-questions.png',
         },
         {
           title: 'סימולציות פגישת משקיעים',
           text: 'תתרגלו עד שזה מושלם. סימולציות של מצגת 15 דקות, קריאה מעמיקה של התוכנית העסקית והפיננסית — כדי שתגיעו לפגישה האמיתית בטוחים ומוכנים.',
+          image: '/images/investor-prep-simulations.png',
         },
         {
           title: 'חיבור ישיר למשקיעים',
           text: 'תפגשו את המשקיעים הנכונים. ל-WeCcelerate קשרים אישיים עם מאנג׳לים ועד הקרנות הגדולות בהייטק הישראלי. מיפוי מעגלי השקעה, ניסוח מיילים ומעקב צמוד עד לסגירת עסקה.',
+          image: '/images/investor-prep-connections.png',
         },
         {
           title: 'ליווי בתהליך החוזה',
           text: 'תסגרו עסקה מוגנת. מעבר על חוזה השקעה, הסכמי סודיות (NDA), הדרכה על קרנות הון סיכון — כל המסמכים המשפטיים שמגנים עליכם, בליווי הרצוג-פוקס-נאמן.',
+          image: '/images/investor-prep-contract.png',
         },
       ],
     },
@@ -421,7 +428,7 @@ export const servicesEn: Service[] = [
     shortDescription:
       'Find your next investment — without wasting time on screening. Ventures that completed full acceleration, ready for investment and matched to your interests.',
     isPremium: false,
-    imageSrc: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&h=600&fit=crop',
+    imageSrc: '/images/investors-hero.png',
     fullContent: {
       intro: 'We save you ~80% of the screening process. Accelerated ventures, investment-ready and matched to your domain.',
       sections: [
@@ -454,33 +461,39 @@ export const servicesEn: Service[] = [
     shortDescription:
       'Walk into investor meetings with full confidence. Simulations, pitch practice, preparation for the 100 toughest questions and direct connections to relevant investors.',
     isPremium: false,
-    imageSrc: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=600&fit=crop',
+    imageSrc: '/images/investor-prep-hero.png',
     fullContent: {
       intro: 'The more professional your preparation, the closer you are to raising capital. A process that trains you for the business world and increases your fundraising success rate.',
       sections: [
         {
           title: 'Master the Language of Investors',
           text: 'Speak investor language from day one. Understanding terminology, development processes, patent procedures — everything you need to never be caught unprepared.',
+          image: '/images/investor-prep-terms.png',
         },
         {
           title: 'Elevator Pitch',
           text: 'Convince any investor in 60 seconds. Time with investors is precious — learn to maximize every second with a sharp elevator pitch that makes investors want to hear more.',
+          image: '/images/investor-prep-elevator.png',
         },
         {
           title: 'The 100 Toughest Questions',
           text: 'Be ready for any question an investor throws at you. A database of 100 questions by topic and category — with prepared answers that show you master the material.',
+          image: '/images/investor-prep-questions.png',
         },
         {
           title: 'Investor Meeting Simulations',
           text: 'Practice until it is perfect. 15-minute presentation simulations, deep reading of business and financial plans — so you arrive at the real meeting confident and ready.',
+          image: '/images/investor-prep-simulations.png',
         },
         {
           title: 'Direct Investor Connections',
           text: 'Meet the right investors. WeCcelerate has personal connections from angels to the largest VC funds in Israeli high-tech. Investment circle mapping, email drafting and close follow-up until deal closing.',
+          image: '/images/investor-prep-connections.png',
         },
         {
           title: 'Contract Process Support',
           text: 'Close a protected deal. Investment agreement review, NDAs, VC fund guidance — all legal documents that protect you, with Herzog Fox & Neeman support.',
+          image: '/images/investor-prep-contract.png',
         },
       ],
     },
