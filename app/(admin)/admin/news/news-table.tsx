@@ -296,7 +296,14 @@ export function NewsTable({ news }: NewsTableProps) {
   const handleToggleActive = (item: NewsUpdate) => {
     setActionId(item.id);
     startTransition(async () => {
-      await updateNewsAction(item.id, { isActive: !item.isActive });
+      try {
+        const result = await updateNewsAction(item.id, { isActive: !item.isActive });
+        if (!result.success) {
+          alert(result.error || 'שגיאה בעדכון');
+        }
+      } catch (err) {
+        alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
+      }
       router.refresh();
       setActionId(null);
     });
@@ -305,7 +312,14 @@ export function NewsTable({ news }: NewsTableProps) {
   const handleTogglePinned = (item: NewsUpdate) => {
     setActionId(item.id);
     startTransition(async () => {
-      await updateNewsAction(item.id, { isPinned: !item.isPinned });
+      try {
+        const result = await updateNewsAction(item.id, { isPinned: !item.isPinned });
+        if (!result.success) {
+          alert(result.error || 'שגיאה בעדכון');
+        }
+      } catch (err) {
+        alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
+      }
       router.refresh();
       setActionId(null);
     });

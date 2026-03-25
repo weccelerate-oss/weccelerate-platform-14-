@@ -20,7 +20,7 @@ import type { UrgencyLevel, EventStatus, VideoCategory, UserRole } from '@prisma
 
 async function verifyAdmin() {
   const session = await auth();
-  if (!session?.user || session.user.role !== 'ADMIN') {
+  if (!session?.user || (session.user as any).role !== 'ADMIN') {
     throw new Error('Unauthorized: Admin access required');
   }
   return session.user;
@@ -69,7 +69,14 @@ export async function createNewsAction(data: NewsFormData) {
 
 export async function updateNewsAction(id: string, data: Partial<NewsFormData>) {
   try {
-    await verifyAdmin();
+    const session = await auth();
+    if (!session?.user) {
+      return { success: false, error: 'לא מחובר - יש להתחבר מחדש' };
+    }
+    if ((session.user as any).role !== 'ADMIN') {
+      return { success: false, error: `אין הרשאת מנהל (role: ${(session.user as any).role || 'undefined'})` };
+    }
+
     const news = await prisma.newsUpdate.update({
       where: { id },
       data,
@@ -81,7 +88,8 @@ export async function updateNewsAction(id: string, data: Partial<NewsFormData>) 
     return { success: true };
   } catch (error) {
     console.error('[Admin] Error updating news:', error);
-    return { success: false, error: 'Failed to update news' };
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: `שגיאה בעדכון: ${msg}` };
   }
 }
 
@@ -143,13 +151,20 @@ export interface EventFormData {
 export async function createEventAction(data: EventFormData) {
   try {
     await verifyAdmin();
+
+    // Validate date
+    const parsedDate = new Date(data.date);
+    if (isNaN(parsedDate.getTime())) {
+      return { success: false, error: 'תאריך לא תקין' };
+    }
+
     const event = await prisma.event.create({
       data: {
         name: data.name,
         nameEn: data.nameEn,
         slug: data.slug,
         description: data.description,
-        date: new Date(data.date),
+        date: parsedDate,
         time: data.time,
         endTime: data.endTime,
         locationType: data.locationType,
@@ -387,9 +402,17 @@ export async function createUserAction(data: CreateUserFormData) {
   }
 }
 
+const VALID_ROLES: UserRole[] = ['ADMIN', 'ENTREPRENEUR', 'MENTOR', 'INVESTOR', 'PARTNER'];
+
 export async function updateUserAction(id: string, data: Partial<CreateUserFormData>) {
   try {
     await verifyAdmin();
+
+    // Validate role if provided
+    if (data.role && !VALID_ROLES.includes(data.role)) {
+      return { success: false, error: 'תפקיד לא תקין' };
+    }
+
     const user = await prisma.user.update({
       where: { id },
       data: {
@@ -400,6 +423,18 @@ export async function updateUserAction(id: string, data: Partial<CreateUserFormD
         role: data.role,
       },
     });
+
+    // Log role change
+    if (data.role) {
+      await prisma.activityLog.create({
+        data: {
+          action: 'user.role_changed',
+          description: `User ${user.email} role changed to ${data.role}`,
+          userId: user.id,
+          metadata: { newRole: data.role, changedBy: 'admin' },
+        },
+      }).catch(() => {});
+    }
 
     revalidatePath('/admin/users');
 
@@ -492,6 +527,15 @@ export interface StoryFormData {
 export async function createStoryAction(data: StoryFormData) {
   try {
     await verifyAdmin();
+
+    // Check slug uniqueness
+    const existingSlug = await prisma.successStory.findFirst({
+      where: { slug: data.slug },
+    });
+    if (existingSlug) {
+      return { success: false, error: `slug "${data.slug}" כבר קיים. נא לבחור slug אחר.` };
+    }
+
     const story = await prisma.successStory.create({
       data: {
         companyName: data.companyName,
@@ -525,9 +569,8 @@ export async function createStoryAction(data: StoryFormData) {
 }
 
 export async function updateStoryAction(id: string, data: StoryFormData) {
-  await verifyAdmin();
-
   try {
+    await verifyAdmin();
     const story = await prisma.successStory.update({
       where: { id },
       data: {
@@ -687,8 +730,23 @@ export async function seedStoriesFromMockAction() {
 // YOUTUBE SYNC ACTIONS
 // =============================================================================
 
+let lastYouTubeSyncTime = 0;
+const YOUTUBE_SYNC_COOLDOWN = 5 * 60 * 1000; // 5 minutes
+
 export async function syncYouTubeAction() {
-  await verifyAdmin();
+  try {
+    await verifyAdmin();
+  } catch (error) {
+    return { success: false, error: 'אין הרשאת מנהל' };
+  }
+
+  // Rate limit YouTube sync
+  const now = Date.now();
+  if (now - lastYouTubeSyncTime < YOUTUBE_SYNC_COOLDOWN) {
+    const remainingMin = Math.ceil((YOUTUBE_SYNC_COOLDOWN - (now - lastYouTubeSyncTime)) / 60000);
+    return { success: false, error: `נא להמתין ${remainingMin} דקות בין סנכרונים` };
+  }
+  lastYouTubeSyncTime = now;
 
   try {
     const { syncYouTubeVideos } = await import('@/lib/youtube-sync');
