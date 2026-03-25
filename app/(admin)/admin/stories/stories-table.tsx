@@ -46,7 +46,14 @@ export function StoriesTable({ stories }: StoriesTableProps) {
   const handleDelete = (id: string, companyName: string) => {
     if (confirm(`האם למחוק את "${companyName}"?`)) {
       startTransition(async () => {
-        await deleteStoryAction(id);
+        try {
+          const result = await deleteStoryAction(id);
+          if (!result.success) {
+            alert(result.error || 'שגיאה במחיקת הסיפור');
+          }
+        } catch (err) {
+          alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
+        }
         router.refresh();
       });
     }
@@ -55,7 +62,14 @@ export function StoriesTable({ stories }: StoriesTableProps) {
 
   const handleToggleActive = (id: string) => {
     startTransition(async () => {
-      await toggleStoryActiveAction(id);
+      try {
+        const result = await toggleStoryActiveAction(id);
+        if (!result.success) {
+          alert(result.error || 'שגיאה בעדכון הנראות');
+        }
+      } catch (err) {
+        alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
+      }
       router.refresh();
     });
     setOpenMenuId(null);
@@ -63,7 +77,14 @@ export function StoriesTable({ stories }: StoriesTableProps) {
 
   const handleToggleFeatured = (id: string) => {
     startTransition(async () => {
-      await toggleStoryFeaturedAction(id);
+      try {
+        const result = await toggleStoryFeaturedAction(id);
+        if (!result.success) {
+          alert(result.error || 'שגיאה בעדכון מומלץ');
+        }
+      } catch (err) {
+        alert('שגיאה בתקשורת עם השרת: ' + (err instanceof Error ? err.message : String(err)));
+      }
       router.refresh();
     });
     setOpenMenuId(null);
