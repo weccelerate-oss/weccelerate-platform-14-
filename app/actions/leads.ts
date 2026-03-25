@@ -22,7 +22,7 @@ const ContactFormSchema = z.object({
     .email('כתובת אימייל לא תקינה'),
   phone: z.string()
     .min(1, 'טלפון הוא שדה חובה')
-    .refine((val) => /^[\d\s\-+()]{7,20}$/.test(val), {
+    .refine((val) => /^[+]?\d[\d\s\-()]{6,19}$/.test(val) && val.replace(/\D/g, '').length >= 7, {
       message: 'מספר טלפון לא תקין',
     }),
   company: z.string()
@@ -59,7 +59,7 @@ export interface FormState {
 // ZAPIER WEBHOOK
 // =============================================================================
 
-const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/7280045/ucs3rvp/';
+const ZAPIER_WEBHOOK_URL = process.env.ZAPIER_WEBHOOK_URL || '';
 
 async function sendToZapier(data: {
   name: string;
@@ -81,6 +81,10 @@ async function sendToZapier(data: {
       'הודעה': data.message || '',
       'חברה': data.company || '',
     };
+    if (!ZAPIER_WEBHOOK_URL) {
+      console.warn('[Zapier] ZAPIER_WEBHOOK_URL not configured');
+      return;
+    }
     await fetch(ZAPIER_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -317,9 +321,21 @@ export async function submitEventRegistration(
     formType: 'event',
   });
 
-  // Update event registration count
+  // Update event registration count with capacity check
   if (eventId) {
     try {
+      const event = await prisma.event.findUnique({
+        where: { id: eventId },
+        select: { capacity: true, registeredCount: true },
+      });
+
+      if (event?.capacity && event.registeredCount >= event.capacity) {
+        return {
+          success: false,
+          message: 'האירוע מלא - אין מקומות פנויים.',
+        };
+      }
+
       await prisma.event.update({
         where: { id: eventId },
         data: { registeredCount: { increment: 1 } },

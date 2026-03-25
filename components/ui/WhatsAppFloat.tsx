@@ -7,7 +7,7 @@ export function WhatsAppFloat() {
     <TrackedLink
       trackAction="click.whatsapp"
       trackMeta={{ location: 'float-button' }}
-      href="https://wa.me/972555647538"
+      href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '972555647538'}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="שלחו לנו הודעה בוואטסאפ"

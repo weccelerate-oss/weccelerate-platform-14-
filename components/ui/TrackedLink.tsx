@@ -16,7 +16,11 @@ export function TrackedLink({
   ...props
 }: TrackedLinkProps) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    trackClick(trackAction, trackMeta);
+    try {
+      trackClick(trackAction, trackMeta);
+    } catch (err) {
+      console.error('Analytics tracking failed:', err);
+    }
     onClick?.(e);
   };
 

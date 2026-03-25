@@ -75,8 +75,11 @@ export function LiveTicker({
     contentWidthRef.current = totalWidth;
     positionRef.current = 0;
 
+    // Respect prefers-reduced-motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const animate = () => {
-      if (!isPaused) {
+      if (!isPaused && !prefersReducedMotion) {
         // RTL: scroll moves content to the right (positive translateX)
         positionRef.current += pixelsPerFrame;
 

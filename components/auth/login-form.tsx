@@ -285,17 +285,7 @@ export function LoginForm() {
           )}
         </div>
 
-        {/* Remember Me */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="remember"
-            className="w-4 h-4 rounded border-white/[0.1] bg-white/[0.05] text-[#c8a951] focus:ring-[#c8a951]/50"
-          />
-          <label htmlFor="remember" className="text-sm text-white/50">
-            {t('login.form.rememberMe')}
-          </label>
-        </div>
+        {/* Forgot Password */}
 
         {/* Submit Button */}
         <motion.button

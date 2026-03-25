@@ -33,6 +33,7 @@ import {
   Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { signOut } from 'next-auth/react';
 import { ProjectTimeline } from './components/project-timeline';
 import { FileVault } from './components/file-vault';
 import { WhatsAppButton } from './components/whatsapp-button';
@@ -79,25 +80,25 @@ interface DashboardContentProps {
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'לוח בקרה', href: '/portal/dashboard', id: 'dashboard' },
-  { icon: Target, label: 'הפרויקט שלי', href: '/portal/project', id: 'project' },
-  { icon: FolderOpen, label: 'מסמכים', href: '/portal/documents', id: 'documents' },
-  { icon: Calendar, label: 'לוח שנה', href: '/portal/calendar', id: 'calendar' },
-  { icon: MessageSquare, label: 'הודעות', href: '/portal/messages', id: 'messages', badge: 2 },
-  { icon: TrendingUp, label: 'התקדמות', href: '/portal/progress', id: 'progress' },
-  { icon: GraduationCap, label: 'מרכז למידה', href: '/portal/learning', id: 'learning' },
+  { icon: Target, label: 'הפרויקט שלי', href: '/portal/dashboard', id: 'project' },
+  { icon: FolderOpen, label: 'מסמכים', href: '/portal/dashboard', id: 'documents' },
+  { icon: Calendar, label: 'לוח שנה', href: '/portal/dashboard', id: 'calendar', comingSoon: true },
+  { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages', badge: 2, comingSoon: true },
+  { icon: TrendingUp, label: 'התקדמות', href: '/portal/dashboard', id: 'progress' },
+  { icon: GraduationCap, label: 'מרכז למידה', href: '/portal/dashboard', id: 'learning', comingSoon: true },
 ];
 
 const BOTTOM_NAV_ITEMS = [
-  { icon: Settings, label: 'הגדרות', href: '/portal/settings', id: 'settings' },
-  { icon: HelpCircle, label: 'עזרה', href: '/portal/help', id: 'help' },
+  { icon: Settings, label: 'הגדרות', href: '/portal/dashboard', id: 'settings', comingSoon: true },
+  { icon: HelpCircle, label: 'עזרה', href: '/portal/dashboard', id: 'help', comingSoon: true },
 ];
 
 // Mobile bottom nav - key items for thumb access
 const MOBILE_BOTTOM_NAV = [
   { icon: LayoutDashboard, label: 'בית', href: '/portal/dashboard', id: 'dashboard' },
-  { icon: Target, label: 'פרויקט', href: '/portal/project', id: 'project' },
-  { icon: FolderOpen, label: 'מסמכים', href: '/portal/documents', id: 'documents' },
-  { icon: MessageSquare, label: 'הודעות', href: '/portal/messages', id: 'messages', badge: 2 },
+  { icon: Target, label: 'פרויקט', href: '/portal/dashboard', id: 'project' },
+  { icon: FolderOpen, label: 'מסמכים', href: '/portal/dashboard', id: 'documents' },
+  { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages', badge: 2 },
   { icon: Menu, label: 'עוד', href: '#more', id: 'more' },
 ];
 
@@ -154,7 +155,7 @@ export function DashboardContent({
 
   const firstName = user.name?.split(' ')[0] || 'יזם';
   const unreadCount = notifications.filter(n => !n.isRead).length;
-  const completionPercent = Math.round((project.stage / 10) * 100);
+  const completionPercent = Math.min(100, Math.round((project.stage / 10) * 100));
 
   return (
     <div className="flex min-h-screen bg-slate-50/50" dir="rtl">
@@ -298,7 +299,11 @@ export function DashboardContent({
               </motion.div>
             )}
             {isSidebarOpen && (
-              <button className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-slate-700 transition-all text-slate-400 hover:text-white">
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-slate-700 transition-all text-slate-400 hover:text-white"
+                title="התנתק"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
             )}
@@ -388,7 +393,11 @@ export function DashboardContent({
                   <p className="font-medium text-sm text-white truncate">{user.name}</p>
                   <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
                 </div>
-                <button className="p-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white">
+                <button
+                  onClick={() => signOut({ callbackUrl: '/login' })}
+                  className="p-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+                  title="התנתק"
+                >
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
@@ -435,7 +444,7 @@ export function DashboardContent({
                 >
                   <Bell className="w-[18px] h-[18px] text-slate-500" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
+                    <span className="absolute top-0.5 left-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
                       {unreadCount}
                     </span>
                   )}
@@ -453,7 +462,7 @@ export function DashboardContent({
                     >
                       <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                         <h3 className="font-semibold text-slate-900 text-sm">התראות</h3>
-                        <button className="text-xs text-royal-600 hover:underline">סמן הכל כנקרא</button>
+                        <button onClick={() => { /* TODO: mark all as read API */ }} className="text-xs text-royal-600 hover:underline">סמן הכל כנקרא</button>
                       </div>
                       <div className="max-h-72 overflow-y-auto">
                         {notifications.length === 0 ? (
@@ -486,9 +495,9 @@ export function DashboardContent({
                         )}
                       </div>
                       <div className="p-3 border-t border-slate-100 text-center">
-                        <a href="/portal/notifications" className="text-xs text-royal-600 hover:underline font-medium">
+                        <span className="text-xs text-royal-600 font-medium">
                           צפייה בכל ההתראות
-                        </a>
+                        </span>
                       </div>
                     </motion.div>
                   )}

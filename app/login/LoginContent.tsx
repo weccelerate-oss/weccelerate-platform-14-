@@ -82,10 +82,7 @@ export function LoginContent() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-sm text-white/40">
-            {t('login.noAccount')}{' '}
-            <Link href="/register" className="text-[#c8a951] hover:text-[#e8d48b] font-medium transition-colors">
-              {t('login.register')}
-            </Link>
+            {t('login.contactAdmin')}
           </p>
         </div>
 

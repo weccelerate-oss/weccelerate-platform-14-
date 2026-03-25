@@ -32,7 +32,7 @@ interface WhatsAppButtonProps {
 // =============================================================================
 
 // Default WeCcelerate support number
-const DEFAULT_PHONE = '+972535551234';
+const DEFAULT_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '+972555647538';
 
 // Pre-defined message templates
 const MESSAGE_TEMPLATES = [

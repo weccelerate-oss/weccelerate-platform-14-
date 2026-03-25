@@ -49,7 +49,7 @@ function createSchema(t: (key: string) => string) {
       .string()
       .min(1, t('contact.form.phone'))
       .refine(
-        (val) => /^[\d\s\-+()]{7,20}$/.test(val),
+        (val) => /^[+]?\d[\d\s\-()]{6,19}$/.test(val) && val.replace(/\D/g, '').length >= 7,
         t('contact.form.phone')
       ),
     company: z
@@ -238,6 +238,9 @@ export function ContactForm() {
       <input type="hidden" name="sourceUrl" value={currentUrl} />
       <input type="hidden" name="referrerUrl" value={referrer} />
       <input type="hidden" name="site" value="main" />
+      {searchParams.get('service') && (
+        <input type="hidden" name="service" value={searchParams.get('service') || ''} />
+      )}
       {searchParams.get('utm_source') && (
         <input type="hidden" name="utm_source" value={searchParams.get('utm_source') || ''} />
       )}

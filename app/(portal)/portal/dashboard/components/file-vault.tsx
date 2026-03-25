@@ -118,10 +118,16 @@ export function FileVault({ files }: FileVaultProps) {
     return matchesSearch && matchesType;
   });
 
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
   const handleDownload = async (file: FileType) => {
     setDownloadingId(file.id);
+    setDownloadError(null);
     try {
       const response = await fetch(file.url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -133,6 +139,8 @@ export function FileVault({ files }: FileVaultProps) {
       document.body.removeChild(a);
     } catch (error) {
       console.error('Download failed:', error);
+      setDownloadError('שגיאה בהורדת הקובץ. נסה שוב.');
+      setTimeout(() => setDownloadError(null), 3000);
     } finally {
       setTimeout(() => setDownloadingId(null), 1000);
     }

@@ -151,9 +151,13 @@ export function SuccessStories({
     setCurrentIndex((prev) => (prev - 1 + stories.length) % stories.length);
   }, [stories.length]);
 
-  // Auto-advance carousel
+  // Auto-advance carousel (respects prefers-reduced-motion)
   useEffect(() => {
     if (!autoPlay || isPaused || stories.length <= 1 || variant !== 'carousel') return;
+
+    // Respect user's motion preferences
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
 
     const timer = setInterval(goToNext, interval);
     return () => clearInterval(timer);
@@ -247,7 +251,7 @@ export function SuccessStories({
           onMouseLeave={() => setIsPaused(false)}
         >
           {/* Story cards */}
-          <div className="overflow-hidden">
+          <div className="overflow-hidden" aria-live="polite" aria-atomic="true">
             <div
               className="flex transition-transform duration-500 ease-out"
               style={{ transform: `translateX(${currentIndex * 100}%)` }}

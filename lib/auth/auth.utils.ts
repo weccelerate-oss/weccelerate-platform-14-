@@ -71,7 +71,7 @@ export function validatePasswordStrength(password: string): {
  * Get the current session (server-side)
  */
 export async function getSession() {
-  return getServerSession(authOptions);
+  return auth();
 }
 
 /**

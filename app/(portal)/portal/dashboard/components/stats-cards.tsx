@@ -126,7 +126,7 @@ export function StatsCards({ project }: StatsCardsProps) {
       subValue: getStageLabel(project.status),
       icon: <Target className="w-5 h-5" />,
       color: 'blue',
-      progress: (project.stage / 10) * 100,
+      progress: Math.min(100, (project.stage / 10) * 100),
     },
     {
       label: 'גיוס הון',
