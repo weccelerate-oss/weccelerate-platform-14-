@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import BusinessTimeline from './BusinessTimeline';
-import ServiceFullSections from '@/components/services/ServiceFullSections';
+
 
 // =============================================================================
 // BUSINESS CONSULTING CONTENT — Client wrapper for i18n
@@ -96,11 +96,6 @@ export default function BusinessConsultingContent() {
       {/* INTERACTIVE TIMELINE SECTION                                      */}
       {/* ================================================================= */}
       <BusinessTimeline />
-
-      {/* ================================================================= */}
-      {/* SERVICE DETAILS — "מה כולל השירות?"                               */}
-      {/* ================================================================= */}
-      <ServiceFullSections serviceId="business-consulting" />
 
       {/* ================================================================= */}
       {/* CTA SECTION                                                       */}

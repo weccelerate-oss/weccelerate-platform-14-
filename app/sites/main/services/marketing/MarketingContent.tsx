@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import MarketingTimeline from './MarketingTimeline';
-import ServiceFullSections from '@/components/services/ServiceFullSections';
+
 
 // =============================================================================
 // MARKETING CONTENT — Client wrapper for i18n
@@ -124,11 +124,6 @@ export default function MarketingContent() {
       {/* INTERACTIVE TIMELINE SECTION                                      */}
       {/* ================================================================= */}
       <MarketingTimeline />
-
-      {/* ================================================================= */}
-      {/* SERVICE DETAILS — "מה כולל השירות?"                               */}
-      {/* ================================================================= */}
-      <ServiceFullSections serviceId="marketing" />
 
       {/* ================================================================= */}
       {/* CTA SECTION                                                       */}

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import BioScanPanel from './BioScanPanel';
-import ServiceFullSections from '@/components/services/ServiceFullSections';
+
 
 // =============================================================================
 // MEDTECH CONTENT — Client wrapper for i18n
@@ -134,11 +134,6 @@ export default function MedTechContent() {
       {/* BIO-SCAN INTERACTIVE PANEL                                        */}
       {/* ================================================================= */}
       <BioScanPanel />
-
-      {/* ================================================================= */}
-      {/* SERVICE DETAILS — "מה כולל השירות?"                               */}
-      {/* ================================================================= */}
-      <ServiceFullSections serviceId="medtech-leumit" />
 
       {/* ================================================================= */}
       {/* CTA SECTION                                                       */}

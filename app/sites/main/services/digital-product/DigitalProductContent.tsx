@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import StickyScroll from './StickyScroll';
-import ServiceFullSections from '@/components/services/ServiceFullSections';
+
 
 // =============================================================================
 // DIGITAL PRODUCT CONTENT — Client wrapper for i18n
@@ -92,11 +92,6 @@ export default function DigitalProductContent() {
       {/* STICKY SCROLL SECTION                                             */}
       {/* ================================================================= */}
       <StickyScroll />
-
-      {/* ================================================================= */}
-      {/* SERVICE DETAILS — "מה כולל השירות?"                               */}
-      {/* ================================================================= */}
-      <ServiceFullSections serviceId="digital-product" />
 
       {/* ================================================================= */}
       {/* CTA SECTION                                                       */}

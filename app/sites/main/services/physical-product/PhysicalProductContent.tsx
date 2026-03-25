@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ArrowLeft, ArrowRight, Cpu, Shield, Zap, Award } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import CADPanel from './CADPanel';
-import ServiceFullSections from '@/components/services/ServiceFullSections';
+
 
 // =============================================================================
 // PHYSICAL PRODUCT CONTENT — Client wrapper for i18n
@@ -96,11 +96,6 @@ export default function PhysicalProductContent() {
       {/* INTERACTIVE CAD PANEL                                             */}
       {/* ================================================================= */}
       <CADPanel />
-
-      {/* ================================================================= */}
-      {/* SERVICE DETAILS — "מה כולל השירות?"                               */}
-      {/* ================================================================= */}
-      <ServiceFullSections serviceId="physical-product" />
 
       {/* ================================================================= */}
       {/* CAPABILITIES STRIP                                                */}

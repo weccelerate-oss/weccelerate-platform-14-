@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Target, Box, Code2, HeartPulse, TrendingUp, Handshake, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import { servicesHe, servicesEn, type Service } from '@/lib/services-data';
-import ServiceFullSections from '@/components/services/ServiceFullSections';
+
 
 // =============================================================================
 // ICON MAP
@@ -142,11 +142,6 @@ export function ServiceDetailContent({ serviceId }: { serviceId: string }) {
           </div>
         </div>
       </section>
-
-      {/* ================================================================= */}
-      {/* SERVICE DETAILS — "מה כולל השירות?"                               */}
-      {/* ================================================================= */}
-      <ServiceFullSections serviceId={serviceId} />
 
       {/* ================================================================= */}
       {/* CTA SECTION                                                       */}
