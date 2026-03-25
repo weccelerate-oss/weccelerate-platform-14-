@@ -1,39 +1,26 @@
 'use client';
 
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/i18n';
 import { servicesHe, servicesEn } from '@/lib/services-data';
-import { useEffect, useRef, useState } from 'react';
 
 interface ServiceFullSectionsProps {
   serviceId: string;
 }
 
-function useInView(threshold = 0.2) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(el);
-        }
-      },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return { ref, isVisible };
+// Dynamic span patterns based on section count
+function getSpanMap(count: number): string[] {
+  if (count === 3) return ['md:col-span-2', '', 'md:col-span-3'];
+  if (count === 4) return ['md:col-span-2', '', '', 'md:col-span-2'];
+  if (count === 5) return ['md:col-span-2', '', '', 'md:col-span-2', 'md:col-span-3'];
+  if (count === 6) return ['md:col-span-2', '', '', 'md:col-span-2', 'md:col-span-2', ''];
+  if (count === 7) return ['md:col-span-2', '', '', 'md:col-span-2', 'md:col-span-2', '', 'md:col-span-3'];
+  return Array(count).fill('');
 }
 
 export default function ServiceFullSections({ serviceId }: ServiceFullSectionsProps) {
-  const { lang, dir } = useLanguage();
+  const { lang } = useLanguage();
   const services = lang === 'he' ? servicesHe : servicesEn;
   const service = services.find((s) => s.id === serviceId);
 
@@ -41,161 +28,83 @@ export default function ServiceFullSections({ serviceId }: ServiceFullSectionsPr
 
   const { intro, sections } = service.fullContent;
   const hasImages = sections.some((s) => s.image);
+  const spanMap = getSpanMap(sections.length);
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative py-20 sm:py-28 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0d1321] to-[#070b1e]" />
 
-      <div className="relative z-10">
+      <div className="container-corporate relative z-10">
         {/* Section heading */}
-        <div className="text-center py-16 sm:py-20 px-4">
+        <div className="text-center mb-12 sm:mb-16">
           <span className="inline-block text-[#c8a951] text-sm font-bold uppercase tracking-[0.3em] mb-4">
             {lang === 'he' ? 'מה כולל השירות?' : 'What Does the Service Include?'}
           </span>
-          <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
             {intro}
           </p>
         </div>
 
-        {/* Sections — alternating full-width rows on desktop, stacked on mobile */}
-        {hasImages ? (
-          <div className="flex flex-col">
-            {sections.map((section, idx) => (
-              <SectionRow
-                key={idx}
-                section={section}
-                idx={idx}
-                reverse={idx % 2 === 1}
-                dir={dir}
-              />
-            ))}
-          </div>
-        ) : (
-          /* Fallback grid for sections without images */
-          <div className="container-corporate px-4 pb-20">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sections.map((section, idx) => (
-                <article
-                  key={idx}
-                  className="relative rounded-xl bg-white/[0.03] border border-white/[0.06] p-8 hover:bg-white/[0.05] hover:border-white/[0.1] transition-all duration-500 group"
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+          {sections.map((section, idx) => {
+            const span = spanMap[idx] || '';
+            const isFullWidth = span === 'md:col-span-3';
+
+            return (
+              <div key={idx} className={span}>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-60px' }}
+                  transition={{ duration: 0.5, delay: idx * 0.08 }}
+                  whileHover={{ scale: 1.02 }}
+                  className={`relative group overflow-hidden rounded-2xl border border-white/[0.06] cursor-default ${
+                    hasImages
+                      ? isFullWidth ? 'h-[220px] sm:h-[260px]' : 'h-[280px] sm:h-[320px]'
+                      : ''
+                  }`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#c8a951]/15 text-[#c8a951] flex items-center justify-center text-sm font-bold mb-5">
-                    {idx + 1}
+                  {/* Background image */}
+                  {section.image && (
+                    <>
+                      <Image
+                        src={section.image}
+                        alt={section.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 group-hover:from-black/70 group-hover:via-black/40 transition-all duration-500" />
+                      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ boxShadow: 'inset 0 0 0 1px rgba(200,169,81,0.3), 0 0 20px rgba(200,169,81,0.08)' }} />
+                    </>
+                  )}
+
+                  <div className={`relative z-10 ${hasImages ? 'h-full flex flex-col justify-end' : ''} p-6 sm:p-8 ${!section.image ? 'bg-white/[0.03] hover:bg-white/[0.05] transition-colors duration-500' : ''}`}>
+                    {/* Step number */}
+                    <div className={`${hasImages ? 'absolute top-5 right-5 sm:top-6 sm:right-6' : 'mb-5'}`}>
+                      <div className={`${hasImages ? 'w-10 h-10 rounded-xl' : 'w-8 h-8 rounded-lg'} bg-[#c8a951]/15 border border-[#c8a951]/25 ${hasImages ? 'backdrop-blur-sm' : ''} flex items-center justify-center group-hover:bg-[#c8a951]/25 transition-colors duration-500`}>
+                        <span className="text-[#c8a951] font-bold text-sm">{String(idx + 1).padStart(2, '0')}</span>
+                      </div>
+                    </div>
+
+                    <h3 className={`${hasImages ? 'text-xl sm:text-2xl' : 'text-lg'} font-bold text-white mb-2 group-hover:text-[#e8d48b] transition-colors duration-300 tracking-tight`}>
+                      {section.title}
+                    </h3>
+
+                    <p className={`text-white/60 text-sm sm:text-[15px] leading-relaxed group-hover:text-white/70 transition-colors duration-300 ${isFullWidth ? 'max-w-xl' : 'max-w-sm'}`}>
+                      {section.text}
+                    </p>
                   </div>
-                  <h3 className="text-lg font-bold text-[#e8d48b] mb-3 tracking-tight">
-                    {section.title}
-                  </h3>
-                  <p className="text-white/50 text-sm leading-relaxed">
-                    {section.text}
-                  </p>
-                  <div className="absolute bottom-0 left-4 right-4 h-[1px] rounded-full bg-gradient-to-r from-transparent via-[#c8a951]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </article>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
 
-function SectionRow({
-  section,
-  idx,
-  reverse,
-  dir,
-}: {
-  section: { title: string; text: string; image?: string };
-  idx: number;
-  reverse: boolean;
-  dir: string;
-}) {
-  const { ref, isVisible } = useInView(0.15);
-
-  // For RTL, flip the reverse logic
-  const isReversed = dir === 'rtl' ? !reverse : reverse;
-
-  return (
-    <div
-      ref={ref}
-      className={`
-        relative grid grid-cols-1 lg:grid-cols-2 min-h-[400px] lg:min-h-[500px]
-        transition-all duration-1000 ease-out
-        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}
-      `}
-    >
-      {/* Image side */}
-      <div
-        className={`
-          relative h-[300px] sm:h-[350px] lg:h-auto overflow-hidden
-          ${isReversed ? 'lg:order-2' : 'lg:order-1'}
-        `}
-      >
-        {section.image && (
-          <>
-            <Image
-              src={section.image}
-              alt={section.title}
-              fill
-              className={`
-                object-cover transition-transform duration-[1.5s] ease-out
-                ${isVisible ? 'scale-100' : 'scale-110'}
-              `}
-            />
-            {/* Gradient overlay fading into content side */}
-            <div
-              className={`
-                absolute inset-0
-                bg-gradient-to-b lg:bg-gradient-to-r from-transparent to-[#0a0f1f]/90
-                ${isReversed ? 'lg:bg-gradient-to-l' : 'lg:bg-gradient-to-r'}
-              `}
-            />
-            {/* Bottom gradient on mobile */}
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0a0f1f] to-transparent lg:hidden" />
-          </>
-        )}
-      </div>
-
-      {/* Content side */}
-      <div
-        className={`
-          relative flex items-center
-          ${isReversed ? 'lg:order-1' : 'lg:order-2'}
-          bg-[#0a0f1f]
-        `}
-      >
-        {/* Subtle border between sections */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
-
-        <div
-          className={`
-            w-full px-6 sm:px-10 lg:px-16 xl:px-20 py-12 lg:py-16
-            transition-all duration-1000 delay-200 ease-out
-            ${isVisible ? 'opacity-100 translate-x-0' : `opacity-0 ${isReversed ? '-translate-x-8' : 'translate-x-8'}`}
-          `}
-        >
-          {/* Step number */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-[#c8a951]/10 border border-[#c8a951]/20 text-[#c8a951] flex items-center justify-center text-lg font-bold">
-              {idx + 1}
-            </div>
-            <div className="h-px flex-1 bg-gradient-to-r from-[#c8a951]/30 to-transparent" />
-          </div>
-
-          {/* Title */}
-          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-5 tracking-tight leading-tight">
-            {section.title}
-          </h3>
-
-          {/* Text */}
-          <p className="text-white/55 text-base sm:text-lg leading-relaxed max-w-lg">
-            {section.text}
-          </p>
-
-          {/* Decorative accent */}
-          <div className="mt-8 w-16 h-1 rounded-full bg-gradient-to-r from-[#c8a951] to-[#c8a951]/20" />
+                  {/* Bottom glow */}
+                  <div className="absolute bottom-0 left-6 right-6 sm:left-8 sm:right-8 h-px bg-gradient-to-r from-transparent via-[#c8a951]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
