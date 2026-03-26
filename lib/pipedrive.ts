@@ -171,9 +171,12 @@ class PipedriveClient {
   constructor() {
     this.baseUrl = PIPEDRIVE_CONFIG.API_BASE_URL;
     this.apiToken = PIPEDRIVE_CONFIG.API_TOKEN;
-    
-    const { valid } = validatePipedriveConfig();
+
+    const { valid, errors } = validatePipedriveConfig();
     this.isConfigured = valid;
+    if (!valid) {
+      console.warn('[Pipedrive] Client not configured:', errors.join(', '));
+    }
   }
 
   /**
@@ -450,10 +453,14 @@ class PipedriveClient {
   async getDealActivities(dealId: number | string): Promise<PipedriveActivity[]> {
     const response = await this.request<PipedriveActivity[]>(
       'GET',
-      `/deals/${dealId}/activities?done=0,1`
+      `/deals/${dealId}/activities`
     );
+    console.log(`[Pipedrive] getDealActivities(${dealId}): success=${response.success}, count=${response.data?.length || 0}`);
     if (response.success && response.data) {
       return response.data;
+    }
+    if (!response.success) {
+      console.error(`[Pipedrive] getDealActivities error:`, response.error);
     }
     return [];
   }

@@ -318,9 +318,11 @@ export default async function DashboardPage() {
   if (data.project?.pipedriveId) {
     try {
       const { pipedriveClient } = await import('@/lib/pipedrive');
+      console.log(`[Dashboard] Fetching Pipedrive data for deal ${data.project.pipedriveId}, client ready: ${pipedriveClient.isReady()}`);
 
       // Fetch deal first to get pipeline_id
       const deal = await pipedriveClient.getDeal(data.project.pipedriveId);
+      console.log(`[Dashboard] Deal fetched: ${deal ? deal.title : 'null'}, status: ${deal?.status}`);
 
       // Then fetch products, activities, and stages in parallel
       const [products, activities, stages] = await Promise.all([
