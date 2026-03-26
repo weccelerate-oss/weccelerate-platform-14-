@@ -369,13 +369,15 @@ model Event {
   status           EventStatus      @default(DRAFT)
   isActive         Boolean          @default(true)
   isFeatured       Boolean          @default(false)
-  
+  displayOrder     Int              @default(0) // Lower = shown first; 0 = auto (sort by date)
+
   // Timestamps
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
-  
+
   @@index([status, isActive, date])
   @@index([date])
+  @@index([displayOrder])
   @@map("events")
 }
 

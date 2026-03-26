@@ -130,9 +130,22 @@ const MOCK_EVENTS = [
 async function getEvents() {
   try {
     const { prisma } = await import('@/lib/db');
-    
+
+    // Auto-update: move past UPCOMING/ONGOING events to PAST status
+    const now = new Date();
+    await prisma.event.updateMany({
+      where: {
+        status: { in: ['UPCOMING', 'ONGOING'] },
+        date: { lt: now },
+      },
+      data: { status: 'PAST' },
+    });
+
     const events = await prisma.event.findMany({
-      orderBy: { date: 'desc' },
+      orderBy: [
+        { displayOrder: 'asc' },
+        { date: 'asc' },
+      ],
     });
     return events;
   } catch (dbError) {

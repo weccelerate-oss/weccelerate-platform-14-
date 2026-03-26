@@ -12,7 +12,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import type { UrgencyLevel, EventStatus, VideoCategory, UserRole } from '@prisma/client';
+import type { UrgencyLevel, EventStatus, VideoCategory, UserRole, ProjectStatus } from '@prisma/client';
 
 // =============================================================================
 // HELPERS
@@ -158,6 +158,11 @@ export async function createEventAction(data: EventFormData) {
       return { success: false, error: 'תאריך לא תקין' };
     }
 
+    // Prevent setting UPCOMING/ONGOING status for past dates
+    if (parsedDate < new Date() && (data.status === 'UPCOMING' || data.status === 'ONGOING')) {
+      data.status = 'PAST' as EventStatus;
+    }
+
     const event = await prisma.event.create({
       data: {
         name: data.name,
@@ -205,6 +210,18 @@ export async function updateEventAction(id: string, data: Partial<EventFormData>
       updateData.date = new Date(data.date);
     }
 
+    // Prevent setting UPCOMING/ONGOING status for past dates
+    const eventDate = data.date ? new Date(data.date) : null;
+    if (eventDate && eventDate < new Date() && (data.status === 'UPCOMING' || data.status === 'ONGOING')) {
+      updateData.status = 'PAST';
+    } else if (!data.date && (data.status === 'UPCOMING' || data.status === 'ONGOING')) {
+      // Check existing event date if status is being changed without date change
+      const existing = await prisma.event.findUnique({ where: { id }, select: { date: true } });
+      if (existing && existing.date < new Date()) {
+        updateData.status = 'PAST';
+      }
+    }
+
     const event = await prisma.event.update({
       where: { id },
       data: updateData,
@@ -235,6 +252,31 @@ export async function deleteEventAction(id: string) {
   } catch (error) {
     console.error('[Admin] Error deleting event:', error);
     return { success: false, error: 'Failed to delete event' };
+  }
+}
+
+export async function reorderEventsAction(orderedIds: string[]) {
+  try {
+    await verifyAdmin();
+
+    // Update displayOrder for each event based on its position in the array
+    await Promise.all(
+      orderedIds.map((id, index) =>
+        prisma.event.update({
+          where: { id },
+          data: { displayOrder: index + 1 },
+        })
+      )
+    );
+
+    revalidatePath('/admin/events');
+    revalidatePath('/events');
+    revalidatePath('/');
+
+    return { success: true };
+  } catch (error) {
+    console.error('[Admin] Error reordering events:', error);
+    return { success: false, error: 'Failed to reorder events' };
   }
 }
 
@@ -343,6 +385,13 @@ export interface CreateUserFormData {
 export async function createUserAction(data: CreateUserFormData) {
   try {
     await verifyAdmin();
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      return { success: false, error: 'כתובת אימייל לא תקינה' };
+    }
+
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: data.email.toLowerCase() },
@@ -775,6 +824,309 @@ export async function syncYouTubeAction() {
 // =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
+
+// =============================================================================
+// PROJECT MANAGEMENT ACTIONS
+// =============================================================================
+
+export interface CreateProjectFormData {
+  name: string;
+  description?: string;
+  industry?: string;
+  website?: string;
+  userId: string;
+  pipedriveId?: string;
+  status?: ProjectStatus;
+  stage?: number;
+  targetFunding?: number;
+  fundingCurrency?: string;
+  teamSize?: number;
+}
+
+export async function createProjectAction(data: CreateProjectFormData) {
+  try {
+    await verifyAdmin();
+
+    if (!data.name.trim()) {
+      return { success: false, error: 'נדרש שם פרויקט' };
+    }
+
+    // Verify user exists
+    const user = await prisma.user.findUnique({ where: { id: data.userId } });
+    if (!user) {
+      return { success: false, error: 'משתמש לא נמצא' };
+    }
+
+    // Check if user already has an active project
+    const existingProject = await prisma.project.findFirst({
+      where: { userId: data.userId, isArchived: false },
+    });
+    if (existingProject) {
+      return { success: false, error: 'למשתמש כבר יש פרויקט פעיל. ניתן לארכב אותו לפני יצירת חדש.' };
+    }
+
+    const project = await prisma.project.create({
+      data: {
+        name: data.name.trim(),
+        description: data.description?.trim() || null,
+        industry: data.industry?.trim() || null,
+        website: data.website?.trim() || null,
+        userId: data.userId,
+        pipedriveId: data.pipedriveId?.trim() || null,
+        status: data.status || 'DRAFT',
+        stage: data.stage || 1,
+        targetFunding: data.targetFunding || null,
+        fundingCurrency: data.fundingCurrency || 'ILS',
+        teamSize: data.teamSize || null,
+      },
+    });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        action: 'project.created',
+        description: `פרויקט "${project.name}" נוצר עבור ${user.name || user.email}`,
+        userId: data.userId,
+        projectId: project.id,
+        metadata: { createdBy: 'admin' },
+      },
+    });
+
+    // Create welcome notification
+    await prisma.notification.create({
+      data: {
+        title: 'פרויקט חדש נוצר!',
+        message: `הפרויקט "${project.name}" נוצר עבורך. ברוכים הבאים לתוכנית!`,
+        type: 'success',
+        userId: data.userId,
+        link: '/portal/dashboard',
+      },
+    });
+
+    revalidatePath('/admin/projects');
+    revalidatePath('/admin/users');
+
+    return { success: true, project: { id: project.id, name: project.name } };
+  } catch (error) {
+    console.error('[Admin] Error creating project:', error);
+    return { success: false, error: 'שגיאה ביצירת פרויקט' };
+  }
+}
+
+export async function updateProjectAction(id: string, data: Partial<CreateProjectFormData> & { isArchived?: boolean }) {
+  try {
+    await verifyAdmin();
+
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name.trim();
+    if (data.description !== undefined) updateData.description = data.description?.trim() || null;
+    if (data.industry !== undefined) updateData.industry = data.industry?.trim() || null;
+    if (data.website !== undefined) updateData.website = data.website?.trim() || null;
+    if (data.pipedriveId !== undefined) updateData.pipedriveId = data.pipedriveId?.trim() || null;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.stage !== undefined) updateData.stage = data.stage;
+    if (data.targetFunding !== undefined) updateData.targetFunding = data.targetFunding;
+    if (data.fundingCurrency !== undefined) updateData.fundingCurrency = data.fundingCurrency;
+    if (data.teamSize !== undefined) updateData.teamSize = data.teamSize;
+    if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
+
+    const project = await prisma.project.update({
+      where: { id },
+      data: updateData,
+    });
+
+    // Log status change
+    if (data.status) {
+      await prisma.activityLog.create({
+        data: {
+          action: 'project.status_changed',
+          description: `סטטוס פרויקט "${project.name}" עודכן ל-${data.status}`,
+          userId: project.userId,
+          projectId: project.id,
+          metadata: { newStatus: data.status, changedBy: 'admin' },
+        },
+      });
+
+      await prisma.notification.create({
+        data: {
+          title: 'סטטוס הפרויקט עודכן',
+          message: `הפרויקט "${project.name}" התקדם לשלב חדש`,
+          type: 'info',
+          userId: project.userId,
+          link: '/portal/dashboard',
+        },
+      });
+    }
+
+    revalidatePath('/admin/projects');
+    return { success: true };
+  } catch (error) {
+    console.error('[Admin] Error updating project:', error);
+    return { success: false, error: 'שגיאה בעדכון פרויקט' };
+  }
+}
+
+export async function deleteProjectAction(id: string) {
+  try {
+    await verifyAdmin();
+    await prisma.project.delete({ where: { id } });
+    revalidatePath('/admin/projects');
+    return { success: true };
+  } catch (error) {
+    console.error('[Admin] Error deleting project:', error);
+    return { success: false, error: 'שגיאה במחיקת פרויקט' };
+  }
+}
+
+export async function addProjectNoteAction(projectId: string, content: string, isPrivate: boolean = false) {
+  try {
+    const admin = await verifyAdmin();
+    await prisma.projectNote.create({
+      data: {
+        content,
+        isPrivate,
+        projectId,
+        authorName: (admin as any).name || 'Admin',
+      },
+    });
+    revalidatePath('/admin/projects');
+    return { success: true };
+  } catch (error) {
+    console.error('[Admin] Error adding note:', error);
+    return { success: false, error: 'שגיאה בהוספת הערה' };
+  }
+}
+
+export async function uploadProjectFileAction(formData: FormData) {
+  try {
+    await verifyAdmin();
+
+    const file = formData.get('file') as File;
+    const projectId = formData.get('projectId') as string;
+    const displayName = formData.get('displayName') as string;
+
+    if (!file || !projectId) {
+      return { success: false, error: 'חסרים פרטים' };
+    }
+
+    // Validate file size (50MB max)
+    if (file.size > 50 * 1024 * 1024) {
+      return { success: false, error: 'הקובץ גדול מ-50MB' };
+    }
+
+    // Get project to verify it exists
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) {
+      return { success: false, error: 'פרויקט לא נמצא' };
+    }
+
+    // Determine file type
+    const mimeType = file.type;
+    let fileType: 'DOCUMENT' | 'SPREADSHEET' | 'PRESENTATION' | 'IMAGE' | 'VIDEO' | 'OTHER' = 'OTHER';
+    if (mimeType.includes('pdf') || mimeType.includes('word') || mimeType.includes('text')) fileType = 'DOCUMENT';
+    else if (mimeType.includes('sheet') || mimeType.includes('excel') || mimeType.includes('csv')) fileType = 'SPREADSHEET';
+    else if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) fileType = 'PRESENTATION';
+    else if (mimeType.startsWith('image/')) fileType = 'IMAGE';
+    else if (mimeType.startsWith('video/')) fileType = 'VIDEO';
+
+    // Upload to Supabase storage
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return { success: false, error: 'שירות אחסון לא מוגדר' };
+    }
+
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const timestamp = Date.now();
+    const ext = file.name.split('.').pop() || 'bin';
+    const storagePath = `vault/${projectId}/${timestamp}.${ext}`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(storagePath, buffer, {
+        contentType: mimeType,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      // Try creating the bucket if it doesn't exist
+      if (uploadError.message?.includes('not found')) {
+        await supabase.storage.createBucket('documents', { public: false });
+        const { error: retryError } = await supabase.storage
+          .from('documents')
+          .upload(storagePath, buffer, { contentType: mimeType, upsert: false });
+        if (retryError) {
+          console.error('[Upload] Retry failed:', retryError);
+          return { success: false, error: 'שגיאה בהעלאת הקובץ' };
+        }
+      } else {
+        console.error('[Upload] Error:', uploadError);
+        return { success: false, error: 'שגיאה בהעלאת הקובץ' };
+      }
+    }
+
+    // Get signed URL for private file
+    const { data: signedUrlData } = await supabase.storage
+      .from('documents')
+      .createSignedUrl(storagePath, 60 * 60 * 24 * 7); // 7 days
+
+    const fileUrl = signedUrlData?.signedUrl || `${supabaseUrl}/storage/v1/object/documents/${storagePath}`;
+
+    // Save to DB
+    const dbFile = await prisma.file.create({
+      data: {
+        name: file.name,
+        displayName: displayName || file.name,
+        url: fileUrl,
+        gcsPath: storagePath,
+        bucket: 'documents',
+        type: fileType,
+        mimeType,
+        size: file.size,
+        isPrivate: true,
+        projectId,
+      },
+    });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        action: 'file.uploaded',
+        description: `הועלה קובץ: ${displayName || file.name}`,
+        userId: project.userId,
+        projectId,
+        metadata: { fileId: dbFile.id, fileName: file.name },
+      },
+    });
+
+    revalidatePath('/admin/projects');
+    revalidatePath('/portal/dashboard');
+
+    return { success: true, file: { id: dbFile.id, name: dbFile.name } };
+  } catch (error) {
+    console.error('[Admin] Error uploading file:', error);
+    return { success: false, error: 'שגיאה בהעלאת קובץ' };
+  }
+}
+
+export async function deleteProjectFileAction(fileId: string) {
+  try {
+    await verifyAdmin();
+    await prisma.file.delete({ where: { id: fileId } });
+    revalidatePath('/admin/projects');
+    revalidatePath('/portal/dashboard');
+    return { success: true };
+  } catch (error) {
+    console.error('[Admin] Error deleting file:', error);
+    return { success: false, error: 'שגיאה במחיקת קובץ' };
+  }
+}
 
 function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';

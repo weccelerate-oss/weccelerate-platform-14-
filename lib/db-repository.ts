@@ -121,14 +121,23 @@ export async function getEvents(options: GetEventsOptions = {}) {
 
   const now = new Date();
 
+  // Auto-update: move past UPCOMING/ONGOING events to PAST status
+  await prisma.event.updateMany({
+    where: {
+      status: { in: ['UPCOMING', 'ONGOING'] as const },
+      date: { lt: now },
+    },
+    data: { status: 'PAST' as const },
+  });
+
   const where = {
     isActive: true,
     ...(status && { status }),
-    ...(upcoming && { 
+    ...(upcoming && {
       status: 'UPCOMING' as const,
       date: { gte: now },
     }),
-    ...(past && { 
+    ...(past && {
       status: 'PAST' as const,
     }),
     ...(featured && { isFeatured: true }),
@@ -137,9 +146,9 @@ export async function getEvents(options: GetEventsOptions = {}) {
 
   const events = await prisma.event.findMany({
     where,
-    orderBy: upcoming 
-      ? { date: 'asc' }  // Nearest first for upcoming
-      : { date: 'desc' }, // Most recent first for past
+    orderBy: upcoming
+      ? [{ displayOrder: 'asc' }, { date: 'asc' }]  // By order, then nearest first
+      : [{ date: 'desc' }], // Most recent first for past
     take: limit,
   });
 

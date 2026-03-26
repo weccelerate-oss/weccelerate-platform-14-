@@ -24,9 +24,12 @@ import {
   Search,
   Filter,
   Globe,
+  ArrowUp,
+  ArrowDown,
+  GripVertical,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { deleteEventAction, updateEventAction } from '../actions';
+import { deleteEventAction, updateEventAction, reorderEventsAction } from '../actions';
 import { EventFormDialog } from './event-form-dialog';
 
 // =============================================================================
@@ -59,6 +62,7 @@ interface Event {
   isActive: boolean;
   isFeatured: boolean;
   imageUrl?: string | null;
+  displayOrder?: number;
   createdAt: Date;
 }
 
@@ -99,6 +103,8 @@ function formatDate(date: Date): string {
 export function EventsTable({ events: initialEvents }: EventsTableProps) {
   const [events, setEvents] = useState(initialEvents);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isReordering, setIsReordering] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   // Sync local state when server data changes (after router.refresh)
   useEffect(() => {
@@ -107,6 +113,35 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  // Move event up/down in order
+  const handleMoveEvent = (eventId: string, direction: 'up' | 'down') => {
+    setEvents((prev) => {
+      const idx = prev.findIndex((e) => e.id === eventId);
+      if (idx === -1) return prev;
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= prev.length) return prev;
+      const newArr = [...prev];
+      [newArr[idx], newArr[swapIdx]] = [newArr[swapIdx], newArr[idx]];
+      return newArr;
+    });
+  };
+
+  // Save the current order to the database
+  const handleSaveOrder = async () => {
+    setIsSavingOrder(true);
+    try {
+      const orderedIds = events.map((e) => e.id);
+      const result = await reorderEventsAction(orderedIds);
+      if (!result.success) {
+        alert(result.error || 'שגיאה בשמירת הסדר');
+      }
+      setIsReordering(false);
+    } catch (err) {
+      alert('שגיאה בתקשורת עם השרת');
+    }
+    setIsSavingOrder(false);
+  };
 
   // Filter events
   const filteredEvents = events.filter((event) => {
@@ -200,6 +235,36 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
           <option value="PAST">עבר</option>
           <option value="CANCELLED">בוטל</option>
         </select>
+
+        {/* Reorder Toggle */}
+        {isReordering ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSaveOrder}
+              disabled={isSavingOrder}
+              className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+            >
+              {isSavingOrder ? 'שומר...' : 'שמור סדר'}
+            </button>
+            <button
+              onClick={() => {
+                setEvents(initialEvents);
+                setIsReordering(false);
+              }}
+              className="px-4 py-2 border border-slate-200 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              ביטול
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsReordering(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-sm text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            <GripVertical className="w-4 h-4" />
+            סדר אירועים
+          </button>
+        )}
       </div>
 
       {/* Mobile Card View */}
@@ -220,6 +285,25 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
+                  {/* Reorder arrows (mobile) */}
+                  {isReordering && (
+                    <div className="flex flex-col gap-0.5 flex-shrink-0">
+                      <button
+                        onClick={() => handleMoveEvent(event.id, 'up')}
+                        className="p-1 hover:bg-slate-200 rounded transition-colors"
+                        title="הזז למעלה"
+                      >
+                        <ArrowUp className="w-4 h-4 text-slate-500" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveEvent(event.id, 'down')}
+                        className="p-1 hover:bg-slate-200 rounded transition-colors"
+                        title="הזז למטה"
+                      >
+                        <ArrowDown className="w-4 h-4 text-slate-500" />
+                      </button>
+                    </div>
+                  )}
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     {event.imageUrl ? (
                       <img src={event.imageUrl} alt={event.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
@@ -336,6 +420,9 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
         <table className="w-full">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
+              {isReordering && (
+                <th className="px-3 py-3 text-right text-xs font-semibold text-slate-500 w-16">סדר</th>
+              )}
               <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">אירוע</th>
               <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">תאריך</th>
               <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">מיקום</th>
@@ -360,6 +447,26 @@ export function EventsTable({ events: initialEvents }: EventsTableProps) {
                       !event.isActive && 'opacity-60'
                     )}
                   >
+                    {isReordering && (
+                      <td className="px-3 py-3">
+                        <div className="flex flex-col items-center gap-0.5">
+                          <button
+                            onClick={() => handleMoveEvent(event.id, 'up')}
+                            className="p-1 hover:bg-slate-200 rounded transition-colors"
+                            title="הזז למעלה"
+                          >
+                            <ArrowUp className="w-4 h-4 text-slate-500" />
+                          </button>
+                          <button
+                            onClick={() => handleMoveEvent(event.id, 'down')}
+                            className="p-1 hover:bg-slate-200 rounded transition-colors"
+                            title="הזז למטה"
+                          >
+                            <ArrowDown className="w-4 h-4 text-slate-500" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                     <td className="px-4 py-3">
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-lg bg-royal-100 text-royal-600 flex items-center justify-center flex-shrink-0">

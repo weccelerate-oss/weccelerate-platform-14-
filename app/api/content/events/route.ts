@@ -98,6 +98,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
 
     const now = new Date();
 
+    // Auto-update: move past UPCOMING/ONGOING events to PAST status
+    await prisma.event.updateMany({
+      where: {
+        status: { in: ['UPCOMING', 'ONGOING'] },
+        date: { lt: now },
+      },
+      data: { status: 'PAST' },
+    });
+
     // Build where clause
     const where: Record<string, unknown> = {
       isActive: true,
@@ -141,9 +150,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const [events, totalCount] = await Promise.all([
       prisma.event.findMany({
         where,
-        orderBy: status === 'past' 
-          ? { date: 'desc' }  // Most recent past events first
-          : { date: 'asc' },  // Nearest upcoming events first
+        orderBy: status === 'past'
+          ? [{ date: 'desc' }]  // Most recent past events first
+          : [{ displayOrder: 'asc' }, { date: 'asc' }],  // By order, then nearest first
         take: limit + 1, // Fetch one extra to check if there's more
         skip: offset,
         select: {
