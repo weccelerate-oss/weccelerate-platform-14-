@@ -534,10 +534,10 @@ export async function resetUserPasswordAction(id: string) {
 export async function deleteUserAction(id: string) {
   try {
     await verifyAdmin();
-    // Soft delete - just deactivate
-    await prisma.user.update({
+
+    // Hard delete — cascade removes projects, files, notes, etc.
+    await prisma.user.delete({
       where: { id },
-      data: { isActive: false },
     });
 
     revalidatePath('/admin/users');

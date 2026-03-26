@@ -119,7 +119,7 @@ export function UsersTable({ users }: UsersTableProps) {
   };
 
   const handleDelete = (userId: string) => {
-    if (!confirm('האם אתה בטוח שברצונך למחוק משתמש זה? (המשתמש יושבת)')) return;
+    if (!confirm('האם אתה בטוח שברצונך למחוק משתמש זה לצמיתות? כל הפרויקטים והקבצים שלו יימחקו.')) return;
 
     setActionId(userId);
     setOpenMenu(null);
