@@ -92,10 +92,10 @@ const NAV_ITEMS: NavItem[] = [
   { icon: LayoutDashboard, label: 'לוח בקרה', href: '/portal/dashboard', id: 'dashboard' },
   { icon: Target, label: 'הפרויקט שלי', href: '/portal/dashboard', id: 'project' },
   { icon: FolderOpen, label: 'מסמכים', href: '/portal/dashboard', id: 'documents' },
+  { icon: GraduationCap, label: 'מרכז למידה', href: '/portal/learning', id: 'learning' },
+  { icon: TrendingUp, label: 'התקדמות', href: '/portal/dashboard', id: 'progress' },
   { icon: Calendar, label: 'לוח שנה', href: '/portal/dashboard', id: 'calendar', comingSoon: true },
   { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages', comingSoon: true },
-  { icon: TrendingUp, label: 'התקדמות', href: '/portal/dashboard', id: 'progress' },
-  { icon: GraduationCap, label: 'מרכז למידה', href: '/portal/dashboard', id: 'learning', comingSoon: true },
 ];
 
 const BOTTOM_NAV_ITEMS = [
@@ -107,8 +107,8 @@ const BOTTOM_NAV_ITEMS = [
 const MOBILE_BOTTOM_NAV: NavItem[] = [
   { icon: LayoutDashboard, label: 'בית', href: '/portal/dashboard', id: 'dashboard' },
   { icon: Target, label: 'פרויקט', href: '/portal/dashboard', id: 'project' },
+  { icon: GraduationCap, label: 'למידה', href: '/portal/learning', id: 'learning' },
   { icon: FolderOpen, label: 'מסמכים', href: '/portal/dashboard', id: 'documents' },
-  { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages' },
   { icon: Menu, label: 'עוד', href: '#more', id: 'more' },
 ];
 
@@ -715,33 +715,35 @@ export function DashboardContent({
                 <RecentActivity activities={activities} />
               </DashboardCard>
 
-              {/* AI Assistant Teaser */}
-              <motion.div
+              {/* Learning Center Widget */}
+              <motion.a
+                href="/portal/learning"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 text-white"
+                className="block relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 text-white group hover:shadow-lg transition-shadow"
               >
                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                  <div className="absolute -top-8 -left-8 w-32 h-32 bg-royal-500/20 rounded-full blur-2xl" />
-                  <div className="absolute -bottom-8 -right-8 w-28 h-28 bg-cyan-500/20 rounded-full blur-2xl" />
+                  <div className="absolute -top-8 -left-8 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl" />
+                  <div className="absolute -bottom-8 -right-8 w-28 h-28 bg-violet-500/20 rounded-full blur-2xl" />
                 </div>
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="p-1.5 bg-white/10 rounded-lg">
-                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <GraduationCap className="w-4 h-4 text-cyan-400" />
                     </div>
-                    <span className="text-xs font-medium text-amber-400/90 bg-amber-400/10 px-2 py-0.5 rounded-full">בקרוב</span>
+                    <span className="text-xs font-medium text-cyan-400/90">מרכז הלמידה</span>
                   </div>
-                  <h3 className="text-base font-semibold mb-1.5">עוזר AI אישי</h3>
+                  <h3 className="text-base font-semibold mb-1.5">קורסים להעשרה ליזם</h3>
                   <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-                    קבל תשובות מיידיות לשאלות על הפרויקט, טיפים לגיוס, ועוד.
+                    דוחות כספיים, הערכת שווי, תוכניות עסקיות, השקעות ופיתוח - כל מה שיזם צריך לדעת.
                   </p>
-                  <button className="w-full px-4 py-2.5 bg-white/10 hover:bg-white/15 active:bg-white/20 rounded-xl text-sm font-medium transition-colors border border-white/10">
-                    הצטרף לרשימת ההמתנה
-                  </button>
+                  <div className="flex items-center gap-2 text-sm font-medium text-cyan-400 group-hover:gap-3 transition-all">
+                    <span>התחל ללמוד</span>
+                    <ChevronLeft className="w-4 h-4" />
+                  </div>
                 </div>
-              </motion.div>
+              </motion.a>
             </div>
           </div>
         </div>

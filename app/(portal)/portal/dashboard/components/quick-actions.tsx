@@ -50,13 +50,13 @@ interface ActionItem {
 
 const ALL_ACTIONS: ActionItem[] = [
   {
-    id: 'whatsapp',
-    label: 'שיחה עם הצוות',
-    description: 'שלח הודעה בוואטסאפ',
-    icon: <MessageSquare className="w-4 h-4" />,
-    href: 'https://wa.me/972555647538',
-    color: 'text-emerald-600',
-    iconBg: 'bg-emerald-50',
+    id: 'learning',
+    label: 'מרכז הלמידה',
+    description: 'קורסים להעשרה במסע היזמי',
+    icon: <BookOpen className="w-4 h-4" />,
+    href: '/portal/learning',
+    color: 'text-royal-600',
+    iconBg: 'bg-royal-50',
     priority: 1,
   },
   {
@@ -80,6 +80,16 @@ const ALL_ACTIONS: ActionItem[] = [
     priority: 3,
   },
   {
+    id: 'whatsapp',
+    label: 'שיחה עם הצוות',
+    description: 'שלח הודעה בוואטסאפ',
+    icon: <MessageSquare className="w-4 h-4" />,
+    href: 'https://wa.me/972555647538',
+    color: 'text-emerald-600',
+    iconBg: 'bg-emerald-50',
+    priority: 4,
+  },
+  {
     id: 'schedule',
     label: 'תיאום פגישה',
     description: 'קבע פגישה עם המנטור',
@@ -87,17 +97,7 @@ const ALL_ACTIONS: ActionItem[] = [
     href: `https://wa.me/972555647538?text=${encodeURIComponent('היי, אשמח לתאם פגישה')}`,
     color: 'text-violet-600',
     iconBg: 'bg-violet-50',
-    priority: 4,
-  },
-  {
-    id: 'learning',
-    label: 'מרכז הלמידה',
-    description: 'בקרוב!',
-    icon: <BookOpen className="w-4 h-4" />,
-    href: '/portal/dashboard',
-    color: 'text-royal-600',
-    iconBg: 'bg-royal-50',
-    priority: 6,
+    priority: 5,
   },
 ];
 
