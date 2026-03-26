@@ -101,6 +101,24 @@ export interface PipedriveNote {
   add_time: string;
 }
 
+export interface PipedriveDealProduct {
+  id: number;
+  deal_id: number;
+  product_id: number;
+  name: string;
+  item_price: number;
+  quantity: number;
+  sum: number;
+  currency: string;
+  active_flag: boolean;
+  enabled_flag: boolean;
+  add_time: string;
+  last_edit: string | null;
+  comments: string | null;
+  tax: number;
+  [key: string]: unknown;
+}
+
 export interface CreateLeadResult {
   success: boolean;
   personId?: number;
@@ -364,6 +382,32 @@ class PipedriveClient {
     org_id?: number;
   }): Promise<PipedriveResponse<PipedriveNote>> {
     return this.request<PipedriveNote>('POST', '/notes', data);
+  }
+
+  /**
+   * Get products attached to a deal
+   */
+  async getDealProducts(dealId: number | string): Promise<PipedriveDealProduct[]> {
+    const response = await this.request<PipedriveDealProduct[]>(
+      'GET',
+      `/deals/${dealId}/products`
+    );
+
+    if (response.success && response.data) {
+      return response.data;
+    }
+    return [];
+  }
+
+  /**
+   * Get deal details by ID
+   */
+  async getDeal(dealId: number | string): Promise<PipedriveDeal | null> {
+    const response = await this.request<PipedriveDeal>('GET', `/deals/${dealId}`);
+    if (response.success && response.data) {
+      return response.data;
+    }
+    return null;
   }
 }
 

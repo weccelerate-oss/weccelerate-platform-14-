@@ -41,6 +41,8 @@ import { WelcomeOnboarding } from './components/welcome-onboarding';
 import { StatsCards } from './components/stats-cards';
 import { RecentActivity } from './components/recent-activity';
 import { QuickActions } from './components/quick-actions';
+import { PurchasedServices } from './components/purchased-services';
+import type { DealProductDisplay } from './components/purchased-services';
 import type { Project, File, ProjectNote, Notification, ActivityLog } from '@prisma/client';
 
 // =============================================================================
@@ -73,6 +75,7 @@ interface DashboardContentProps {
   notifications: Notification[];
   activities: ActivityLog[];
   dbError?: boolean;
+  dealProducts?: DealProductDisplay[];
 }
 
 // =============================================================================
@@ -122,6 +125,7 @@ export function DashboardContent({
   notifications,
   activities,
   dbError,
+  dealProducts = [],
 }: DashboardContentProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -658,6 +662,17 @@ export function DashboardContent({
 
           {/* Stats Row */}
           <StatsCards project={project} />
+
+          {/* Purchased Services from Pipedrive */}
+          {dealProducts.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 }}
+            >
+              <PurchasedServices products={dealProducts} />
+            </motion.div>
+          )}
 
           {/* Main Grid */}
           <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">

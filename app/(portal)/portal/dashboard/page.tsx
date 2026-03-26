@@ -309,6 +309,35 @@ export default async function DashboardPage() {
   // Fetch project data
   const data = await getProjectData(session.user.id);
 
+  // Fetch purchased products from Pipedrive if project has a deal linked
+  let dealProducts: { id: number; name: string; price: number; quantity: number; sum: number; currency: string; completed: boolean; active: boolean }[] = [];
+  if (data.project?.pipedriveId) {
+    try {
+      const { pipedriveClient } = await import('@/lib/pipedrive');
+      const [products, deal] = await Promise.all([
+        pipedriveClient.getDealProducts(data.project.pipedriveId),
+        pipedriveClient.getDeal(data.project.pipedriveId),
+      ]);
+
+      const currentStageId = deal?.stage_id || 0;
+      const dealStatus = deal?.status || 'open';
+
+      dealProducts = products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: p.item_price,
+        quantity: p.quantity,
+        sum: p.sum,
+        currency: p.currency || 'ILS',
+        // Mark as completed if deal is won, or use active_flag from Pipedrive
+        completed: dealStatus === 'won' || !p.active_flag,
+        active: p.active_flag && dealStatus === 'open',
+      }));
+    } catch (err) {
+      console.warn('[Dashboard] Failed to fetch Pipedrive products:', err);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Suspense fallback={<DashboardSkeleton />}>
@@ -318,6 +347,7 @@ export default async function DashboardPage() {
           notifications={data.notifications}
           activities={data.activities}
           dbError={data.dbError}
+          dealProducts={dealProducts}
         />
       </Suspense>
     </div>
