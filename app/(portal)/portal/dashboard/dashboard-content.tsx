@@ -661,17 +661,13 @@ export function DashboardContent({
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Project Timeline */}
               <DashboardCard
-                title="ציר הזמן של הפרויקט"
+                title="מה עשינו ומה נשאר"
                 subtitle={project.name}
-                badge={`שלב ${project.stage}/10`}
+                badge={dealActivities.length > 0 ? `${dealActivities.filter(a => a.done).length}/${dealActivities.length}` : undefined}
                 delay={0}
               >
                 <ProjectTimeline
-                  status={project.status}
-                  stage={project.stage}
-                  timeline={project.timeline as Record<string, unknown> | null}
-                  pipedriveStages={pipedriveStages}
-                  currentStageId={currentStageId}
+                  dealActivities={dealActivities}
                   dealStatus={dealStatus}
                 />
               </DashboardCard>
