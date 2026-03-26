@@ -2,6 +2,7 @@
  * Recent Activity Component
  *
  * Clean activity timeline with color-coded entries and relative timestamps.
+ * Dark premium theme.
  */
 
 'use client';
@@ -42,50 +43,50 @@ interface ActivityConfig {
 const ACTIVITY_CONFIG: Record<string, ActivityConfig> = {
   'project.created': {
     icon: <CheckCircle className="w-3.5 h-3.5" />,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
     label: 'פרויקט נוצר',
   },
   'project.updated': {
     icon: <RefreshCw className="w-3.5 h-3.5" />,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/10',
     label: 'פרויקט עודכן',
   },
   'project.status_changed': {
     icon: <ArrowUpRight className="w-3.5 h-3.5" />,
-    color: 'text-royal-600',
-    bgColor: 'bg-royal-50',
+    color: 'text-[#c8a951]',
+    bgColor: 'bg-[#c8a951]/10',
     label: 'סטטוס שונה',
   },
   'file.uploaded': {
     icon: <Upload className="w-3.5 h-3.5" />,
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50',
+    color: 'text-violet-400',
+    bgColor: 'bg-violet-500/10',
     label: 'קובץ הועלה',
   },
   'note.added': {
     icon: <MessageSquare className="w-3.5 h-3.5" />,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
+    color: 'text-amber-400',
+    bgColor: 'bg-amber-500/10',
     label: 'הערה נוספה',
   },
   'meeting.scheduled': {
     icon: <Calendar className="w-3.5 h-3.5" />,
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50',
+    color: 'text-pink-400',
+    bgColor: 'bg-pink-500/10',
     label: 'פגישה נקבעה',
   },
   'user.login': {
     icon: <User className="w-3.5 h-3.5" />,
-    color: 'text-slate-500',
-    bgColor: 'bg-slate-50',
+    color: 'text-white/40',
+    bgColor: 'bg-white/[0.04]',
     label: 'התחברות',
   },
   default: {
     icon: <Clock className="w-3.5 h-3.5" />,
-    color: 'text-slate-500',
-    bgColor: 'bg-slate-50',
+    color: 'text-white/40',
+    bgColor: 'bg-white/[0.04]',
     label: 'פעולה',
   },
 };
@@ -121,11 +122,11 @@ export function RecentActivity({ activities }: RecentActivityProps) {
   if (!activities || activities.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-slate-50 flex items-center justify-center">
-          <Clock className="w-5 h-5 text-slate-300" />
+        <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-white/[0.04] flex items-center justify-center">
+          <Clock className="w-5 h-5 text-white/20" />
         </div>
-        <p className="text-sm text-slate-500">אין פעילות אחרונה</p>
-        <p className="text-xs text-slate-400 mt-1">הפעילות שלך תופיע כאן</p>
+        <p className="text-sm text-white/50">אין פעילות אחרונה</p>
+        <p className="text-xs text-white/30 mt-1">הפעילות שלך תופיע כאן</p>
       </div>
     );
   }
@@ -141,7 +142,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
             initial={{ opacity: 0, x: -6 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 + index * 0.04 }}
-            className="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50/50 transition-colors group"
+            className="flex items-start gap-3 p-2 rounded-lg hover:bg-white/[0.03] transition-colors group"
           >
             {/* Icon */}
             <div className={cn(
@@ -154,18 +155,18 @@ export function RecentActivity({ activities }: RecentActivityProps) {
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-slate-800 leading-snug">
-                <span className="font-medium">{config.label}</span>
+              <p className="text-sm text-white/70 leading-snug">
+                <span className="font-medium text-white/90">{config.label}</span>
               </p>
               {activity.description && (
-                <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                <p className="text-[11px] text-white/30 mt-0.5 line-clamp-1">
                   {activity.description}
                 </p>
               )}
             </div>
 
             {/* Time */}
-            <span className="text-[10px] text-slate-400 whitespace-nowrap flex-shrink-0 mt-0.5 font-medium">
+            <span className="text-[10px] text-white/30 whitespace-nowrap flex-shrink-0 mt-0.5 font-medium">
               {formatRelativeTime(activity.createdAt)}
             </span>
           </motion.div>
@@ -175,7 +176,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
       {/* View all */}
       {activities.length > 6 && (
         <div className="pt-2 text-center">
-          <span className="text-xs text-slate-400 font-medium">
+          <span className="text-xs text-white/30 font-medium">
             מציג 6 אחרונות
           </span>
         </div>

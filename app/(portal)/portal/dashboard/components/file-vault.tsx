@@ -2,7 +2,7 @@
  * File Vault Component
  *
  * Modern document management with grid/list views, search, and download.
- * Touch-friendly design with always-visible actions on mobile.
+ * Dark premium theme with glass morphism.
  */
 
 'use client';
@@ -46,32 +46,32 @@ type ViewMode = 'grid' | 'list';
 const FILE_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bgColor: string; label: string }> = {
   DOCUMENT: {
     icon: <FileText className="w-5 h-5" />,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 group-hover:bg-blue-100',
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/10 group-hover:bg-blue-500/15',
     label: 'מסמך',
   },
   SPREADSHEET: {
     icon: <FileSpreadsheet className="w-5 h-5" />,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50 group-hover:bg-emerald-100',
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10 group-hover:bg-emerald-500/15',
     label: 'גיליון',
   },
   PRESENTATION: {
     icon: <FileText className="w-5 h-5" />,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50 group-hover:bg-orange-100',
+    color: 'text-orange-400',
+    bgColor: 'bg-orange-500/10 group-hover:bg-orange-500/15',
     label: 'מצגת',
   },
   IMAGE: {
     icon: <FileImage className="w-5 h-5" />,
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50 group-hover:bg-violet-100',
+    color: 'text-violet-400',
+    bgColor: 'bg-violet-500/10 group-hover:bg-violet-500/15',
     label: 'תמונה',
   },
   VIDEO: {
     icon: <FileVideo className="w-5 h-5" />,
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50 group-hover:bg-pink-100',
+    color: 'text-pink-400',
+    bgColor: 'bg-pink-500/10 group-hover:bg-pink-500/15',
     label: 'סרטון',
   },
 };
@@ -79,8 +79,8 @@ const FILE_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; b
 function getTypeConfig(type: FileTypeEnum) {
   return FILE_TYPE_CONFIG[type] || {
     icon: <File className="w-5 h-5" />,
-    color: 'text-slate-600',
-    bgColor: 'bg-slate-50',
+    color: 'text-white/50',
+    bgColor: 'bg-white/[0.04]',
     label: 'קובץ',
   };
 }
@@ -150,11 +150,11 @@ export function FileVault({ files }: FileVaultProps) {
   if (files.length === 0) {
     return (
       <div className="text-center py-8 sm:py-10">
-        <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-slate-50 flex items-center justify-center">
-          <Folder className="w-7 h-7 text-slate-300" />
+        <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/[0.04] flex items-center justify-center">
+          <Folder className="w-7 h-7 text-white/20" />
         </div>
-        <h3 className="text-sm font-semibold text-slate-900 mb-1">אין מסמכים עדיין</h3>
-        <p className="text-xs text-slate-500">המסמכים שלך יופיעו כאן כשהצוות יעלה אותם</p>
+        <h3 className="text-sm font-semibold text-white/70 mb-1">אין מסמכים עדיין</h3>
+        <p className="text-xs text-white/40">המסמכים שלך יופיעו כאן כשהצוות יעלה אותם</p>
       </div>
     );
   }
@@ -163,9 +163,9 @@ export function FileVault({ files }: FileVaultProps) {
     <div className="space-y-3 sm:space-y-4">
       {/* Download Error */}
       {downloadError && (
-        <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm flex items-center justify-between">
+        <div className="p-3 bg-red-500/10 text-red-400 rounded-xl text-sm flex items-center justify-between border border-red-500/20">
           <span>{downloadError}</span>
-          <button onClick={() => setDownloadError(null)} className="text-red-500 hover:text-red-700 text-xs underline mr-2">סגור</button>
+          <button onClick={() => setDownloadError(null)} className="text-red-400 hover:text-red-300 text-xs underline mr-2">סגור</button>
         </div>
       )}
       {/* Toolbar */}
@@ -173,34 +173,34 @@ export function FileVault({ files }: FileVaultProps) {
         {/* Search row */}
         <div className="flex gap-2 items-center">
           <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input
               type="text"
               placeholder="חיפוש מסמכים..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pr-9 pl-3 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-royal-500/20 focus:border-royal-400 focus:bg-white transition-all"
+              className="w-full pr-9 pl-3 py-2 sm:py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#c8a951]/20 focus:border-[#c8a951]/40 transition-all"
             />
           </div>
 
-          {/* Filter toggle (mobile) / View toggle */}
+          {/* Filter toggle (mobile) */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
               'sm:hidden p-2.5 rounded-xl border transition-colors',
-              showFilters ? 'bg-royal-50 border-royal-200 text-royal-600' : 'bg-slate-50 border-slate-200 text-slate-500'
+              showFilters ? 'bg-[#c8a951]/10 border-[#c8a951]/20 text-[#c8a951]' : 'bg-white/[0.04] border-white/[0.08] text-white/50'
             )}
           >
             <ChevronDown className={cn('w-4 h-4 transition-transform', showFilters && 'rotate-180')} />
           </button>
 
           {/* View toggle */}
-          <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-200">
+          <div className="flex items-center bg-white/[0.04] rounded-xl p-1 border border-white/[0.08]">
             <button
               onClick={() => setViewMode('grid')}
               className={cn(
                 'p-1.5 rounded-lg transition-all',
-                viewMode === 'grid' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'
+                viewMode === 'grid' ? 'bg-white/[0.08] shadow-sm text-white' : 'text-white/40 hover:text-white/60'
               )}
             >
               <Grid className="w-3.5 h-3.5" />
@@ -209,7 +209,7 @@ export function FileVault({ files }: FileVaultProps) {
               onClick={() => setViewMode('list')}
               className={cn(
                 'p-1.5 rounded-lg transition-all',
-                viewMode === 'list' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'
+                viewMode === 'list' ? 'bg-white/[0.08] shadow-sm text-white' : 'text-white/40 hover:text-white/60'
               )}
             >
               <List className="w-3.5 h-3.5" />
@@ -217,9 +217,9 @@ export function FileVault({ files }: FileVaultProps) {
           </div>
         </div>
 
-        {/* Type filter pills - always visible on desktop, toggleable on mobile */}
+        {/* Type filter pills */}
         <div className={cn(
-          'sm:flex items-center gap-1 bg-slate-50 rounded-xl p-1',
+          'sm:flex items-center gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/[0.06]',
           showFilters ? 'flex flex-wrap' : 'hidden'
         )}>
           {['ALL', 'DOCUMENT', 'SPREADSHEET', 'PRESENTATION', 'IMAGE', 'VIDEO'].map((type) => {
@@ -234,8 +234,8 @@ export function FileVault({ files }: FileVaultProps) {
                 className={cn(
                   'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
                   selectedType === type
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700 active:bg-white/50'
+                    ? 'bg-white/[0.08] text-white shadow-sm'
+                    : 'text-white/40 hover:text-white/60 active:bg-white/[0.04]'
                 )}
               >
                 {labels[type]}
@@ -248,8 +248,8 @@ export function FileVault({ files }: FileVaultProps) {
       {/* No results */}
       {filteredFiles.length === 0 && (
         <div className="text-center py-8">
-          <Search className="w-6 h-6 mx-auto text-slate-300 mb-2" />
-          <p className="text-sm text-slate-500">לא נמצאו מסמכים מתאימים</p>
+          <Search className="w-6 h-6 mx-auto text-white/20 mb-2" />
+          <p className="text-sm text-white/40">לא נמצאו מסמכים מתאימים</p>
         </div>
       )}
 
@@ -268,7 +268,7 @@ export function FileVault({ files }: FileVaultProps) {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.03 }}
-                  className="group relative bg-slate-50/80 rounded-xl p-3 sm:p-4 hover:bg-white hover:shadow-md active:shadow-sm hover:border-slate-200 border border-transparent transition-all duration-200 cursor-pointer"
+                  className="group relative bg-white/[0.03] rounded-xl p-3 sm:p-4 hover:bg-white/[0.06] hover:border-[#c8a951]/20 border border-white/[0.06] transition-all duration-200 cursor-pointer"
                 >
                   {/* File icon */}
                   <div className={cn(
@@ -280,16 +280,16 @@ export function FileVault({ files }: FileVaultProps) {
                   </div>
 
                   {/* File info */}
-                  <h4 className="font-medium text-xs sm:text-sm text-slate-900 truncate mb-0.5">
+                  <h4 className="font-medium text-xs sm:text-sm text-white/90 truncate mb-0.5">
                     {file.displayName || file.name}
                   </h4>
-                  <p className="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1">
+                  <p className="text-[10px] sm:text-[11px] text-white/40 flex items-center gap-1">
                     <span>{formatFileSize(file.size)}</span>
-                    <span className="text-slate-300 hidden sm:inline">·</span>
+                    <span className="text-white/20 hidden sm:inline">·</span>
                     <span className="hidden sm:inline">{formatDate(file.uploadedAt)}</span>
                   </p>
 
-                  {/* Download button - always visible on mobile, hover on desktop */}
+                  {/* Download button */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
                     disabled={isDownloading}
@@ -297,15 +297,15 @@ export function FileVault({ files }: FileVaultProps) {
                       'absolute top-2 left-2 sm:top-3 sm:left-3 p-1.5 sm:p-2 rounded-lg transition-all border',
                       'sm:opacity-0 sm:group-hover:opacity-100',
                       isDownloading
-                        ? 'bg-emerald-50 border-emerald-200'
-                        : 'bg-white/90 border-slate-200 hover:shadow-md active:bg-slate-50'
+                        ? 'bg-emerald-500/10 border-emerald-500/20'
+                        : 'bg-white/[0.06] border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04]'
                     )}
                     title="הורדה"
                   >
                     {isDownloading ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     ) : (
-                      <Download className="w-3.5 h-3.5 text-slate-600" />
+                      <Download className="w-3.5 h-3.5 text-white/60" />
                     )}
                   </button>
                 </motion.div>
@@ -330,7 +330,7 @@ export function FileVault({ files }: FileVaultProps) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 8 }}
                   transition={{ delay: index * 0.02 }}
-                  className="flex items-center gap-3 py-2.5 px-2 sm:px-3 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors group cursor-pointer"
+                  className="flex items-center gap-3 py-2.5 px-2 sm:px-3 rounded-xl hover:bg-white/[0.03] active:bg-white/[0.05] transition-colors group cursor-pointer"
                 >
                   {/* Icon */}
                   <div className={cn(
@@ -343,35 +343,35 @@ export function FileVault({ files }: FileVaultProps) {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm text-slate-900 truncate">
+                    <h4 className="font-medium text-sm text-white/90 truncate">
                       {file.displayName || file.name}
                     </h4>
-                    <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                    <p className="text-[11px] text-white/40 flex items-center gap-1.5">
                       <span>{formatFileSize(file.size)}</span>
-                      <span className="text-slate-300">·</span>
+                      <span className="text-white/20">·</span>
                       <span>{formatDate(file.uploadedAt)}</span>
                     </p>
                   </div>
 
-                  {/* Actions - always visible */}
+                  {/* Actions */}
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={() => handleDownload(file)}
                       disabled={isDownloading}
-                      className="p-2 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors"
+                      className="p-2 hover:bg-white/[0.06] active:bg-white/[0.08] rounded-lg transition-colors"
                       title="הורדה"
                     >
                       {isDownloading ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       ) : (
-                        <Download className="w-4 h-4 text-slate-500" />
+                        <Download className="w-4 h-4 text-white/50" />
                       )}
                     </button>
                     <button
-                      className="p-2 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors hidden sm:block"
+                      className="p-2 hover:bg-white/[0.06] active:bg-white/[0.08] rounded-lg transition-colors hidden sm:block"
                       title="תצוגה מקדימה"
                     >
-                      <Eye className="w-4 h-4 text-slate-500" />
+                      <Eye className="w-4 h-4 text-white/50" />
                     </button>
                   </div>
                 </motion.div>
@@ -382,7 +382,7 @@ export function FileVault({ files }: FileVaultProps) {
       )}
 
       {/* Count */}
-      <p className="text-[11px] text-slate-400 text-center pt-1">
+      <p className="text-[11px] text-white/30 text-center pt-1">
         {filteredFiles.length} מתוך {files.length} מסמכים
       </p>
     </div>

@@ -84,14 +84,14 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
       <div className="hidden md:block">
         <div className="relative px-2">
           {/* Background track */}
-          <div className="absolute top-5 right-5 left-5 h-[3px] bg-slate-100 rounded-full" />
+          <div className="absolute top-5 right-5 left-5 h-[3px] bg-white/[0.06] rounded-full" />
 
           {/* Progress fill */}
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 1, ease: 'easeOut' }}
-            className="absolute top-5 right-5 h-[3px] bg-gradient-to-l from-emerald-500 to-royal-500 rounded-full"
+            className="absolute top-5 right-5 h-[3px] bg-gradient-to-l from-[#e8d48b] to-[#c8a951] rounded-full"
             style={{ maxWidth: 'calc(100% - 40px)' }}
           />
 
@@ -116,8 +116,8 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
                     className={cn(
                       'relative z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300',
                       isCompleted && 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/30',
-                      isCurrent && 'bg-royal-500 text-white shadow-md shadow-royal-500/30 ring-[3px] ring-royal-100',
-                      isPending && 'bg-white text-slate-300 border-2 border-slate-200'
+                      isCurrent && 'bg-[#c8a951] text-[#070b1e] shadow-md shadow-[#c8a951]/30 ring-[3px] ring-[#c8a951]/20',
+                      isPending && 'bg-white/[0.06] text-white/30 border-2 border-white/[0.08]'
                     )}
                   >
                     {isCompleted ? (
@@ -129,7 +129,7 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
                     {/* Pulse for current */}
                     {isCurrent && (
                       <motion.div
-                        className="absolute inset-0 rounded-full bg-royal-400"
+                        className="absolute inset-0 rounded-full bg-[#c8a951]"
                         animate={{ scale: [1, 1.6], opacity: [0.4, 0] }}
                         transition={{ repeat: Infinity, duration: 2, ease: 'easeOut' }}
                       />
@@ -139,9 +139,9 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
                   {/* Label */}
                   <p className={cn(
                     'mt-2.5 text-[10px] font-medium text-center leading-tight max-w-[60px]',
-                    isCompleted && 'text-emerald-600',
-                    isCurrent && 'text-royal-600 font-semibold',
-                    isPending && 'text-slate-400'
+                    isCompleted && 'text-emerald-400',
+                    isCurrent && 'text-[#c8a951] font-semibold',
+                    isPending && 'text-white/30'
                   )}>
                     {step.labelHe}
                   </p>
@@ -156,20 +156,20 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mt-6 flex items-center gap-3 p-3.5 bg-gradient-to-l from-royal-50 to-slate-50 rounded-xl border border-royal-100/60"
+          className="mt-6 flex items-center gap-3 p-3.5 bg-[#c8a951]/[0.06] rounded-xl border border-[#c8a951]/15"
         >
-          <div className="p-2 bg-white rounded-lg text-royal-600 shadow-sm">
+          <div className="p-2 bg-[#c8a951]/10 rounded-lg text-[#c8a951]">
             {TIMELINE_STEPS[currentStepIndex]?.icon}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-sm font-semibold text-white">
               שלב נוכחי: {TIMELINE_STEPS[currentStepIndex]?.labelHe}
             </p>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-white/50 mt-0.5">
               {TIMELINE_STEPS[currentStepIndex]?.description}
             </p>
           </div>
-          <div className="mr-auto text-xs font-semibold text-royal-600 bg-white px-2.5 py-1 rounded-lg shadow-sm">
+          <div className="mr-auto text-xs font-semibold text-[#c8a951] bg-[#c8a951]/10 px-2.5 py-1 rounded-lg border border-[#c8a951]/20">
             {currentStepIndex + 1}/{TIMELINE_STEPS.length}
           </div>
         </motion.div>
@@ -179,12 +179,12 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
       <div className="md:hidden">
         <div className="relative pr-8">
           {/* Vertical line */}
-          <div className="absolute right-[11px] top-0 bottom-0 w-[2px] bg-slate-100 rounded-full">
+          <div className="absolute right-[11px] top-0 bottom-0 w-[2px] bg-white/[0.06] rounded-full">
             <motion.div
               initial={{ height: 0 }}
               animate={{ height: `${progressPercent}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="w-full bg-gradient-to-b from-emerald-500 to-royal-500 rounded-full"
+              className="w-full bg-gradient-to-b from-emerald-500 to-[#c8a951] rounded-full"
             />
           </div>
 
@@ -206,8 +206,8 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
                   <div className={cn(
                     'absolute right-0 w-6 h-6 rounded-full flex items-center justify-center -translate-x-1/2',
                     isCompleted && 'bg-emerald-500 text-white',
-                    isCurrent && 'bg-royal-500 text-white ring-2 ring-royal-200',
-                    isPending && 'bg-white border-2 border-slate-200 text-slate-300'
+                    isCurrent && 'bg-[#c8a951] text-[#070b1e] ring-2 ring-[#c8a951]/20',
+                    isPending && 'bg-white/[0.06] border-2 border-white/[0.08] text-white/30'
                   )}>
                     {isCompleted ? (
                       <Check className="w-3 h-3" strokeWidth={3} />
@@ -219,18 +219,18 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
                   {/* Content */}
                   <div className={cn(
                     'flex-1 pb-1',
-                    isCurrent && 'bg-royal-50 -mr-1 px-3 py-2 rounded-lg border border-royal-100'
+                    isCurrent && 'bg-[#c8a951]/[0.06] -mr-1 px-3 py-2 rounded-lg border border-[#c8a951]/15'
                   )}>
                     <p className={cn(
                       'font-medium text-sm',
-                      isCompleted && 'text-emerald-600',
-                      isCurrent && 'text-royal-700',
-                      isPending && 'text-slate-400'
+                      isCompleted && 'text-emerald-400',
+                      isCurrent && 'text-[#c8a951]',
+                      isPending && 'text-white/30'
                     )}>
                       {step.labelHe}
                     </p>
                     {isCurrent && (
-                      <p className="text-xs text-slate-500 mt-0.5">{step.description}</p>
+                      <p className="text-xs text-white/50 mt-0.5">{step.description}</p>
                     )}
                   </div>
                 </motion.div>
@@ -242,8 +242,8 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
 
       {/* Custom Timeline */}
       {customTimeline && customTimeline.length > 0 && (
-        <div className="pt-4 border-t border-slate-100">
-          <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+        <div className="pt-4 border-t border-white/[0.06]">
+          <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">
             אבני דרך מותאמות
           </h4>
           <div className="space-y-2">
@@ -252,20 +252,20 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
                 key={index}
                 className={cn(
                   'flex items-center gap-3 p-2.5 rounded-lg transition-colors',
-                  item.status === 'completed' && 'bg-emerald-50/60',
-                  item.status === 'in-progress' && 'bg-royal-50/60',
-                  item.status === 'upcoming' && 'bg-slate-50'
+                  item.status === 'completed' && 'bg-emerald-500/[0.06]',
+                  item.status === 'in-progress' && 'bg-[#c8a951]/[0.06]',
+                  item.status === 'upcoming' && 'bg-white/[0.02]'
                 )}
               >
                 <div className={cn(
                   'w-2 h-2 rounded-full flex-shrink-0',
                   item.status === 'completed' && 'bg-emerald-500',
-                  item.status === 'in-progress' && 'bg-royal-500 animate-pulse',
-                  item.status === 'upcoming' && 'bg-slate-300'
+                  item.status === 'in-progress' && 'bg-[#c8a951] animate-pulse',
+                  item.status === 'upcoming' && 'bg-white/20'
                 )} />
-                <span className="flex-1 text-sm text-slate-700">{item.name}</span>
+                <span className="flex-1 text-sm text-white/70">{item.name}</span>
                 {item.endDate && (
-                  <span className="text-xs text-slate-400 font-medium">
+                  <span className="text-xs text-white/40 font-medium">
                     {new Date(item.endDate).toLocaleDateString('he-IL')}
                   </span>
                 )}

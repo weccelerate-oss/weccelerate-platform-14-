@@ -160,26 +160,26 @@ export function LearningContent({ user, initialCompletedSlugs }: LearningContent
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50" dir="rtl">
+    <div className="min-h-screen bg-[#070b1e]" dir="rtl">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-[#0a0e27]/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           {/* Back to dashboard */}
           <a
             href="/portal/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors mb-4"
+            className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white/70 transition-colors mb-4"
           >
             <ChevronLeft className="w-4 h-4 rotate-180" />
             <span>חזרה ללוח הבקרה</span>
           </a>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-gradient-to-br from-blue-600 to-violet-600 rounded-xl text-white">
+            <div className="p-2.5 bg-gradient-to-br from-[#c8a951] to-[#e8d48b] rounded-xl text-[#070b1e]">
               <GraduationCap className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">מרכז הלמידה</h1>
-              <p className="text-slate-500 text-sm mt-0.5">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">מרכז הלמידה</h1>
+              <p className="text-white/50 text-sm mt-0.5">
                 קורסים להעשרה שילוו אותך לאורך כל המסע היזמי
               </p>
             </div>
@@ -242,28 +242,28 @@ function OverallProgress({
   progressPercent: number;
 }) {
   return (
-    <div className="bg-gradient-to-l from-slate-50 to-blue-50/60 rounded-2xl p-4 sm:p-5 border border-slate-100">
+    <div className="bg-white/[0.03] backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/[0.08]">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-amber-500" />
-          <span className="font-semibold text-slate-700">ההתקדמות שלך</span>
+          <Trophy className="w-5 h-5 text-[#c8a951]" />
+          <span className="font-semibold text-white/90">ההתקדמות שלך</span>
         </div>
-        <span className="text-sm font-medium text-slate-500">
+        <span className="text-sm font-medium text-white/50">
           {completedCount} מתוך {totalLessons} שיעורים
         </span>
       </div>
-      <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+      <div className="w-full h-3 bg-white/[0.06] rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-l from-blue-500 to-violet-500 rounded-full"
+          className="h-full bg-gradient-to-l from-[#e8d48b] to-[#c8a951] rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercent}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
         />
       </div>
       <div className="flex items-center justify-between mt-2">
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-white/40">
           {progressPercent === 100 ? (
-            <span className="flex items-center gap-1 text-emerald-600 font-medium">
+            <span className="flex items-center gap-1 text-emerald-400 font-medium">
               <Sparkles className="w-3.5 h-3.5" />
               כל הכבוד! סיימת את כל השיעורים
             </span>
@@ -273,7 +273,7 @@ function OverallProgress({
             'בוא נתחיל ללמוד'
           )}
         </span>
-        <span className="text-sm font-bold text-slate-700">{progressPercent}%</span>
+        <span className="text-sm font-bold text-[#c8a951]">{progressPercent}%</span>
       </div>
     </div>
   );
@@ -317,36 +317,36 @@ function CategoryCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
+      className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
     >
       {/* Category Header */}
       <button
         onClick={() => onToggleCategory(category.slug)}
-        className="w-full flex items-center gap-4 p-5 sm:p-6 hover:bg-slate-50/50 transition-colors text-right"
+        className="w-full flex items-center gap-4 p-5 sm:p-6 hover:bg-white/[0.02] transition-colors text-right"
       >
         <div className={cn('p-3 rounded-xl text-white', colors.bg)}>
           {ICON_MAP[category.icon] || <BookOpen className="w-6 h-6" />}
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-900">{category.name}</h2>
-          <p className="text-sm text-slate-500 mt-0.5 line-clamp-1">{category.description}</p>
+          <h2 className="text-lg sm:text-xl font-bold text-white">{category.name}</h2>
+          <p className="text-sm text-white/50 mt-0.5 line-clamp-1">{category.description}</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {/* Mini progress */}
           <div className="hidden sm:flex items-center gap-2">
-            <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className="w-20 h-2 bg-white/[0.06] rounded-full overflow-hidden">
               <div
                 className={cn('h-full rounded-full transition-all duration-500', colors.progress)}
                 style={{ width: `${categoryPercent}%` }}
               />
             </div>
-            <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
+            <span className="text-xs font-medium text-white/40 whitespace-nowrap">
               {categoryCompleted}/{categoryTotal}
             </span>
           </div>
           <ChevronDown
             className={cn(
-              'w-5 h-5 text-slate-400 transition-transform duration-300',
+              'w-5 h-5 text-white/40 transition-transform duration-300',
               isExpanded && 'rotate-180'
             )}
           />
@@ -411,35 +411,35 @@ function SubcategorySection({
   const allDone = completedCount === totalCount && totalCount > 0;
 
   return (
-    <div className={cn('rounded-xl border transition-colors', isExpanded ? colors.border : 'border-slate-100')}>
+    <div className={cn('rounded-xl border transition-colors', isExpanded ? 'border-white/[0.12]' : 'border-white/[0.04]')}>
       {/* Subcategory Header */}
       <button
         onClick={() => onToggle(subcategory.slug)}
-        className="w-full flex items-center gap-3 p-4 hover:bg-slate-50/70 transition-colors text-right rounded-xl"
+        className="w-full flex items-center gap-3 p-4 hover:bg-white/[0.02] transition-colors text-right rounded-xl"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-slate-800">{subcategory.name}</h3>
+            <h3 className="font-semibold text-white/90">{subcategory.name}</h3>
             {allDone && (
               <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
             )}
           </div>
-          <span className="text-xs text-slate-400">{totalCount} שיעורים</span>
+          <span className="text-xs text-white/40">{totalCount} שיעורים</span>
         </div>
         <div className="flex items-center gap-2">
           <span
             className={cn(
               'text-xs font-medium px-2 py-0.5 rounded-full',
               allDone
-                ? 'bg-emerald-50 text-emerald-600'
-                : colors.light + ' ' + colors.text
+                ? 'bg-emerald-500/10 text-emerald-400'
+                : 'bg-white/[0.06] text-white/60'
             )}
           >
             {completedCount}/{totalCount}
           </span>
           <ChevronDown
             className={cn(
-              'w-4 h-4 text-slate-400 transition-transform duration-200',
+              'w-4 h-4 text-white/40 transition-transform duration-200',
               isExpanded && 'rotate-180'
             )}
           />
@@ -458,7 +458,7 @@ function SubcategorySection({
           >
             {/* Subcategory description */}
             <div className="px-4 pb-3">
-              <p className="text-sm text-slate-500 leading-relaxed">{subcategory.description}</p>
+              <p className="text-sm text-white/50 leading-relaxed">{subcategory.description}</p>
             </div>
             <div className="px-3 pb-4 space-y-1">
               {subcategory.lessons.map((lesson, idx) => (
@@ -508,8 +508,8 @@ function LessonRow({
       transition={{ delay: index * 0.04 }}
       className={cn(
         'group flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer',
-        'hover:bg-slate-50',
-        isCompleted && 'bg-slate-50/50'
+        'hover:bg-white/[0.03]',
+        isCompleted && 'bg-white/[0.02]'
       )}
       onClick={onOpen}
     >
@@ -522,9 +522,9 @@ function LessonRow({
         className="flex-shrink-0 transition-transform hover:scale-110"
       >
         {isCompleted ? (
-          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
         ) : (
-          <Circle className={cn('w-5 h-5 text-slate-300 group-hover:' + colors.text)} />
+          <Circle className="w-5 h-5 text-white/20 group-hover:text-white/40" />
         )}
       </button>
 
@@ -533,7 +533,7 @@ function LessonRow({
         <span
           className={cn(
             'text-sm font-medium transition-colors',
-            isCompleted ? 'text-slate-400 line-through' : 'text-slate-700'
+            isCompleted ? 'text-white/30 line-through' : 'text-white/80'
           )}
         >
           {lesson.title}
@@ -599,7 +599,7 @@ function VideoModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] overflow-y-auto"
+        className="bg-[#0d1321] rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] overflow-y-auto border border-white/[0.08]"
       >
         {/* Video Player */}
         <div className="relative aspect-video bg-black">
@@ -622,14 +622,14 @@ function VideoModal({
         {/* Lesson Info */}
         <div className="p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
-            <h3 className="text-xl font-bold text-slate-900">{lesson.title}</h3>
+            <h3 className="text-xl font-bold text-white">{lesson.title}</h3>
             <button
               onClick={onToggleComplete}
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all flex-shrink-0',
                 isCompleted
-                  ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                  : colors.light + ' ' + colors.text + ' hover:opacity-80'
+                  ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15 border border-emerald-500/20'
+                  : 'bg-[#c8a951]/10 text-[#c8a951] hover:bg-[#c8a951]/15 border border-[#c8a951]/20'
               )}
             >
               {isCompleted ? (
@@ -646,7 +646,7 @@ function VideoModal({
             </button>
           </div>
 
-          <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+          <p className="text-white/60 leading-relaxed text-sm sm:text-base">
             {lesson.description}
           </p>
         </div>
