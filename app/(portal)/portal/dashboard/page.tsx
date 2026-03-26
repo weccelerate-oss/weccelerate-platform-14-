@@ -312,16 +312,31 @@ export default async function DashboardPage() {
   // Fetch purchased products and activities from Pipedrive if project has a deal linked
   let dealProducts: { id: number; name: string; price: number; quantity: number; sum: number; currency: string; completed: boolean; active: boolean }[] = [];
   let dealActivities: { id: number; type: string; subject: string; done: boolean; dueDate: string | null; dueTime: string | null; addTime: string; markedDoneTime: string | null; location: string | null }[] = [];
+  let pipedriveStages: { id: number; name: string; orderNr: number }[] = [];
+  let currentStageId: number | undefined;
+  let dealStatus: string | undefined;
   if (data.project?.pipedriveId) {
     try {
       const { pipedriveClient } = await import('@/lib/pipedrive');
-      const [products, deal, activities] = await Promise.all([
+
+      // Fetch deal first to get pipeline_id
+      const deal = await pipedriveClient.getDeal(data.project.pipedriveId);
+
+      // Then fetch products, activities, and stages in parallel
+      const [products, activities, stages] = await Promise.all([
         pipedriveClient.getDealProducts(data.project.pipedriveId),
-        pipedriveClient.getDeal(data.project.pipedriveId),
         pipedriveClient.getDealActivities(data.project.pipedriveId),
+        deal ? pipedriveClient.getPipelineStages(deal.pipeline_id) : Promise.resolve([]),
       ]);
 
-      const dealStatus = deal?.status || 'open';
+      dealStatus = deal?.status || 'open';
+      currentStageId = deal?.stage_id;
+
+      pipedriveStages = stages.map((s) => ({
+        id: s.id,
+        name: s.name,
+        orderNr: s.order_nr,
+      }));
 
       dealProducts = products.map((p) => ({
         id: p.id,
@@ -368,6 +383,9 @@ export default async function DashboardPage() {
           dbError={data.dbError}
           dealProducts={dealProducts}
           dealActivities={dealActivities}
+          pipedriveStages={pipedriveStages}
+          currentStageId={currentStageId}
+          dealStatus={dealStatus}
         />
       </Suspense>
     </div>

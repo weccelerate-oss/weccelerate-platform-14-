@@ -12,25 +12,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   Bell,
-  Settings,
   LogOut,
   ChevronRight,
   ChevronLeft,
   Plus,
-  Calendar,
   TrendingUp,
-  Users,
   Target,
-  Sparkles,
   Search,
   X,
-  CheckCircle2,
   FolderOpen,
   GraduationCap,
-  MessageSquare,
-  HelpCircle,
   ExternalLink,
-  Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { signOut } from 'next-auth/react';
@@ -79,6 +71,9 @@ interface DashboardContentProps {
   dbError?: boolean;
   dealProducts?: DealProductDisplay[];
   dealActivities?: DealActivityDisplay[];
+  pipedriveStages?: { id: number; name: string; orderNr: number }[];
+  currentStageId?: number;
+  dealStatus?: string;
 }
 
 // =============================================================================
@@ -96,26 +91,19 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { icon: LayoutDashboard, label: 'לוח בקרה', href: '/portal/dashboard', id: 'dashboard' },
-  { icon: Target, label: 'הפרויקט שלי', href: '/portal/dashboard', id: 'project' },
-  { icon: FolderOpen, label: 'מסמכים', href: '/portal/dashboard', id: 'documents' },
+  { icon: Target, label: 'הפרויקט שלי', href: '/portal/project', id: 'project' },
+  { icon: FolderOpen, label: 'מסמכים', href: '/portal/documents', id: 'documents' },
   { icon: GraduationCap, label: 'מרכז למידה', href: '/portal/learning', id: 'learning' },
-  { icon: TrendingUp, label: 'התקדמות', href: '/portal/dashboard', id: 'progress' },
-  { icon: Calendar, label: 'לוח שנה', href: '/portal/dashboard', id: 'calendar', comingSoon: true },
-  { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages', comingSoon: true },
-];
-
-const BOTTOM_NAV_ITEMS = [
-  { icon: Settings, label: 'הגדרות', href: '/portal/dashboard', id: 'settings', comingSoon: true },
-  { icon: HelpCircle, label: 'עזרה', href: '/portal/dashboard', id: 'help', comingSoon: true },
+  { icon: TrendingUp, label: 'התקדמות', href: '/portal/progress', id: 'progress' },
 ];
 
 // Mobile bottom nav - key items for thumb access
 const MOBILE_BOTTOM_NAV: NavItem[] = [
   { icon: LayoutDashboard, label: 'בית', href: '/portal/dashboard', id: 'dashboard' },
-  { icon: Target, label: 'פרויקט', href: '/portal/dashboard', id: 'project' },
+  { icon: Target, label: 'פרויקט', href: '/portal/project', id: 'project' },
   { icon: GraduationCap, label: 'למידה', href: '/portal/learning', id: 'learning' },
-  { icon: FolderOpen, label: 'מסמכים', href: '/portal/dashboard', id: 'documents' },
-  { icon: Menu, label: 'עוד', href: '#more', id: 'more' },
+  { icon: TrendingUp, label: 'התקדמות', href: '/portal/progress', id: 'progress' },
+  { icon: FolderOpen, label: 'מסמכים', href: '/portal/documents', id: 'documents' },
 ];
 
 // =============================================================================
@@ -130,6 +118,9 @@ export function DashboardContent({
   dbError,
   dealProducts = [],
   dealActivities = [],
+  pipedriveStages = [],
+  currentStageId,
+  dealStatus,
 }: DashboardContentProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -336,21 +327,6 @@ export function DashboardContent({
           ))}
         </nav>
 
-        {/* Bottom Nav */}
-        <div className="px-3 pb-2 space-y-1 border-t border-slate-800/60 pt-2">
-          {BOTTOM_NAV_ITEMS.map((item) => (
-            <SidebarLink
-              key={item.id}
-              icon={<item.icon className="w-[18px] h-[18px]" />}
-              label={item.label}
-              href={item.href}
-              isOpen={isSidebarOpen}
-              active={activeNav === item.id}
-              onClick={() => setActiveNav(item.id)}
-            />
-          ))}
-        </div>
-
         {/* User Section */}
         <div className="px-3 pb-4 pt-2 border-t border-slate-800/60">
           <div className={cn(
@@ -440,19 +416,6 @@ export function DashboardContent({
                 />
               ))}
 
-              <div className="h-px bg-slate-800/60 my-3" />
-
-              {BOTTOM_NAV_ITEMS.map((item) => (
-                <SidebarLink
-                  key={item.id}
-                  icon={<item.icon className="w-[18px] h-[18px]" />}
-                  label={item.label}
-                  href={item.href}
-                  isOpen={true}
-                  active={activeNav === item.id}
-                  onClick={() => { setActiveNav(item.id); setIsMobileSidebarOpen(false); }}
-                />
-              ))}
             </nav>
 
             {/* User section */}
@@ -707,6 +670,9 @@ export function DashboardContent({
                   status={project.status}
                   stage={project.stage}
                   timeline={project.timeline as Record<string, unknown> | null}
+                  pipedriveStages={pipedriveStages}
+                  currentStageId={currentStageId}
+                  dealStatus={dealStatus}
                 />
               </DashboardCard>
 
@@ -787,18 +753,12 @@ export function DashboardContent({
         <div className="flex items-center justify-around px-2 h-16">
           {MOBILE_BOTTOM_NAV.map((item) => {
             const isActive = activeNav === item.id;
-            const isMore = item.id === 'more';
 
             return (
-              <button
+              <a
                 key={item.id}
-                onClick={() => {
-                  if (isMore) {
-                    setIsMobileSidebarOpen(true);
-                  } else {
-                    setActiveNav(item.id);
-                  }
-                }}
+                href={item.href}
+                onClick={() => setActiveNav(item.id)}
                 className={cn(
                   'flex flex-col items-center justify-center gap-0.5 py-1.5 px-3 rounded-xl transition-colors min-w-[56px]',
                   isActive
@@ -826,7 +786,7 @@ export function DashboardContent({
                     className="absolute bottom-1 w-5 h-0.5 bg-[#c8a951] rounded-full"
                   />
                 )}
-              </button>
+              </a>
             );
           })}
         </div>

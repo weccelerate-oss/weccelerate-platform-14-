@@ -1,8 +1,8 @@
 /**
  * Project Timeline Component
  *
- * Clean, modern horizontal stepper showing project progress through stages.
- * Features smooth animations, responsive design, and clear visual hierarchy.
+ * Displays project progress through stages.
+ * Uses Pipedrive pipeline stages when available, falls back to hardcoded steps.
  */
 
 'use client';
@@ -29,23 +29,28 @@ import type { ProjectStatus } from '@prisma/client';
 // =============================================================================
 
 interface TimelineProps {
+  // DB-based (fallback)
   status: ProjectStatus;
   stage: number;
   timeline?: Record<string, unknown> | null;
+  // Pipedrive-based (preferred)
+  pipedriveStages?: { id: number; name: string; orderNr: number }[];
+  currentStageId?: number;
+  dealStatus?: string;
 }
 
 interface TimelineStep {
-  id: ProjectStatus;
+  id: string;
   labelHe: string;
   icon: React.ReactNode;
   description: string;
 }
 
 // =============================================================================
-// TIMELINE CONFIGURATION
+// FALLBACK TIMELINE CONFIGURATION
 // =============================================================================
 
-const TIMELINE_STEPS: TimelineStep[] = [
+const FALLBACK_STEPS: TimelineStep[] = [
   { id: 'DRAFT', labelHe: 'טיוטה', icon: <Circle className="w-4 h-4" />, description: 'הפרויקט נוצר' },
   { id: 'CHARACTERIZATION', labelHe: 'אפיון', icon: <FileSearch className="w-4 h-4" />, description: 'אפיון הפרויקט והגדרת יעדים' },
   { id: 'MARKET_RESEARCH', labelHe: 'מחקר שוק', icon: <Target className="w-4 h-4" />, description: 'מחקר שוק והבנת הלקוח' },
@@ -58,8 +63,8 @@ const TIMELINE_STEPS: TimelineStep[] = [
   { id: 'GRADUATED', labelHe: 'בוגר', icon: <Award className="w-4 h-4" />, description: 'סיום התוכנית בהצלחה!' },
 ];
 
-function getStepIndex(status: ProjectStatus): number {
-  const index = TIMELINE_STEPS.findIndex((step) => step.id === status);
+function getFallbackStepIndex(status: ProjectStatus): number {
+  const index = FALLBACK_STEPS.findIndex((step) => step.id === status);
   return index >= 0 ? index : 0;
 }
 
@@ -67,16 +72,61 @@ function getStepIndex(status: ProjectStatus): number {
 // COMPONENT
 // =============================================================================
 
-export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
-  const currentStepIndex = getStepIndex(status);
-  const progressPercent = (currentStepIndex / (TIMELINE_STEPS.length - 1)) * 100;
+export function ProjectTimeline({
+  status,
+  stage,
+  timeline,
+  pipedriveStages,
+  currentStageId,
+  dealStatus,
+}: TimelineProps) {
+  // Determine if we should use Pipedrive stages
+  const usePipedrive = pipedriveStages && pipedriveStages.length > 0 && currentStageId !== undefined;
 
-  const customTimeline = timeline?.stages as Array<{
-    name: string;
-    status: string;
-    startDate?: string;
-    endDate?: string;
-  }> | undefined;
+  // Build the steps array
+  const steps: { id: string; label: string; icon: React.ReactNode }[] = usePipedrive
+    ? pipedriveStages.map((s, i) => ({
+        id: String(s.id),
+        label: s.name,
+        icon: <Circle className="w-4 h-4" />,
+      }))
+    : FALLBACK_STEPS.map((s) => ({
+        id: s.id,
+        label: s.labelHe,
+        icon: s.icon,
+      }));
+
+  // Find current step index
+  let currentStepIndex: number;
+  if (usePipedrive) {
+    if (dealStatus === 'won') {
+      // All stages completed
+      currentStepIndex = steps.length;
+    } else if (dealStatus === 'lost') {
+      currentStepIndex = pipedriveStages.findIndex((s) => s.id === currentStageId);
+      if (currentStepIndex < 0) currentStepIndex = 0;
+    } else {
+      currentStepIndex = pipedriveStages.findIndex((s) => s.id === currentStageId);
+      if (currentStepIndex < 0) currentStepIndex = 0;
+    }
+  } else {
+    currentStepIndex = getFallbackStepIndex(status);
+  }
+
+  const totalSteps = steps.length;
+  const progressPercent = totalSteps > 1
+    ? (Math.min(currentStepIndex, totalSteps - 1) / (totalSteps - 1)) * 100
+    : 100;
+
+  // For "won" deals, progress is 100%
+  const finalProgress = (usePipedrive && dealStatus === 'won') ? 100 : progressPercent;
+
+  const currentStepLabel = currentStepIndex < steps.length
+    ? steps[currentStepIndex].label
+    : steps[steps.length - 1]?.label || '';
+  const currentStepDescription = usePipedrive
+    ? (dealStatus === 'won' ? 'הפרויקט הושלם בהצלחה!' : `שלב נוכחי בצינור העסקאות`)
+    : (FALLBACK_STEPS[currentStepIndex]?.description || '');
 
   return (
     <div className="space-y-6">
@@ -89,7 +139,7 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
           {/* Progress fill */}
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: `${progressPercent}%` }}
+            animate={{ width: `${finalProgress}%` }}
             transition={{ duration: 1, ease: 'easeOut' }}
             className="absolute top-5 right-5 h-[3px] bg-gradient-to-l from-[#e8d48b] to-[#c8a951] rounded-full"
             style={{ maxWidth: 'calc(100% - 40px)' }}
@@ -97,16 +147,20 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
 
           {/* Steps */}
           <div className="relative flex justify-between">
-            {TIMELINE_STEPS.map((step, index) => {
-              const isCompleted = index < currentStepIndex;
-              const isCurrent = index === currentStepIndex;
-              const isPending = index > currentStepIndex;
+            {steps.map((step, index) => {
+              const isCompleted = usePipedrive
+                ? (dealStatus === 'won' || index < currentStepIndex)
+                : index < currentStepIndex;
+              const isCurrent = usePipedrive
+                ? (dealStatus !== 'won' && index === currentStepIndex)
+                : index === currentStepIndex;
+              const isPending = !isCompleted && !isCurrent;
 
               return (
                 <div
                   key={step.id}
                   className="flex flex-col items-center relative"
-                  style={{ width: `${100 / TIMELINE_STEPS.length}%` }}
+                  style={{ width: `${100 / totalSteps}%` }}
                 >
                   {/* Step circle */}
                   <motion.div
@@ -138,12 +192,12 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
 
                   {/* Label */}
                   <p className={cn(
-                    'mt-2.5 text-[10px] font-medium text-center leading-tight max-w-[60px]',
+                    'mt-2.5 text-[10px] font-medium text-center leading-tight max-w-[70px]',
                     isCompleted && 'text-emerald-400',
                     isCurrent && 'text-[#c8a951] font-semibold',
                     isPending && 'text-white/30'
                   )}>
-                    {step.labelHe}
+                    {step.label}
                   </p>
                 </div>
               );
@@ -156,21 +210,44 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mt-6 flex items-center gap-3 p-3.5 bg-[#c8a951]/[0.06] rounded-xl border border-[#c8a951]/15"
+          className={cn(
+            'mt-6 flex items-center gap-3 p-3.5 rounded-xl border',
+            usePipedrive && dealStatus === 'won'
+              ? 'bg-emerald-500/[0.06] border-emerald-500/15'
+              : 'bg-[#c8a951]/[0.06] border-[#c8a951]/15'
+          )}
         >
-          <div className="p-2 bg-[#c8a951]/10 rounded-lg text-[#c8a951]">
-            {TIMELINE_STEPS[currentStepIndex]?.icon}
+          <div className={cn(
+            'p-2 rounded-lg',
+            usePipedrive && dealStatus === 'won'
+              ? 'bg-emerald-500/10 text-emerald-400'
+              : 'bg-[#c8a951]/10 text-[#c8a951]'
+          )}>
+            {usePipedrive && dealStatus === 'won' ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              currentStepIndex < steps.length ? steps[currentStepIndex].icon : <Check className="w-4 h-4" />
+            )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white">
-              שלב נוכחי: {TIMELINE_STEPS[currentStepIndex]?.labelHe}
+              {usePipedrive && dealStatus === 'won'
+                ? 'הפרויקט הושלם!'
+                : `שלב נוכחי: ${currentStepLabel}`}
             </p>
             <p className="text-xs text-white/50 mt-0.5">
-              {TIMELINE_STEPS[currentStepIndex]?.description}
+              {currentStepDescription}
             </p>
           </div>
-          <div className="mr-auto text-xs font-semibold text-[#c8a951] bg-[#c8a951]/10 px-2.5 py-1 rounded-lg border border-[#c8a951]/20">
-            {currentStepIndex + 1}/{TIMELINE_STEPS.length}
+          <div className={cn(
+            'mr-auto text-xs font-semibold px-2.5 py-1 rounded-lg border',
+            usePipedrive && dealStatus === 'won'
+              ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+              : 'text-[#c8a951] bg-[#c8a951]/10 border-[#c8a951]/20'
+          )}>
+            {usePipedrive && dealStatus === 'won'
+              ? `${totalSteps}/${totalSteps}`
+              : `${Math.min(currentStepIndex + 1, totalSteps)}/${totalSteps}`}
           </div>
         </motion.div>
       </div>
@@ -182,17 +259,21 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
           <div className="absolute right-[11px] top-0 bottom-0 w-[2px] bg-white/[0.06] rounded-full">
             <motion.div
               initial={{ height: 0 }}
-              animate={{ height: `${progressPercent}%` }}
+              animate={{ height: `${finalProgress}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
               className="w-full bg-gradient-to-b from-emerald-500 to-[#c8a951] rounded-full"
             />
           </div>
 
           <div className="space-y-4">
-            {TIMELINE_STEPS.map((step, index) => {
-              const isCompleted = index < currentStepIndex;
-              const isCurrent = index === currentStepIndex;
-              const isPending = index > currentStepIndex;
+            {steps.map((step, index) => {
+              const isCompleted = usePipedrive
+                ? (dealStatus === 'won' || index < currentStepIndex)
+                : index < currentStepIndex;
+              const isCurrent = usePipedrive
+                ? (dealStatus !== 'won' && index === currentStepIndex)
+                : index === currentStepIndex;
+              const isPending = !isCompleted && !isCurrent;
 
               return (
                 <motion.div
@@ -227,10 +308,10 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
                       isCurrent && 'text-[#c8a951]',
                       isPending && 'text-white/30'
                     )}>
-                      {step.labelHe}
+                      {step.label}
                     </p>
                     {isCurrent && (
-                      <p className="text-xs text-white/50 mt-0.5">{step.description}</p>
+                      <p className="text-xs text-white/50 mt-0.5">{currentStepDescription}</p>
                     )}
                   </div>
                 </motion.div>
@@ -239,41 +320,6 @@ export function ProjectTimeline({ status, stage, timeline }: TimelineProps) {
           </div>
         </div>
       </div>
-
-      {/* Custom Timeline */}
-      {customTimeline && customTimeline.length > 0 && (
-        <div className="pt-4 border-t border-white/[0.06]">
-          <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">
-            אבני דרך מותאמות
-          </h4>
-          <div className="space-y-2">
-            {customTimeline.map((item, index) => (
-              <div
-                key={index}
-                className={cn(
-                  'flex items-center gap-3 p-2.5 rounded-lg transition-colors',
-                  item.status === 'completed' && 'bg-emerald-500/[0.06]',
-                  item.status === 'in-progress' && 'bg-[#c8a951]/[0.06]',
-                  item.status === 'upcoming' && 'bg-white/[0.02]'
-                )}
-              >
-                <div className={cn(
-                  'w-2 h-2 rounded-full flex-shrink-0',
-                  item.status === 'completed' && 'bg-emerald-500',
-                  item.status === 'in-progress' && 'bg-[#c8a951] animate-pulse',
-                  item.status === 'upcoming' && 'bg-white/20'
-                )} />
-                <span className="flex-1 text-sm text-white/70">{item.name}</span>
-                {item.endDate && (
-                  <span className="text-xs text-white/40 font-medium">
-                    {new Date(item.endDate).toLocaleDateString('he-IL')}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

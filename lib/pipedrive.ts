@@ -121,6 +121,17 @@ export interface PipedriveActivity {
   [key: string]: unknown;
 }
 
+export interface PipedriveStage {
+  id: number;
+  order_nr: number;
+  name: string;
+  active_flag: boolean;
+  deal_probability: number;
+  pipeline_id: number;
+  pipeline_name: string;
+  [key: string]: unknown;
+}
+
 export interface PipedriveDealProduct {
   id: number;
   deal_id: number;
@@ -443,6 +454,17 @@ class PipedriveClient {
     );
     if (response.success && response.data) {
       return response.data;
+    }
+    return [];
+  }
+
+  /**
+   * Get pipeline stages sorted by order
+   */
+  async getPipelineStages(pipelineId: number): Promise<PipedriveStage[]> {
+    const response = await this.request<PipedriveStage[]>('GET', `/stages?pipeline_id=${pipelineId}`);
+    if (response.success && response.data) {
+      return response.data.sort((a, b) => a.order_nr - b.order_nr);
     }
     return [];
   }
