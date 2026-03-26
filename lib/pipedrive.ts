@@ -101,6 +101,26 @@ export interface PipedriveNote {
   add_time: string;
 }
 
+export interface PipedriveActivity {
+  id: number;
+  type: string;
+  subject: string;
+  done: boolean;
+  due_date: string | null;
+  due_time: string | null;
+  duration: string | null;
+  add_time: string;
+  marked_as_done_time: string | null;
+  deal_id: number | null;
+  person_id: number | null;
+  org_id: number | null;
+  note: string | null;
+  public_description: string | null;
+  location: string | null;
+  busy_flag: boolean;
+  [key: string]: unknown;
+}
+
 export interface PipedriveDealProduct {
   id: number;
   deal_id: number;
@@ -406,6 +426,20 @@ class PipedriveClient {
     const response = await this.request<PipedriveDeal[]>(
       'GET',
       `/persons/${personId}/deals?status=all_not_deleted&sort=add_time DESC`
+    );
+    if (response.success && response.data) {
+      return response.data;
+    }
+    return [];
+  }
+
+  /**
+   * Get activities linked to a deal (meetings, calls, tasks, etc.)
+   */
+  async getDealActivities(dealId: number | string): Promise<PipedriveActivity[]> {
+    const response = await this.request<PipedriveActivity[]>(
+      'GET',
+      `/deals/${dealId}/activities?done=0,1`
     );
     if (response.success && response.data) {
       return response.data;

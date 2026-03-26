@@ -309,17 +309,18 @@ export default async function DashboardPage() {
   // Fetch project data
   const data = await getProjectData(session.user.id);
 
-  // Fetch purchased products from Pipedrive if project has a deal linked
+  // Fetch purchased products and activities from Pipedrive if project has a deal linked
   let dealProducts: { id: number; name: string; price: number; quantity: number; sum: number; currency: string; completed: boolean; active: boolean }[] = [];
+  let dealActivities: { id: number; type: string; subject: string; done: boolean; dueDate: string | null; dueTime: string | null; addTime: string; markedDoneTime: string | null; location: string | null }[] = [];
   if (data.project?.pipedriveId) {
     try {
       const { pipedriveClient } = await import('@/lib/pipedrive');
-      const [products, deal] = await Promise.all([
+      const [products, deal, activities] = await Promise.all([
         pipedriveClient.getDealProducts(data.project.pipedriveId),
         pipedriveClient.getDeal(data.project.pipedriveId),
+        pipedriveClient.getDealActivities(data.project.pipedriveId),
       ]);
 
-      const currentStageId = deal?.stage_id || 0;
       const dealStatus = deal?.status || 'open';
 
       dealProducts = products.map((p) => ({
@@ -329,12 +330,30 @@ export default async function DashboardPage() {
         quantity: p.quantity,
         sum: p.sum,
         currency: p.currency || 'ILS',
-        // Mark as completed if deal is won, or use active_flag from Pipedrive
         completed: dealStatus === 'won' || !p.active_flag,
         active: p.active_flag && dealStatus === 'open',
       }));
+
+      dealActivities = activities
+        .filter((a) => a.type !== 'note')
+        .map((a) => ({
+          id: a.id,
+          type: a.type,
+          subject: a.subject,
+          done: a.done,
+          dueDate: a.due_date,
+          dueTime: a.due_time,
+          addTime: a.add_time,
+          markedDoneTime: a.marked_as_done_time,
+          location: a.location,
+        }))
+        .sort((a, b) => {
+          // Done activities last, then sort by due date
+          if (a.done !== b.done) return a.done ? 1 : -1;
+          return (b.dueDate || b.addTime).localeCompare(a.dueDate || a.addTime);
+        });
     } catch (err) {
-      console.warn('[Dashboard] Failed to fetch Pipedrive products:', err);
+      console.warn('[Dashboard] Failed to fetch Pipedrive data:', err);
     }
   }
 
@@ -348,6 +367,7 @@ export default async function DashboardPage() {
           activities={data.activities}
           dbError={data.dbError}
           dealProducts={dealProducts}
+          dealActivities={dealActivities}
         />
       </Suspense>
     </div>

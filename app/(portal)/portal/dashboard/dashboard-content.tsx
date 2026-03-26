@@ -42,7 +42,9 @@ import { StatsCards } from './components/stats-cards';
 import { RecentActivity } from './components/recent-activity';
 import { QuickActions } from './components/quick-actions';
 import { PurchasedServices } from './components/purchased-services';
+import { DealActivities } from './components/deal-activities';
 import type { DealProductDisplay } from './components/purchased-services';
+import type { DealActivityDisplay } from './components/deal-activities';
 import type { Project, File, ProjectNote, Notification, ActivityLog } from '@prisma/client';
 
 // =============================================================================
@@ -76,6 +78,7 @@ interface DashboardContentProps {
   activities: ActivityLog[];
   dbError?: boolean;
   dealProducts?: DealProductDisplay[];
+  dealActivities?: DealActivityDisplay[];
 }
 
 // =============================================================================
@@ -126,6 +129,7 @@ export function DashboardContent({
   activities,
   dbError,
   dealProducts = [],
+  dealActivities = [],
 }: DashboardContentProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -664,14 +668,28 @@ export function DashboardContent({
           <StatsCards project={project} />
 
           {/* Purchased Services from Pipedrive */}
-          {dealProducts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08 }}
-            >
-              <PurchasedServices products={dealProducts} />
-            </motion.div>
+          {/* Pipedrive Data: Products + Activities */}
+          {(dealProducts.length > 0 || dealActivities.length > 0) && (
+            <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+              {dealProducts.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08 }}
+                >
+                  <PurchasedServices products={dealProducts} />
+                </motion.div>
+              )}
+              {dealActivities.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.12 }}
+                >
+                  <DealActivities activities={dealActivities} />
+                </motion.div>
+              )}
+            </div>
           )}
 
           {/* Main Grid */}
