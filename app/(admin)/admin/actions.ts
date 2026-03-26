@@ -865,19 +865,29 @@ export async function createProjectAction(data: CreateProjectFormData) {
       return { success: false, error: 'למשתמש כבר יש פרויקט פעיל. ניתן לארכב אותו לפני יצירת חדש.' };
     }
 
-    // Auto-create Pipedrive deal if no pipedriveId provided
+    // Auto-link or create Pipedrive deal if no pipedriveId provided
     let pipedriveId = data.pipedriveId?.trim() || null;
     if (!pipedriveId) {
       try {
         const { pipedriveClient } = await import('@/lib/pipedrive');
         if (pipedriveClient.isReady()) {
-          // Look up or create person in Pipedrive
           let personId: number | undefined;
+
+          // Step 1: Find existing person by email
           if (user.email) {
             const existingPerson = await pipedriveClient.findPersonByEmail(user.email);
             if (existingPerson) {
               personId = existingPerson.id;
+
+              // Step 2: Check if person already has deals — link to the most recent open one
+              const existingDeals = await pipedriveClient.getPersonDeals(personId);
+              const openDeal = existingDeals.find((d) => d.status === 'open');
+              if (openDeal) {
+                pipedriveId = String(openDeal.id);
+                console.log(`[Admin] Found existing Pipedrive deal ${pipedriveId} for ${user.email}`);
+              }
             } else {
+              // Create new person
               const personResult = await pipedriveClient.createPerson({
                 name: user.name || user.email,
                 email: user.email,
@@ -889,21 +899,23 @@ export async function createProjectAction(data: CreateProjectFormData) {
             }
           }
 
-          // Create deal in Pipedrive
-          const dealResult = await pipedriveClient.createDeal({
-            title: `${data.name.trim()} — ${user.company || user.name || user.email}`,
-            person_id: personId,
-            value: data.targetFunding || 0,
-            currency: data.fundingCurrency || 'ILS',
-          });
+          // Step 3: If no existing deal found, create a new one
+          if (!pipedriveId) {
+            const dealResult = await pipedriveClient.createDeal({
+              title: `${data.name.trim()} — ${user.company || user.name || user.email}`,
+              person_id: personId,
+              value: data.targetFunding || 0,
+              currency: data.fundingCurrency || 'ILS',
+            });
 
-          if (dealResult.success && dealResult.data) {
-            pipedriveId = String(dealResult.data.id);
-            console.log(`[Admin] Created Pipedrive deal ${pipedriveId} for project "${data.name}"`);
+            if (dealResult.success && dealResult.data) {
+              pipedriveId = String(dealResult.data.id);
+              console.log(`[Admin] Created new Pipedrive deal ${pipedriveId} for project "${data.name}"`);
+            }
           }
         }
       } catch (pipedriveError) {
-        console.warn('[Admin] Failed to create Pipedrive deal (continuing without it):', pipedriveError);
+        console.warn('[Admin] Failed to link/create Pipedrive deal (continuing without it):', pipedriveError);
       }
     }
 

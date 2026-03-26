@@ -400,6 +400,20 @@ class PipedriveClient {
   }
 
   /**
+   * Get deals linked to a person
+   */
+  async getPersonDeals(personId: number): Promise<PipedriveDeal[]> {
+    const response = await this.request<PipedriveDeal[]>(
+      'GET',
+      `/persons/${personId}/deals?status=all_not_deleted&sort=add_time DESC`
+    );
+    if (response.success && response.data) {
+      return response.data;
+    }
+    return [];
+  }
+
+  /**
    * Get deal details by ID
    */
   async getDeal(dealId: number | string): Promise<PipedriveDeal | null> {
