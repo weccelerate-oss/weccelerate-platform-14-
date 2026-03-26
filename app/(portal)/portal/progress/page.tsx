@@ -1,7 +1,7 @@
 /**
  * Progress Page
  *
- * Full progress view: Pipedrive timeline + activities.
+ * Full progress view: Pipedrive activities timeline.
  */
 
 export const dynamic = 'force-dynamic';
@@ -16,52 +16,35 @@ export const metadata: Metadata = {
   description: 'מעקב התקדמות הפרויקט שלך',
 };
 
-async function getProjectData(userId: string) {
-  try {
-    const { prisma } = await import('@/lib/db');
-    const project = await prisma.project.findFirst({
-      where: { userId, isArchived: false },
-      select: {
-        id: true,
-        name: true,
-        status: true,
-        stage: true,
-        timeline: true,
-        pipedriveId: true,
-      },
-    });
-    return { project };
-  } catch (err) {
-    console.warn('[Progress Page] DB error:', err);
-    return { project: null };
-  }
-}
-
 export default async function ProgressPage() {
   const session = await auth();
   if (!session?.user) redirect('/login?callbackUrl=/portal/progress');
 
-  const data = await getProjectData(session.user.id!);
+  // Fetch project
+  let project: { name: string; pipedriveId: string | null } | null = null;
+  try {
+    const { prisma } = await import('@/lib/db');
+    project = await prisma.project.findFirst({
+      where: { userId: session.user.id!, isArchived: false },
+      select: { name: true, pipedriveId: true },
+    });
+  } catch (err) {
+    console.warn('[Progress] DB error:', err);
+  }
 
+  // Fetch activities from Pipedrive
   let dealActivities: { id: number; type: string; subject: string; done: boolean; dueDate: string | null; dueTime: string | null; addTime: string; markedDoneTime: string | null; location: string | null }[] = [];
-  let pipedriveStages: { id: number; name: string; orderNr: number }[] = [];
-  let currentStageId: number | undefined;
   let dealStatus: string | undefined;
 
-  if (data.project?.pipedriveId) {
+  if (project?.pipedriveId) {
     try {
       const { pipedriveClient } = await import('@/lib/pipedrive');
-      const deal = await pipedriveClient.getDeal(data.project.pipedriveId);
-
-      const [activities, stages] = await Promise.all([
-        pipedriveClient.getDealActivities(data.project.pipedriveId),
-        deal ? pipedriveClient.getPipelineStages(deal.pipeline_id) : Promise.resolve([]),
+      const [deal, activities] = await Promise.all([
+        pipedriveClient.getDeal(project.pipedriveId),
+        pipedriveClient.getDealActivities(project.pipedriveId),
       ]);
 
       dealStatus = deal?.status || 'open';
-      currentStageId = deal?.stage_id;
-
-      pipedriveStages = stages.map((s) => ({ id: s.id, name: s.name, orderNr: s.order_nr }));
 
       dealActivities = activities
         .filter((a) => a.type !== 'note')
@@ -75,20 +58,16 @@ export default async function ProgressPage() {
           return (b.dueDate || b.addTime).localeCompare(a.dueDate || a.addTime);
         });
     } catch (err) {
-      console.warn('[Progress Page] Pipedrive error:', err);
+      console.warn('[Progress] Pipedrive error:', err);
     }
   }
 
   return (
     <div className="min-h-screen bg-[#070b1e]" dir="rtl">
       <ProgressPageContent
-        projectName={data.project?.name}
-        projectStatus={data.project?.status}
-        projectStage={data.project?.stage}
-        projectTimeline={data.project?.timeline as Record<string, unknown> | null}
+        projectName={project?.name}
+        hasProject={!!project}
         dealActivities={dealActivities}
-        pipedriveStages={pipedriveStages}
-        currentStageId={currentStageId}
         dealStatus={dealStatus}
       />
     </div>

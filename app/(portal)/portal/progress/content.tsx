@@ -1,7 +1,7 @@
 /**
  * Progress Page Content
  *
- * Full progress view with timeline and activities.
+ * Full progress view with timeline and activities from Pipedrive.
  */
 
 'use client';
@@ -11,31 +11,20 @@ import { ArrowRight, TrendingUp } from 'lucide-react';
 import { ProjectTimeline } from '../dashboard/components/project-timeline';
 import { DealActivities } from '../dashboard/components/deal-activities';
 import type { DealActivityDisplay } from '../dashboard/components/deal-activities';
-import type { ProjectStatus } from '@prisma/client';
 
 interface Props {
   projectName?: string;
-  projectStatus?: ProjectStatus;
-  projectStage?: number;
-  projectTimeline?: Record<string, unknown> | null;
+  hasProject: boolean;
   dealActivities: DealActivityDisplay[];
-  pipedriveStages: { id: number; name: string; orderNr: number }[];
-  currentStageId?: number;
   dealStatus?: string;
 }
 
 export function ProgressPageContent({
   projectName,
-  projectStatus,
-  projectStage,
-  projectTimeline,
+  hasProject,
   dealActivities,
-  pipedriveStages,
-  currentStageId,
   dealStatus,
 }: Props) {
-  const hasProject = projectStatus && projectStage !== undefined;
-
   return (
     <>
       {/* Header */}
@@ -72,28 +61,24 @@ export function ProgressPageContent({
           </motion.div>
         ) : (
           <>
-            {/* Timeline */}
+            {/* Timeline from Activities */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden"
             >
               <div className="px-5 py-4 border-b border-white/[0.06]">
-                <h2 className="text-[15px] font-semibold text-white/90">ציר הזמן של הפרויקט</h2>
+                <h2 className="text-[15px] font-semibold text-white/90">מה עשינו ומה נשאר</h2>
               </div>
               <div className="p-5">
                 <ProjectTimeline
-                  status={projectStatus}
-                  stage={projectStage}
-                  timeline={projectTimeline}
-                  pipedriveStages={pipedriveStages}
-                  currentStageId={currentStageId}
+                  dealActivities={dealActivities}
                   dealStatus={dealStatus}
                 />
               </div>
             </motion.div>
 
-            {/* Activities */}
+            {/* Activities Detail */}
             {dealActivities.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
@@ -110,10 +95,10 @@ export function ProgressPageContent({
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+                className="grid grid-cols-3 gap-4"
               >
                 <StatCard
-                  label="פעילויות"
+                  label="סה״כ פעילויות"
                   value={dealActivities.length}
                   color="white"
                 />
@@ -126,11 +111,6 @@ export function ProgressPageContent({
                   label="ממתינות"
                   value={dealActivities.filter(a => !a.done).length}
                   color="amber"
-                />
-                <StatCard
-                  label="שלבים בצינור"
-                  value={pipedriveStages.length || '-'}
-                  color="blue"
                 />
               </motion.div>
             )}
@@ -146,7 +126,6 @@ function StatCard({ label, value, color }: { label: string; value: number | stri
     white: 'text-white/80 bg-white/[0.03] border-white/[0.08]',
     emerald: 'text-emerald-400 bg-emerald-500/[0.06] border-emerald-500/15',
     amber: 'text-[#c8a951] bg-[#c8a951]/[0.06] border-[#c8a951]/15',
-    blue: 'text-blue-400 bg-blue-500/[0.06] border-blue-500/15',
   };
 
   return (

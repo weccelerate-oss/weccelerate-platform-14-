@@ -139,15 +139,11 @@ export function ProjectPageContent({
           className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden"
         >
           <div className="px-5 py-4 border-b border-white/[0.06]">
-            <h2 className="text-[15px] font-semibold text-white/90">ציר הזמן של הפרויקט</h2>
+            <h2 className="text-[15px] font-semibold text-white/90">מה עשינו ומה נשאר</h2>
           </div>
           <div className="p-5">
             <ProjectTimeline
-              status={project.status}
-              stage={project.stage}
-              timeline={project.timeline as Record<string, unknown> | null}
-              pipedriveStages={pipedriveStages}
-              currentStageId={currentStageId}
+              dealActivities={dealActivities}
               dealStatus={dealStatus}
             />
           </div>
