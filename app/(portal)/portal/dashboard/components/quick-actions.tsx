@@ -115,11 +115,11 @@ export function QuickActions({ project }: QuickActionsProps) {
     .slice(0, 4);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+    <div className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-[15px] font-semibold text-slate-900">פעולות מהירות</h2>
+          <h2 className="text-[15px] font-semibold text-white/90">פעולות מהירות</h2>
         </div>
         <div className="p-1.5 bg-amber-50 rounded-lg">
           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -135,7 +135,7 @@ export function QuickActions({ project }: QuickActionsProps) {
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 + index * 0.04 }}
-            className="flex items-center gap-3 p-3 sm:p-2.5 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all group cursor-pointer"
+            className="flex items-center gap-3 p-3 sm:p-2.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.06] transition-all group cursor-pointer"
           >
             {/* Icon */}
             <div className={cn(
@@ -148,14 +148,14 @@ export function QuickActions({ project }: QuickActionsProps) {
 
             {/* Text */}
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-slate-900 text-sm">{action.label}</p>
+              <p className="font-medium text-white/90 text-sm">{action.label}</p>
               {action.description && (
-                <p className="text-[11px] text-slate-400 truncate">{action.description}</p>
+                <p className="text-[11px] text-white/40 truncate">{action.description}</p>
               )}
             </div>
 
             {/* Arrow */}
-            <ChevronLeft className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all flex-shrink-0" />
+            <ChevronLeft className="w-4 h-4 text-white/20 opacity-0 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all flex-shrink-0" />
           </motion.a>
         ))}
       </div>

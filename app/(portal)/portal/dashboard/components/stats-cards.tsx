@@ -165,7 +165,7 @@ export function StatsCards({ project }: StatsCardsProps) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.06, duration: 0.4 }}
-            className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300 group"
+            className="bg-white/[0.03] backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/[0.08] hover:border-[#c8a951]/20 hover:shadow-[0_0_30px_rgba(200,169,81,0.06)] transition-all duration-300 group"
           >
             {/* Header: Icon + Trend */}
             <div className="flex items-start justify-between mb-3">
@@ -194,11 +194,11 @@ export function StatsCards({ project }: StatsCardsProps) {
             </div>
 
             {/* Value */}
-            <p className="text-xl sm:text-2xl font-bold text-slate-900 mb-0.5 tracking-tight">
+            <p className="text-xl sm:text-2xl font-bold text-white mb-0.5 tracking-tight">
               {stat.value}
             </p>
             {stat.subValue && (
-              <p className="text-xs text-slate-500 mb-1">
+              <p className="text-xs text-white/50 mb-1">
                 {stat.subValue}
               </p>
             )}
@@ -218,7 +218,7 @@ export function StatsCards({ project }: StatsCardsProps) {
             )}
 
             {/* Label */}
-            <p className="text-[11px] text-slate-400 mt-2 font-medium uppercase tracking-wider">
+            <p className="text-[11px] text-white/30 mt-2 font-medium uppercase tracking-wider">
               {stat.label}
             </p>
           </motion.div>

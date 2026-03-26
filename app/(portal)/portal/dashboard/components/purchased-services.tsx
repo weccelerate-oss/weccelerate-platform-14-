@@ -61,14 +61,14 @@ export function PurchasedServices({ products }: PurchasedServicesProps) {
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+    <div className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-[15px] font-semibold text-slate-900">השירותים שרכשת</h2>
+          <h2 className="text-[15px] font-semibold text-white/90">השירותים שרכשת</h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-slate-500">
+          <span className="text-xs font-medium text-white/50">
             {completedCount}/{totalCount} הושלמו
           </span>
           <div className="p-1.5 bg-violet-50 rounded-lg">
@@ -79,17 +79,17 @@ export function PurchasedServices({ products }: PurchasedServicesProps) {
 
       {/* Progress bar */}
       <div className="px-5 pt-3">
-        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="h-full bg-gradient-to-l from-emerald-500 to-teal-500 rounded-full"
+            className="h-full bg-gradient-to-l from-[#e8d48b] to-[#c8a951] rounded-full"
           />
         </div>
         <div className="flex items-center justify-between mt-1.5 mb-2">
-          <span className="text-[11px] text-slate-400">התקדמות כללית</span>
-          <span className="text-[11px] font-semibold text-slate-600">{progressPercent}%</span>
+          <span className="text-[11px] text-white/40">התקדמות כללית</span>
+          <span className="text-[11px] font-semibold text-[#c8a951]">{progressPercent}%</span>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export function PurchasedServices({ products }: PurchasedServicesProps) {
             transition={{ delay: 0.1 + index * 0.04 }}
             className={cn(
               'flex items-center gap-3 p-3 rounded-xl transition-all',
-              product.completed ? 'bg-emerald-50/50' : 'hover:bg-slate-50'
+              product.completed ? 'bg-emerald-500/5' : 'hover:bg-white/[0.03]'
             )}
           >
             {/* Status icon */}
@@ -121,12 +121,12 @@ export function PurchasedServices({ products }: PurchasedServicesProps) {
             <div className="flex-1 min-w-0">
               <p className={cn(
                 'text-sm font-medium',
-                product.completed ? 'text-emerald-700' : 'text-slate-900'
+                product.completed ? 'text-emerald-400' : 'text-white/90'
               )}>
                 {product.name}
               </p>
               {product.quantity > 1 && (
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-white/40">
                   כמות: {product.quantity}
                 </p>
               )}
@@ -136,7 +136,7 @@ export function PurchasedServices({ products }: PurchasedServicesProps) {
             <div className="flex-shrink-0 text-left">
               <span className={cn(
                 'text-xs font-semibold',
-                product.completed ? 'text-emerald-600' : 'text-slate-500'
+                product.completed ? 'text-emerald-400' : 'text-white/50'
               )}>
                 {formatPrice(product.sum, product.currency)}
               </span>
@@ -146,9 +146,9 @@ export function PurchasedServices({ products }: PurchasedServicesProps) {
       </div>
 
       {/* Total */}
-      <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-500">סה״כ</span>
-        <span className="text-sm font-bold text-slate-900">
+      <div className="px-5 py-3 border-t border-white/[0.06] flex items-center justify-between">
+        <span className="text-xs font-medium text-white/50">סה״כ</span>
+        <span className="text-sm font-bold text-[#c8a951]">
           {formatPrice(
             products.reduce((sum, p) => sum + p.sum, 0),
             products[0]?.currency || 'ILS'

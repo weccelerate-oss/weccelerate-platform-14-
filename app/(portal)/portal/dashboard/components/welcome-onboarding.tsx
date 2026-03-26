@@ -134,29 +134,35 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50" dir="rtl">
+    <div className="min-h-screen bg-[#070b1e]" dir="rtl">
+      {/* Ambient glows */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-[#c8a951]/[0.03] rounded-full blur-[150px]" />
+        <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-blue-600/[0.03] rounded-full blur-[120px]" />
+      </div>
+
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-30">
+      <header className="bg-[#0a0e27]/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-royal-500 to-cyan-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">W</span>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center">
+              <span className="text-[#070b1e] font-bold text-sm">W</span>
             </div>
-            <span className="text-base font-bold text-slate-900">WeCcelerate</span>
-            <span className="px-2 py-0.5 bg-royal-50 text-royal-700 text-[10px] font-semibold rounded-md">
+            <span className="text-base font-bold text-white">WeCcelerate</span>
+            <span className="px-2 py-0.5 bg-[#c8a951]/10 text-[#c8a951] text-[10px] font-semibold rounded-md border border-[#c8a951]/20">
               פורטל יזמים
             </span>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2">
-              <span className="text-sm text-slate-500">{user.company || user.email}</span>
+              <span className="text-sm text-white/50">{user.company || user.email}</span>
             </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-royal-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center text-[#070b1e] font-semibold text-sm">
               {firstName.charAt(0)}
             </div>
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
-              className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600"
+              className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/40 hover:text-white/70"
               title="התנתק"
             >
               <LogOut className="w-4 h-4" />
@@ -166,17 +172,17 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
       </header>
 
       {/* Main content */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
         {/* Greeting */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-10"
         >
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
             {getGreeting()}, {firstName}!
           </h1>
-          <p className="text-slate-500 text-base max-w-lg">
+          <p className="text-white/60 text-base max-w-lg">
             הפרויקט שלך בהכנה. בינתיים, אפשר להתחיל ללמוד ולהתכונן למסע היזמי.
           </p>
         </motion.div>
@@ -186,9 +192,9 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 mb-6"
+          className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] p-5 sm:p-6 mb-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
         >
-          <h2 className="text-[15px] font-semibold text-slate-900 mb-5">
+          <h2 className="text-[15px] font-semibold text-white/90 mb-5">
             המסע שלך ב-WeCcelerate
           </h2>
           <div className="space-y-4">
@@ -198,14 +204,14 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
                 <div className="flex flex-col items-center">
                   <div className={cn(
                     'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
-                    stage.completed ? 'bg-emerald-100 text-emerald-600' : stage.current ? cn(stage.iconBg, stage.color, 'ring-2 ring-blue-200') : 'bg-slate-100 text-slate-400'
+                    stage.completed ? 'bg-emerald-500/10 text-emerald-400' : stage.current ? 'bg-[#c8a951]/10 text-[#c8a951] ring-2 ring-[#c8a951]/20' : 'bg-white/[0.04] text-white/30'
                   )}>
                     {stage.icon}
                   </div>
                   {index < JOURNEY_STAGES.length - 1 && (
                     <div className={cn(
                       'w-0.5 h-6 mt-1',
-                      stage.completed ? 'bg-emerald-300' : 'bg-slate-200'
+                      stage.completed ? 'bg-emerald-500/30' : 'bg-white/[0.08]'
                     )} />
                   )}
                 </div>
@@ -214,23 +220,23 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
                   <div className="flex items-center gap-2">
                     <h3 className={cn(
                       'font-semibold text-sm',
-                      stage.completed ? 'text-emerald-700' : stage.current ? 'text-slate-900' : 'text-slate-400'
+                      stage.completed ? 'text-emerald-400' : stage.current ? 'text-white' : 'text-white/30'
                     )}>
                       {stage.title}
                     </h3>
                     {stage.completed && (
-                      <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">הושלם</span>
+                      <span className="text-[10px] font-medium text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">הושלם</span>
                     )}
                     {stage.current && (
-                      <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                      <span className="text-[10px] font-medium text-[#c8a951] bg-[#c8a951]/10 px-1.5 py-0.5 rounded flex items-center gap-1 border border-[#c8a951]/20">
+                        <span className="w-1.5 h-1.5 bg-[#c8a951] rounded-full animate-pulse" />
                         כרגע
                       </span>
                     )}
                   </div>
                   <p className={cn(
                     'text-xs mt-0.5',
-                    stage.completed || stage.current ? 'text-slate-500' : 'text-slate-400'
+                    stage.completed || stage.current ? 'text-white/50' : 'text-white/30'
                   )}>
                     {stage.description}
                   </p>
@@ -285,7 +291,7 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
 
             <a
               href="/portal/learning"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] font-bold rounded-sm hover:scale-[1.03] transition-all text-sm shadow-[0_0_20px_rgba(200,169,81,0.25)]"
             >
               <BookOpen className="w-4 h-4" />
               <span>התחל ללמוד</span>
@@ -298,20 +304,20 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6"
+          className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
         >
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-              <MessageSquare className="w-5 h-5 text-emerald-600" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+              <MessageSquare className="w-5 h-5 text-emerald-400" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-sm text-slate-900 mb-1">יש שאלות? אנחנו כאן</h3>
-              <p className="text-xs text-slate-500 mb-3">הצוות שלנו זמין בוואטסאפ לכל שאלה או בקשה</p>
+              <h3 className="font-semibold text-sm text-white/90 mb-1">יש שאלות? אנחנו כאן</h3>
+              <p className="text-xs text-white/50 mb-3">הצוות שלנו זמין בוואטסאפ לכל שאלה או בקשה</p>
               <a
                 href={`https://wa.me/972555647538?text=${encodeURIComponent('היי, אני יזם/ת בתוכנית ויש לי שאלה')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 font-medium rounded-xl hover:bg-emerald-100 transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 font-medium rounded-xl hover:bg-emerald-500/15 transition-colors text-sm border border-emerald-500/20"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>שלח הודעה</span>
@@ -322,7 +328,7 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
       </main>
 
       {/* Footer */}
-      <footer className="py-8 text-center text-sm text-slate-400 border-t border-slate-100">
+      <footer className="py-8 text-center text-sm text-white/30 border-t border-white/[0.06] relative z-10">
         <p>
           WeCcelerate &mdash; מאיצים יזמות
         </p>

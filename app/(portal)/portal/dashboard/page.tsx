@@ -339,7 +339,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#070b1e]">
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardContent
           user={session.user}

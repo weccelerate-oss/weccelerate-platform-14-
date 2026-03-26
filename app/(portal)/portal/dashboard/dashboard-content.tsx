@@ -229,7 +229,7 @@ export function DashboardContent({
   const completionPercent = Math.min(100, Math.round((project.stage / 10) * 100));
 
   return (
-    <div className="flex min-h-screen bg-slate-50/50" dir="rtl">
+    <div className="flex min-h-screen bg-[#070b1e]" dir="rtl">
       {/* Mobile Overlay */}
       <AnimatePresence>
         {isMobileSidebarOpen && (
@@ -249,8 +249,8 @@ export function DashboardContent({
         animate={{ width: isSidebarOpen ? 272 : 76 }}
         className={cn(
           'fixed right-0 top-0 h-screen z-50 flex flex-col',
-          'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950',
-          'border-l border-slate-800/50',
+          'bg-gradient-to-b from-[#0a0e27] via-[#080c20] to-[#050810]',
+          'border-l border-white/[0.06]',
           'hidden lg:flex'
         )}
       >
@@ -265,7 +265,7 @@ export function DashboardContent({
                 exit={{ opacity: 0 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-royal-500 to-cyan-500 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center">
                   <span className="text-white font-bold text-sm">W</span>
                 </div>
                 <div>
@@ -279,7 +279,7 @@ export function DashboardContent({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-br from-royal-500 to-cyan-500 flex items-center justify-center"
+                className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center"
               >
                 <span className="text-white font-bold text-sm">W</span>
               </motion.div>
@@ -302,14 +302,14 @@ export function DashboardContent({
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-slate-400">התקדמות הפרויקט</span>
-              <span className="text-xs font-semibold text-cyan-400">{completionPercent}%</span>
+              <span className="text-xs font-semibold text-[#c8a951]">{completionPercent}%</span>
             </div>
             <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${completionPercent}%` }}
                 transition={{ duration: 1, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-l from-cyan-400 to-royal-500 rounded-full"
+                className="h-full bg-gradient-to-l from-[#e8d48b] to-[#c8a951] rounded-full"
               />
             </div>
             <p className="text-[11px] text-slate-500 mt-1.5 truncate">{project.name}</p>
@@ -354,7 +354,7 @@ export function DashboardContent({
             !isSidebarOpen && 'justify-center'
           )}>
             <div className="relative flex-shrink-0">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-royal-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-slate-800">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center text-white font-semibold text-sm ring-2 ring-slate-800">
                 {firstName.charAt(0)}
               </div>
               <div className="absolute -bottom-0.5 -left-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900" />
@@ -394,7 +394,7 @@ export function DashboardContent({
           >
             <div className="flex items-center justify-between h-14 px-4 border-b border-slate-800/60">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-royal-500 to-cyan-500 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center">
                   <span className="text-white font-bold text-sm">W</span>
                 </div>
                 <span className="text-base font-bold text-white">WeCcelerate</span>
@@ -411,11 +411,11 @@ export function DashboardContent({
             <div className="mx-4 mt-4 p-3 rounded-xl bg-slate-800/60 border border-slate-700/50">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-slate-400">התקדמות הפרויקט</span>
-                <span className="text-xs font-semibold text-cyan-400">{completionPercent}%</span>
+                <span className="text-xs font-semibold text-[#c8a951]">{completionPercent}%</span>
               </div>
               <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-l from-cyan-400 to-royal-500 rounded-full transition-all duration-700"
+                  className="h-full bg-gradient-to-l from-[#e8d48b] to-[#c8a951] rounded-full transition-all duration-700"
                   style={{ width: `${completionPercent}%` }}
                 />
               </div>
@@ -455,7 +455,7 @@ export function DashboardContent({
             <div className="px-4 pb-6 pt-3 border-t border-slate-800/60">
               <div className="flex items-center gap-3 p-2">
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-royal-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center text-white font-semibold text-sm">
                     {firstName.charAt(0)}
                   </div>
                   <div className="absolute -bottom-0.5 -left-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900" />
@@ -485,14 +485,14 @@ export function DashboardContent({
         !isSidebarOpen && 'lg:mr-[76px]'
       )}>
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/80">
+        <header className="sticky top-0 z-30 bg-[#0a0e27]/80 backdrop-blur-xl border-b border-white/[0.06]">
           <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-14 sm:h-16">
             {/* Greeting */}
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 truncate">
+              <h1 className="text-base sm:text-lg font-bold text-white truncate">
                 {getGreeting()}, {firstName}
               </h1>
-              <p className="text-[11px] sm:text-xs text-slate-500 hidden sm:block truncate">
+              <p className="text-[11px] sm:text-xs text-white/50 hidden sm:block truncate">
                 הנה סיכום ההתקדמות של הפרויקט שלך
               </p>
             </div>
@@ -502,18 +502,18 @@ export function DashboardContent({
               {/* Search */}
               <button
                 onClick={() => setShowSearch(!showSearch)}
-                className="p-2 rounded-xl hover:bg-slate-100 transition-colors"
+                className="p-2 rounded-xl hover:bg-white/[0.06] transition-colors"
               >
-                <Search className="w-[18px] h-[18px] text-slate-500" />
+                <Search className="w-[18px] h-[18px] text-white/50" />
               </button>
 
               {/* Notifications */}
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors"
+                  className="relative p-2 rounded-xl hover:bg-white/[0.06] transition-colors"
                 >
-                  <Bell className="w-[18px] h-[18px] text-slate-500" />
+                  <Bell className="w-[18px] h-[18px] text-white/50" />
                   {unreadCount > 0 && (
                     <span className="absolute top-0.5 left-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
                       {unreadCount}
@@ -581,7 +581,7 @@ export function DashboardContent({
               {/* New Action Button — opens upload dialog */}
               <button
                 onClick={() => setShowUploadDialog(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] hover:from-[#d4af37] hover:to-[#e8d48b] text-[#070b1e] text-sm font-bold rounded-sm transition-all shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">העלאת קובץ</span>
@@ -596,15 +596,15 @@ export function DashboardContent({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden border-t border-slate-100"
+                className="overflow-hidden border-t border-white/[0.06]"
               >
                 <div className="px-4 py-3">
                   <div className="relative">
-                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                     <input
                       type="text"
                       placeholder="חיפוש מסמכים, פעולות, הגדרות..."
-                      className="w-full pr-10 pl-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-royal-500/20 focus:border-royal-400"
+                      className="w-full pr-10 pl-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#c8a951]/20 focus:border-[#c8a951]/40"
                       autoFocus
                     />
                     <button
@@ -634,19 +634,19 @@ export function DashboardContent({
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="lg:hidden bg-gradient-to-l from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-4 text-white"
+            className="lg:hidden bg-white/[0.03] backdrop-blur-md border border-white/[0.08] rounded-2xl p-4 text-white"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                  <Target className="w-4 h-4 text-cyan-400" />
+                  <Target className="w-4 h-4 text-[#c8a951]" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold truncate">{project.name}</p>
                   <p className="text-[11px] text-slate-400">{project.industry || 'Technology'}</p>
                 </div>
               </div>
-              <span className="text-xs font-bold text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-lg">
+              <span className="text-xs font-bold text-[#c8a951] bg-[#c8a951]/10 px-2 py-1 rounded-lg">
                 {completionPercent}%
               </span>
             </div>
@@ -655,7 +655,7 @@ export function DashboardContent({
                 initial={{ width: 0 }}
                 animate={{ width: `${completionPercent}%` }}
                 transition={{ duration: 1, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-l from-cyan-400 to-royal-500 rounded-full"
+                className="h-full bg-gradient-to-l from-[#e8d48b] to-[#c8a951] rounded-full"
               />
             </div>
           </motion.div>
@@ -699,7 +699,7 @@ export function DashboardContent({
                 action={
                   <button
                     onClick={() => setShowUploadDialog(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-royal-600 hover:bg-royal-50 active:bg-royal-100 rounded-lg transition-colors font-medium"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#c8a951] hover:bg-[#c8a951]/10 active:bg-[#c8a951]/15 rounded-lg transition-colors font-medium"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>העלאת קובץ</span>
@@ -745,15 +745,15 @@ export function DashboardContent({
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="p-1.5 bg-white/10 rounded-lg">
-                      <GraduationCap className="w-4 h-4 text-cyan-400" />
+                      <GraduationCap className="w-4 h-4 text-[#c8a951]" />
                     </div>
-                    <span className="text-xs font-medium text-cyan-400/90">מרכז הלמידה</span>
+                    <span className="text-xs font-medium text-[#c8a951]/90">מרכז הלמידה</span>
                   </div>
                   <h3 className="text-base font-semibold mb-1.5">קורסים להעשרה ליזם</h3>
                   <p className="text-sm text-slate-300 mb-4 leading-relaxed">
                     דוחות כספיים, הערכת שווי, תוכניות עסקיות, השקעות ופיתוח - כל מה שיזם צריך לדעת.
                   </p>
-                  <div className="flex items-center gap-2 text-sm font-medium text-cyan-400 group-hover:gap-3 transition-all">
+                  <div className="flex items-center gap-2 text-sm font-medium text-[#c8a951] group-hover:gap-3 transition-all">
                     <span>התחל ללמוד</span>
                     <ChevronLeft className="w-4 h-4" />
                   </div>
@@ -765,7 +765,7 @@ export function DashboardContent({
       </main>
 
       {/* ====== MOBILE BOTTOM NAVIGATION ====== */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 backdrop-blur-xl border-t border-slate-200/80 safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#0a0e27]/95 backdrop-blur-xl border-t border-white/[0.06] safe-area-pb">
         <div className="flex items-center justify-around px-2 h-16">
           {MOBILE_BOTTOM_NAV.map((item) => {
             const isActive = activeNav === item.id;
@@ -784,12 +784,12 @@ export function DashboardContent({
                 className={cn(
                   'flex flex-col items-center justify-center gap-0.5 py-1.5 px-3 rounded-xl transition-colors min-w-[56px]',
                   isActive
-                    ? 'text-royal-600'
-                    : 'text-slate-400 active:text-slate-600'
+                    ? 'text-[#c8a951]'
+                    : 'text-white/40 active:text-white/60'
                 )}
               >
                 <div className="relative">
-                  <item.icon className={cn('w-5 h-5', isActive && 'text-royal-600')} />
+                  <item.icon className={cn('w-5 h-5', isActive && 'text-[#c8a951]')} />
                   {item.badge && item.badge > 0 && (
                     <span className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
                       {item.badge}
@@ -798,14 +798,14 @@ export function DashboardContent({
                 </div>
                 <span className={cn(
                   'text-[10px] font-medium',
-                  isActive ? 'text-royal-600' : 'text-slate-400'
+                  isActive ? 'text-[#c8a951]' : 'text-white/40'
                 )}>
                   {item.label}
                 </span>
                 {isActive && (
                   <motion.div
                     layoutId="mobile-nav-active"
-                    className="absolute bottom-1 w-5 h-0.5 bg-royal-500 rounded-full"
+                    className="absolute bottom-1 w-5 h-0.5 bg-[#c8a951] rounded-full"
                   />
                 )}
               </button>
@@ -909,18 +909,18 @@ function DashboardCard({ title, subtitle, badge, action, delay = 0, children }: 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden"
+      className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
-      <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 flex items-center justify-between gap-2">
+      <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-white/[0.06] flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="text-sm sm:text-[15px] font-semibold text-slate-900">{title}</h2>
+          <h2 className="text-sm sm:text-[15px] font-semibold text-white/90">{title}</h2>
           {subtitle && (
-            <p className="text-[11px] text-slate-500 mt-0.5 truncate">{subtitle}</p>
+            <p className="text-[11px] text-white/40 mt-0.5 truncate">{subtitle}</p>
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {badge && (
-            <span className="px-2 sm:px-2.5 py-1 bg-royal-50 text-royal-700 text-[11px] sm:text-xs font-semibold rounded-lg whitespace-nowrap">
+            <span className="px-2 sm:px-2.5 py-1 bg-[#c8a951]/10 text-[#c8a951] text-[11px] sm:text-xs font-semibold rounded-lg whitespace-nowrap border border-[#c8a951]/20">
               {badge}
             </span>
           )}
@@ -961,11 +961,11 @@ function SidebarLink({ icon, label, href, isOpen, active, badge, onClick }: Side
       {active && (
         <motion.div
           layoutId="sidebar-active"
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-cyan-400 rounded-l-full"
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[#c8a951] rounded-l-full"
         />
       )}
 
-      <span className={cn('flex-shrink-0', active && 'text-cyan-400')}>
+      <span className={cn('flex-shrink-0', active && 'text-[#c8a951]')}>
         {icon}
       </span>
 
