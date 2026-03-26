@@ -34,6 +34,14 @@ async function getEventsFromDB() {
       where: { isActive: true },
       orderBy: { date: 'asc' },
       take: 6,
+      select: {
+        id: true, name: true, nameEn: true, slug: true, description: true,
+        date: true, time: true, endTime: true, locationType: true,
+        address: true, city: true, virtualLink: true, registrationLink: true,
+        imageUrl: true, status: true, capacity: true, registeredCount: true,
+        category: true, host: true, isFree: true, price: true, currency: true,
+        isFeatured: true, tags: true, isActive: true, createdAt: true, updatedAt: true,
+      },
     });
     return events.length > 0 ? events : mockEvents;
   } catch {

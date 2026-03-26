@@ -148,7 +148,7 @@ export async function getEvents(options: GetEventsOptions = {}) {
     ...(category && { category }),
   };
 
-  // Try with displayOrder, fallback to date-only if column doesn't exist
+  // Try with displayOrder, fallback if column doesn't exist in DB
   try {
     return await prisma.event.findMany({
       where,
@@ -158,10 +158,21 @@ export async function getEvents(options: GetEventsOptions = {}) {
       take: limit,
     });
   } catch {
+    // displayOrder column may not exist — use select to exclude it
     return await prisma.event.findMany({
       where,
       orderBy: upcoming ? { date: 'asc' } : { date: 'desc' },
       take: limit,
+      select: {
+        id: true, name: true, nameEn: true, slug: true, description: true,
+        descriptionEn: true, date: true, time: true, endTime: true, timezone: true,
+        locationType: true, address: true, city: true, virtualLink: true,
+        locationDetails: true, registrationLink: true, registrationRequired: true,
+        capacity: true, registeredCount: true, price: true, currency: true,
+        isFree: true, imageUrl: true, thumbnailUrl: true, category: true,
+        tags: true, host: true, hostBio: true, status: true, isActive: true,
+        isFeatured: true, createdAt: true, updatedAt: true,
+      },
     });
   }
 }
