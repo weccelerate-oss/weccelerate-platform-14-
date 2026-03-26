@@ -85,10 +85,16 @@ async function getProjectData(userId: string) {
       project,
       notifications,
       activities,
+      dbError: false,
     };
   } catch (dbError) {
-    console.warn('[Dashboard] Database error, using mock data:', dbError);
-    return getMockData(userId);
+    console.warn('[Dashboard] Database error:', dbError);
+    return {
+      project: null,
+      notifications: [],
+      activities: [],
+      dbError: true,
+    };
   }
 }
 
@@ -311,6 +317,7 @@ export default async function DashboardPage() {
           project={data.project}
           notifications={data.notifications}
           activities={data.activities}
+          dbError={data.dbError}
         />
       </Suspense>
     </div>

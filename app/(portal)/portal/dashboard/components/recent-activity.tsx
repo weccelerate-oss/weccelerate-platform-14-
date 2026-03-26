@@ -175,12 +175,9 @@ export function RecentActivity({ activities }: RecentActivityProps) {
       {/* View all */}
       {activities.length > 6 && (
         <div className="pt-2 text-center">
-          <a
-            href="/portal/activity"
-            className="text-xs text-royal-600 hover:text-royal-700 font-medium hover:underline"
-          >
-            צפייה בכל הפעילות
-          </a>
+          <span className="text-xs text-slate-400 font-medium">
+            מציג 6 אחרונות
+          </span>
         </div>
       )}
     </div>

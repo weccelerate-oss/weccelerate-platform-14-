@@ -154,16 +154,20 @@ export function FileVault({ files }: FileVaultProps) {
           <Folder className="w-7 h-7 text-slate-300" />
         </div>
         <h3 className="text-sm font-semibold text-slate-900 mb-1">אין מסמכים עדיין</h3>
-        <p className="text-xs text-slate-500 mb-4">המסמכים שלך יופיעו כאן לאחר העלאה</p>
-        <button className="px-4 py-2.5 bg-slate-900 text-white text-sm rounded-xl hover:bg-slate-800 active:bg-slate-700 transition-colors">
-          העלאת מסמך ראשון
-        </button>
+        <p className="text-xs text-slate-500">המסמכים שלך יופיעו כאן כשהצוות יעלה אותם</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-3 sm:space-y-4">
+      {/* Download Error */}
+      {downloadError && (
+        <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm flex items-center justify-between">
+          <span>{downloadError}</span>
+          <button onClick={() => setDownloadError(null)} className="text-red-500 hover:text-red-700 text-xs underline mr-2">סגור</button>
+        </div>
+      )}
       {/* Toolbar */}
       <div className="space-y-3">
         {/* Search row */}
@@ -218,20 +222,26 @@ export function FileVault({ files }: FileVaultProps) {
           'sm:flex items-center gap-1 bg-slate-50 rounded-xl p-1',
           showFilters ? 'flex flex-wrap' : 'hidden'
         )}>
-          {['ALL', 'DOCUMENT', 'SPREADSHEET', 'PRESENTATION'].map((type) => (
-            <button
-              key={type}
-              onClick={() => setSelectedType(type as FileTypeEnum | 'ALL')}
-              className={cn(
-                'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
-                selectedType === type
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700 active:bg-white/50'
-              )}
-            >
-              {type === 'ALL' ? 'הכל' : type === 'DOCUMENT' ? 'מסמכים' : type === 'SPREADSHEET' ? 'גיליונות' : 'מצגות'}
-            </button>
-          ))}
+          {['ALL', 'DOCUMENT', 'SPREADSHEET', 'PRESENTATION', 'IMAGE', 'VIDEO'].map((type) => {
+            const labels: Record<string, string> = {
+              ALL: 'הכל', DOCUMENT: 'מסמכים', SPREADSHEET: 'גיליונות',
+              PRESENTATION: 'מצגות', IMAGE: 'תמונות', VIDEO: 'סרטונים',
+            };
+            return (
+              <button
+                key={type}
+                onClick={() => setSelectedType(type as FileTypeEnum | 'ALL')}
+                className={cn(
+                  'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
+                  selectedType === type
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700 active:bg-white/50'
+                )}
+              >
+                {labels[type]}
+              </button>
+            );
+          })}
         </div>
       </div>
 

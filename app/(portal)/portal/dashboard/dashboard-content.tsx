@@ -72,18 +72,28 @@ interface DashboardContentProps {
   project: ProjectWithRelations | null;
   notifications: Notification[];
   activities: ActivityLog[];
+  dbError?: boolean;
 }
 
 // =============================================================================
 // SIDEBAR NAV ITEMS
 // =============================================================================
 
-const NAV_ITEMS = [
+interface NavItem {
+  icon: typeof LayoutDashboard;
+  label: string;
+  href: string;
+  id: string;
+  badge?: number;
+  comingSoon?: boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { icon: LayoutDashboard, label: 'לוח בקרה', href: '/portal/dashboard', id: 'dashboard' },
   { icon: Target, label: 'הפרויקט שלי', href: '/portal/dashboard', id: 'project' },
   { icon: FolderOpen, label: 'מסמכים', href: '/portal/dashboard', id: 'documents' },
   { icon: Calendar, label: 'לוח שנה', href: '/portal/dashboard', id: 'calendar', comingSoon: true },
-  { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages', badge: 2, comingSoon: true },
+  { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages', comingSoon: true },
   { icon: TrendingUp, label: 'התקדמות', href: '/portal/dashboard', id: 'progress' },
   { icon: GraduationCap, label: 'מרכז למידה', href: '/portal/dashboard', id: 'learning', comingSoon: true },
 ];
@@ -94,11 +104,11 @@ const BOTTOM_NAV_ITEMS = [
 ];
 
 // Mobile bottom nav - key items for thumb access
-const MOBILE_BOTTOM_NAV = [
+const MOBILE_BOTTOM_NAV: NavItem[] = [
   { icon: LayoutDashboard, label: 'בית', href: '/portal/dashboard', id: 'dashboard' },
   { icon: Target, label: 'פרויקט', href: '/portal/dashboard', id: 'project' },
   { icon: FolderOpen, label: 'מסמכים', href: '/portal/dashboard', id: 'documents' },
-  { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages', badge: 2 },
+  { icon: MessageSquare, label: 'הודעות', href: '/portal/dashboard', id: 'messages' },
   { icon: Menu, label: 'עוד', href: '#more', id: 'more' },
 ];
 
@@ -111,12 +121,16 @@ export function DashboardContent({
   project,
   notifications,
   activities,
+  dbError,
 }: DashboardContentProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [activeNav, setActiveNav] = useState('dashboard');
   const [showSearch, setShowSearch] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Close mobile sidebar on resize
   useEffect(() => {
@@ -147,6 +161,59 @@ export function DashboardContent({
     if (hour < 21) return 'ערב טוב';
     return 'לילה טוב';
   };
+
+  // Handle file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadMessage(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (project) formData.append('projectId', project.id);
+
+      const response = await fetch('/api/portal/upload', { method: 'POST', body: formData });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'העלאה נכשלה');
+      }
+
+      setUploadMessage({ type: 'success', text: `הקובץ "${file.name}" הועלה בהצלחה!` });
+      setTimeout(() => {
+        setShowUploadDialog(false);
+        setUploadMessage(null);
+        window.location.reload();
+      }, 1500);
+    } catch (err) {
+      setUploadMessage({ type: 'error', text: err instanceof Error ? err.message : 'העלאה נכשלה' });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // If DB error, show error state
+  if (dbError && !project) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6" dir="rtl">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-50 flex items-center justify-center">
+            <ExternalLink className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">שגיאה בטעינת הנתונים</h2>
+          <p className="text-slate-500 mb-6">לא הצלחנו לטעון את נתוני הפרויקט שלך. נסה לרענן את הדף.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-colors"
+          >
+            רענן דף
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // If no project, show onboarding
   if (!project) {
@@ -462,7 +529,7 @@ export function DashboardContent({
                     >
                       <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                         <h3 className="font-semibold text-slate-900 text-sm">התראות</h3>
-                        <button onClick={() => { /* TODO: mark all as read API */ }} className="text-xs text-royal-600 hover:underline">סמן הכל כנקרא</button>
+                        <button onClick={() => setShowNotifications(false)} className="text-xs text-royal-600 hover:underline">סגור</button>
                       </div>
                       <div className="max-h-72 overflow-y-auto">
                         {notifications.length === 0 ? (
@@ -495,19 +562,25 @@ export function DashboardContent({
                         )}
                       </div>
                       <div className="p-3 border-t border-slate-100 text-center">
-                        <span className="text-xs text-royal-600 font-medium">
-                          צפייה בכל ההתראות
-                        </span>
+                        <button
+                          onClick={() => setShowNotifications(false)}
+                          className="text-xs text-royal-600 font-medium hover:underline"
+                        >
+                          סגור
+                        </button>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* New Action Button */}
-              <button className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm">
+              {/* New Action Button — opens upload dialog */}
+              <button
+                onClick={() => setShowUploadDialog(true)}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+              >
                 <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">פעולה חדשה</span>
+                <span className="hidden sm:inline">העלאת קובץ</span>
               </button>
             </div>
           </div>
@@ -609,7 +682,10 @@ export function DashboardContent({
                 title="כספת המסמכים"
                 subtitle={`${project.files.length} מסמכים`}
                 action={
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-royal-600 hover:bg-royal-50 active:bg-royal-100 rounded-lg transition-colors font-medium">
+                  <button
+                    onClick={() => setShowUploadDialog(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-royal-600 hover:bg-royal-50 active:bg-royal-100 rounded-lg transition-colors font-medium"
+                  >
                     <Plus className="w-3.5 h-3.5" />
                     <span>העלאת קובץ</span>
                   </button>
@@ -721,9 +797,76 @@ export function DashboardContent({
         </div>
       </nav>
 
-      {/* Floating WhatsApp Button */}
+      {/* Upload Dialog */}
+      <AnimatePresence>
+        {showUploadDialog && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isUploading && setShowUploadDialog(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+            >
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" dir="rtl" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-lg font-bold text-slate-900">העלאת קובץ</h3>
+                  <button
+                    onClick={() => !isUploading && setShowUploadDialog(false)}
+                    className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {uploadMessage && (
+                  <div className={cn(
+                    'p-3 rounded-xl text-sm mb-4',
+                    uploadMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                  )}>
+                    {uploadMessage.text}
+                  </div>
+                )}
+
+                <label className={cn(
+                  'flex flex-col items-center gap-3 p-8 border-2 border-dashed rounded-xl cursor-pointer transition-colors',
+                  isUploading ? 'border-slate-200 bg-slate-50' : 'border-slate-300 hover:border-royal-400 hover:bg-royal-50/30'
+                )}>
+                  {isUploading ? (
+                    <>
+                      <div className="w-10 h-10 border-3 border-royal-500 border-t-transparent rounded-full animate-spin" />
+                      <span className="text-sm text-slate-500">מעלה...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FolderOpen className="w-10 h-10 text-slate-400" />
+                      <span className="text-sm font-medium text-slate-700">לחץ לבחירת קובץ</span>
+                      <span className="text-xs text-slate-400">PDF, Word, Excel, PowerPoint, תמונה (עד 25MB)</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    className="hidden"
+                    disabled={isUploading}
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.txt,.csv"
+                    onChange={handleFileUpload}
+                  />
+                </label>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Floating WhatsApp Button — sends to WeCcelerate team, not the user */}
       <WhatsAppButton
-        phone={project.user.phone}
+        phone={process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '972555647538'}
         projectName={project.name}
       />
     </div>

@@ -59,41 +59,42 @@ interface OnboardingStep {
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'profile',
-    title: 'השלם את הפרופיל',
-    description: 'הוסף פרטים על עצמך והחברה שלך',
+    title: 'ברוכים הבאים!',
+    description: 'החשבון שלך נוצר ע״י הצוות שלנו',
     icon: <Users className="w-5 h-5" />,
-    action: 'עדכן פרופיל',
-    href: '/portal/settings/profile',
+    action: 'הושלם',
+    href: '/portal/dashboard',
     color: 'text-violet-600',
     iconBg: 'bg-violet-50',
+    completed: true,
   },
   {
     id: 'project',
-    title: 'צור פרויקט חדש',
-    description: 'התחל לעקוב אחרי ההתקדמות שלך',
+    title: 'הפרויקט שלך בדרך',
+    description: 'הצוות שלנו ייצור את הפרויקט עבורך בקרוב',
     icon: <Target className="w-5 h-5" />,
-    action: 'צור פרויקט',
-    href: '/portal/project/new',
+    action: 'ממתין',
+    href: '/portal/dashboard',
     color: 'text-blue-600',
     iconBg: 'bg-blue-50',
   },
   {
     id: 'documents',
-    title: 'העלה מסמכים',
-    description: 'שתף את התכנית העסקית או המצגת',
+    title: 'מסמכים ישותפו אתך',
+    description: 'הצוות יעלה מסמכים רלוונטיים לפרויקט שלך',
     icon: <FileText className="w-5 h-5" />,
-    action: 'העלאת קבצים',
-    href: '/portal/files/upload',
+    action: 'ממתין',
+    href: '/portal/dashboard',
     color: 'text-emerald-600',
     iconBg: 'bg-emerald-50',
   },
   {
     id: 'meeting',
     title: 'קבע פגישה ראשונה',
-    description: 'תאם שיחה עם המנטור שלך',
+    description: 'שלח הודעה לצוות לתיאום פגישה',
     icon: <Calendar className="w-5 h-5" />,
-    action: 'קביעת פגישה',
-    href: '/portal/meetings/schedule',
+    action: 'שלח וואטסאפ',
+    href: `https://wa.me/972555647538?text=${encodeURIComponent('היי, אשמח לתאם פגישת היכרות')}`,
     color: 'text-amber-600',
     iconBg: 'bg-amber-50',
   },
@@ -131,7 +132,7 @@ const QUICK_RESOURCES = [
 // =============================================================================
 
 export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
-  const [completedSteps, setCompletedSteps] = useState<string[]>(['profile']);
+  const [completedSteps] = useState<string[]>(['profile']);
   const firstName = user.name?.split(' ')[0] || 'יזם';
   const progress = (completedSteps.length / ONBOARDING_STEPS.length) * 100;
 
@@ -329,14 +330,18 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">
                   <a
-                    href="/portal/project/new"
+                    href={`https://wa.me/972555647538?text=${encodeURIComponent('היי, אני רוצה להתחיל את התהליך')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-colors text-sm"
                   >
                     <Rocket className="w-4 h-4" />
-                    <span>צור פרויקט חדש</span>
+                    <span>דברו אתנו</span>
                   </a>
                   <a
-                    href="/portal/meetings/schedule"
+                    href={`https://wa.me/972555647538?text=${encodeURIComponent('היי, אשמח לתאם פגישת היכרות')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/10 text-white font-medium rounded-xl hover:bg-white/15 transition-colors border border-white/10 text-sm"
                   >
                     <Phone className="w-4 h-4" />
@@ -360,9 +365,9 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
       <footer className="py-8 text-center text-sm text-slate-400 border-t border-slate-100">
         <p>
           צריכים עזרה?{' '}
-          <a href="/contact" className="text-royal-600 hover:underline font-medium">צרו קשר</a>
+          <a href="/sites/main/contact" className="text-royal-600 hover:underline font-medium">צרו קשר</a>
           {' '}או שלחו לנו{' '}
-          <a href="https://wa.me/972535551234" className="text-emerald-600 hover:underline font-medium">וואטסאפ</a>
+          <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '972555647538'}`} className="text-emerald-600 hover:underline font-medium">וואטסאפ</a>
         </p>
       </footer>
     </div>

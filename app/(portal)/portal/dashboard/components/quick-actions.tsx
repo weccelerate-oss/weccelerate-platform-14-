@@ -50,87 +50,54 @@ interface ActionItem {
 
 const ALL_ACTIONS: ActionItem[] = [
   {
-    id: 'upload',
-    label: 'העלאת מסמך',
-    description: 'הוסף מסמך חדש',
-    icon: <Upload className="w-4 h-4" />,
-    href: '/portal/documents/upload',
+    id: 'whatsapp',
+    label: 'שיחה עם הצוות',
+    description: 'שלח הודעה בוואטסאפ',
+    icon: <MessageSquare className="w-4 h-4" />,
+    href: 'https://wa.me/972555647538',
+    color: 'text-emerald-600',
+    iconBg: 'bg-emerald-50',
+    priority: 1,
+  },
+  {
+    id: 'progress',
+    label: 'ציר הזמן',
+    description: 'צפה בהתקדמות הפרויקט',
+    icon: <TrendingUp className="w-4 h-4" />,
+    href: '/portal/dashboard',
+    color: 'text-indigo-600',
+    iconBg: 'bg-indigo-50',
+    priority: 2,
+  },
+  {
+    id: 'documents',
+    label: 'מסמכים',
+    description: 'צפה במסמכים שלך',
+    icon: <FileText className="w-4 h-4" />,
+    href: '/portal/dashboard',
     color: 'text-blue-600',
     iconBg: 'bg-blue-50',
-    priority: 1,
+    priority: 3,
   },
   {
     id: 'schedule',
     label: 'תיאום פגישה',
     description: 'קבע פגישה עם המנטור',
     icon: <Calendar className="w-4 h-4" />,
-    href: '/portal/calendar/schedule',
+    href: `https://wa.me/972555647538?text=${encodeURIComponent('היי, אשמח לתאם פגישה')}`,
     color: 'text-violet-600',
     iconBg: 'bg-violet-50',
-    priority: 2,
-  },
-  {
-    id: 'message',
-    label: 'שליחת הודעה',
-    description: 'צור קשר עם הצוות',
-    icon: <MessageSquare className="w-4 h-4" />,
-    href: '/portal/messages/new',
-    color: 'text-emerald-600',
-    iconBg: 'bg-emerald-50',
-    priority: 3,
-  },
-  {
-    id: 'business-plan',
-    label: 'תוכנית עסקית',
-    description: 'התחל לבנות את התוכנית',
-    icon: <FileText className="w-4 h-4" />,
-    href: '/portal/templates/business-plan',
-    color: 'text-amber-600',
-    iconBg: 'bg-amber-50',
     priority: 4,
-    stages: ['CHARACTERIZATION', 'MARKET_RESEARCH', 'BUSINESS_MODEL'],
-  },
-  {
-    id: 'pitch-deck',
-    label: 'מצגת משקיעים',
-    description: 'הכן את הפיץ׳ שלך',
-    icon: <Video className="w-4 h-4" />,
-    href: '/portal/templates/pitch-deck',
-    color: 'text-pink-600',
-    iconBg: 'bg-pink-50',
-    priority: 5,
-    stages: ['FUNDING_PREP', 'ACTIVE_FUNDING'],
   },
   {
     id: 'learning',
     label: 'מרכז הלמידה',
-    description: 'קורסים וחומרי לימוד',
+    description: 'בקרוב!',
     icon: <BookOpen className="w-4 h-4" />,
-    href: '/portal/learning',
+    href: '/portal/dashboard',
     color: 'text-royal-600',
     iconBg: 'bg-royal-50',
     priority: 6,
-  },
-  {
-    id: 'investors',
-    label: 'רשימת משקיעים',
-    description: 'גש לרשימת המשקיעים',
-    icon: <Users className="w-4 h-4" />,
-    href: '/portal/investors',
-    color: 'text-teal-600',
-    iconBg: 'bg-teal-50',
-    priority: 7,
-    stages: ['FUNDING_PREP', 'ACTIVE_FUNDING', 'POST_FUNDING'],
-  },
-  {
-    id: 'progress',
-    label: 'דיווח התקדמות',
-    description: 'עדכן את הסטטוס',
-    icon: <TrendingUp className="w-4 h-4" />,
-    href: '/portal/progress/update',
-    color: 'text-indigo-600',
-    iconBg: 'bg-indigo-50',
-    priority: 8,
   },
 ];
 
@@ -193,16 +160,8 @@ export function QuickActions({ project }: QuickActionsProps) {
         ))}
       </div>
 
-      {/* View all */}
-      <div className="px-5 pb-4">
-        <a
-          href="/portal/actions"
-          className="flex items-center justify-center gap-1.5 w-full py-2 text-xs text-slate-500 hover:text-slate-700 font-medium transition-colors rounded-lg hover:bg-slate-50"
-        >
-          <span>כל הפעולות</span>
-          <ArrowLeft className="w-3 h-3" />
-        </a>
-      </div>
+      {/* Spacer */}
+      <div className="h-2" />
     </div>
   );
 }
