@@ -13,8 +13,8 @@ export const PIPEDRIVE_CONFIG = {
   // Base API URL
   API_BASE_URL: 'https://api.pipedrive.com/v1',
   
-  // API Token from environment
-  API_TOKEN: process.env.PIPEDRIVE_API_TOKEN || '',
+  // API Token from environment (trim to remove any trailing newline from env vars)
+  API_TOKEN: (process.env.PIPEDRIVE_API_TOKEN || '').trim(),
   
   // Company domain (e.g., "weccelerate" for weccelerate.pipedrive.com)
   COMPANY_DOMAIN: process.env.PIPEDRIVE_COMPANY_DOMAIN || '',
