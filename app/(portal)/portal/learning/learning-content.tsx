@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   CheckCircle2,
   Circle,
+  Clock,
   Play,
   TrendingUp,
   Briefcase,
@@ -45,6 +46,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   TrendingUp: <TrendingUp className="w-6 h-6" />,
   Briefcase: <Briefcase className="w-6 h-6" />,
   Rocket: <Rocket className="w-6 h-6" />,
+  Clock: <Clock className="w-6 h-6" />,
 };
 
 const COLOR_MAP: Record<string, { bg: string; text: string; border: string; light: string; progress: string }> = {
@@ -68,6 +70,13 @@ const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ligh
     border: 'border-violet-200',
     light: 'bg-violet-50',
     progress: 'bg-violet-500',
+  },
+  amber: {
+    bg: 'bg-amber-500',
+    text: 'text-amber-600',
+    border: 'border-amber-200',
+    light: 'bg-amber-50',
+    progress: 'bg-amber-500',
   },
 };
 

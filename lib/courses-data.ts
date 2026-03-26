@@ -420,6 +420,167 @@ export const COURSES_DATA: CategoryData[] = [
       },
     ],
   },
+  {
+    name: 'ניהול זמן',
+    slug: 'time-management',
+    description: 'עקרונות ניהול זמן, כלים פרקטיים ושיטות עבודה יעילות ליזם',
+    icon: 'Clock',
+    color: 'amber',
+    subcategories: [
+      {
+        name: 'עקרונות ניהול זמן',
+        slug: 'time-management-basics',
+        description:
+          'ניהול זמן הוא אחד הכישורים החשובים ביותר ליזם. כשאתה מנהל סטארטאפ, הזמן שלך הוא המשאב הכי יקר. למד את העקרונות הבסיסיים שיעזרו לך לנצל כל רגע בצורה חכמה.',
+        lessons: [
+          {
+            title: 'ניהול זמן',
+            slug: 'time-management-intro',
+            youtubeUrl: 'https://youtu.be/pRYGz_37LHg',
+            youtubeId: ytId('https://youtu.be/pRYGz_37LHg'),
+            description:
+              'מבוא לעקרונות ניהול זמן - הבסיס שכל יזם חייב להכיר. למד איך לנהל את הזמן שלך כדי להספיק יותר ולהרגיש פחות לחוץ.',
+          },
+          {
+            title: 'אפיון איזה בן אדם אתה?',
+            slug: 'time-behavior-assessment',
+            youtubeUrl: 'https://youtu.be/LiN0Fz8_uGw',
+            youtubeId: ytId('https://youtu.be/LiN0Fz8_uGw'),
+            description:
+              'שאלון אפיון התנהגות בניהול זמן - הכר את עצמך כדי לבנות שיטת עבודה שמתאימה בדיוק לך. כל אחד מנהל זמן אחרת, והצעד הראשון הוא להבין את הסגנון שלך.',
+          },
+          {
+            title: 'מולטיטסקינג',
+            slug: 'multitasking',
+            youtubeUrl: 'https://youtu.be/hs5rkcHNsP8',
+            youtubeId: ytId('https://youtu.be/hs5rkcHNsP8'),
+            description:
+              'ההולסטיקה - יתרונות וחסרונות של מולטיטסקינג. למד מתי כדאי לעשות כמה דברים במקביל ומתי עדיף להתמקד בדבר אחד - טיפ קריטי לכל יזם שמנסה לעשות הכל בו-זמנית.',
+          },
+        ],
+      },
+      {
+        name: 'עקרונות ופרקטיקה - מקום, מחשבה, זמן',
+        slug: 'practical-principles',
+        description:
+          'עקרונות פרקטיים שאפשר ליישם מיד. שלושה צירים מרכזיים - מקום, מחשבה וזמן - שיעזרו לך לארגן את העבודה ולהפוך ליעיל יותר.',
+        lessons: [
+          {
+            title: 'עקרונות פרקטיקה - מקום',
+            slug: 'practice-place',
+            youtubeUrl: 'https://youtu.be/o4sn-4dKW24',
+            youtubeId: ytId('https://youtu.be/o4sn-4dKW24'),
+            description:
+              'הקדמה ועקרונות פרקטיקה הקשורים למקום העבודה שלך. הסביבה שבה אתה עובד משפיעה ישירות על הפרודוקטיביות - למד איך לארגן את המרחב שלך לעבודה יעילה.',
+          },
+          {
+            title: 'עקרונות פרקטיקה - מחשבה',
+            slug: 'practice-mindset',
+            youtubeUrl: 'https://youtu.be/u_V_JikhM5A',
+            youtubeId: ytId('https://youtu.be/u_V_JikhM5A'),
+            description:
+              'עקרונות פרקטיים לניהול המחשבות וההתמקדות. הראש שלך הוא הכלי הכי חשוב - למד איך לנקות רעשים, לתעדף ולהישאר ממוקד במה שחשוב.',
+          },
+          {
+            title: 'עקרונות פרקטיקה - זמן',
+            slug: 'practice-time',
+            youtubeUrl: 'https://youtu.be/MTpSQampC28',
+            youtubeId: ytId('https://youtu.be/MTpSQampC28'),
+            description:
+              'עקרונות פרקטיים לניהול הזמן עצמו. טכניקות ושיטות שיעזרו לך לחלק את היום, להקצות זמן נכון למשימות ולהימנע מבזבוז זמן.',
+          },
+        ],
+      },
+      {
+        name: 'הקדמה + קביעת נקודות איסוף דיגיטלי',
+        slug: 'digital-collection-points',
+        description:
+          'בעידן הדיגיטלי, מידע ומשימות מגיעים מכל כיוון. למד איך לקבוע נקודות איסוף, לנהל תהליכים ולהפוך את הכאוס לסדר ברור ויעיל.',
+        lessons: [
+          {
+            title: 'קביעת נקודות איסוף דיגיטלי',
+            slug: 'digital-collection',
+            youtubeUrl: 'https://youtu.be/_LP07ETcMI0',
+            youtubeId: ytId('https://youtu.be/_LP07ETcMI0'),
+            description:
+              'למד איך לקבוע נקודות איסוף דיגיטליות שמרכזות את כל המידע, המשימות וההודעות שלך במקום אחד - כך שלא תפספס שום דבר חשוב.',
+          },
+          {
+            title: 'שלב התהליך - מה, מתי, איפה',
+            slug: 'process-what-when-where',
+            youtubeUrl: 'https://youtu.be/dVvHtlPvGrk',
+            youtubeId: ytId('https://youtu.be/dVvHtlPvGrk'),
+            description:
+              'הבנת שלבי התהליך - מה צריך לעשות, מתי לעשות את זה ואיפה. מסגרת חשיבה שתעזור לך לפרק כל משימה מורכבת לצעדים ברורים.',
+          },
+          {
+            title: 'דוגמאות פרקטיות - מה, מתי, איפה',
+            slug: 'process-examples',
+            youtubeUrl: 'https://youtu.be/OOGgZIlNa8w',
+            youtubeId: ytId('https://youtu.be/OOGgZIlNa8w'),
+            description:
+              'דוגמאות פרקטיות ליישום שיטת מה-מתי-איפה בחיי היום-יום של יזם. ראה איך זה עובד בפועל עם מקרים אמיתיים.',
+          },
+          {
+            title: 'ללמוד לומר \'לא\'',
+            slug: 'learn-to-say-no',
+            youtubeUrl: 'https://youtu.be/ik0qI7zZcuo',
+            youtubeId: ytId('https://youtu.be/ik0qI7zZcuo'),
+            description:
+              'אחד הכישורים הכי חשובים ליזם - לדעת מתי ואיך לומר \'לא\'. כשאתה אומר כן לכל דבר, אתה למעשה אומר לא לדברים החשובים באמת.',
+          },
+          {
+            title: 'ביצוע תהלוך למשימות עם דוגמאות',
+            slug: 'task-walkthrough',
+            youtubeUrl: 'https://youtu.be/OOGgZIlNa8w',
+            youtubeId: ytId('https://youtu.be/OOGgZIlNa8w'),
+            description:
+              'ביצוע תהלוך מעשי למשימות עם דוגמאות מהשטח. למד את התהליך המלא מקבלת משימה ועד השלמתה בצורה יעילה ומסודרת.',
+          },
+        ],
+      },
+      {
+        name: 'סיכום קורס וכלים פרקטיים',
+        slug: 'tools-and-summary',
+        description:
+          'כלים דיגיטליים שיעזרו לך ליישם את כל מה שלמדת. מכלי אוטומציה ועד ארגון מידע - הכלים שיחסכו לך שעות כל שבוע.',
+        lessons: [
+          {
+            title: 'Magical',
+            slug: 'magical-tool',
+            youtubeUrl: 'https://youtu.be/_LP07ETcMI0',
+            youtubeId: ytId('https://youtu.be/_LP07ETcMI0'),
+            description:
+              'Magical - כלי אוטומציה שמאפשר לך ליצור קיצורי טקסט, תבניות ותגובות מהירות. חוסך זמן יקר בפעולות חוזרות שיזמים עושים עשרות פעמים ביום.',
+          },
+          {
+            title: 'סננים במייל',
+            slug: 'email-filters',
+            youtubeUrl: 'https://youtu.be/zJpdc8Pue7c',
+            youtubeId: ytId('https://youtu.be/zJpdc8Pue7c'),
+            description:
+              'למד איך להגדיר סננים במייל שיסדרו את תיבת הדואר שלך אוטומטית. תפסיק לבזבז זמן על מיון מיילים ותתמקד במה שחשוב.',
+          },
+          {
+            title: 'Texpand',
+            slug: 'texpand-tool',
+            youtubeUrl: 'https://youtu.be/GOS5R2bgdNg',
+            youtubeId: ytId('https://youtu.be/GOS5R2bgdNg'),
+            description:
+              'Texpand - כלי להרחבת טקסט שמאפשר לך להקליד קיצורים ולקבל טקסטים שלמים. מושלם להודעות חוזרות, חתימות ותבניות שאתה משתמש בהן הרבה.',
+          },
+          {
+            title: 'סיכום הקורס וטיפים נוספים',
+            slug: 'course-summary-tips',
+            youtubeUrl: 'https://youtu.be/70MRt3YOTXA',
+            youtubeId: ytId('https://youtu.be/70MRt3YOTXA'),
+            description:
+              'סיכום הקורס עם טיפים נוספים - מסך הבית בטלפון, גוגל Keep וסיכום הקורס וטיפים אישיים נוספים. הכל על כלים שיעזרו לך לשמור על הסדר גם מחוץ למחשב.',
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 /** Total number of lessons across all courses */
