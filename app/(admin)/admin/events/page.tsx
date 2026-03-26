@@ -133,21 +133,31 @@ async function getEvents() {
 
     // Auto-update: move past UPCOMING/ONGOING events to PAST status
     const now = new Date();
-    await prisma.event.updateMany({
-      where: {
-        status: { in: ['UPCOMING', 'ONGOING'] },
-        date: { lt: now },
-      },
-      data: { status: 'PAST' },
-    });
+    try {
+      await prisma.event.updateMany({
+        where: {
+          status: { in: ['UPCOMING', 'ONGOING'] },
+          date: { lt: now },
+        },
+        data: { status: 'PAST' },
+      });
+    } catch {
+      // Column may not exist yet — skip auto-update
+    }
 
-    const events = await prisma.event.findMany({
-      orderBy: [
-        { displayOrder: 'asc' },
-        { date: 'asc' },
-      ],
-    });
-    return events;
+    // Try with displayOrder, fallback to date-only if column doesn't exist
+    try {
+      return await prisma.event.findMany({
+        orderBy: [
+          { displayOrder: 'asc' },
+          { date: 'asc' },
+        ],
+      });
+    } catch {
+      return await prisma.event.findMany({
+        orderBy: { date: 'asc' },
+      });
+    }
   } catch (dbError) {
     console.warn('[Admin Events] Database error, using mock data:', dbError);
     return MOCK_EVENTS;

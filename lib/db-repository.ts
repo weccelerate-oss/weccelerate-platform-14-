@@ -122,13 +122,17 @@ export async function getEvents(options: GetEventsOptions = {}) {
   const now = new Date();
 
   // Auto-update: move past UPCOMING/ONGOING events to PAST status
-  await prisma.event.updateMany({
-    where: {
-      status: { in: ['UPCOMING', 'ONGOING'] as const },
-      date: { lt: now },
-    },
-    data: { status: 'PAST' as const },
-  });
+  try {
+    await prisma.event.updateMany({
+      where: {
+        status: { in: ['UPCOMING', 'ONGOING'] as const },
+        date: { lt: now },
+      },
+      data: { status: 'PAST' as const },
+    });
+  } catch {
+    // Column may not exist yet — skip auto-update
+  }
 
   const where = {
     isActive: true,
@@ -144,15 +148,22 @@ export async function getEvents(options: GetEventsOptions = {}) {
     ...(category && { category }),
   };
 
-  const events = await prisma.event.findMany({
-    where,
-    orderBy: upcoming
-      ? [{ displayOrder: 'asc' }, { date: 'asc' }]  // By order, then nearest first
-      : [{ date: 'desc' }], // Most recent first for past
-    take: limit,
-  });
-
-  return events;
+  // Try with displayOrder, fallback to date-only if column doesn't exist
+  try {
+    return await prisma.event.findMany({
+      where,
+      orderBy: upcoming
+        ? [{ displayOrder: 'asc' }, { date: 'asc' }]
+        : [{ date: 'desc' }],
+      take: limit,
+    });
+  } catch {
+    return await prisma.event.findMany({
+      where,
+      orderBy: upcoming ? { date: 'asc' } : { date: 'desc' },
+      take: limit,
+    });
+  }
 }
 
 export async function getUpcomingEvents(limit = 5) {

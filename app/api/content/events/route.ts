@@ -99,13 +99,17 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const now = new Date();
 
     // Auto-update: move past UPCOMING/ONGOING events to PAST status
-    await prisma.event.updateMany({
-      where: {
-        status: { in: ['UPCOMING', 'ONGOING'] },
-        date: { lt: now },
-      },
-      data: { status: 'PAST' },
-    });
+    try {
+      await prisma.event.updateMany({
+        where: {
+          status: { in: ['UPCOMING', 'ONGOING'] },
+          date: { lt: now },
+        },
+        data: { status: 'PAST' },
+      });
+    } catch {
+      // Column may not exist yet — skip auto-update
+    }
 
     // Build where clause
     const where: Record<string, unknown> = {
@@ -147,43 +151,62 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     }
 
     // Fetch events with count for pagination
-    const [events, totalCount] = await Promise.all([
-      prisma.event.findMany({
-        where,
-        orderBy: status === 'past'
-          ? [{ date: 'desc' }]  // Most recent past events first
-          : [{ displayOrder: 'asc' }, { date: 'asc' }],  // By order, then nearest first
-        take: limit + 1, // Fetch one extra to check if there's more
-        skip: offset,
-        select: {
-          id: true,
-          name: true,
-          nameEn: true,
-          slug: true,
-          description: true,
-          date: true,
-          time: true,
-          endTime: true,
-          locationType: true,
-          address: true,
-          city: true,
-          virtualLink: true,
-          registrationLink: true,
-          imageUrl: true,
-          status: true,
-          capacity: true,
-          registeredCount: true,
-          category: true,
-          host: true,
-          isFree: true,
-          price: true,
-          currency: true,
-          isFeatured: true,
-          tags: true,
-        },
-      }),
-      prisma.event.count({ where }),
-    ]);
+    const selectFields = {
+      id: true,
+      name: true,
+      nameEn: true,
+      slug: true,
+      description: true,
+      date: true,
+      time: true,
+      endTime: true,
+      locationType: true,
+      address: true,
+      city: true,
+      virtualLink: true,
+      registrationLink: true,
+      imageUrl: true,
+      status: true,
+      capacity: true,
+      registeredCount: true,
+      category: true,
+      host: true,
+      isFree: true,
+      price: true,
+      currency: true,
+      isFeatured: true,
+      tags: true,
+    };
+
+    let events;
+    let totalCount: number;
+
+    try {
+      [events, totalCount] = await Promise.all([
+        prisma.event.findMany({
+          where,
+          orderBy: status === 'past'
+            ? [{ date: 'desc' }]
+            : [{ displayOrder: 'asc' }, { date: 'asc' }],
+          take: limit + 1,
+          skip: offset,
+          select: selectFields,
+        }),
+        prisma.event.count({ where }),
+      ]);
+    } catch {
+      // Fallback if displayOrder column doesn't exist yet
+      [events, totalCount] = await Promise.all([
+        prisma.event.findMany({
+          where,
+          orderBy: status === 'past' ? { date: 'desc' } : { date: 'asc' },
+          take: limit + 1,
+          skip: offset,
+          select: selectFields,
+        }),
+        prisma.event.count({ where }),
+      ]);
+    }
 
     // Check if there are more results
     const hasMore = events.length > limit;
