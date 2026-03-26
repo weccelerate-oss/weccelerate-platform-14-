@@ -23,6 +23,7 @@ import {
   BarChart3,
   Bell,
   FileText,
+  FolderKanban,
   Menu,
   X,
 } from 'lucide-react';
@@ -53,9 +54,10 @@ const NAV_ITEMS = [
     ],
   },
   {
-    label: 'ניהול משתמשים',
+    label: 'ניהול יזמים',
     items: [
       { label: 'יזמים', href: '/admin/users', icon: Users },
+      { label: 'פרויקטים', href: '/admin/projects', icon: FolderKanban },
     ],
   },
   {
