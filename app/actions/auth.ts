@@ -167,17 +167,31 @@ export async function requestPasswordReset(
       const resetUrl = `${baseUrl}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
 
       // Send email via Resend
-      const { Resend } = await import('resend');
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const { html, text } = buildResetEmail(resetUrl, lang);
+      if (!process.env.RESEND_API_KEY) {
+        console.error('[Auth] RESEND_API_KEY is not configured — cannot send password reset email');
+        console.log('[Auth] Reset URL (for dev):', resetUrl);
+        // In development, still return success so we can test the flow
+      } else {
+        const { Resend } = await import('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const { html, text } = buildResetEmail(resetUrl, lang);
 
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'WeCcelerate <onboarding@resend.dev>',
-        to: email,
-        subject: lang === 'he' ? 'איפוס סיסמה — WeCcelerate' : 'Password Reset — WeCcelerate',
-        html,
-        text,
-      });
+        const emailResult = await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || 'WeCcelerate <noreply@weccelerate.com>',
+          to: email,
+          subject: lang === 'he' ? 'איפוס סיסמה — WeCcelerate' : 'Password Reset — WeCcelerate',
+          html,
+          text,
+        });
+
+        if (emailResult.error) {
+          console.error('[Auth] Failed to send reset email:', emailResult.error);
+          return {
+            success: false,
+            message: 'Email send failed',
+          };
+        }
+      }
     }
 
     // Always return success (don't reveal if account exists)

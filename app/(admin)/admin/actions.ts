@@ -865,6 +865,48 @@ export async function createProjectAction(data: CreateProjectFormData) {
       return { success: false, error: 'למשתמש כבר יש פרויקט פעיל. ניתן לארכב אותו לפני יצירת חדש.' };
     }
 
+    // Auto-create Pipedrive deal if no pipedriveId provided
+    let pipedriveId = data.pipedriveId?.trim() || null;
+    if (!pipedriveId) {
+      try {
+        const { pipedriveClient } = await import('@/lib/pipedrive');
+        if (pipedriveClient.isReady()) {
+          // Look up or create person in Pipedrive
+          let personId: number | undefined;
+          if (user.email) {
+            const existingPerson = await pipedriveClient.findPersonByEmail(user.email);
+            if (existingPerson) {
+              personId = existingPerson.id;
+            } else {
+              const personResult = await pipedriveClient.createPerson({
+                name: user.name || user.email,
+                email: user.email,
+                phone: user.phone || undefined,
+              });
+              if (personResult.success && personResult.data) {
+                personId = personResult.data.id;
+              }
+            }
+          }
+
+          // Create deal in Pipedrive
+          const dealResult = await pipedriveClient.createDeal({
+            title: `${data.name.trim()} — ${user.company || user.name || user.email}`,
+            person_id: personId,
+            value: data.targetFunding || 0,
+            currency: data.fundingCurrency || 'ILS',
+          });
+
+          if (dealResult.success && dealResult.data) {
+            pipedriveId = String(dealResult.data.id);
+            console.log(`[Admin] Created Pipedrive deal ${pipedriveId} for project "${data.name}"`);
+          }
+        }
+      } catch (pipedriveError) {
+        console.warn('[Admin] Failed to create Pipedrive deal (continuing without it):', pipedriveError);
+      }
+    }
+
     const project = await prisma.project.create({
       data: {
         name: data.name.trim(),
@@ -872,7 +914,7 @@ export async function createProjectAction(data: CreateProjectFormData) {
         industry: data.industry?.trim() || null,
         website: data.website?.trim() || null,
         userId: data.userId,
-        pipedriveId: data.pipedriveId?.trim() || null,
+        pipedriveId,
         status: data.status || 'DRAFT',
         stage: data.stage || 1,
         targetFunding: data.targetFunding || null,
