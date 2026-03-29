@@ -380,21 +380,27 @@ export default async function DashboardPage() {
       const { findDriveFolder, listDriveFiles } = await import('@/lib/google-drive');
       const portalRootId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID;
       if (portalRootId) {
-        // Try to find entrepreneur's subfolder by deal ID, then by name
-        let targetFolderId = await findDriveFolder(portalRootId, data.project.pipedriveId);
+        // Step 1: Find the entrepreneur's folder by deal ID (e.g. "17200 - מאור ארגמן")
+        const entrepreneurFolder = await findDriveFolder(portalRootId, data.project.pipedriveId);
+        console.log(`[Dashboard] Entrepreneur folder for deal ${data.project.pipedriveId}: ${entrepreneurFolder || 'not found'}`);
 
-        // If no subfolder found, maybe the folder ID IS the entrepreneur's folder directly
-        if (!targetFolderId) {
-          targetFolderId = portalRootId;
+        if (entrepreneurFolder) {
+          // Step 2: Look for "Portal" subfolder inside the entrepreneur's folder
+          const { findDriveFolder: findSub } = await import('@/lib/google-drive');
+          const portalFolder = await findSub(entrepreneurFolder, 'Portal');
+
+          // Step 3: List files from Portal subfolder, or directly from entrepreneur folder
+          const targetFolder = portalFolder || entrepreneurFolder;
+          console.log(`[Dashboard] Target Drive folder: ${targetFolder} (portal subfolder: ${!!portalFolder})`);
+
+          const files = await listDriveFiles(targetFolder);
+          console.log(`[Dashboard] Drive files found: ${files.length}`);
+          driveFiles = files.map(f => ({
+            id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
+            webViewLink: f.webViewLink, webContentLink: f.webContentLink,
+            modifiedTime: f.modifiedTime,
+          }));
         }
-
-        const files = await listDriveFiles(targetFolderId);
-        console.log(`[Dashboard] Drive files found: ${files.length} in folder ${targetFolderId}`);
-        driveFiles = files.map(f => ({
-          id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
-          webViewLink: f.webViewLink, webContentLink: f.webContentLink,
-          modifiedTime: f.modifiedTime,
-        }));
       }
     } catch (err) {
       console.warn('[Dashboard] Google Drive error:', err);
