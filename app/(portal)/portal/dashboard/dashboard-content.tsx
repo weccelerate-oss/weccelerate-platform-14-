@@ -7,26 +7,13 @@
 
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Plus,
-  Target,
-  GraduationCap,
-  FolderOpen,
-  ChevronLeft,
-  X,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { ProjectTimeline } from './components/project-timeline';
-import { FileVault } from './components/file-vault';
+import { motion } from 'framer-motion';
+import { GraduationCap, ChevronLeft } from 'lucide-react';
 import { WhatsAppButton } from './components/whatsapp-button';
 import { WelcomeOnboarding } from './components/welcome-onboarding';
 import { StatsCards } from './components/stats-cards';
 import { RecentActivity } from './components/recent-activity';
 import { QuickActions } from './components/quick-actions';
-import { PurchasedServices } from './components/purchased-services';
-import { DealActivities } from './components/deal-activities';
 import { ServiceTimeline } from './components/service-timeline';
 import type { DealProductDisplay } from './components/purchased-services';
 import type { DealActivityDisplay } from './components/deal-activities';
@@ -86,41 +73,6 @@ export function DashboardContent({
   matchedServices = [],
   driveFiles = [],
 }: DashboardContentProps) {
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  // Handle file upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 4 * 1024 * 1024) {
-      setUploadMessage({ type: 'error', text: `הקובץ גדול מדי (${(file.size / (1024 * 1024)).toFixed(1)}MB). הגודל המקסימלי הוא 4MB.` });
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadMessage(null);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      if (project) formData.append('projectId', project.id);
-
-      const response = await fetch('/api/portal/upload', { method: 'POST', body: formData });
-      if (response.status === 413) throw new Error('הקובץ גדול מדי. הגודל המקסימלי הוא 4MB.');
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'העלאה נכשלה');
-
-      setUploadMessage({ type: 'success', text: `הקובץ "${file.name}" הועלה בהצלחה!` });
-      setTimeout(() => { setShowUploadDialog(false); setUploadMessage(null); window.location.reload(); }, 1500);
-    } catch (err) {
-      setUploadMessage({ type: 'error', text: err instanceof Error ? err.message : 'העלאה נכשלה' });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   // Error state
   if (dbError && !project) {
     return (
@@ -162,45 +114,17 @@ export function DashboardContent({
 
         {/* Services Timeline from Pipedrive */}
         {matchedServices.length > 0 && (
-          <DashboardCard
-            title="השירותים שלך ב-WeCcelerate"
-            subtitle={project.name}
-            badge={`${matchedServices.filter(s => s.allDone).length}/${matchedServices.length}`}
-          >
-            <ServiceTimeline
-              services={matchedServices}
-              projectId={project.id}
-              files={project.files.map(f => ({ id: f.id, name: f.name, displayName: f.displayName, url: f.url, size: f.size, mimeType: f.mimeType }))}
-              driveFiles={driveFiles}
-            />
-          </DashboardCard>
+          <ServiceTimeline
+            services={matchedServices}
+            projectId={project.id}
+            files={project.files.map(f => ({ id: f.id, name: f.name, displayName: f.displayName, url: f.url, size: f.size, mimeType: f.mimeType }))}
+            driveFiles={driveFiles}
+          />
         )}
 
-        {/* Main Grid */}
+        {/* Widgets */}
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Left: Main content - 2 cols */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-
-            {/* File Vault */}
-            <DashboardCard
-              title="כספת המסמכים"
-              subtitle={`${project.files.length} מסמכים`}
-              action={
-                <button
-                  onClick={() => setShowUploadDialog(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#c8a951] hover:bg-[#c8a951]/10 rounded-lg transition-colors font-medium"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>העלאת קובץ</span>
-                </button>
-              }
-            >
-              <FileVault files={project.files} />
-            </DashboardCard>
-          </div>
-
-          {/* Right sidebar widgets */}
-          <div className="space-y-4 sm:space-y-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <QuickActions project={project} />
             </motion.div>
@@ -238,65 +162,6 @@ export function DashboardContent({
           </div>
         </div>
       </div>
-
-      {/* Upload Dialog */}
-      <AnimatePresence>
-        {showUploadDialog && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => !isUploading && setShowUploadDialog(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-            >
-              <div className="bg-[#0d1321] rounded-2xl shadow-2xl w-full max-w-md p-6 border border-white/[0.08]" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-lg font-bold text-white">העלאת קובץ</h3>
-                  <button onClick={() => !isUploading && setShowUploadDialog(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {uploadMessage && (
-                  <div className={cn(
-                    'p-3 rounded-xl text-sm mb-4',
-                    uploadMessage.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                  )}>
-                    {uploadMessage.text}
-                  </div>
-                )}
-
-                <label className={cn(
-                  'flex flex-col items-center gap-3 p-8 border-2 border-dashed rounded-xl cursor-pointer transition-colors',
-                  isUploading ? 'border-white/[0.06] bg-white/[0.02]' : 'border-white/[0.1] hover:border-[#c8a951]/30 hover:bg-[#c8a951]/[0.03]'
-                )}>
-                  {isUploading ? (
-                    <>
-                      <div className="w-10 h-10 border-3 border-[#c8a951] border-t-transparent rounded-full animate-spin" />
-                      <span className="text-sm text-white/50">מעלה...</span>
-                    </>
-                  ) : (
-                    <>
-                      <FolderOpen className="w-10 h-10 text-white/30" />
-                      <span className="text-sm font-medium text-white/70">לחץ לבחירת קובץ</span>
-                      <span className="text-xs text-white/30">PDF, Word, Excel, PowerPoint, תמונה (עד 4MB)</span>
-                    </>
-                  )}
-                  <input type="file" className="hidden" disabled={isUploading}
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.txt,.csv"
-                    onChange={handleFileUpload}
-                  />
-                </label>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* WhatsApp */}
       <WhatsAppButton phone={process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '972555647538'} projectName={project.name} />
