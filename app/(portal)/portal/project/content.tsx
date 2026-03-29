@@ -125,7 +125,11 @@ export function ProjectPageContent({ project, matchedServices, dealStatus }: Pro
               <h2 className="text-[15px] font-semibold text-white/90">השירותים שלך ב-WeCcelerate</h2>
             </div>
             <div className="p-5">
-              <ServiceTimeline services={matchedServices} projectId={project.id} />
+              <ServiceTimeline
+                services={matchedServices}
+                projectId={project.id}
+                files={project.files.map(f => ({ id: f.id, name: f.name, displayName: f.displayName, url: f.url, size: f.size, mimeType: f.mimeType }))}
+              />
             </div>
           </motion.div>
         )}

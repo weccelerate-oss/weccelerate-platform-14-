@@ -165,7 +165,11 @@ export function DashboardContent({
             subtitle={project.name}
             badge={`${matchedServices.filter(s => s.allDone).length}/${matchedServices.length}`}
           >
-            <ServiceTimeline services={matchedServices} projectId={project.id} />
+            <ServiceTimeline
+              services={matchedServices}
+              projectId={project.id}
+              files={project.files.map(f => ({ id: f.id, name: f.name, displayName: f.displayName, url: f.url, size: f.size, mimeType: f.mimeType }))}
+            />
           </DashboardCard>
         )}
 

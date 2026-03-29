@@ -43,10 +43,20 @@ import type { MatchedService } from '@/lib/service-matcher';
 // TYPES
 // =============================================================================
 
+interface ProjectFile {
+  id: string;
+  name: string;
+  displayName: string | null;
+  url: string;
+  size: number | null;
+  mimeType: string | null;
+}
+
 interface ServiceTimelineProps {
   services: MatchedService[];
   projectId?: string;
   isAdmin?: boolean;
+  files?: ProjectFile[];
 }
 
 // =============================================================================
@@ -67,17 +77,16 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Search: <Search className="w-5 h-5" />,
 };
 
-// Mock portal files for completed services
-const MOCK_PORTAL_FILES: Record<string, { name: string; type: string; size: string }[]> = {
-  'strategic-consulting': [{ name: 'סיכום ייעוץ אסטרטגי.pdf', type: 'pdf', size: '2.1 MB' }],
-  'canvas-model': [{ name: 'מודל קנבס - גרסה סופית.pdf', type: 'pdf', size: '1.4 MB' }],
-  'marketing-plan': [{ name: 'תוכנית שיווקית מלאה.pdf', type: 'pdf', size: '3.2 MB' }, { name: 'מצגת קמפיין מיתוג.pptx', type: 'pptx', size: '5.1 MB' }],
-  'financial-plan': [{ name: 'מודל פיננסי.xlsx', type: 'xlsx', size: '890 KB' }, { name: 'תחזית 3 שנים.pdf', type: 'pdf', size: '1.8 MB' }],
-  'pitch-deck': [{ name: 'מצגת משקיעים - Final.pptx', type: 'pptx', size: '8.2 MB' }],
-  'landing-page': [{ name: 'מפרט דף נחיתה.pdf', type: 'pdf', size: '1.1 MB' }],
-  'brief': [{ name: 'בריף פרויקט.pdf', type: 'pdf', size: '650 KB' }],
-  'investor-prep': [{ name: 'חומרי הכנה למשקיעים.pdf', type: 'pdf', size: '2.4 MB' }],
-};
+function formatFileSize(bytes: number | null): string {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getFileExt(name: string): string {
+  return name.split('.').pop()?.toLowerCase() || '';
+}
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '';
@@ -179,18 +188,26 @@ function StationNode({
   isAdmin,
   projectId,
   totalStations,
+  files: allFiles,
 }: {
   service: MatchedService;
   index: number;
   isAdmin: boolean;
   projectId?: string;
   totalStations: number;
+  files: ProjectFile[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const icon = ICON_MAP[service.icon] || <FileText className="w-5 h-5" />;
-  const files = MOCK_PORTAL_FILES[service.id] || [];
+  // Match files to this service by name keywords
+  const serviceFiles = allFiles.filter((f) => {
+    const fileName = (f.displayName || f.name).toLowerCase();
+    const serviceName = service.name.toLowerCase();
+    const words = serviceName.split(' ').filter(w => w.length > 2);
+    return words.some(w => fileName.includes(w));
+  });
   const isEven = index % 2 === 0;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -352,34 +369,48 @@ function StationNode({
 
                 {service.allDone ? (
                   <div className="space-y-2">
-                    {/* File list */}
-                    {files.map((file, fi) => (
-                      <div
-                        key={fi}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/[0.1] transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04]',
-                          FILE_ICONS[file.type] || 'text-white/40'
-                        )}>
-                          <FileText className="w-4 h-4" />
+                    {/* File list from project */}
+                    {serviceFiles.map((file) => {
+                      const ext = getFileExt(file.name);
+                      return (
+                        <div
+                          key={file.id}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/[0.1] transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04]',
+                            FILE_ICONS[ext] || 'text-white/40'
+                          )}>
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white/75 font-medium truncate">{file.displayName || file.name}</p>
+                            <p className="text-[10px] text-white/25">{formatFileSize(file.size)}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/40 hover:text-white/70"
+                              title="צפה אונליין"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </a>
+                            <a
+                              href={file.url}
+                              download={file.name}
+                              className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/40 hover:text-white/70"
+                              title="הורד"
+                            >
+                              <Download className="w-4 h-4" />
+                            </a>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white/75 font-medium truncate">{file.name}</p>
-                          <p className="text-[10px] text-white/25">{file.size}</p>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <button className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/40 hover:text-white/70" title="צפה אונליין">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/40 hover:text-white/70" title="הורד">
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
 
-                    {files.length === 0 && (
+                    {serviceFiles.length === 0 && (
                       <div className="text-center py-4">
                         <FileText className="w-5 h-5 text-white/15 mx-auto mb-1.5" />
                         <p className="text-xs text-white/25">עדיין לא הועלו קבצים לשירות זה</p>
@@ -533,7 +564,7 @@ function PowerCore({ percent, done, total }: { percent: number; done: number; to
 // MAIN COMPONENT
 // =============================================================================
 
-export function ServiceTimeline({ services, projectId, isAdmin = false }: ServiceTimelineProps) {
+export function ServiceTimeline({ services, projectId, isAdmin = false, files = [] }: ServiceTimelineProps) {
   const doneCount = useMemo(() => services.filter((s) => s.allDone).length, [services]);
   const totalCount = services.length;
   const progressPercent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
@@ -602,6 +633,7 @@ export function ServiceTimeline({ services, projectId, isAdmin = false }: Servic
               isAdmin={isAdmin}
               projectId={projectId}
               totalStations={totalCount}
+              files={files}
             />
             {index < services.length - 1 && (
               <MazePath
