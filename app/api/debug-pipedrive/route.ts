@@ -37,11 +37,29 @@ export async function GET() {
     results.driveFolderId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID || null;
 
     if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_SERVICE_ACCOUNT_KEY && process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID) {
-      const { listDriveFiles } = await import('@/lib/google-drive');
-      const files = await listDriveFiles(process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID);
-      results.driveFilesCount = files.length;
-      if (files.length > 0) {
-        results.driveFirstFile = files[0].name;
+      const { listDriveFiles, findDriveFolder, listDriveSubfolders } = await import('@/lib/google-drive');
+      const rootId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID;
+
+      // List subfolders in root
+      const subfolders = await listDriveSubfolders(rootId);
+      results.driveSubfolders = subfolders.length;
+      results.driveSampleFolders = subfolders.slice(0, 3).map(f => f.name);
+
+      // Find deal 17200 folder
+      const dealFolder = await findDriveFolder(rootId, '17200');
+      results.driveDealFolder = dealFolder;
+
+      if (dealFolder) {
+        // Find Portal subfolder
+        const portalFolder = await findDriveFolder(dealFolder, 'Portal');
+        results.drivePortalFolder = portalFolder;
+
+        const targetFolder = portalFolder || dealFolder;
+        const files = await listDriveFiles(targetFolder);
+        results.driveFilesCount = files.length;
+        if (files.length > 0) {
+          results.driveFileNames = files.map(f => f.name);
+        }
       }
     }
   } catch (err) {
