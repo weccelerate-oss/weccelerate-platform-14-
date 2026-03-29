@@ -145,13 +145,6 @@ export function StatsCards({ project }: StatsCardsProps) {
       icon: <Users className="w-5 h-5" />,
       color: 'purple',
     },
-    {
-      label: 'מסמכים',
-      value: project.files.length.toString(),
-      subValue: 'קבצים בכספת',
-      icon: <FileText className="w-5 h-5" />,
-      color: 'orange',
-    },
   ];
 
   return (

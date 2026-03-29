@@ -28,7 +28,6 @@ interface PortalNavbarProps {
 const NAV_LINKS = [
   { href: '/portal/dashboard', label: 'לוח בקרה', icon: LayoutDashboard },
   { href: '/portal/project', label: 'הפרויקט שלי', icon: Target },
-  { href: '/portal/documents', label: 'מסמכים', icon: FolderOpen },
   { href: '/portal/learning', label: 'מרכז למידה', icon: GraduationCap },
 ];
 
