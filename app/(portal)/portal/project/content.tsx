@@ -55,16 +55,13 @@ export function ProjectPageContent({
 
   return (
     <>
-      {/* Header */}
-      <div className="bg-[#0a0e27]/80 backdrop-blur-xl border-b border-white/[0.06]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-          <a
-            href="/portal/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white/70 mb-4 transition-colors"
-          >
-            <ArrowRight className="w-4 h-4" />
-            חזרה ללוח הבקרה
-          </a>
+      {/* Header with hero */}
+      <div className="relative border-b border-white/[0.06] overflow-hidden">
+        <div className="absolute inset-0">
+          <img src="/images/portal/project-hero.png" alt="" className="w-full h-full object-cover opacity-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/50 to-[#070b1e]" />
+        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 relative z-10">
           <h1 className="text-2xl font-bold text-white">הפרויקט שלי</h1>
         </div>
       </div>

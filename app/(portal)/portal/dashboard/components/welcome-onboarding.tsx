@@ -134,45 +134,15 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#070b1e]" dir="rtl">
-      {/* Ambient glows */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-[#c8a951]/[0.03] rounded-full blur-[150px]" />
-        <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-blue-600/[0.03] rounded-full blur-[120px]" />
-      </div>
-
-      {/* Header */}
-      <header className="bg-[#0a0e27]/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center">
-              <span className="text-[#070b1e] font-bold text-sm">W</span>
-            </div>
-            <span className="text-base font-bold text-white">WeCcelerate</span>
-            <span className="px-2 py-0.5 bg-[#c8a951]/10 text-[#c8a951] text-[10px] font-semibold rounded-md border border-[#c8a951]/20">
-              פורטל יזמים
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="text-sm text-white/50">{user.company || user.email}</span>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center text-[#070b1e] font-semibold text-sm">
-              {firstName.charAt(0)}
-            </div>
-            <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
-              className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/40 hover:text-white/70"
-              title="התנתק"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+    <div>
+      {/* Hero with background image */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img src="/images/portal/welcome-hero.png" alt="" className="w-full h-full object-cover opacity-15" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/60 to-[#070b1e]" />
         </div>
-      </header>
 
-      {/* Main content */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
         {/* Greeting */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -328,7 +298,9 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
       </main>
 
       {/* Footer */}
-      <footer className="py-8 text-center text-sm text-white/30 border-t border-white/[0.06] relative z-10">
+      </div>
+
+      <footer className="py-8 text-center text-sm text-white/30 border-t border-white/[0.06]">
         <p>
           WeCcelerate &mdash; מאיצים יזמות
         </p>

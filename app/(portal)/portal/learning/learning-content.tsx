@@ -161,9 +161,13 @@ export function LearningContent({ user, initialCompletedSlugs }: LearningContent
 
   return (
     <div>
-      {/* Header */}
-      <div className="border-b border-white/[0.04]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      {/* Header with hero image */}
+      <div className="relative border-b border-white/[0.04] overflow-hidden">
+        <div className="absolute inset-0">
+          <img src="/images/portal/learning-hero.png" alt="" className="w-full h-full object-cover opacity-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/50 to-[#070b1e]" />
+        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2.5 bg-gradient-to-br from-[#c8a951] to-[#e8d48b] rounded-xl text-[#070b1e]">
               <GraduationCap className="w-6 h-6" />
