@@ -1,22 +1,24 @@
 /**
- * Service Journey — Interactive Roadmap
+ * Startup Journey Maze — Interactive Service Roadmap
  *
- * Displays purchased WeCcelerate services as an interactive startup journey map.
- * Nodes connected by a winding path, with file management per service.
+ * An immersive, gamified journey map showing WeCcelerate services.
+ * Each service is a "station" along a winding maze path.
  *
- * - Entrepreneur: view/download files
- * - Admin: upload files to each service node
+ * Role-based:
+ * - Entrepreneur: view/download files from Portal
+ * - Admin: upload deliverables to entrepreneur's Portal
  */
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Check,
   Clock,
   Upload,
   Download,
+  Eye,
   FileText,
   TrendingUp,
   Megaphone,
@@ -27,12 +29,12 @@ import {
   ClipboardList,
   FileCheck,
   Search,
-  X,
-  FolderOpen,
-  Trophy,
   ChevronDown,
-  ExternalLink,
+  Trophy,
   HardDrive,
+  Zap,
+  MapPin,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MatchedService } from '@/lib/service-matcher';
@@ -47,15 +49,8 @@ interface ServiceTimelineProps {
   isAdmin?: boolean;
 }
 
-interface PortalFile {
-  name: string;
-  url: string;
-  size: string;
-  type: string;
-}
-
 // =============================================================================
-// ICON MAP
+// CONSTANTS
 // =============================================================================
 
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -72,326 +67,465 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Search: <Search className="w-5 h-5" />,
 };
 
-// Service images from portal folder
-const SERVICE_IMAGES: Record<string, string> = {
-  'financial-plan': '/images/portal/course-financial.png',
-  'pitch-deck': '/images/portal/course-investments.png',
-  'marketing-plan': '/images/portal/course-business.png',
-  'canvas-model': '/images/portal/course-business.png',
-  'landing-page': '/images/portal/project-hero.png',
-  'strategic-consulting': '/images/portal/timeline-progress.png',
-  'investor-prep': '/images/portal/course-investments.png',
-  'business-plan': '/images/portal/course-business.png',
-  'market-research': '/images/portal/course-financial.png',
-  'brief': '/images/portal/empty-state.png',
-  'one-pager': '/images/portal/course-business.png',
+// Mock portal files for completed services
+const MOCK_PORTAL_FILES: Record<string, { name: string; type: string; size: string }[]> = {
+  'strategic-consulting': [{ name: 'סיכום ייעוץ אסטרטגי.pdf', type: 'pdf', size: '2.1 MB' }],
+  'canvas-model': [{ name: 'מודל קנבס - גרסה סופית.pdf', type: 'pdf', size: '1.4 MB' }],
+  'marketing-plan': [{ name: 'תוכנית שיווקית מלאה.pdf', type: 'pdf', size: '3.2 MB' }, { name: 'מצגת קמפיין מיתוג.pptx', type: 'pptx', size: '5.1 MB' }],
+  'financial-plan': [{ name: 'מודל פיננסי.xlsx', type: 'xlsx', size: '890 KB' }, { name: 'תחזית 3 שנים.pdf', type: 'pdf', size: '1.8 MB' }],
+  'pitch-deck': [{ name: 'מצגת משקיעים - Final.pptx', type: 'pptx', size: '8.2 MB' }],
+  'landing-page': [{ name: 'מפרט דף נחיתה.pdf', type: 'pdf', size: '1.1 MB' }],
+  'brief': [{ name: 'בריף פרויקט.pdf', type: 'pdf', size: '650 KB' }],
+  'investor-prep': [{ name: 'חומרי הכנה למשקיעים.pdf', type: 'pdf', size: '2.4 MB' }],
 };
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+const FILE_ICONS: Record<string, string> = {
+  pdf: 'text-red-400',
+  pptx: 'text-orange-400',
+  xlsx: 'text-emerald-400',
+  docx: 'text-blue-400',
+};
+
 // =============================================================================
-// SVG PATH CONNECTOR
+// MAZE PATH SVG
 // =============================================================================
 
-function PathConnector({ isCompleted, index }: { isCompleted: boolean; index: number }) {
+function MazePath({ completed, index, total }: { completed: boolean; index: number; total: number }) {
+  const isEven = index % 2 === 0;
+
   return (
-    <div className="flex justify-center py-1">
-      <svg width="40" height="36" viewBox="0 0 40 36" className="overflow-visible">
+    <div className="relative h-12 flex items-center justify-center overflow-visible">
+      <svg width="200" height="48" viewBox="0 0 200 48" className="overflow-visible">
+        {/* Maze corridor walls */}
         <motion.path
-          d={index % 2 === 0
-            ? "M20 0 C20 12, 8 18, 20 36"
-            : "M20 0 C20 12, 32 18, 20 36"
+          d={isEven
+            ? "M100 0 C100 10, 60 14, 60 24 C60 34, 100 38, 100 48"
+            : "M100 0 C100 10, 140 14, 140 24 C140 34, 100 38, 100 48"
+          }
+          fill="none"
+          strokeWidth="16"
+          className="stroke-white/[0.02]"
+        />
+        {/* Inner path */}
+        <motion.path
+          d={isEven
+            ? "M100 0 C100 10, 60 14, 60 24 C60 34, 100 38, 100 48"
+            : "M100 0 C100 10, 140 14, 140 24 C140 34, 100 38, 100 48"
           }
           fill="none"
           strokeWidth="2"
-          strokeDasharray={isCompleted ? "0" : "4 4"}
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 0.5, delay: index * 0.08 }}
-          className={isCompleted ? 'stroke-emerald-500' : 'stroke-white/10'}
+          strokeDasharray={completed ? "0" : "6 4"}
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.6, delay: index * 0.1 }}
+          className={completed ? 'stroke-emerald-500/60' : 'stroke-white/[0.08]'}
         />
-        {/* Animated glow dot on path */}
-        {!isCompleted && (
-          <motion.circle
-            r="2"
-            fill="#c8a951"
-            animate={{
-              offsetDistance: ['0%', '100%'],
-              opacity: [0, 1, 0],
-            }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          >
+        {/* Glow for completed */}
+        {completed && (
+          <motion.path
+            d={isEven
+              ? "M100 0 C100 10, 60 14, 60 24 C60 34, 100 38, 100 48"
+              : "M100 0 C100 10, 140 14, 140 24 C140 34, 100 38, 100 48"
+            }
+            fill="none"
+            strokeWidth="6"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 0.3 }}
+            transition={{ duration: 0.8, delay: index * 0.1 }}
+            className="stroke-emerald-400"
+            filter="url(#glow)"
+          />
+        )}
+        {/* Traveling particle for in-progress */}
+        {!completed && (
+          <circle r="3" fill="#c8a951" opacity="0.8">
             <animateMotion
-              dur="2s"
+              dur="3s"
               repeatCount="indefinite"
-              path={index % 2 === 0
-                ? "M20 0 C20 12, 8 18, 20 36"
-                : "M20 0 C20 12, 32 18, 20 36"
+              path={isEven
+                ? "M100 0 C100 10, 60 14, 60 24 C60 34, 100 38, 100 48"
+                : "M100 0 C100 10, 140 14, 140 24 C140 34, 100 38, 100 48"
               }
             />
-          </motion.circle>
+          </circle>
         )}
+        {/* Glow filter definition */}
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
       </svg>
     </div>
   );
 }
 
 // =============================================================================
-// SERVICE NODE
+// STATION NODE
 // =============================================================================
 
-function ServiceNode({
+function StationNode({
   service,
   index,
   isAdmin,
   projectId,
-  isLast,
+  totalStations,
 }: {
   service: MatchedService;
   index: number;
   isAdmin: boolean;
   projectId?: string;
-  isLast: boolean;
+  totalStations: number;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const [uploadingFor, setUploadingFor] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const icon = ICON_MAP[service.icon] || <FileText className="w-5 h-5" />;
-  const bgImage = SERVICE_IMAGES[service.id];
+  const files = MOCK_PORTAL_FILES[service.id] || [];
+  const isEven = index % 2 === 0;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 4 * 1024 * 1024) {
-      setUploadMsg({ type: 'error', text: 'הקובץ גדול מדי (מקסימום 4MB)' });
-      return;
-    }
-    setUploadingFor(true);
+    if (file.size > 4 * 1024 * 1024) { setUploadMsg({ type: 'error', text: 'גדול מדי (מקס 4MB)' }); return; }
+    setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      if (projectId) formData.append('projectId', projectId);
-      const res = await fetch('/api/portal/upload', { method: 'POST', body: formData });
-      if (!res.ok) throw new Error('Upload failed');
+      const fd = new FormData();
+      fd.append('file', file);
+      if (projectId) fd.append('projectId', projectId);
+      const res = await fetch('/api/portal/upload', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error();
       setUploadMsg({ type: 'success', text: `"${file.name}" הועלה` });
       setTimeout(() => setUploadMsg(null), 3000);
-    } catch {
-      setUploadMsg({ type: 'error', text: 'העלאה נכשלה' });
-    } finally {
-      setUploadingFor(false);
-    }
+    } catch { setUploadMsg({ type: 'error', text: 'העלאה נכשלה' }); }
+    finally { setUploading(false); }
   };
-
-  // Alternate layout direction for winding path feel
-  const isEven = index % 2 === 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08, duration: 0.4 }}
+      initial={{ opacity: 0, y: 24, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: index * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className={cn('relative', isEven ? 'sm:pr-8' : 'sm:pl-8')}
     >
+      {/* Station card */}
       <div
+        onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'relative group cursor-pointer',
-          'flex gap-4 items-start',
-          isEven ? 'flex-row' : 'flex-row-reverse',
+          'relative rounded-2xl border cursor-pointer transition-all duration-500 overflow-hidden group',
+          service.allDone
+            ? 'border-emerald-500/20 hover:border-emerald-500/40'
+            : 'border-white/[0.06] hover:border-[#c8a951]/25',
+          // Perspective depth effect
+          isEven ? 'sm:mr-12 lg:mr-20' : 'sm:ml-12 lg:ml-20',
         )}
-        onClick={() => setExpanded(!expanded)}
       >
-        {/* Node circle */}
-        <div className="relative flex-shrink-0">
-          <div
-            className={cn(
-              'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden',
-              service.allDone
-                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                : 'bg-white/[0.04] text-white/50 border border-white/[0.1] group-hover:border-[#c8a951]/30'
-            )}
-          >
-            {/* Background image hint */}
-            {bgImage && (
-              <div className="absolute inset-0 opacity-20">
-                <img src={bgImage} alt="" className="w-full h-full object-cover" />
-              </div>
-            )}
-            <div className="relative z-10">
-              {service.allDone ? <Check className="w-7 h-7" strokeWidth={2.5} /> : icon}
-            </div>
-          </div>
-          {/* Step number */}
+        {/* Ambient glow background */}
+        <div className={cn(
+          'absolute inset-0 transition-opacity duration-500',
+          service.allDone ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        )}>
           <div className={cn(
-            'absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center',
+            'absolute inset-0',
             service.allDone
-              ? 'bg-emerald-600 text-white'
-              : 'bg-[#c8a951] text-[#070b1e]'
-          )}>
-            {index + 1}
+              ? 'bg-gradient-to-br from-emerald-500/[0.06] to-transparent'
+              : 'bg-gradient-to-br from-[#c8a951]/[0.04] to-transparent'
+          )} />
+        </div>
+
+        {/* Inner content */}
+        <div className="relative z-10 p-4 sm:p-5">
+          <div className="flex items-start gap-4">
+            {/* Station icon with ring */}
+            <div className="relative flex-shrink-0">
+              {/* Outer ring */}
+              <div className={cn(
+                'absolute -inset-1.5 rounded-2xl transition-all duration-500',
+                service.allDone
+                  ? 'bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                  : 'bg-white/[0.02]'
+              )} />
+              <div className={cn(
+                'relative w-14 h-14 rounded-xl flex items-center justify-center transition-all',
+                service.allDone
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white/[0.05] text-white/50'
+              )}>
+                {service.allDone ? <Check className="w-6 h-6" strokeWidth={2.5} /> : icon}
+              </div>
+              {/* Step badge */}
+              <div className={cn(
+                'absolute -top-3 -right-3 w-7 h-7 rounded-lg text-[11px] font-bold flex items-center justify-center shadow-lg',
+                service.allDone ? 'bg-emerald-600 text-white' : 'bg-[#c8a951] text-[#070b1e]'
+              )}>
+                {index + 1}
+              </div>
+            </div>
+
+            {/* Station info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className={cn(
+                    'text-base sm:text-lg font-bold leading-tight',
+                    service.allDone ? 'text-emerald-400' : 'text-white'
+                  )}>
+                    {service.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    {service.completedDate && (
+                      <span className="text-xs text-white/35">{formatDate(service.completedDate)}</span>
+                    )}
+                    <span className={cn(
+                      'inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full',
+                      service.allDone
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-[#c8a951]/10 text-[#c8a951] border border-[#c8a951]/20'
+                    )}>
+                      {service.allDone ? <><Check className="w-3 h-3" /> הושלם</> : <><Clock className="w-3 h-3" /> בתהליך</>}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Expand */}
+                <motion.div animate={{ rotate: isOpen ? 180 : 0 }} className="mt-1 flex-shrink-0">
+                  <ChevronDown className="w-5 h-5 text-white/25 group-hover:text-white/40 transition-colors" />
+                </motion.div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="mt-3">
+                <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(service.completedActivities / service.totalActivities) * 100}%` }}
+                    transition={{ duration: 0.8, delay: index * 0.1 }}
+                    className={cn('h-full rounded-full', service.allDone ? 'bg-emerald-500' : 'bg-[#c8a951]')}
+                  />
+                </div>
+                <p className="text-[10px] text-white/25 mt-1">{service.completedActivities}/{service.totalActivities} פעולות</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Content card */}
-        <div
-          className={cn(
-            'flex-1 rounded-2xl border transition-all duration-300 overflow-hidden',
-            service.allDone
-              ? 'bg-emerald-500/[0.04] border-emerald-500/15 hover:border-emerald-500/25'
-              : 'bg-white/[0.02] border-white/[0.06] hover:border-[#c8a951]/20 hover:bg-white/[0.03]'
-          )}
-        >
-          <div className="p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <h3 className={cn(
-                  'text-base sm:text-lg font-bold',
-                  service.allDone ? 'text-emerald-400' : 'text-white'
-                )}>
-                  {service.name}
-                </h3>
-                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                  {service.completedDate && (
-                    <span className="text-xs text-white/40">{formatDate(service.completedDate)}</span>
-                  )}
-                  <span className={cn(
-                    'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full',
-                    service.allDone
-                      ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                      : 'bg-[#c8a951]/10 text-[#c8a951] border border-[#c8a951]/20'
-                  )}>
-                    {service.allDone ? <><Check className="w-3 h-3" /> הושלם</> : <><Clock className="w-3 h-3" /> בתהליך</>}
+        {/* Expanded: Control Panel Interior */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="relative px-4 sm:px-5 pb-4 sm:pb-5 pt-3 border-t border-white/[0.04]">
+                {/* Status badge */}
+                <div className="flex items-center gap-2 mb-3">
+                  <HardDrive className="w-3.5 h-3.5 text-white/25" />
+                  <span className="text-[11px] text-white/25">
+                    {isAdmin ? 'ניהול קבצי Portal' : 'מחובר ל-Portal Drive — צפייה בלבד'}
                   </span>
-                </div>
-              </div>
-
-              {/* Expand indicator */}
-              <motion.div
-                animate={{ rotate: expanded ? 180 : 0 }}
-                className="mt-1"
-              >
-                <ChevronDown className="w-5 h-5 text-white/30" />
-              </motion.div>
-            </div>
-
-            {/* Mini progress */}
-            <div className="mt-3">
-              <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(service.completedActivities / service.totalActivities) * 100}%` }}
-                  transition={{ duration: 0.8, delay: index * 0.1 }}
-                  className={cn(
-                    'h-full rounded-full',
-                    service.allDone ? 'bg-emerald-500' : 'bg-[#c8a951]'
+                  {!isAdmin && (
+                    <Shield className="w-3 h-3 text-white/20" />
                   )}
-                />
-              </div>
-              <p className="text-[10px] text-white/30 mt-1">
-                {service.completedActivities}/{service.totalActivities} פעולות
-              </p>
-            </div>
-          </div>
+                </div>
 
-          {/* Expanded: Files section */}
-          <AnimatePresence>
-            {expanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-white/[0.04] pt-4">
-                  {/* Google Drive sync badge */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <HardDrive className="w-3.5 h-3.5 text-white/30" />
-                    <span className="text-[11px] text-white/30">מסונכרן עם תיקיית Portal</span>
+                {uploadMsg && (
+                  <div className={cn(
+                    'p-2.5 rounded-lg text-xs mb-3',
+                    uploadMsg.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                  )}>
+                    {uploadMsg.text}
                   </div>
+                )}
 
-                  {/* Upload message */}
-                  {uploadMsg && (
-                    <div className={cn(
-                      'p-2.5 rounded-lg text-xs mb-3',
-                      uploadMsg.type === 'success'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                    )}>
-                      {uploadMsg.text}
-                    </div>
-                  )}
-
-                  {service.allDone ? (
-                    <>
-                      {/* Admin: Upload area */}
-                      {isAdmin && (
-                        <label className={cn(
-                          'flex items-center gap-3 p-3.5 rounded-xl border border-dashed cursor-pointer transition-all mb-3',
-                          uploadingFor
-                            ? 'border-[#c8a951]/20 bg-[#c8a951]/[0.02]'
-                            : 'border-white/[0.1] hover:border-[#c8a951]/30 hover:bg-[#c8a951]/[0.03]'
+                {service.allDone ? (
+                  <div className="space-y-2">
+                    {/* File list */}
+                    {files.map((file, fi) => (
+                      <div
+                        key={fi}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/[0.1] transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center bg-white/[0.04]',
+                          FILE_ICONS[file.type] || 'text-white/40'
                         )}>
-                          {uploadingFor ? (
-                            <div className="w-8 h-8 border-2 border-[#c8a951] border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-lg bg-[#c8a951]/10 flex items-center justify-center">
-                              <Upload className="w-4 h-4 text-[#c8a951]" />
-                            </div>
-                          )}
-                          <div>
-                            <span className="text-sm text-white/70 font-medium block">
-                              {uploadingFor ? 'מעלה...' : 'העלה קובץ לשירות זה'}
-                            </span>
-                            <span className="text-[10px] text-white/30">PDF, Word, Excel, תמונה (עד 4MB)</span>
-                          </div>
-                          <input type="file" className="hidden" disabled={uploadingFor}
-                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp"
-                            onChange={handleUpload}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </label>
-                      )}
-
-                      {/* Entrepreneur: View files placeholder */}
-                      {!isAdmin && (
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-[#c8a951]/15 transition-colors">
-                            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                              <FileText className="w-4 h-4 text-blue-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-white/70 font-medium">קבצי {service.name}</p>
-                              <p className="text-[10px] text-white/30">קבצים שהועלו על ידי הצוות</p>
-                            </div>
-                            <button
-                              onClick={(e) => e.stopPropagation()}
-                              className="px-3 py-1.5 text-xs font-medium text-[#c8a951] bg-[#c8a951]/10 rounded-lg border border-[#c8a951]/20 hover:bg-[#c8a951]/15 transition-colors"
-                            >
-                              צפה בקבצים
-                            </button>
-                          </div>
+                          <FileText className="w-4 h-4" />
                         </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-3">
-                      <Clock className="w-5 h-5 text-white/20 mx-auto mb-1.5" />
-                      <p className="text-xs text-white/30">השירות בתהליך - הקבצים יהיו זמינים לאחר השלמתו</p>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-white/75 font-medium truncate">{file.name}</p>
+                          <p className="text-[10px] text-white/25">{file.size}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <button className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/40 hover:text-white/70" title="צפה אונליין">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/40 hover:text-white/70" title="הורד">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {files.length === 0 && (
+                      <div className="text-center py-4">
+                        <FileText className="w-5 h-5 text-white/15 mx-auto mb-1.5" />
+                        <p className="text-xs text-white/25">עדיין לא הועלו קבצים לשירות זה</p>
+                      </div>
+                    )}
+
+                    {/* Admin upload gate */}
+                    {isAdmin && (
+                      <label
+                        className={cn(
+                          'flex items-center gap-3 p-3.5 rounded-xl border border-dashed cursor-pointer transition-all mt-2',
+                          uploading ? 'border-[#c8a951]/20' : 'border-white/[0.08] hover:border-[#c8a951]/30 hover:bg-[#c8a951]/[0.02]'
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {uploading ? (
+                          <div className="w-8 h-8 border-2 border-[#c8a951] border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-[#c8a951]/10 flex items-center justify-center">
+                            <Upload className="w-4 h-4 text-[#c8a951]" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-xs text-white/60 font-medium">העלה קובץ סופי ל-Portal של היזם</p>
+                          <p className="text-[10px] text-white/25">PDF, Word, Excel, תמונה (עד 4MB)</p>
+                        </div>
+                        <input type="file" className="hidden" disabled={uploading}
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp"
+                          onChange={handleUpload}
+                        />
+                      </label>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <Clock className="w-5 h-5 text-white/15 mx-auto mb-1.5" />
+                    <p className="text-xs text-white/25">השירות בתהליך — הקבצים יהיו זמינים לאחר השלמתו</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
+// =============================================================================
+// COMPASS TRACKER
+// =============================================================================
+
+function CompassTracker({ current, total, percent }: { current: number; total: number; percent: number }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="relative w-10 h-10">
+        {/* Compass ring */}
+        <svg width="40" height="40" viewBox="0 0 40 40" className="transform -rotate-90">
+          <circle cx="20" cy="20" r="17" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="3" />
+          <motion.circle
+            cx="20" cy="20" r="17"
+            fill="none"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray={`${percent * 1.07} 107`}
+            initial={{ strokeDasharray: '0 107' }}
+            animate={{ strokeDasharray: `${percent * 1.07} 107` }}
+            transition={{ duration: 1.2, ease: 'easeOut' }}
+            className={percent === 100 ? 'stroke-emerald-400' : 'stroke-[#c8a951]'}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Compass className={cn('w-4 h-4', percent === 100 ? 'text-emerald-400' : 'text-[#c8a951]')} />
+        </div>
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-white/70">תחנה {current} מתוך {total}</p>
+        <p className="text-[10px] text-white/30">{percent === 100 ? 'המסע הושלם!' : 'בדרך להצלחה'}</p>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// POWER CORE PROGRESS BAR
+// =============================================================================
+
+function PowerCore({ percent, done, total }: { percent: number; done: number; total: number }) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-white/50">{done} מתוך {total} שירותים</span>
+        <div className={cn(
+          'flex items-center gap-1.5 text-sm font-bold',
+          percent === 100 ? 'text-emerald-400' : 'text-[#c8a951]'
+        )}>
+          <Zap className="w-4 h-4" />
+          {percent}%
         </div>
       </div>
 
-      {/* Path connector to next node */}
-      {!isLast && <PathConnector isCompleted={service.allDone} index={index} />}
-    </motion.div>
+      {/* The bar */}
+      <div className="relative h-4 bg-white/[0.04] rounded-full overflow-hidden border border-white/[0.06]">
+        {/* Inner track marks */}
+        <div className="absolute inset-0 flex items-center">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="flex-1 border-r border-white/[0.03] h-full" />
+          ))}
+        </div>
+
+        {/* Fill */}
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${percent}%` }}
+          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          className={cn(
+            'absolute inset-y-0 right-0 rounded-full',
+            percent === 100
+              ? 'bg-gradient-to-l from-emerald-500 to-emerald-400'
+              : 'bg-gradient-to-l from-[#c8a951] to-[#e8d48b]'
+          )}
+        >
+          {/* Shimmer */}
+          <div className="absolute inset-0 overflow-hidden rounded-full">
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
+            />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Step dots */}
+      <div className="flex items-center gap-1">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              'h-1.5 flex-1 rounded-full transition-all',
+              i < done ? 'bg-emerald-500/70' : 'bg-white/[0.06]'
+            )}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -400,110 +534,97 @@ function ServiceNode({
 // =============================================================================
 
 export function ServiceTimeline({ services, projectId, isAdmin = false }: ServiceTimelineProps) {
+  const doneCount = useMemo(() => services.filter((s) => s.allDone).length, [services]);
+  const totalCount = services.length;
+  const progressPercent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+  // Find current station (first incomplete, or last if all done)
+  const currentStation = useMemo(() => {
+    const idx = services.findIndex((s) => !s.allDone);
+    return idx >= 0 ? idx + 1 : totalCount;
+  }, [services, totalCount]);
+
   if (!services || services.length === 0) {
     return (
-      <div className="text-center py-10">
-        <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/[0.04] flex items-center justify-center">
-          <Clock className="w-7 h-7 text-white/20" />
+      <div className="text-center py-12">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
+          <MapPin className="w-8 h-8 text-white/15" />
         </div>
-        <h3 className="text-sm font-semibold text-white/70 mb-1">אין שירותים עדיין</h3>
-        <p className="text-xs text-white/40">השירותים שרכשת מ-WeCcelerate יופיעו כאן</p>
+        <h3 className="text-sm font-semibold text-white/60 mb-1">המסע טרם התחיל</h3>
+        <p className="text-xs text-white/30">השירותים שרכשת מ-WeCcelerate יופיעו כאן כמפת מסע</p>
       </div>
     );
   }
 
-  const doneCount = services.filter((s) => s.allDone).length;
-  const totalCount = services.length;
-  const progressPercent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
-
   return (
     <div className="space-y-6">
-      {/* Journey header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-l from-[#0d1321] to-[#070b1e] p-5 sm:p-6 border border-white/[0.06]">
-        {/* Background decoration */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-          <div className="absolute -top-20 -left-20 w-60 h-60 bg-[#c8a951]/[0.04] rounded-full blur-[80px]" />
-          <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-emerald-500/[0.04] rounded-full blur-[60px]" />
-          <img src="/images/portal/dashboard-hero.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.04]" />
+      {/* Journey Console Header */}
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
+        {/* Background layers */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0d1525] via-[#0a0f1e] to-[#070b1e]" />
+        <div className="absolute inset-0">
+          <img src="/images/portal/dashboard-hero.png" alt="" className="w-full h-full object-cover opacity-[0.03]" />
         </div>
+        <div className="absolute -top-20 -right-20 w-60 h-60 bg-[#c8a951]/[0.03] rounded-full blur-[100px]" />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-emerald-500/[0.03] rounded-full blur-[80px]" />
 
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
+        <div className="relative z-10 p-5 sm:p-6">
+          {/* Top row: Title + Compass */}
+          <div className="flex items-start justify-between gap-4 mb-5">
             <div>
-              <h3 className="text-lg font-bold text-white">המסע היזמי שלך</h3>
-              <p className="text-sm text-white/40 mt-0.5">
-                {doneCount === totalCount
-                  ? 'כל השירותים הושלמו בהצלחה!'
-                  : `${doneCount} מתוך ${totalCount} שירותים הושלמו`}
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1.5 h-1.5 bg-[#c8a951] rounded-full animate-pulse" />
+                <span className="text-[10px] text-[#c8a951] font-semibold uppercase tracking-widest">WeCcelerate Journey</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">המסע היזמי שלך</h2>
+              <p className="text-sm text-white/35 mt-1">
+                {progressPercent === 100 ? 'כל התחנות הושלמו — המסע נגמר בהצלחה!' : 'עוקב אחרי ההתקדמות שלך בתוכנית'}
               </p>
             </div>
-            {progressPercent === 100 && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20"
-              >
-                <Trophy className="w-6 h-6 text-emerald-400" />
-              </motion.div>
-            )}
+            <CompassTracker current={currentStation} total={totalCount} percent={progressPercent} />
           </div>
 
-          {/* Progress bar */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-3 bg-white/[0.06] rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 1.2, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-l from-emerald-400 to-[#c8a951] rounded-full relative"
-              >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]" style={{ animationDuration: '2s' }} />
-              </motion.div>
-            </div>
-            <span className="text-lg font-bold text-[#c8a951] min-w-[48px] text-left">{progressPercent}%</span>
-          </div>
-
-          {/* Step indicators */}
-          <div className="flex items-center gap-1.5 mt-4">
-            {services.map((s, i) => (
-              <div
-                key={s.id}
-                className={cn(
-                  'h-1.5 flex-1 rounded-full transition-all',
-                  s.allDone ? 'bg-emerald-500' : 'bg-white/[0.08]'
-                )}
-              />
-            ))}
-          </div>
+          {/* Power Core */}
+          <PowerCore percent={progressPercent} done={doneCount} total={totalCount} />
         </div>
       </div>
 
-      {/* Journey path — service nodes */}
-      <div className="px-2 sm:px-4">
+      {/* Maze Journey */}
+      <div className="relative px-1 sm:px-4">
+        {/* Vertical center line (maze backbone) */}
+        <div className="absolute right-1/2 translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-white/[0.04] via-white/[0.08] to-white/[0.04] hidden sm:block" />
+
         {services.map((service, index) => (
-          <ServiceNode
-            key={service.id}
-            service={service}
-            index={index}
-            isAdmin={isAdmin}
-            projectId={projectId}
-            isLast={index === services.length - 1}
-          />
+          <div key={service.id}>
+            <StationNode
+              service={service}
+              index={index}
+              isAdmin={isAdmin}
+              projectId={projectId}
+              totalStations={totalCount}
+            />
+            {index < services.length - 1 && (
+              <MazePath
+                completed={service.allDone}
+                index={index}
+                total={totalCount}
+              />
+            )}
+          </div>
         ))}
       </div>
 
-      {/* Journey completion */}
+      {/* Journey Completion */}
       {progressPercent === 100 && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
           className="text-center py-6"
         >
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20 text-sm font-semibold">
-            <Trophy className="w-4 h-4" />
-            כל הכבוד! השלמת את כל השירותים
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+            <Trophy className="w-5 h-5 text-emerald-400" />
+            <span className="text-sm font-bold text-emerald-400">כל הכבוד! השלמת את כל התחנות במסע</span>
           </div>
         </motion.div>
       )}
