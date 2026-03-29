@@ -30,7 +30,6 @@ const NAV_LINKS = [
   { href: '/portal/project', label: 'הפרויקט שלי', icon: Target },
   { href: '/portal/documents', label: 'מסמכים', icon: FolderOpen },
   { href: '/portal/learning', label: 'מרכז למידה', icon: GraduationCap },
-  { href: '/portal/progress', label: 'התקדמות', icon: TrendingUp },
 ];
 
 export function PortalNavbar({ userName, userEmail }: PortalNavbarProps) {

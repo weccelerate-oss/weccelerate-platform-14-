@@ -1,18 +1,15 @@
 /**
  * Project Page Content
  *
- * Full project details with timeline, services, activities, and notes.
+ * Shows project details + service timeline from Pipedrive + notes.
  */
 
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Target, Building2, Globe, Calendar, Users } from 'lucide-react';
-import { ProjectTimeline } from '../dashboard/components/project-timeline';
-import { PurchasedServices } from '../dashboard/components/purchased-services';
-import { DealActivities } from '../dashboard/components/deal-activities';
-import type { DealProductDisplay } from '../dashboard/components/purchased-services';
-import type { DealActivityDisplay } from '../dashboard/components/deal-activities';
+import { Target, Building2, Globe, Calendar, Users } from 'lucide-react';
+import { ServiceTimeline } from '../dashboard/components/service-timeline';
+import type { MatchedService } from '@/lib/service-matcher';
 import type { Project, File, ProjectNote } from '@prisma/client';
 
 interface ProjectWithRelations extends Project {
@@ -23,31 +20,19 @@ interface ProjectWithRelations extends Project {
 
 interface Props {
   project: ProjectWithRelations | null;
-  dealProducts: DealProductDisplay[];
-  dealActivities: DealActivityDisplay[];
-  pipedriveStages: { id: number; name: string; orderNr: number }[];
-  currentStageId?: number;
+  matchedServices: MatchedService[];
   dealStatus?: string;
 }
 
-export function ProjectPageContent({
-  project,
-  dealProducts,
-  dealActivities,
-  pipedriveStages,
-  currentStageId,
-  dealStatus,
-}: Props) {
+export function ProjectPageContent({ project, matchedServices, dealStatus }: Props) {
   if (!project) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center">
           <Target className="w-12 h-12 text-white/20 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-white mb-2">אין פרויקט פעיל</h2>
           <p className="text-white/50 text-sm mb-6">לא נמצא פרויקט פעיל עבורך.</p>
-          <a href="/portal/dashboard" className="text-[#c8a951] hover:underline text-sm">
-            חזרה ללוח הבקרה
-          </a>
+          <a href="/portal/dashboard" className="text-[#c8a951] hover:underline text-sm">חזרה ללוח הבקרה</a>
         </div>
       </div>
     );
@@ -128,46 +113,21 @@ export function ProjectPageContent({
           </div>
         </motion.div>
 
-        {/* Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden"
-        >
-          <div className="px-5 py-4 border-b border-white/[0.06]">
-            <h2 className="text-[15px] font-semibold text-white/90">מה עשינו ומה נשאר</h2>
-          </div>
-          <div className="p-5">
-            <ProjectTimeline
-              dealActivities={dealActivities}
-              dealStatus={dealStatus}
-            />
-          </div>
-        </motion.div>
-
-        {/* Services + Activities */}
-        {(dealProducts.length > 0 || dealActivities.length > 0) && (
-          <div className="grid lg:grid-cols-2 gap-6">
-            {dealProducts.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <PurchasedServices products={dealProducts} />
-              </motion.div>
-            )}
-            {dealActivities.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-              >
-                <DealActivities activities={dealActivities} />
-              </motion.div>
-            )}
-          </div>
+        {/* Service Timeline */}
+        {matchedServices.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden"
+          >
+            <div className="px-5 py-4 border-b border-white/[0.06]">
+              <h2 className="text-[15px] font-semibold text-white/90">השירותים שלך ב-WeCcelerate</h2>
+            </div>
+            <div className="p-5">
+              <ServiceTimeline services={matchedServices} projectId={project.id} />
+            </div>
+          </motion.div>
         )}
 
         {/* Notes */}
@@ -175,7 +135,7 @@ export function ProjectPageContent({
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.1 }}
             className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden"
           >
             <div className="px-5 py-4 border-b border-white/[0.06]">
@@ -183,10 +143,7 @@ export function ProjectPageContent({
             </div>
             <div className="p-5 space-y-3">
               {project.notes.map((note) => (
-                <div
-                  key={note.id}
-                  className="p-4 bg-white/[0.02] rounded-xl border border-white/[0.06]"
-                >
+                <div key={note.id} className="p-4 bg-white/[0.02] rounded-xl border border-white/[0.06]">
                   <p className="text-sm text-white/70 leading-relaxed">{note.content}</p>
                   <div className="flex items-center gap-3 mt-3 text-xs text-white/30">
                     {note.authorName && <span>{note.authorName}</span>}
