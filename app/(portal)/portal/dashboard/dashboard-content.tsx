@@ -271,9 +271,7 @@ export function DashboardContent({
                 exit={{ opacity: 0 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">W</span>
-                </div>
+                <img src="/images/logos/weccelerate-logo.jpeg" alt="WeCcelerate" className="w-8 h-8 rounded-lg object-cover" />
                 <div>
                   <span className="text-base font-bold text-white">WeCcelerate</span>
                   <span className="block text-[10px] text-slate-400 -mt-0.5">פורטל יזמים</span>
@@ -285,9 +283,9 @@ export function DashboardContent({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center"
+                className="w-8 h-8 mx-auto rounded-lg overflow-hidden"
               >
-                <span className="text-white font-bold text-sm">W</span>
+                <img src="/images/logos/weccelerate-logo.jpeg" alt="W" className="w-full h-full object-cover" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -385,9 +383,7 @@ export function DashboardContent({
           >
             <div className="flex items-center justify-between h-14 px-4 border-b border-slate-800/60">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c8a951] to-[#e8d48b] flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">W</span>
-                </div>
+                <img src="/images/logos/weccelerate-logo.jpeg" alt="WeCcelerate" className="w-8 h-8 rounded-lg object-cover" />
                 <span className="text-base font-bold text-white">WeCcelerate</span>
               </div>
               <button
@@ -506,12 +502,12 @@ export function DashboardContent({
                       initial={{ opacity: 0, y: 8, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute left-0 sm:left-auto sm:right-0 top-12 w-[calc(100vw-2rem)] sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50"
+                      className="absolute right-0 top-12 w-[calc(100vw-2rem)] sm:w-80 bg-[#0d1321] rounded-2xl shadow-xl border border-white/[0.08] overflow-hidden z-50"
                       style={{ maxWidth: '320px' }}
                     >
-                      <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-                        <h3 className="font-semibold text-slate-900 text-sm">התראות</h3>
-                        <button onClick={() => setShowNotifications(false)} className="text-xs text-royal-600 hover:underline">סגור</button>
+                      <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
+                        <h3 className="font-semibold text-white text-sm">התראות</h3>
+                        <button onClick={() => setShowNotifications(false)} className="text-xs text-[#c8a951] hover:underline">סגור</button>
                       </div>
                       <div className="max-h-72 overflow-y-auto">
                         {notifications.length === 0 ? (
@@ -525,18 +521,18 @@ export function DashboardContent({
                               key={notif.id}
                               href={notif.link || '#'}
                               className={cn(
-                                'block px-4 py-3 hover:bg-slate-50 active:bg-slate-100 transition-colors border-b border-slate-50 last:border-0',
-                                !notif.isRead && 'bg-royal-50/30'
+                                'block px-4 py-3 hover:bg-white/[0.04] active:bg-white/[0.06] transition-colors border-b border-white/[0.04] last:border-0',
+                                !notif.isRead && 'bg-[#c8a951]/[0.04]'
                               )}
                             >
                               <div className="flex items-start gap-3">
                                 <div className={cn(
                                   'w-2 h-2 rounded-full mt-1.5 flex-shrink-0',
-                                  !notif.isRead ? 'bg-royal-500' : 'bg-transparent'
+                                  !notif.isRead ? 'bg-[#c8a951]' : 'bg-transparent'
                                 )} />
                                 <div className="min-w-0">
-                                  <p className="text-sm font-medium text-slate-900">{notif.title}</p>
-                                  <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{notif.message}</p>
+                                  <p className="text-sm font-medium text-white/90">{notif.title}</p>
+                                  <p className="text-xs text-white/50 mt-0.5 line-clamp-2">{notif.message}</p>
                                 </div>
                               </div>
                             </a>
@@ -546,7 +542,7 @@ export function DashboardContent({
                       <div className="p-3 border-t border-slate-100 text-center">
                         <button
                           onClick={() => setShowNotifications(false)}
-                          className="text-xs text-royal-600 font-medium hover:underline"
+                          className="text-xs text-[#c8a951] font-medium hover:underline"
                         >
                           סגור
                         </button>

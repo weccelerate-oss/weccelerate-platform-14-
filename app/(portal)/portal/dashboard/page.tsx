@@ -375,9 +375,8 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b1e]">
-      <Suspense fallback={<DashboardSkeleton />}>
-        <DashboardContent
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardContent
           user={session.user}
           project={data.project}
           notifications={data.notifications}
@@ -390,6 +389,5 @@ export default async function DashboardPage() {
           dealStatus={dealStatus}
         />
       </Suspense>
-    </div>
   );
 }

@@ -86,15 +86,13 @@ export default async function ProjectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b1e]" dir="rtl">
-      <ProjectPageContent
-        project={data.project}
-        dealProducts={dealProducts}
-        dealActivities={dealActivities}
-        pipedriveStages={pipedriveStages}
-        currentStageId={currentStageId}
-        dealStatus={dealStatus}
-      />
-    </div>
+    <ProjectPageContent
+      project={data.project}
+      dealProducts={dealProducts}
+      dealActivities={dealActivities}
+      pipedriveStages={pipedriveStages}
+      currentStageId={currentStageId}
+      dealStatus={dealStatus}
+    />
   );
 }

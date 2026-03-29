@@ -160,19 +160,10 @@ export function LearningContent({ user, initialCompletedSlugs }: LearningContent
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#070b1e]" dir="rtl">
+    <div>
       {/* Header */}
-      <div className="bg-[#0a0e27]/80 backdrop-blur-xl border-b border-white/[0.06]">
+      <div className="border-b border-white/[0.04]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          {/* Back to dashboard */}
-          <a
-            href="/portal/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white/70 transition-colors mb-4"
-          >
-            <ChevronLeft className="w-4 h-4 rotate-180" />
-            <span>חזרה ללוח הבקרה</span>
-          </a>
-
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2.5 bg-gradient-to-br from-[#c8a951] to-[#e8d48b] rounded-xl text-[#070b1e]">
               <GraduationCap className="w-6 h-6" />

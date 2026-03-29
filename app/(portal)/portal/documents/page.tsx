@@ -39,12 +39,10 @@ export default async function DocumentsPage() {
   const data = await getProjectFiles(session.user.id!);
 
   return (
-    <div className="min-h-screen bg-[#070b1e]" dir="rtl">
-      <DocumentsPageContent
-        files={data.project?.files || []}
-        projectId={data.project?.id}
-        projectName={data.project?.name}
-      />
-    </div>
+    <DocumentsPageContent
+      files={data.project?.files || []}
+      projectId={data.project?.id}
+      projectName={data.project?.name}
+    />
   );
 }

@@ -63,13 +63,11 @@ export default async function ProgressPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b1e]" dir="rtl">
-      <ProgressPageContent
-        projectName={project?.name}
-        hasProject={!!project}
-        dealActivities={dealActivities}
-        dealStatus={dealStatus}
-      />
-    </div>
+    <ProgressPageContent
+      projectName={project?.name}
+      hasProject={!!project}
+      dealActivities={dealActivities}
+      dealStatus={dealStatus}
+    />
   );
 }
