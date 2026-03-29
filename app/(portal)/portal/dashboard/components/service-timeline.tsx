@@ -155,11 +155,10 @@ function NetworkNode({
 
       {/* Node card */}
       <div
-        onClick={() => service.allDone && setOpen(!open)}
         className={cn(
           'relative rounded-2xl border overflow-hidden transition-all duration-300',
           service.allDone
-            ? 'cursor-pointer border-emerald-500/15 hover:border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.04)]'
+            ? 'border-emerald-500/15 hover:border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.04)]'
             : 'border-white/[0.06]',
         )}
       >
@@ -172,7 +171,11 @@ function NetworkNode({
           service.allDone ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]' : 'bg-white/[0.04]'
         )} />
 
-        <div className="relative z-10 p-4 sm:p-5">
+        {/* Clickable header area */}
+        <div
+          className={cn('relative z-10 p-4 sm:p-5', service.allDone && 'cursor-pointer')}
+          onClick={() => service.allDone && setOpen(!open)}
+        >
           <div className="flex items-center gap-4">
             {/* Node indicator */}
             <div className="relative flex-shrink-0">
@@ -267,7 +270,7 @@ function NetworkNode({
                   {allFiles.map((f) => {
                     const fi = getFileIcon(f.name, f.mimeType);
                     return (
-                      <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:border-white/[0.08] transition-colors group" onClick={e => e.stopPropagation()}>
+                      <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:border-white/[0.08] transition-colors group" onClick={(e) => e.stopPropagation()}>
                         <div className={cn('w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center', fi.color)}>
                           {fi.icon}
                         </div>
@@ -300,7 +303,7 @@ function NetworkNode({
 
                 {/* Admin upload */}
                 {isAdmin && (
-                  <label className="flex items-center gap-3 p-3 mt-2 rounded-xl border border-dashed border-white/[0.08] hover:border-[#c8a951]/25 cursor-pointer transition-colors" onClick={e => e.stopPropagation()}>
+                  <label className="flex items-center gap-3 p-3 mt-2 rounded-xl border border-dashed border-white/[0.08] hover:border-[#c8a951]/25 cursor-pointer transition-colors" onClick={(e) => e.stopPropagation()}>
                     {uploading
                       ? <div className="w-8 h-8 border-2 border-[#c8a951] border-t-transparent rounded-full animate-spin" />
                       : <div className="w-8 h-8 rounded-lg bg-[#c8a951]/10 flex items-center justify-center"><Upload className="w-4 h-4 text-[#c8a951]" /></div>}
