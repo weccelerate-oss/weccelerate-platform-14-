@@ -312,8 +312,6 @@ export default async function DashboardPage() {
   // Fetch purchased products and activities from Pipedrive if project has a deal linked
   let dealProducts: { id: number; name: string; price: number; quantity: number; sum: number; currency: string; completed: boolean; active: boolean }[] = [];
   let dealActivities: { id: number; type: string; subject: string; done: boolean; dueDate: string | null; dueTime: string | null; addTime: string; markedDoneTime: string | null; location: string | null }[] = [];
-  let pipedriveStages: { id: number; name: string; orderNr: number }[] = [];
-  let currentStageId: number | undefined;
   let dealStatus: string | undefined;
   if (data.project?.pipedriveId) {
     try {
@@ -324,21 +322,13 @@ export default async function DashboardPage() {
       const deal = await pipedriveClient.getDeal(data.project.pipedriveId);
       console.log(`[Dashboard] Deal fetched: ${deal ? deal.title : 'null'}, status: ${deal?.status}`);
 
-      // Then fetch products, activities, and stages in parallel
-      const [products, activities, stages] = await Promise.all([
+      // Then fetch products and activities in parallel
+      const [products, activities] = await Promise.all([
         pipedriveClient.getDealProducts(data.project.pipedriveId),
         pipedriveClient.getDealActivities(data.project.pipedriveId),
-        deal ? pipedriveClient.getPipelineStages(deal.pipeline_id) : Promise.resolve([]),
       ]);
 
       dealStatus = deal?.status || 'open';
-      currentStageId = deal?.stage_id;
-
-      pipedriveStages = stages.map((s) => ({
-        id: s.id,
-        name: s.name,
-        orderNr: s.order_nr,
-      }));
 
       dealProducts = products.map((p) => ({
         id: p.id,
@@ -374,6 +364,15 @@ export default async function DashboardPage() {
     }
   }
 
+  // Match activities to WeCcelerate services
+  let matchedServices: import('@/lib/service-matcher').MatchedService[] = [];
+  if (dealActivities.length > 0) {
+    const { matchActivitiesToServices } = await import('@/lib/service-matcher');
+    matchedServices = matchActivitiesToServices(
+      dealActivities.map((a) => ({ ...a, addTime: a.addTime, markedDoneTime: a.markedDoneTime }))
+    );
+  }
+
   return (
     <Suspense fallback={<DashboardSkeleton />}>
       <DashboardContent
@@ -384,9 +383,8 @@ export default async function DashboardPage() {
           dbError={data.dbError}
           dealProducts={dealProducts}
           dealActivities={dealActivities}
-          pipedriveStages={pipedriveStages}
-          currentStageId={currentStageId}
           dealStatus={dealStatus}
+          matchedServices={matchedServices}
         />
       </Suspense>
   );

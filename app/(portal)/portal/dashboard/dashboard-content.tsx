@@ -27,8 +27,10 @@ import { RecentActivity } from './components/recent-activity';
 import { QuickActions } from './components/quick-actions';
 import { PurchasedServices } from './components/purchased-services';
 import { DealActivities } from './components/deal-activities';
+import { ServiceTimeline } from './components/service-timeline';
 import type { DealProductDisplay } from './components/purchased-services';
 import type { DealActivityDisplay } from './components/deal-activities';
+import type { MatchedService } from '@/lib/service-matcher';
 import type { Project, File, ProjectNote, Notification, ActivityLog } from '@prisma/client';
 
 // =============================================================================
@@ -63,9 +65,8 @@ interface DashboardContentProps {
   dbError?: boolean;
   dealProducts?: DealProductDisplay[];
   dealActivities?: DealActivityDisplay[];
-  pipedriveStages?: { id: number; name: string; orderNr: number }[];
-  currentStageId?: number;
   dealStatus?: string;
+  matchedServices?: MatchedService[];
 }
 
 // =============================================================================
@@ -81,6 +82,7 @@ export function DashboardContent({
   dealProducts = [],
   dealActivities = [],
   dealStatus,
+  matchedServices = [],
 }: DashboardContentProps) {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -156,34 +158,21 @@ export function DashboardContent({
         {/* Stats Row */}
         <StatsCards project={project} />
 
-        {/* Pipedrive Data: Products + Activities */}
-        {(dealProducts.length > 0 || dealActivities.length > 0) && (
-          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
-            {dealProducts.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
-                <PurchasedServices products={dealProducts} />
-              </motion.div>
-            )}
-            {dealActivities.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-                <DealActivities activities={dealActivities} />
-              </motion.div>
-            )}
-          </div>
+        {/* Services Timeline from Pipedrive */}
+        {matchedServices.length > 0 && (
+          <DashboardCard
+            title="השירותים שלך ב-WeCcelerate"
+            subtitle={project.name}
+            badge={`${matchedServices.filter(s => s.allDone).length}/${matchedServices.length}`}
+          >
+            <ServiceTimeline services={matchedServices} projectId={project.id} />
+          </DashboardCard>
         )}
 
         {/* Main Grid */}
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Left: Main content - 2 cols */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Project Timeline */}
-            <DashboardCard
-              title="מה עשינו ומה נשאר"
-              subtitle={project.name}
-              badge={dealActivities.length > 0 ? `${dealActivities.filter(a => a.done).length}/${dealActivities.length}` : undefined}
-            >
-              <ProjectTimeline dealActivities={dealActivities} dealStatus={dealStatus} />
-            </DashboardCard>
 
             {/* File Vault */}
             <DashboardCard
