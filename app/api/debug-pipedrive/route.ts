@@ -30,5 +30,23 @@ export async function GET() {
     results.error = err instanceof Error ? err.message : String(err);
   }
 
+  // Check Google Drive
+  try {
+    results.driveEmail = !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    results.driveKey = !!(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+    results.driveFolderId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID || null;
+
+    if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_SERVICE_ACCOUNT_KEY && process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID) {
+      const { listDriveFiles } = await import('@/lib/google-drive');
+      const files = await listDriveFiles(process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID);
+      results.driveFilesCount = files.length;
+      if (files.length > 0) {
+        results.driveFirstFile = files[0].name;
+      }
+    }
+  } catch (err) {
+    results.driveError = err instanceof Error ? err.message : String(err);
+  }
+
   return NextResponse.json(results);
 }
