@@ -166,6 +166,12 @@ export function DashboardContent({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Check file size before uploading (Vercel limit ~4.5MB)
+    if (file.size > 4 * 1024 * 1024) {
+      setUploadMessage({ type: 'error', text: `הקובץ גדול מדי (${(file.size / (1024 * 1024)).toFixed(1)}MB). הגודל המקסימלי הוא 4MB.` });
+      return;
+    }
+
     setIsUploading(true);
     setUploadMessage(null);
     try {
@@ -174,6 +180,11 @@ export function DashboardContent({
       if (project) formData.append('projectId', project.id);
 
       const response = await fetch('/api/portal/upload', { method: 'POST', body: formData });
+
+      if (response.status === 413) {
+        throw new Error('הקובץ גדול מדי. הגודל המקסימלי הוא 4MB.');
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -838,7 +849,7 @@ export function DashboardContent({
                     <>
                       <FolderOpen className="w-10 h-10 text-slate-400" />
                       <span className="text-sm font-medium text-slate-700">לחץ לבחירת קובץ</span>
-                      <span className="text-xs text-slate-400">PDF, Word, Excel, PowerPoint, תמונה (עד 25MB)</span>
+                      <span className="text-xs text-slate-400">PDF, Word, Excel, PowerPoint, תמונה (עד 4MB)</span>
                     </>
                   )}
                   <input
