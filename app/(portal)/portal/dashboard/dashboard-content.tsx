@@ -143,7 +143,7 @@ export function DashboardContent({
 
   const firstName = user.name?.split(' ')[0] || 'יזם';
 
-  // Get greeting
+  // Greeting based on time of day
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'בוקר טוב' : hour < 17 ? 'צהריים טובים' : hour < 21 ? 'ערב טוב' : 'לילה טוב';
 
@@ -151,7 +151,7 @@ export function DashboardContent({
     <>
       {/* Greeting */}
       <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-2">
-        <h1 className="text-lg sm:text-xl font-bold text-white">{greeting}, {firstName}</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-white" suppressHydrationWarning>{greeting}, {firstName}</h1>
         <p className="text-xs text-white/50">הנה סיכום ההתקדמות של הפרויקט שלך</p>
       </div>
 
