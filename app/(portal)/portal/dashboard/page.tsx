@@ -373,6 +373,29 @@ export default async function DashboardPage() {
     );
   }
 
+  // Fetch files from Google Drive Portal folder
+  let driveFiles: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; modifiedTime: string }[] = [];
+  if (data.project?.pipedriveId) {
+    try {
+      const { findDriveFolder, listDriveFiles } = await import('@/lib/google-drive');
+      const portalRootId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID;
+      if (portalRootId) {
+        // Find entrepreneur's subfolder by deal ID or name
+        const subFolderId = await findDriveFolder(portalRootId, data.project.pipedriveId);
+        if (subFolderId) {
+          const files = await listDriveFiles(subFolderId);
+          driveFiles = files.map(f => ({
+            id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
+            webViewLink: f.webViewLink, webContentLink: f.webContentLink,
+            modifiedTime: f.modifiedTime,
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('[Dashboard] Google Drive error:', err);
+    }
+  }
+
   return (
     <Suspense fallback={<DashboardSkeleton />}>
       <DashboardContent
@@ -385,6 +408,7 @@ export default async function DashboardPage() {
           dealActivities={dealActivities}
           dealStatus={dealStatus}
           matchedServices={matchedServices}
+          driveFiles={driveFiles}
         />
       </Suspense>
   );

@@ -48,11 +48,22 @@ interface ProjectFile {
   mimeType: string | null;
 }
 
+interface DriveFileDisplay {
+  id: string;
+  name: string;
+  mimeType: string;
+  size: string;
+  webViewLink: string;
+  webContentLink: string | null;
+  modifiedTime: string;
+}
+
 interface ServiceTimelineProps {
   services: MatchedService[];
   projectId?: string;
   isAdmin?: boolean;
   files?: ProjectFile[];
+  driveFiles?: DriveFileDisplay[];
 }
 
 // =============================================================================
@@ -179,13 +190,14 @@ function SlalomTrack({ count, doneCount }: { count: number; doneCount: number })
 // =============================================================================
 
 function StationCard({
-  service, index, isAdmin, projectId, files,
+  service, index, isAdmin, projectId, files, driveFiles,
 }: {
   service: MatchedService;
   index: number;
   isAdmin: boolean;
   projectId?: string;
   files: ProjectFile[];
+  driveFiles: DriveFileDisplay[];
 }) {
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -193,11 +205,22 @@ function StationCard({
   const icon = ICON_MAP[service.icon] || <FileText className="w-5 h-5" />;
   const isEven = index % 2 === 0;
 
-  // Match files to this service
+  // Match DB files to this service
   const svcFiles = files.filter((f) => {
     const name = (f.displayName || f.name).toLowerCase();
     return service.name.split(' ').filter(w => w.length > 2).some(w => name.includes(w.toLowerCase()));
   });
+
+  // Match Drive files to this service
+  const svcDriveFiles = driveFiles.filter((f) => {
+    const name = f.name.toLowerCase();
+    return service.name.split(' ').filter(w => w.length > 2).some(w => name.includes(w.toLowerCase()));
+  });
+
+  const allDisplayFiles = [
+    ...svcDriveFiles.map(f => ({ id: f.id, name: f.name, viewUrl: f.webViewLink, downloadUrl: f.webContentLink || f.webViewLink, size: f.size, source: 'drive' as const })),
+    ...svcFiles.map(f => ({ id: f.id, name: f.displayName || f.name, viewUrl: f.url, downloadUrl: f.url, size: String(f.size || 0), source: 'db' as const })),
+  ];
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
@@ -322,24 +345,27 @@ function StationCard({
 
                 {service.allDone ? (
                   <>
-                    {svcFiles.map((f) => (
-                      <div key={f.id} className="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04] mb-1.5" onClick={(e) => e.stopPropagation()}>
+                    {allDisplayFiles.map((f) => (
+                      <div key={f.id} className="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04] mb-1.5 hover:border-white/[0.08] transition-colors" onClick={(e) => e.stopPropagation()}>
                         <div className={cn('w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center', FILE_COLORS[getExt(f.name)] || 'text-white/40')}>
                           <FileText className="w-3.5 h-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-white/70 font-medium truncate">{f.displayName || f.name}</p>
-                          <p className="text-[10px] text-white/20">{formatSize(f.size)}</p>
+                          <p className="text-xs text-white/70 font-medium truncate">{f.name}</p>
+                          <p className="text-[10px] text-white/20">
+                            {f.source === 'drive' && <><HardDrive className="w-2.5 h-2.5 inline -mt-0.5 mr-0.5" />Drive · </>}
+                            {formatSize(Number(f.size) || null)}
+                          </p>
                         </div>
-                        <a href={f.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-white/[0.06] text-white/40 hover:text-white/70" title="צפה">
+                        <a href={f.viewUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors" title="צפה אונליין">
                           <Eye className="w-3.5 h-3.5" />
                         </a>
-                        <a href={f.url} download={f.name} className="p-1.5 rounded-md hover:bg-white/[0.06] text-white/40 hover:text-white/70" title="הורד">
+                        <a href={f.downloadUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors" title="הורד">
                           <Download className="w-3.5 h-3.5" />
                         </a>
                       </div>
                     ))}
-                    {svcFiles.length === 0 && (
+                    {allDisplayFiles.length === 0 && (
                       <p className="text-center text-[11px] text-white/20 py-3">עדיין לא הועלו קבצים</p>
                     )}
                     {isAdmin && (
@@ -369,7 +395,7 @@ function StationCard({
 // MAIN COMPONENT
 // =============================================================================
 
-export function ServiceTimeline({ services, projectId, isAdmin = false, files = [] }: ServiceTimelineProps) {
+export function ServiceTimeline({ services, projectId, isAdmin = false, files = [], driveFiles = [] }: ServiceTimelineProps) {
   const doneCount = useMemo(() => services.filter(s => s.allDone).length, [services]);
   const total = services.length;
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
@@ -466,6 +492,7 @@ export function ServiceTimeline({ services, projectId, isAdmin = false, files = 
               isAdmin={isAdmin}
               projectId={projectId}
               files={files}
+              driveFiles={driveFiles}
             />
           ))}
         </div>

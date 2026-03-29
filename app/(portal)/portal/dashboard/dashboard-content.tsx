@@ -67,6 +67,7 @@ interface DashboardContentProps {
   dealActivities?: DealActivityDisplay[];
   dealStatus?: string;
   matchedServices?: MatchedService[];
+  driveFiles?: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; modifiedTime: string }[];
 }
 
 // =============================================================================
@@ -83,6 +84,7 @@ export function DashboardContent({
   dealActivities = [],
   dealStatus,
   matchedServices = [],
+  driveFiles = [],
 }: DashboardContentProps) {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -169,6 +171,7 @@ export function DashboardContent({
               services={matchedServices}
               projectId={project.id}
               files={project.files.map(f => ({ id: f.id, name: f.name, displayName: f.displayName, url: f.url, size: f.size, mimeType: f.mimeType }))}
+              driveFiles={driveFiles}
             />
           </DashboardCard>
         )}
