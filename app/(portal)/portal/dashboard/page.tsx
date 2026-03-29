@@ -380,16 +380,21 @@ export default async function DashboardPage() {
       const { findDriveFolder, listDriveFiles } = await import('@/lib/google-drive');
       const portalRootId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID;
       if (portalRootId) {
-        // Find entrepreneur's subfolder by deal ID or name
-        const subFolderId = await findDriveFolder(portalRootId, data.project.pipedriveId);
-        if (subFolderId) {
-          const files = await listDriveFiles(subFolderId);
-          driveFiles = files.map(f => ({
-            id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
-            webViewLink: f.webViewLink, webContentLink: f.webContentLink,
-            modifiedTime: f.modifiedTime,
-          }));
+        // Try to find entrepreneur's subfolder by deal ID, then by name
+        let targetFolderId = await findDriveFolder(portalRootId, data.project.pipedriveId);
+
+        // If no subfolder found, maybe the folder ID IS the entrepreneur's folder directly
+        if (!targetFolderId) {
+          targetFolderId = portalRootId;
         }
+
+        const files = await listDriveFiles(targetFolderId);
+        console.log(`[Dashboard] Drive files found: ${files.length} in folder ${targetFolderId}`);
+        driveFiles = files.map(f => ({
+          id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
+          webViewLink: f.webViewLink, webContentLink: f.webContentLink,
+          modifiedTime: f.modifiedTime,
+        }));
       }
     } catch (err) {
       console.warn('[Dashboard] Google Drive error:', err);
