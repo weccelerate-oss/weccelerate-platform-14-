@@ -1,8 +1,12 @@
 /**
- * Startup Journey — Slalom Track
+ * Startup Growth Network — Premium Service Journey
  *
- * Services displayed as stations along a winding slalom track.
- * Stations zigzag left-right across the screen with SVG path connecting them.
+ * A sophisticated network topology showing WeCcelerate services
+ * as interconnected nodes in a clean, schematic layout.
+ *
+ * Role-based:
+ * - Entrepreneur: view/download files from Google Drive Portal
+ * - Admin: upload deliverables
  */
 
 'use client';
@@ -10,27 +14,10 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Check,
-  Clock,
-  Upload,
-  Download,
-  Eye,
-  FileText,
-  TrendingUp,
-  Megaphone,
-  LayoutGrid,
-  Globe,
-  Compass,
-  Users,
-  ClipboardList,
-  FileCheck,
-  Search,
-  ChevronDown,
-  Trophy,
-  HardDrive,
-  Zap,
-  MapPin,
-  Shield,
+  Check, Clock, Upload, Download, Eye, FileText, TrendingUp,
+  Megaphone, LayoutGrid, Globe, Compass, Users, ClipboardList,
+  FileCheck, Search, ChevronDown, Trophy, HardDrive, Zap, MapPin, Shield,
+  FileSpreadsheet, Presentation,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MatchedService } from '@/lib/service-matcher';
@@ -40,23 +27,11 @@ import type { MatchedService } from '@/lib/service-matcher';
 // =============================================================================
 
 interface ProjectFile {
-  id: string;
-  name: string;
-  displayName: string | null;
-  url: string;
-  size: number | null;
-  mimeType: string | null;
+  id: string; name: string; displayName: string | null; url: string; size: number | null; mimeType: string | null;
 }
 
 interface DriveFileDisplay {
-  id: string;
-  name: string;
-  mimeType: string;
-  size: string;
-  webViewLink: string;
-  webContentLink: string | null;
-  downloadLink: string;
-  modifiedTime: string;
+  id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; downloadLink: string; modifiedTime: string;
 }
 
 interface ServiceTimelineProps {
@@ -72,133 +47,48 @@ interface ServiceTimelineProps {
 // =============================================================================
 
 const ICON_MAP: Record<string, React.ReactNode> = {
-  FileText: <FileText className="w-5 h-5" />,
-  TrendingUp: <TrendingUp className="w-5 h-5" />,
-  Presentation: <FileText className="w-5 h-5" />,
-  Megaphone: <Megaphone className="w-5 h-5" />,
-  LayoutGrid: <LayoutGrid className="w-5 h-5" />,
-  Globe: <Globe className="w-5 h-5" />,
-  Compass: <Compass className="w-5 h-5" />,
-  Users: <Users className="w-5 h-5" />,
-  ClipboardList: <ClipboardList className="w-5 h-5" />,
-  FileCheck: <FileCheck className="w-5 h-5" />,
+  FileText: <FileText className="w-5 h-5" />, TrendingUp: <TrendingUp className="w-5 h-5" />,
+  Presentation: <Presentation className="w-5 h-5" />, Megaphone: <Megaphone className="w-5 h-5" />,
+  LayoutGrid: <LayoutGrid className="w-5 h-5" />, Globe: <Globe className="w-5 h-5" />,
+  Compass: <Compass className="w-5 h-5" />, Users: <Users className="w-5 h-5" />,
+  ClipboardList: <ClipboardList className="w-5 h-5" />, FileCheck: <FileCheck className="w-5 h-5" />,
   Search: <Search className="w-5 h-5" />,
 };
 
-const FILE_COLORS: Record<string, string> = {
-  pdf: 'text-red-400', pptx: 'text-orange-400', xlsx: 'text-emerald-400', docx: 'text-blue-400',
-};
+function getFileIcon(name: string, mimeType: string) {
+  if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || name.endsWith('.xlsx') || name.endsWith('.xls'))
+    return { icon: <FileSpreadsheet className="w-4 h-4" />, color: 'text-emerald-400' };
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint') || name.endsWith('.pptx') || name.endsWith('.ppt'))
+    return { icon: <Presentation className="w-4 h-4" />, color: 'text-orange-400' };
+  if (mimeType.includes('pdf') || name.endsWith('.pdf'))
+    return { icon: <FileText className="w-4 h-4" />, color: 'text-red-400' };
+  if (mimeType.includes('document') || mimeType.includes('word') || name.endsWith('.docx'))
+    return { icon: <FileText className="w-4 h-4" />, color: 'text-blue-400' };
+  return { icon: <FileText className="w-4 h-4" />, color: 'text-white/40' };
+}
 
 function formatDate(d: string | null): string {
   if (!d) return '';
   return new Date(d).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function formatSize(b: number | null): string {
-  if (!b) return '';
-  if (b < 1024) return `${b} B`;
-  if (b < 1048576) return `${(b / 1024).toFixed(0)} KB`;
-  return `${(b / 1048576).toFixed(1)} MB`;
-}
-
-function getExt(name: string): string {
-  return name.split('.').pop()?.toLowerCase() || '';
+function formatSize(b: string | number | null): string {
+  const bytes = Number(b);
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / 1048576).toFixed(1)} MB`;
 }
 
 // =============================================================================
-// SLALOM TRACK — the winding SVG path
+// NETWORK NODE
 // =============================================================================
 
-function SlalomTrack({ count, doneCount }: { count: number; doneCount: number }) {
-  // Each station is ~140px apart vertically, zigzagging between 25% and 75% horizontally
-  const nodeSpacing = 140;
-  const totalHeight = (count - 1) * nodeSpacing;
-  const width = 100; // percentage-based thinking, actual SVG width
-
-  // Build path points
-  const points = Array.from({ length: count }, (_, i) => ({
-    x: i % 2 === 0 ? 75 : 25, // zigzag percentage
-    y: i * nodeSpacing + 30,
-  }));
-
-  // Build SVG path string with curves
-  let pathD = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
-    const midY = (prev.y + curr.y) / 2;
-    pathD += ` C ${prev.x} ${midY}, ${curr.x} ${midY}, ${curr.x} ${curr.y}`;
-  }
-
-  // Calculate done path percentage
-  const donePercent = count > 1 ? (doneCount / (count - 1)) * 100 : 100;
-
-  return (
-    <svg
-      viewBox={`0 0 100 ${totalHeight + 60}`}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      preserveAspectRatio="none"
-    >
-      <defs>
-        <filter id="trackGlow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-      </defs>
-
-      {/* Background track */}
-      <path d={pathD} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
-
-      {/* Completed track glow */}
-      <path
-        d={pathD}
-        fill="none"
-        stroke="rgba(16,185,129,0.15)"
-        strokeWidth="2"
-        strokeDasharray={`${donePercent} ${100 - donePercent}`}
-        strokeDashoffset="0"
-        pathLength="100"
-        filter="url(#trackGlow)"
-      />
-
-      {/* Completed track solid */}
-      <path
-        d={pathD}
-        fill="none"
-        stroke="rgba(16,185,129,0.5)"
-        strokeWidth="0.5"
-        strokeDasharray={`${donePercent} ${100 - donePercent}`}
-        strokeDashoffset="0"
-        pathLength="100"
-      />
-
-      {/* Station dots on path */}
-      {points.map((p, i) => (
-        <circle
-          key={i}
-          cx={p.x}
-          cy={p.y}
-          r="1.5"
-          className={i < doneCount ? 'fill-emerald-500' : i === doneCount ? 'fill-[#c8a951]' : 'fill-white/10'}
-        />
-      ))}
-    </svg>
-  );
-}
-
-// =============================================================================
-// STATION CARD
-// =============================================================================
-
-function StationCard({
-  service, index, isAdmin, projectId, files, driveFiles,
+function NetworkNode({
+  service, index, total, isAdmin, projectId, files, driveFiles,
 }: {
-  service: MatchedService;
-  index: number;
-  isAdmin: boolean;
-  projectId?: string;
-  files: ProjectFile[];
-  driveFiles: DriveFileDisplay[];
+  service: MatchedService; index: number; total: number; isAdmin: boolean;
+  projectId?: string; files: ProjectFile[]; driveFiles: DriveFileDisplay[];
 }) {
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -206,21 +96,20 @@ function StationCard({
   const icon = ICON_MAP[service.icon] || <FileText className="w-5 h-5" />;
   const isEven = index % 2 === 0;
 
-  // Match DB files to this service
-  const svcFiles = files.filter((f) => {
-    const name = (f.displayName || f.name).toLowerCase();
-    return service.name.split(' ').filter(w => w.length > 2).some(w => name.includes(w.toLowerCase()));
-  });
-
-  // Match Drive files to this service
+  // Match Drive files to service
   const svcDriveFiles = driveFiles.filter((f) => {
     const name = f.name.toLowerCase();
     return service.name.split(' ').filter(w => w.length > 2).some(w => name.includes(w.toLowerCase()));
   });
 
-  const allDisplayFiles = [
-    ...svcDriveFiles.map(f => ({ id: f.id, name: f.name, viewUrl: f.webViewLink, downloadUrl: f.downloadLink, size: f.size, source: 'drive' as const })),
-    ...svcFiles.map(f => ({ id: f.id, name: f.displayName || f.name, viewUrl: f.url, downloadUrl: f.url, size: String(f.size || 0), source: 'db' as const })),
+  const svcDbFiles = files.filter((f) => {
+    const name = (f.displayName || f.name).toLowerCase();
+    return service.name.split(' ').filter(w => w.length > 2).some(w => name.includes(w.toLowerCase()));
+  });
+
+  const allFiles = [
+    ...svcDriveFiles.map(f => ({ id: f.id, name: f.name, viewUrl: f.webViewLink, downloadUrl: f.downloadLink, size: f.size, mimeType: f.mimeType, source: 'drive' as const })),
+    ...svcDbFiles.map(f => ({ id: f.id, name: f.displayName || f.name, viewUrl: f.url, downloadUrl: f.url, size: String(f.size || 0), mimeType: f.mimeType || '', source: 'db' as const })),
   ];
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -230,8 +119,7 @@ function StationCard({
     if (file.size > 4194304) { setMsg({ ok: false, text: 'מקסימום 4MB' }); return; }
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append('file', file);
+      const fd = new FormData(); fd.append('file', file);
       if (projectId) fd.append('projectId', projectId);
       const res = await fetch('/api/portal/upload', { method: 'POST', body: fd });
       if (!res.ok) throw new Error();
@@ -243,145 +131,185 @@ function StationCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: isEven ? 40 : -40, y: 10 }}
-      animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={cn(
-        'relative w-[85%] sm:w-[45%]',
-        isEven ? 'self-start' : 'self-end',
-      )}
-      style={{ marginTop: index === 0 ? 0 : '-8px' }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="relative"
     >
+      {/* Connection line to next node */}
+      {index < total - 1 && (
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-full h-10 z-0">
+          <div className={cn(
+            'w-px h-full mx-auto',
+            service.allDone ? 'bg-gradient-to-b from-emerald-500/60 to-emerald-500/20' : 'bg-gradient-to-b from-white/[0.08] to-transparent'
+          )} />
+          {service.allDone && (
+            <motion.div
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400"
+              animate={{ y: [0, 32], opacity: [1, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeIn' }}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Node card */}
       <div
-        onClick={() => setOpen(!open)}
+        onClick={() => service.allDone && setOpen(!open)}
         className={cn(
-          'rounded-2xl border cursor-pointer transition-all duration-300 overflow-hidden group',
+          'relative rounded-2xl border overflow-hidden transition-all duration-300',
           service.allDone
-            ? 'border-emerald-500/20 hover:border-emerald-500/35 shadow-[0_0_30px_rgba(16,185,129,0.06)]'
-            : 'border-white/[0.06] hover:border-[#c8a951]/20'
+            ? 'cursor-pointer border-emerald-500/15 hover:border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.04)]'
+            : 'border-white/[0.06]',
         )}
       >
-        {/* Ambient bg */}
+        {/* Glass background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent backdrop-blur-sm" />
+
+        {/* Glow accent line */}
         <div className={cn(
-          'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity',
-          service.allDone ? 'bg-gradient-to-br from-emerald-500/[0.04] to-transparent' : 'bg-gradient-to-br from-[#c8a951]/[0.03] to-transparent'
+          'absolute top-0 right-0 w-1 h-full rounded-full',
+          service.allDone ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]' : 'bg-white/[0.04]'
         )} />
 
-        <div className="relative z-10 p-4">
-          <div className="flex items-center gap-3">
-            {/* Node circle */}
+        <div className="relative z-10 p-4 sm:p-5">
+          <div className="flex items-center gap-4">
+            {/* Node indicator */}
             <div className="relative flex-shrink-0">
               <div className={cn(
-                'w-12 h-12 rounded-xl flex items-center justify-center transition-all',
+                'w-14 h-14 rounded-xl flex items-center justify-center border transition-all',
                 service.allDone
-                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                  : 'bg-white/[0.05] text-white/50'
+                  ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
+                  : 'bg-white/[0.03] border-white/[0.08] text-white/40'
               )}>
-                {service.allDone ? <Check className="w-6 h-6" strokeWidth={2.5} /> : icon}
+                {service.allDone ? <Check className="w-7 h-7" strokeWidth={2} /> : icon}
               </div>
+              {/* Coordinate badge */}
               <div className={cn(
-                'absolute -top-2 -right-2 w-6 h-6 rounded-md text-[10px] font-bold flex items-center justify-center',
+                'absolute -top-2 -left-2 min-w-[24px] h-6 px-1.5 rounded-md text-[10px] font-mono font-bold flex items-center justify-center',
                 service.allDone ? 'bg-emerald-600 text-white' : 'bg-[#c8a951] text-[#070b1e]'
               )}>
-                {index + 1}
+                {String(index + 1).padStart(2, '0')}
               </div>
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <h3 className={cn('font-bold text-sm sm:text-base', service.allDone ? 'text-emerald-400' : 'text-white')}>
+              <h3 className={cn(
+                'font-bold text-base sm:text-lg tracking-tight',
+                service.allDone ? 'text-white' : 'text-white/60'
+              )}>
                 {service.name}
               </h3>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                {service.completedDate && <span className="text-[11px] text-white/30">{formatDate(service.completedDate)}</span>}
+              <div className="flex items-center gap-2.5 mt-1">
+                {service.completedDate && (
+                  <span className="text-xs text-white/30 font-mono">{formatDate(service.completedDate)}</span>
+                )}
                 <span className={cn(
-                  'text-[10px] font-semibold px-2 py-0.5 rounded-full',
+                  'text-[10px] font-bold tracking-wide px-2.5 py-0.5 rounded-md uppercase',
                   service.allDone
-                    ? 'bg-emerald-500/15 text-emerald-400'
-                    : 'bg-[#c8a951]/10 text-[#c8a951]'
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-white/[0.04] text-white/30 border border-white/[0.06]'
                 )}>
-                  {service.allDone ? '✓ הושלם' : '⏳ בתהליך'}
+                  {service.allDone ? 'בוצע!' : 'בתהליך'}
                 </span>
+                {allFiles.length > 0 && service.allDone && (
+                  <span className="text-[10px] text-white/20 font-mono">{allFiles.length} קבצים</span>
+                )}
               </div>
             </div>
 
-            <motion.div animate={{ rotate: open ? 180 : 0 }} className="flex-shrink-0">
-              <ChevronDown className="w-4 h-4 text-white/20" />
-            </motion.div>
-          </div>
+            {/* Data coordinates */}
+            <div className="hidden sm:flex flex-col items-end flex-shrink-0 gap-0.5">
+              <span className={cn('text-lg font-mono font-bold', service.allDone ? 'text-emerald-400/70' : 'text-white/15')}>
+                {service.completedActivities}/{service.totalActivities}
+              </span>
+              <span className="text-[9px] text-white/20 uppercase tracking-widest">פעולות</span>
+            </div>
 
-          {/* Mini bar */}
-          <div className="mt-3 h-1 bg-white/[0.04] rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${(service.completedActivities / service.totalActivities) * 100}%` }}
-              transition={{ duration: 0.6, delay: index * 0.08 }}
-              className={cn('h-full rounded-full', service.allDone ? 'bg-emerald-500' : 'bg-[#c8a951]')}
-            />
+            {/* Expand arrow */}
+            {service.allDone && (
+              <motion.div animate={{ rotate: open ? 180 : 0 }} className="flex-shrink-0">
+                <ChevronDown className="w-4 h-4 text-white/20" />
+              </motion.div>
+            )}
           </div>
         </div>
 
-        {/* Expanded panel */}
+        {/* Expanded: Files Panel */}
         <AnimatePresence>
-          {open && (
+          {open && service.allDone && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25 }}
               className="overflow-hidden"
             >
-              <div className="px-4 pb-4 pt-2 border-t border-white/[0.04]">
-                <div className="flex items-center gap-1.5 mb-3">
-                  <HardDrive className="w-3 h-3 text-white/20" />
-                  <span className="text-[10px] text-white/20">
-                    {isAdmin ? 'ניהול קבצי Portal' : 'Portal Drive — צפייה בלבד'}
+              <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-2 border-t border-white/[0.04]">
+                {/* Portal badge */}
+                <div className="flex items-center gap-2 mb-3">
+                  <HardDrive className="w-3.5 h-3.5 text-emerald-500/50" />
+                  <span className="text-[10px] text-white/25 font-mono tracking-wide">
+                    {isAdmin ? 'ADMIN · PORTAL MANAGEMENT' : 'מחובר ל-Drive Portal — צפייה בלבד'}
                   </span>
+                  {!isAdmin && <Shield className="w-3 h-3 text-white/15" />}
                 </div>
 
                 {msg && (
-                  <div className={cn('p-2 rounded-lg text-xs mb-2', msg.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400')}>
+                  <div className={cn('p-2.5 rounded-lg text-xs mb-3 border', msg.ok ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/15' : 'bg-red-500/10 text-red-400 border-red-500/15')}>
                     {msg.text}
                   </div>
                 )}
 
-                {service.allDone ? (
-                  <>
-                    {allDisplayFiles.map((f) => (
-                      <div key={f.id} className="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04] mb-1.5 hover:border-white/[0.08] transition-colors" onClick={(e) => e.stopPropagation()}>
-                        <div className={cn('w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center', FILE_COLORS[getExt(f.name)] || 'text-white/40')}>
-                          <FileText className="w-3.5 h-3.5" />
+                {/* Files list */}
+                <div className="space-y-1.5">
+                  {allFiles.map((f) => {
+                    const fi = getFileIcon(f.name, f.mimeType);
+                    return (
+                      <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:border-white/[0.08] transition-colors group" onClick={e => e.stopPropagation()}>
+                        <div className={cn('w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center', fi.color)}>
+                          {fi.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-white/70 font-medium truncate">{f.name}</p>
+                          <p className="text-sm text-white/75 font-medium truncate">{f.name}</p>
                           <p className="text-[10px] text-white/20">
                             {f.source === 'drive' && <><HardDrive className="w-2.5 h-2.5 inline -mt-0.5 mr-0.5" />Drive · </>}
-                            {formatSize(Number(f.size) || null)}
+                            {formatSize(f.size)}
                           </p>
                         </div>
-                        <a href={f.viewUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors" title="צפה אונליין">
-                          <Eye className="w-3.5 h-3.5" />
-                        </a>
-                        <a href={f.downloadUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors" title="הורד">
-                          <Download className="w-3.5 h-3.5" />
-                        </a>
+                        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                          <a href={f.viewUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-white/[0.06] text-white/50 hover:text-white transition-colors" title="צפה אונליין">
+                            <Eye className="w-4 h-4" />
+                          </a>
+                          <a href={f.downloadUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-white/[0.06] text-white/50 hover:text-white transition-colors" title="הורד">
+                            <Download className="w-4 h-4" />
+                          </a>
+                        </div>
                       </div>
-                    ))}
-                    {allDisplayFiles.length === 0 && (
-                      <p className="text-center text-[11px] text-white/20 py-3">עדיין לא הועלו קבצים</p>
-                    )}
-                    {isAdmin && (
-                      <label className="flex items-center gap-2.5 p-3 rounded-lg border border-dashed border-white/[0.08] hover:border-[#c8a951]/25 cursor-pointer mt-2 transition-colors" onClick={(e) => e.stopPropagation()}>
-                        {uploading
-                          ? <div className="w-7 h-7 border-2 border-[#c8a951] border-t-transparent rounded-full animate-spin" />
-                          : <div className="w-7 h-7 rounded-md bg-[#c8a951]/10 flex items-center justify-center"><Upload className="w-3.5 h-3.5 text-[#c8a951]" /></div>
-                        }
-                        <span className="text-xs text-white/50">{uploading ? 'מעלה...' : 'העלה קובץ ל-Portal של היזם'}</span>
-                        <input type="file" className="hidden" disabled={uploading} accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp" onChange={handleUpload} />
-                      </label>
-                    )}
-                  </>
-                ) : (
-                  <p className="text-center text-[11px] text-white/20 py-3">השירות בתהליך — קבצים יהיו זמינים לאחר השלמתו</p>
+                    );
+                  })}
+
+                  {allFiles.length === 0 && (
+                    <div className="text-center py-4">
+                      <FileText className="w-5 h-5 text-white/10 mx-auto mb-1.5" />
+                      <p className="text-[11px] text-white/20">אין קבצים זמינים עדיין</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Admin upload */}
+                {isAdmin && (
+                  <label className="flex items-center gap-3 p-3 mt-2 rounded-xl border border-dashed border-white/[0.08] hover:border-[#c8a951]/25 cursor-pointer transition-colors" onClick={e => e.stopPropagation()}>
+                    {uploading
+                      ? <div className="w-8 h-8 border-2 border-[#c8a951] border-t-transparent rounded-full animate-spin" />
+                      : <div className="w-8 h-8 rounded-lg bg-[#c8a951]/10 flex items-center justify-center"><Upload className="w-4 h-4 text-[#c8a951]" /></div>}
+                    <div>
+                      <span className="text-xs text-white/50 font-medium">{uploading ? 'מעלה...' : 'העלה קובץ סופי ל-Portal'}</span>
+                      <span className="block text-[9px] text-white/20">עד 4MB</span>
+                    </div>
+                    <input type="file" className="hidden" disabled={uploading} accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.png" onChange={handleUpload} />
+                  </label>
                 )}
               </div>
             </motion.div>
@@ -400,110 +328,118 @@ export function ServiceTimeline({ services, projectId, isAdmin = false, files = 
   const doneCount = useMemo(() => services.filter(s => s.allDone).length, [services]);
   const total = services.length;
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
-  const currentStation = useMemo(() => {
-    const idx = services.findIndex(s => !s.allDone);
-    return idx >= 0 ? idx + 1 : total;
-  }, [services, total]);
 
   if (!services || total === 0) {
     return (
       <div className="text-center py-12">
-        <MapPin className="w-8 h-8 text-white/15 mx-auto mb-3" />
-        <p className="text-sm text-white/50">המסע טרם התחיל</p>
+        <MapPin className="w-8 h-8 text-white/10 mx-auto mb-3" />
+        <p className="text-sm text-white/40">המסע טרם התחיל</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] p-5 sm:p-6">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0d1525] to-[#070b1e]" />
-        <div className="absolute -top-20 -right-20 w-48 h-48 bg-[#c8a951]/[0.03] rounded-full blur-[80px]" />
-        <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-emerald-500/[0.03] rounded-full blur-[60px]" />
+    <div className="space-y-8">
+      {/* Network Header */}
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
+        <div className="absolute inset-0 bg-[#0a0e1a]" />
+        <div className="absolute inset-0 bg-[url('/images/portal/dashboard-hero.png')] bg-cover bg-center opacity-[0.03]" />
 
-        <div className="relative z-10">
-          <div className="flex items-start justify-between gap-3 mb-4">
+        {/* Schematic grid overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }} />
+
+        <div className="relative z-10 p-5 sm:p-6">
+          {/* Title row */}
+          <div className="flex items-start justify-between gap-4 mb-5">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-1.5 h-1.5 bg-[#c8a951] rounded-full animate-pulse" />
-                <span className="text-[10px] text-[#c8a951] font-semibold uppercase tracking-widest">Journey</span>
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className={cn('w-2 h-2 rounded-full', pct === 100 ? 'bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-[#c8a951] animate-pulse')} />
+                <span className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">Network Status</span>
               </div>
-              <h2 className="text-xl font-bold text-white">המסע היזמי שלך</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">השירותים שלך ב-WeCcelerate</h2>
+              <p className="text-sm text-white/30 mt-1 font-light">
+                {pct === 100 ? 'כל התחנות ברשת הושלמו בהצלחה' : `${doneCount} מתוך ${total} שירותים הושלמו`}
+              </p>
             </div>
-            {/* Compass */}
-            <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10">
-                <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
-                  <circle cx="20" cy="20" r="17" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="3" />
-                  <circle cx="20" cy="20" r="17" fill="none" strokeWidth="3" strokeLinecap="round"
-                    strokeDasharray={`${pct * 1.07} 107`}
+
+            {/* Compass / Coordinate display */}
+            <div className="flex items-center gap-3 bg-white/[0.02] rounded-xl px-4 py-3 border border-white/[0.06]">
+              <div className="relative w-11 h-11">
+                <svg viewBox="0 0 44 44" className="-rotate-90">
+                  <circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="3" />
+                  <motion.circle cx="22" cy="22" r="19" fill="none" strokeWidth="3" strokeLinecap="round"
+                    strokeDasharray={`${pct * 1.19} 119`}
+                    initial={{ strokeDasharray: '0 119' }}
+                    animate={{ strokeDasharray: `${pct * 1.19} 119` }}
+                    transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
                     className={pct === 100 ? 'stroke-emerald-400' : 'stroke-[#c8a951]'}
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Compass className={cn('w-4 h-4', pct === 100 ? 'text-emerald-400' : 'text-[#c8a951]')} />
+                  <span className={cn('text-xs font-mono font-bold', pct === 100 ? 'text-emerald-400' : 'text-[#c8a951]')}>{pct}%</span>
                 </div>
               </div>
               <div className="hidden sm:block">
-                <p className="text-xs font-semibold text-white/60">{currentStation}/{total}</p>
-                <p className="text-[10px] text-white/25">{pct === 100 ? 'הושלם!' : 'בדרך'}</p>
+                <p className="text-xs font-mono font-bold text-white/60">{doneCount}/{total}</p>
+                <p className="text-[9px] text-white/20 uppercase tracking-widest">{pct === 100 ? 'Complete' : 'Active'}</p>
               </div>
             </div>
           </div>
 
           {/* Power bar */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-3 bg-white/[0.04] rounded-full overflow-hidden border border-white/[0.04]">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${pct}%` }}
-                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                className={cn('h-full rounded-full relative', pct === 100 ? 'bg-gradient-to-l from-emerald-500 to-emerald-400' : 'bg-gradient-to-l from-[#c8a951] to-[#e8d48b]')}
-              >
-                <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" animate={{ x: ['-100%', '200%'] }} transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }} />
-              </motion.div>
-            </div>
-            <span className={cn('text-sm font-bold min-w-[40px] text-left', pct === 100 ? 'text-emerald-400' : 'text-[#c8a951]')}>
-              <Zap className="w-3.5 h-3.5 inline -mt-0.5 mr-0.5" />{pct}%
-            </span>
+          <div className="relative h-2.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.04]">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              className={cn('absolute inset-y-0 right-0 rounded-full', pct === 100 ? 'bg-gradient-to-l from-emerald-500 to-emerald-400' : 'bg-gradient-to-l from-[#c8a951] to-[#e8d48b]')}
+            >
+              <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
+              />
+            </motion.div>
           </div>
 
-          {/* Step dots */}
-          <div className="flex gap-1 mt-2">
+          {/* Step indicators */}
+          <div className="flex gap-1.5 mt-3">
             {services.map((s, i) => (
-              <div key={s.id} className={cn('h-1.5 flex-1 rounded-full', s.allDone ? 'bg-emerald-500/60' : 'bg-white/[0.05]')} />
+              <motion.div key={s.id}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: i * 0.06 }}
+                className={cn('h-1 flex-1 rounded-full origin-right', s.allDone ? 'bg-emerald-500/50' : 'bg-white/[0.04]')}
+              />
             ))}
           </div>
         </div>
       </div>
 
-      {/* Slalom Track */}
-      <div className="relative" style={{ minHeight: `${(total - 1) * 140 + 80}px` }}>
-        {/* SVG slalom path behind cards */}
-        <SlalomTrack count={total} doneCount={doneCount} />
-
-        {/* Station cards in zigzag */}
-        <div className="relative z-10 flex flex-col gap-6 px-2">
-          {services.map((service, i) => (
-            <StationCard
-              key={service.id}
-              service={service}
-              index={i}
-              isAdmin={isAdmin}
-              projectId={projectId}
-              files={files}
-              driveFiles={driveFiles}
-            />
-          ))}
-        </div>
+      {/* Network Nodes */}
+      <div className="space-y-10 px-1">
+        {services.map((service, i) => (
+          <NetworkNode
+            key={service.id}
+            service={service}
+            index={i}
+            total={total}
+            isAdmin={isAdmin}
+            projectId={projectId}
+            files={files}
+            driveFiles={driveFiles}
+          />
+        ))}
       </div>
 
-      {/* Finish */}
+      {/* Completion */}
       {pct === 100 && (
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="text-center py-4">
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-sm font-bold text-emerald-400">
-            <Trophy className="w-4 h-4" /> כל הכבוד! סיימת את כל התחנות
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center py-4">
+          <div className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full border border-emerald-500/20 bg-emerald-500/[0.06]">
+            <Trophy className="w-5 h-5 text-emerald-400" />
+            <span className="text-sm font-bold text-emerald-400">כל הכבוד! כל התחנות ברשת הושלמו</span>
           </div>
         </motion.div>
       )}
