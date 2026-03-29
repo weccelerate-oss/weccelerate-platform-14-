@@ -47,12 +47,8 @@ export function PortalNavbar({ userName, userEmail }: PortalNavbarProps) {
             <img
               src="/images/logos/weccelerate-logo.jpeg"
               alt="WeCcelerate"
-              className="w-8 h-8 rounded-lg object-cover"
+              className="h-9 w-auto rounded-lg object-cover"
             />
-            <div className="hidden sm:block">
-              <span className="text-sm font-bold text-white">WeCcelerate</span>
-              <span className="block text-[10px] text-white/40 -mt-0.5">פורטל יזמים</span>
-            </div>
           </Link>
 
           {/* Desktop Nav Links */}
