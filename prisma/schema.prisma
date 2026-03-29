@@ -98,18 +98,18 @@ model User {
   image         String?   // NextAuth standard field
   role          UserRole  @default(ENTREPRENEUR)
   isActive      Boolean   @default(true)
-  
+
   // Profile fields
   company       String?   // Company/startup name
   position      String?   // Job title
   bio           String?   @db.Text
   linkedinUrl   String?
   websiteUrl    String?
-  
+
   // Preferences
   language      String    @default("he") // he, en
   timezone      String    @default("Asia/Jerusalem")
-  
+
   // Relations
   accounts      Account[]
   sessions      Session[]
@@ -117,12 +117,15 @@ model User {
   uploadedFiles File[]    @relation("UploadedBy")
   notifications Notification[]
   activities    ActivityLog[]
-  
+  lessonProgress UserLessonProgress[]
+
   // Timestamps
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastLoginAt   DateTime?
-  
+
+  @@index([role, isActive]) // Admin: list entrepreneurs, mentors
+  @@index([email])          // Auth: login lookup (covered by unique but explicit)
   @@map("users")
 }
 
@@ -220,6 +223,8 @@ model Project {
   @@index([userId])
   @@index([pipedriveId])
   @@index([status])
+  @@index([userId, isArchived]) // Dashboard: find user's active project
+  @@index([isArchived, updatedAt]) // Admin: list projects sorted by update
   @@map("projects")
 }
 
@@ -505,6 +510,7 @@ model Notification {
   createdAt   DateTime @default(now())
   
   @@index([userId, isRead])
+  @@index([userId, createdAt]) // Portal: fetch latest notifications
   @@map("notifications")
 }
 
@@ -535,6 +541,95 @@ model ActivityLog {
   @@index([action])
   @@index([createdAt])
   @@map("activity_logs")
+}
+
+// =============================================================================
+// LEARNING CENTER - COURSES & PROGRESS
+// =============================================================================
+
+model CourseCategory {
+  id            String         @id @default(cuid())
+
+  name          String         // e.g., "מושגים פיננסיים"
+  slug          String         @unique
+  description   String?        @db.Text
+  icon          String?        // Icon name (lucide)
+  color         String?        // Tailwind color (e.g., "blue", "emerald")
+  displayOrder  Int            @default(0)
+  isActive      Boolean        @default(true)
+
+  subcategories CourseSubcategory[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([isActive, displayOrder])
+  @@map("course_categories")
+}
+
+model CourseSubcategory {
+  id            String         @id @default(cuid())
+
+  name          String         // e.g., "דוחות כספיים"
+  slug          String         @unique
+  description   String?        @db.Text
+  displayOrder  Int            @default(0)
+
+  category      CourseCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId    String
+
+  lessons       CourseLesson[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([categoryId, displayOrder])
+  @@map("course_subcategories")
+}
+
+model CourseLesson {
+  id            String         @id @default(cuid())
+
+  title         String         // e.g., "דוח P&L"
+  slug          String         @unique
+  description   String?        @db.Text
+  youtubeUrl    String         // YouTube URL
+  youtubeId     String?        // Extracted YouTube ID
+  duration      Int?           // Duration in seconds
+  displayOrder  Int            @default(0)
+  isActive      Boolean        @default(true)
+
+  subcategory   CourseSubcategory @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  subcategoryId String
+
+  progress      UserLessonProgress[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([subcategoryId, displayOrder])
+  @@map("course_lessons")
+}
+
+model UserLessonProgress {
+  id            String       @id @default(cuid())
+
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+
+  lesson        CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId      String
+
+  completed     Boolean      @default(false)
+  completedAt   DateTime?
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@map("user_lesson_progress")
 }
 
 // =============================================================================
