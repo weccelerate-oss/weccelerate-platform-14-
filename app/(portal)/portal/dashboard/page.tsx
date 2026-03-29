@@ -374,10 +374,10 @@ export default async function DashboardPage() {
   }
 
   // Fetch files from Google Drive Portal folder
-  let driveFiles: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; modifiedTime: string }[] = [];
+  let driveFiles: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; downloadLink: string; modifiedTime: string }[] = [];
   if (data.project?.pipedriveId) {
     try {
-      const { findDriveFolder, listDriveFiles } = await import('@/lib/google-drive');
+      const { findDriveFolder, listAllPdfs } = await import('@/lib/google-drive');
       const portalRootId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID;
       if (portalRootId) {
         // Step 1: Find the entrepreneur's folder by deal ID (e.g. "17200 - מאור ארגמן")
@@ -385,19 +385,13 @@ export default async function DashboardPage() {
         console.log(`[Dashboard] Entrepreneur folder for deal ${data.project.pipedriveId}: ${entrepreneurFolder || 'not found'}`);
 
         if (entrepreneurFolder) {
-          // Step 2: Look for "Portal" subfolder inside the entrepreneur's folder
-          const { findDriveFolder: findSub } = await import('@/lib/google-drive');
-          const portalFolder = await findSub(entrepreneurFolder, 'Portal');
-
-          // Step 3: List files from Portal subfolder, or directly from entrepreneur folder
-          const targetFolder = portalFolder || entrepreneurFolder;
-          console.log(`[Dashboard] Target Drive folder: ${targetFolder} (portal subfolder: ${!!portalFolder})`);
-
-          const files = await listDriveFiles(targetFolder);
-          console.log(`[Dashboard] Drive files found: ${files.length}`);
+          // Recursively scan ALL subfolders for PDF/Excel/PowerPoint/Word files
+          const files = await listAllPdfs(entrepreneurFolder);
+          console.log(`[Dashboard] Drive files found: ${files.length} in entrepreneur folder`);
           driveFiles = files.map(f => ({
             id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
             webViewLink: f.webViewLink, webContentLink: f.webContentLink,
+            downloadLink: f.downloadLink,
             modifiedTime: f.modifiedTime,
           }));
         }

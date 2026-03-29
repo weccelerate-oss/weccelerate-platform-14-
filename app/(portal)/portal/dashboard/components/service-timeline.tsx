@@ -55,6 +55,7 @@ interface DriveFileDisplay {
   size: string;
   webViewLink: string;
   webContentLink: string | null;
+  downloadLink: string;
   modifiedTime: string;
 }
 
@@ -218,7 +219,7 @@ function StationCard({
   });
 
   const allDisplayFiles = [
-    ...svcDriveFiles.map(f => ({ id: f.id, name: f.name, viewUrl: f.webViewLink, downloadUrl: f.webContentLink || f.webViewLink, size: f.size, source: 'drive' as const })),
+    ...svcDriveFiles.map(f => ({ id: f.id, name: f.name, viewUrl: f.webViewLink, downloadUrl: f.downloadLink, size: f.size, source: 'drive' as const })),
     ...svcFiles.map(f => ({ id: f.id, name: f.displayName || f.name, viewUrl: f.url, downloadUrl: f.url, size: String(f.size || 0), source: 'db' as const })),
   ];
 

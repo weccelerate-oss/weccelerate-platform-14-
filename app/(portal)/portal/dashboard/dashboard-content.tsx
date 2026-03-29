@@ -67,7 +67,7 @@ interface DashboardContentProps {
   dealActivities?: DealActivityDisplay[];
   dealStatus?: string;
   matchedServices?: MatchedService[];
-  driveFiles?: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; modifiedTime: string }[];
+  driveFiles?: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; downloadLink: string; modifiedTime: string }[];
 }
 
 // =============================================================================
