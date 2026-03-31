@@ -2,8 +2,13 @@
 
 import { useState, useTransition, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, AlertCircle } from 'lucide-react';
+import { X, AlertCircle, Plus, Trash2 } from 'lucide-react';
 import { createStoryAction, updateStoryAction } from '../actions';
+
+interface MetricItem {
+  label: string;
+  value: string;
+}
 
 interface StoryFormData {
   companyName: string;
@@ -17,9 +22,11 @@ interface StoryFormData {
   personImage?: string;
   slug: string;
   fullStory?: string;
+  fullStoryEn?: string;
   projectLink?: string;
   collaborationDate?: string;
   programName?: string;
+  metrics?: MetricItem[];
   order: number;
   isActive: boolean;
   isFeatured: boolean;
@@ -27,6 +34,7 @@ interface StoryFormData {
 
 interface Story extends StoryFormData {
   id: string;
+  rawMetrics?: any; // JSON from DB: { items: MetricItem[] }
 }
 
 interface StoryFormDialogProps {
@@ -40,6 +48,13 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Parse metrics from DB JSON format
+  const initialMetrics: MetricItem[] = (() => {
+    if (story?.metrics && Array.isArray(story.metrics)) return story.metrics;
+    if (story?.rawMetrics?.items && Array.isArray(story.rawMetrics.items)) return story.rawMetrics.items;
+    return [];
+  })();
+
   const [formData, setFormData] = useState<StoryFormData>({
     companyName: story?.companyName || '',
     logoUrl: story?.logoUrl || '',
@@ -52,9 +67,11 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
     personImage: story?.personImage || '',
     slug: story?.slug || '',
     fullStory: story?.fullStory || '',
+    fullStoryEn: story?.fullStoryEn || '',
     projectLink: story?.projectLink || '',
     collaborationDate: story?.collaborationDate || '',
     programName: story?.programName || '',
+    metrics: initialMetrics,
     order: story?.order || 0,
     isActive: story?.isActive ?? true,
     isFeatured: story?.isFeatured ?? false,
@@ -63,6 +80,12 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // BUG 9: Validation for required fields
+    if (!formData.companyName.trim() || !formData.quote.trim() || !formData.slug.trim()) {
+      setError('שדות חובה לא יכולים להיות ריקים');
+      return;
+    }
 
     startTransition(async () => {
       try {
@@ -91,9 +114,11 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
             personImage: '',
             slug: '',
             fullStory: '',
+            fullStoryEn: '',
             projectLink: '',
             collaborationDate: '',
             programName: '',
+            metrics: [],
             order: 0,
             isActive: true,
             isFeatured: false,
@@ -107,11 +132,33 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
   };
 
   const generateSlug = () => {
-    const slug = formData.companyName
+    let slug = formData.companyName
       .toLowerCase()
       .replace(/[^a-z0-9\u0590-\u05FF]+/g, '-')
       .replace(/^-|-$/g, '');
+    // BUG 5: Empty slug fallback
+    if (!slug) slug = `story-${Date.now()}`;
     setFormData({ ...formData, slug });
+  };
+
+  // BUG 3: Metrics helpers
+  const addMetric = () => {
+    setFormData({
+      ...formData,
+      metrics: [...(formData.metrics || []), { label: '', value: '' }],
+    });
+  };
+
+  const removeMetric = (index: number) => {
+    const updated = [...(formData.metrics || [])];
+    updated.splice(index, 1);
+    setFormData({ ...formData, metrics: updated });
+  };
+
+  const updateMetric = (index: number, field: 'label' | 'value', val: string) => {
+    const updated = [...(formData.metrics || [])];
+    updated[index] = { ...updated[index], [field]: val };
+    setFormData({ ...formData, metrics: updated });
   };
 
   return (
@@ -254,6 +301,20 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    ציטוט (אנגלית)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={formData.quoteEn || ''}
+                    onChange={(e) => setFormData({ ...formData, quoteEn: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                    placeholder="What they said about us (English)..."
+                    dir="ltr"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -280,6 +341,96 @@ export function StoryFormDialog({ mode, story, children }: StoryFormDialogProps)
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Full Story */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-slate-900 border-b pb-2">סיפור מלא</h3>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    סיפור מלא (עברית)
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={formData.fullStory || ''}
+                    onChange={(e) => setFormData({ ...formData, fullStory: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                    placeholder="הסיפור המלא של שיתוף הפעולה..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    סיפור מלא (אנגלית)
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={formData.fullStoryEn || ''}
+                    onChange={(e) => setFormData({ ...formData, fullStoryEn: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                    placeholder="The full collaboration story (English)..."
+                    dir="ltr"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    קישור לפרויקט
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.projectLink || ''}
+                    onChange={(e) => setFormData({ ...formData, projectLink: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
+                    placeholder="https://example.com/project"
+                  />
+                </div>
+              </div>
+
+              {/* Metrics */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b pb-2">
+                  <h3 className="font-medium text-slate-900">מדדים / תוצאות</h3>
+                  <button
+                    type="button"
+                    onClick={addMetric}
+                    className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                    הוסף מדד
+                  </button>
+                </div>
+
+                {(formData.metrics || []).length === 0 && (
+                  <p className="text-sm text-slate-500">אין מדדים. לחץ &quot;הוסף מדד&quot; כדי להוסיף.</p>
+                )}
+
+                {(formData.metrics || []).map((metric, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={metric.label}
+                      onChange={(e) => updateMetric(index, 'label', e.target.value)}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500 text-sm"
+                      placeholder="תווית (למשל: גידול בהכנסות)"
+                    />
+                    <input
+                      type="text"
+                      value={metric.value}
+                      onChange={(e) => updateMetric(index, 'value', e.target.value)}
+                      className="w-32 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-royal-500 focus:border-royal-500 text-sm"
+                      placeholder="ערך (למשל: 300%)"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeMetric(index)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
 
               {/* Program Info */}

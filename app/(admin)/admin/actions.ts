@@ -565,9 +565,11 @@ export interface StoryFormData {
   personImage?: string;
   slug: string;
   fullStory?: string;
+  fullStoryEn?: string;
   projectLink?: string;
   collaborationDate?: string;
   programName?: string;
+  metrics?: { label: string; value: string }[];
   order: number;
   isActive: boolean;
   isFeatured: boolean;
@@ -585,6 +587,10 @@ export async function createStoryAction(data: StoryFormData) {
       return { success: false, error: `slug "${data.slug}" כבר קיים. נא לבחור slug אחר.` };
     }
 
+    // BUG 5: Empty slug fallback
+    let slug = data.slug;
+    if (!slug) slug = `story-${Date.now()}`;
+
     const story = await prisma.successStory.create({
       data: {
         companyName: data.companyName,
@@ -596,11 +602,13 @@ export async function createStoryAction(data: StoryFormData) {
         personName: data.personName || null,
         personRole: data.personRole || null,
         personImage: data.personImage || null,
-        slug: data.slug,
+        slug,
         fullStory: data.fullStory || null,
+        fullStoryEn: data.fullStoryEn || null,
         projectLink: data.projectLink || null,
         collaborationDate: data.collaborationDate || null,
         programName: data.programName || null,
+        metrics: data.metrics && data.metrics.length > 0 ? { items: data.metrics } : null,
         displayOrder: data.order,
         isActive: data.isActive,
         isFeatured: data.isFeatured,
@@ -613,13 +621,29 @@ export async function createStoryAction(data: StoryFormData) {
     return { success: true };
   } catch (error) {
     console.error('[Admin] Error creating story:', error);
-    return { success: false, error: 'Failed to create story' };
+    const msg = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+    return { success: false, error: `שגיאה ביצירה: ${msg}` };
   }
 }
 
 export async function updateStoryAction(id: string, data: StoryFormData) {
   try {
     await verifyAdmin();
+
+    // BUG 2: Slug uniqueness check on update (exclude current story)
+    if (data.slug) {
+      const existingSlug = await prisma.successStory.findFirst({
+        where: { slug: data.slug, NOT: { id } },
+      });
+      if (existingSlug) {
+        return { success: false, error: 'Slug כבר קיים, בחר slug אחר' };
+      }
+    }
+
+    // BUG 5: Empty slug fallback
+    let slug = data.slug;
+    if (!slug) slug = `story-${Date.now()}`;
+
     const story = await prisma.successStory.update({
       where: { id },
       data: {
@@ -632,11 +656,13 @@ export async function updateStoryAction(id: string, data: StoryFormData) {
         personName: data.personName || null,
         personRole: data.personRole || null,
         personImage: data.personImage || null,
-        slug: data.slug,
+        slug,
         fullStory: data.fullStory || null,
+        fullStoryEn: data.fullStoryEn || null,
         projectLink: data.projectLink || null,
         collaborationDate: data.collaborationDate || null,
         programName: data.programName || null,
+        metrics: data.metrics && data.metrics.length > 0 ? { items: data.metrics } : null,
         displayOrder: data.order,
         isActive: data.isActive,
         isFeatured: data.isFeatured,
@@ -649,7 +675,8 @@ export async function updateStoryAction(id: string, data: StoryFormData) {
     return { success: true };
   } catch (error) {
     console.error('[Admin] Error updating story:', error);
-    return { success: false, error: 'Failed to update story' };
+    const msg = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+    return { success: false, error: `שגיאה בעדכון: ${msg}` };
   }
 }
 
@@ -666,7 +693,8 @@ export async function deleteStoryAction(id: string) {
     return { success: true };
   } catch (error) {
     console.error('[Admin] Error deleting story:', error);
-    return { success: false, error: 'Failed to delete story' };
+    const msg = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+    return { success: false, error: `שגיאה במחיקה: ${msg}` };
   }
 }
 
@@ -734,8 +762,16 @@ export async function seedStoriesFromMockAction() {
 
     let count = 0;
     for (const story of mockSuccessStories) {
-      const slug = story.id || `story-${count}`;
+      let slug = story.id || `story-${count}`;
       try {
+        // BUG 7: Check for existing slug before creating
+        const existingSlug = await prisma.successStory.findFirst({
+          where: { slug },
+        });
+        if (existingSlug) {
+          slug = `${slug}-${Date.now()}`;
+        }
+
         await prisma.successStory.create({
           data: {
             companyName: story.companyName,
@@ -750,6 +786,7 @@ export async function seedStoriesFromMockAction() {
             metrics: story.metrics ? { items: story.metrics } : null,
             slug,
             fullStory: null,
+            fullStoryEn: (story as any).fullStoryEn || null,
             projectLink: null,
             collaborationDate: story.collaborationDate || null,
             programName: null,
