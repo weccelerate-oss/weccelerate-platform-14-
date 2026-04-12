@@ -25,6 +25,18 @@ export interface MatchedService {
 // Keywords that map activity subjects to service names
 const SERVICE_MATCHERS: { keywords: string[]; name: string; icon: string; id: string }[] = [
   {
+    id: 'strategic-consulting',
+    name: 'ייעוץ אסטרטגי',
+    icon: 'Compass',
+    keywords: ['ייעוץ', 'אסטרטגי', 'אסטרטגית', 'אסטרטגיה', 'סיעור מוחות'],
+  },
+  {
+    id: 'market-research',
+    name: 'סקירת שוק',
+    icon: 'Search',
+    keywords: ['מחקר שוק', 'סקירת שוק', 'סקירת משק', 'סקירה'],
+  },
+  {
     id: 'business-plan',
     name: 'תוכנית עסקית',
     icon: 'FileText',
@@ -34,7 +46,7 @@ const SERVICE_MATCHERS: { keywords: string[]; name: string; icon: string; id: st
     id: 'financial-plan',
     name: 'תכנון פיננסי',
     icon: 'TrendingUp',
-    keywords: ['פיננסי', 'פיננסית', 'פיננסים'],
+    keywords: ['פיננסי', 'פיננסית', 'פיננסים', 'פיננסיים', 'תחזית'],
   },
   {
     id: 'pitch-deck',
@@ -46,31 +58,25 @@ const SERVICE_MATCHERS: { keywords: string[]; name: string; icon: string; id: st
     id: 'marketing-plan',
     name: 'תוכנית שיווקית',
     icon: 'Megaphone',
-    keywords: ['שיווק', 'שיוווק', 'שיווקית'],
+    keywords: ['שיווק', 'שיוווק', 'שיווקית', 'קמפיין', 'מיתוג'],
   },
   {
     id: 'canvas-model',
     name: 'מודל קנבס',
     icon: 'LayoutGrid',
-    keywords: ['קנבס', 'canvas'],
+    keywords: ['קנבס', 'canvas', 'מודל עסקי'],
   },
   {
     id: 'landing-page',
     name: 'דף נחיתה',
     icon: 'Globe',
-    keywords: ['דף נחיתה', 'לנדינג'],
-  },
-  {
-    id: 'strategic-consulting',
-    name: 'ייעוץ אסטרטגי',
-    icon: 'Compass',
-    keywords: ['ייעוץ', 'אסטרטגי', 'אסטרטגית', 'סיעור מוחות'],
+    keywords: ['דף נחיתה', 'לנדינג', 'landing'],
   },
   {
     id: 'investor-prep',
     name: 'הכנה למשקיעים',
     icon: 'Users',
-    keywords: ['משקיעים', 'יום משקיעים'],
+    keywords: ['משקיעים', 'יום משקיעים', 'הכנה למשקיעים'],
   },
   {
     id: 'brief',
@@ -85,10 +91,22 @@ const SERVICE_MATCHERS: { keywords: string[]; name: string; icon: string; id: st
     keywords: ['one pager', 'תקציר מנהלים'],
   },
   {
-    id: 'market-research',
-    name: 'מחקר שוק',
-    icon: 'Search',
-    keywords: ['מחקר שוק'],
+    id: 'venture-advancement',
+    name: 'קידום מיזם',
+    icon: 'TrendingUp',
+    keywords: ['קידום מיזם', 'קידום', 'מיזם'],
+  },
+  {
+    id: 'engineering',
+    name: 'פיתוח הנדסי',
+    icon: 'LayoutGrid',
+    keywords: ['הנדס', 'הנדסי', 'הנדסית', 'פיתוח מוצר', 'אפיון'],
+  },
+  {
+    id: 'product-design',
+    name: 'עיצוב מוצר',
+    icon: 'Globe',
+    keywords: ['עיצוב', 'דיזיין', 'design', 'ui', 'ux'],
   },
 ];
 
@@ -110,6 +128,11 @@ export function matchActivitiesToServices(
     'נשלחה הודעת',
     'עודכן בגביי',
     'לקדם',
+    'Call',       // Generic English call entries
+    'call',
+    'גבייה',
+    'תשלום',
+    'חשבונית',
   ];
 
   const serviceMap = new Map<string, MatchedService>();
