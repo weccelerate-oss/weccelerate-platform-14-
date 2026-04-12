@@ -364,16 +364,6 @@ export default async function DashboardPage() {
     }
   }
 
-  // Match activities to WeCcelerate services
-  let matchedServices: import('@/lib/service-matcher').MatchedService[] = [];
-  if (dealActivities.length > 0) {
-    const { matchActivitiesToServices } = await import('@/lib/service-matcher');
-    matchedServices = matchActivitiesToServices(
-      dealActivities.map((a) => ({ ...a, addTime: a.addTime, markedDoneTime: a.markedDoneTime })),
-      driveFiles.map((f) => f.name),
-    );
-  }
-
   // Fetch files from Google Drive Portal folder
   let driveFiles: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; downloadLink: string; modifiedTime: string }[] = [];
   if (data.project?.pipedriveId) {
@@ -381,14 +371,9 @@ export default async function DashboardPage() {
       const { findDriveFolder, listAllPdfs } = await import('@/lib/google-drive');
       const portalRootId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID;
       if (portalRootId) {
-        // Step 1: Find the entrepreneur's folder by deal ID (e.g. "17200 - מאור ארגמן")
         const entrepreneurFolder = await findDriveFolder(portalRootId, data.project.pipedriveId);
-        console.log(`[Dashboard] Entrepreneur folder for deal ${data.project.pipedriveId}: ${entrepreneurFolder || 'not found'}`);
-
         if (entrepreneurFolder) {
-          // Recursively scan ALL subfolders for PDF/Excel/PowerPoint/Word files
           const files = await listAllPdfs(entrepreneurFolder);
-          console.log(`[Dashboard] Drive files found: ${files.length} in entrepreneur folder`);
           driveFiles = files.map(f => ({
             id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
             webViewLink: f.webViewLink, webContentLink: f.webContentLink,
@@ -400,6 +385,16 @@ export default async function DashboardPage() {
     } catch (err) {
       console.warn('[Dashboard] Google Drive error:', err);
     }
+  }
+
+  // Match activities to WeCcelerate services (needs driveFiles to determine completion)
+  let matchedServices: import('@/lib/service-matcher').MatchedService[] = [];
+  if (dealActivities.length > 0) {
+    const { matchActivitiesToServices } = await import('@/lib/service-matcher');
+    matchedServices = matchActivitiesToServices(
+      dealActivities.map((a) => ({ ...a, addTime: a.addTime, markedDoneTime: a.markedDoneTime })),
+      driveFiles.map((f) => f.name),
+    );
   }
 
   return (
