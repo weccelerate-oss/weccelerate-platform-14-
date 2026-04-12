@@ -53,7 +53,7 @@ const SERVICE_MATCHERS: { keywords: string[]; name: string; icon: string; id: st
     id: 'pitch-deck',
     name: 'מצגת משקיעים',
     icon: 'Presentation',
-    keywords: ['מצגת משקיעים', 'מצגת'],
+    keywords: ['מצגת משקיעים', 'pitch deck', 'pitch'],
   },
   {
     id: 'marketing-plan',
@@ -95,7 +95,7 @@ const SERVICE_MATCHERS: { keywords: string[]; name: string; icon: string; id: st
     id: 'venture-advancement',
     name: 'קידום מיזם',
     icon: 'TrendingUp',
-    keywords: ['קידום מיזם', 'קידום', 'מיזם'],
+    keywords: ['קידום מיזם'],
   },
   {
     id: 'engineering',
@@ -130,20 +130,38 @@ export function matchActivitiesToServices(
     'נשלחה הודעת',
     'עודכן בגביי',
     'לקדם',
-    'Call',       // Generic English call entries
+    'Call',
     'call',
     'גבייה',
     'תשלום',
     'חשבונית',
+    'שליחת',       // "שליחת X לבדיקה" = internal task, not service
+    'להחזיר',
+    'לסגור',
+    'לשלוח',
+    'לעשות שיחה',
+    'לקחת צ',      // "לקחת צ'קים"
+    'תא"ק',
+    'DONE',
+    'Review',
+    'Firefly',
+    'חומרים סופיים',
   ];
 
   const serviceMap = new Map<string, MatchedService>();
 
+  // Only meetings and bd_meetings represent actual service delivery
+  // Tasks, deadlines, calls are internal operations
+  const serviceTypes = new Set(['meeting', 'bd_meeting']);
+
   for (const activity of activities) {
     const subject = activity.subject.toLowerCase();
 
-    // Skip internal activities
+    // Skip internal activities by pattern
     if (skipPatterns.some((p) => activity.subject.includes(p))) continue;
+
+    // Skip non-service activity types (calls, tasks, deadlines, collections)
+    if (!serviceTypes.has(activity.type)) continue;
 
     // Try to match to a service
     for (const matcher of SERVICE_MATCHERS) {
