@@ -59,7 +59,8 @@ export default async function ProjectPage() {
         }));
 
       const { matchActivitiesToServices } = await import('@/lib/service-matcher');
-      matchedServices = matchActivitiesToServices(mapped);
+      // Drive files not fetched here — pass empty for now (dashboard fetches them)
+      matchedServices = matchActivitiesToServices(mapped, []);
     } catch (err) {
       console.warn('[Project Page] Pipedrive error:', err);
     }

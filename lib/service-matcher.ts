@@ -17,6 +17,7 @@ export interface MatchedService {
     type: string;
   }[];
   allDone: boolean;
+  hasFiles: boolean;           // true if files exist in Drive for this service
   completedDate: string | null; // date of last completed activity
   totalActivities: number;
   completedActivities: number;
@@ -115,7 +116,8 @@ const SERVICE_MATCHERS: { keywords: string[]; name: string; icon: string; id: st
  * Filters out internal/operational activities (calls that didn't connect, internal updates, etc.)
  */
 export function matchActivitiesToServices(
-  activities: { id: number; type: string; subject: string; done: boolean; dueDate: string | null; addTime: string; markedDoneTime: string | null }[]
+  activities: { id: number; type: string; subject: string; done: boolean; dueDate: string | null; addTime: string; markedDoneTime: string | null }[],
+  driveFileNames: string[] = [],
 ): MatchedService[] {
   // Skip internal/operational activities
   const skipPatterns = [
@@ -153,6 +155,7 @@ export function matchActivitiesToServices(
             icon: matcher.icon,
             activities: [],
             allDone: true,
+            hasFiles: false,
             completedDate: null,
             totalActivities: 0,
             completedActivities: 0,
@@ -180,6 +183,19 @@ export function matchActivitiesToServices(
 
         break; // Match to first service only
       }
+    }
+  }
+
+  // Check if each service has files in Drive
+  const driveNamesLower = driveFileNames.map(n => n.toLowerCase());
+  for (const service of serviceMap.values()) {
+    const words = service.name.split(' ').filter(w => w.length > 2);
+    service.hasFiles = driveNamesLower.some(fn =>
+      words.some(w => fn.includes(w.toLowerCase()))
+    );
+    // A service is truly "done" only if activities are done AND it has files
+    if (!service.hasFiles) {
+      service.allDone = false;
     }
   }
 

@@ -369,7 +369,8 @@ export default async function DashboardPage() {
   if (dealActivities.length > 0) {
     const { matchActivitiesToServices } = await import('@/lib/service-matcher');
     matchedServices = matchActivitiesToServices(
-      dealActivities.map((a) => ({ ...a, addTime: a.addTime, markedDoneTime: a.markedDoneTime }))
+      dealActivities.map((a) => ({ ...a, addTime: a.addTime, markedDoneTime: a.markedDoneTime })),
+      driveFiles.map((f) => f.name),
     );
   }
 
