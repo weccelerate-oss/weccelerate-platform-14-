@@ -61,12 +61,12 @@ export default function CTAForm() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent" />
 
       <div className="container-corporate relative z-10">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-12 items-center">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 xl:grid-cols-5 gap-10 xl:gap-12 items-center">
           {/* Left — copy */}
-          <div className="lg:col-span-2 text-center lg:text-right">
+          <div className="xl:col-span-2 text-center xl:text-right">
             {/* Partnership logo */}
             <ScrollReveal variant="up">
-              <div className="flex lg:justify-start justify-center mb-6">
+              <div className="flex xl:justify-start justify-center mb-6">
                 <motion.div
                   className="relative inline-block"
                   whileHover={{ scale: 1.05 }}
@@ -148,7 +148,7 @@ export default function CTAForm() {
 
           {/* Right — form */}
           <ScrollReveal variant="right" delay={200}>
-            <div className="lg:col-span-3">
+            <div className="xl:col-span-3">
               <div className="relative rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 sm:p-8 md:p-10 backdrop-blur-sm">
                 {submitted ? (
                   <div className="text-center py-10">
@@ -168,7 +168,7 @@ export default function CTAForm() {
                       </div>
                     )}
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="l-name" className="block text-xs font-semibold text-white/60 mb-2">
                           שם מלא *

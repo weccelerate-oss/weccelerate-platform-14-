@@ -58,8 +58,8 @@ export default function CTAFormBiz() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
 
       <div className="container-corporate relative z-10">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-12 items-center">
-          <div className="lg:col-span-2 text-center lg:text-right">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 xl:grid-cols-5 gap-10 xl:gap-12 items-center">
+          <div className="xl:col-span-2 text-center xl:text-right">
             <ScrollReveal variant="up">
               <p className="text-emerald-400 text-sm font-bold uppercase tracking-[0.22em] mb-4">
                 השלב הבא
@@ -108,8 +108,8 @@ export default function CTAFormBiz() {
           </div>
 
           <ScrollReveal variant="right" delay={200}>
-            <div className="lg:col-span-3">
-              <div className="relative rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-8 md:p-10 backdrop-blur-sm">
+            <div className="xl:col-span-3">
+              <div className="relative rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 sm:p-8 md:p-10 backdrop-blur-sm">
                 {submitted ? (
                   <div className="text-center py-10">
                     <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-400/30">
@@ -128,7 +128,7 @@ export default function CTAFormBiz() {
                       </div>
                     )}
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="b-name" className="block text-xs font-semibold text-white/60 mb-2">
                           שם מלא *
@@ -160,7 +160,7 @@ export default function CTAFormBiz() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="b-email" className="block text-xs font-semibold text-white/60 mb-2">
                           אימייל עסקי *
