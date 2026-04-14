@@ -61,6 +61,22 @@ export interface FormState {
 
 const ZAPIER_WEBHOOK_URL = process.env.ZAPIER_WEBHOOK_URL || '';
 
+// =============================================================================
+// LEAD SOURCE LABELS (Hebrew) — map site key to human-readable label
+// =============================================================================
+
+const SITE_SOURCE_LABELS: Record<string, string> = {
+  main: 'אתר ראשי',
+  leumit: 'דף נחיתה · Leumit MedTech',
+  biz: 'דף נחיתה · Business',
+  landing: 'דף נחיתה · קמפיין',
+};
+
+function getSourceLabel(site: string | null | undefined): string {
+  if (!site) return SITE_SOURCE_LABELS.main;
+  return SITE_SOURCE_LABELS[site] || `אתר · ${site}`;
+}
+
 async function sendToZapier(data: {
   name: string;
   email: string;
@@ -68,16 +84,22 @@ async function sendToZapier(data: {
   company?: string;
   message?: string;
   formType?: string;
+  site?: string | null;
+  sourceUrl?: string | null;
 }): Promise<void> {
   try {
     const now = new Date();
+    const sourceLabel = getSourceLabel(data.site);
     const payload = {
       'תאריך': now.toLocaleDateString('he-IL') + ' ' + now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
       'שם מלא': data.name,
       'טלפון': data.phone || '',
       'אימייל': data.email,
-      'מודעה': 'אתר החברה',
-      'מקור': 'אתר',
+      'מודעה': sourceLabel,
+      'מקור': sourceLabel,
+      'סאבדומיין': data.site || 'main',
+      'סוג טופס': data.formType || 'contact',
+      'כתובת מקור': data.sourceUrl || '',
       'הודעה': data.message || '',
       'חברה': data.company || '',
     };
@@ -113,6 +135,7 @@ export async function submitContactForm(
 
   const sourceUrl = formData.get('sourceUrl') as string | null;
   const site = formData.get('site') as string | null;
+  const formType = (formData.get('formType') as string | null) || 'contact';
 
   const validationResult = ContactFormSchema.safeParse(rawData);
 
@@ -125,16 +148,17 @@ export async function submitContactForm(
   }
 
   const validData = validationResult.data;
+  const sourceLabel = getSourceLabel(site);
 
-  // Send to Zapier (fire-and-forget)
-  sendToZapier({ ...validData, formType: 'contact' });
+  // Send to Zapier (fire-and-forget) — includes subdomain source
+  sendToZapier({ ...validData, formType, site, sourceUrl });
 
-  // Log to database
+  // Log to database — unified action name so admin counters work for all forms
   try {
     await prisma.activityLog.create({
       data: {
-        action: 'form.contact',
-        description: `Contact form: ${validData.email}`,
+        action: 'form.contact_submit',
+        description: `${sourceLabel} · ${validData.name} · ${validData.email}`,
         metadata: {
           name: validData.name,
           email: validData.email,
@@ -142,6 +166,8 @@ export async function submitContactForm(
           company: validData.company || null,
           message: validData.message || null,
           site: site || 'main',
+          sourceLabel,
+          formType,
           sourceUrl: sourceUrl || null,
           timestamp: new Date().toISOString(),
         },

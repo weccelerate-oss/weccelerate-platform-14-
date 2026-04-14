@@ -15,10 +15,16 @@ export const config = {
 
 function getSubdomain(hostname: string): string | null {
   const cleanHost = hostname.split(':')[0];
+  const parts = cleanHost.split('.');
+
+  // localhost subdomain support: e.g. leumit.localhost:3000
+  if (parts.length >= 2 && parts[parts.length - 1] === 'localhost' && SUBDOMAIN_MAP[parts[0]]) {
+    return parts[0];
+  }
+
   if (ROOT_DOMAINS.some(d => hostname.includes(d))) {
     return null;
   }
-  const parts = cleanHost.split('.');
   if (parts.length > 2 && SUBDOMAIN_MAP[parts[0]]) {
     return parts[0];
   }

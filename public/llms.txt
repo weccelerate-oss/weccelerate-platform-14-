@@ -70,6 +70,35 @@ WeCcelerate has an exclusive partnership with **Leumit Health Services** (לאו
 - **Events**: Networking meetups, Demo Days, webinars, and workshops — https://weccelerate.co.il/events
 - **Blog**: Articles about entrepreneurship, fundraising, and tech — https://weccelerate.co.il/blog
 
+## Dedicated Landing Pages
+
+WeCcelerate operates three dedicated subdomain landing pages for specific audiences:
+
+### Leumit × WeCcelerate MedTech Track
+- URL: https://leumit.weccelerate.co.il
+- Audience: MedTech and HealthTech entrepreneurs
+- Partnership: Exclusive strategic partnership between WeCcelerate and Leumit Health Services
+- Key access: 720,000+ patient records, 8.7 million annual clinical visits (anonymized, Helsinki-approved)
+- Six tracks: Clinical Advisory, Business & Finance, Investor Preparation, Marketing Strategy, Medical Data Access, FDA & CE Guidance
+- Advisory board includes former FDA senior advisors
+- Primary CTA: Free medical-business consultation call
+
+### WeCcelerate Business (for Enterprises)
+- URL: https://biz.weccelerate.co.il
+- Audience: Mid-sized to large enterprises seeking Corporate Venture Building
+- Services: Feasibility analysis → Business Model Design → MVP Development → Spin-off Launch
+- Track record: 40+ ventures built, $150M+ raised by portfolio companies
+- Pricing models: Equity partnership, Success Fee, or Retainer (flexible)
+- IP retention: Full IP ownership stays with client company
+- Primary CTA: Strategic 45-minute partner call
+
+### WeCcelerate Campaign Landing
+- URL: https://landing.weccelerate.co.il
+- Audience: Early-stage entrepreneurs with an idea
+- Format: Multi-select form capturing specific needs (business consulting, investor prep, app development, product development, marketing, MedTech regulation)
+- Primary CTA: Free 20-minute consultation call with senior advisor
+- Target conversion: Campaign traffic from Meta and Google Ads
+
 ## How to Apply
 
 Entrepreneurs at any stage can apply through the contact form at https://weccelerate.co.il/contact. A representative will respond within 48 hours to schedule a free introductory meeting. WeCcelerate supports founders from raw idea stage through growth-stage companies.

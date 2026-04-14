@@ -123,10 +123,10 @@ async function getDashboardStats() {
       'form.contact_submit', 'lead.contact_fallback',
     ];
 
-    const [leadsThisWeek, contactsToday] = await Promise.all([
+    const [leadsThisWeek, contactsToday, recentLeadLogs] = await Promise.all([
       prisma.activityLog.count({
         where: {
-          action: { in: ['form.contact_submit', 'lead.contact_fallback'] },
+          action: { in: ['form.contact_submit', 'lead.contact_fallback', 'form.contact'] },
           createdAt: { gte: weekAgo },
         },
       }),
@@ -136,7 +136,40 @@ async function getDashboardStats() {
           createdAt: { gte: todayStart },
         },
       }),
+      // Recent leads — fetch last 10 from activityLog with full metadata for source tracking
+      prisma.activityLog.findMany({
+        where: {
+          action: { in: ['form.contact_submit', 'lead.contact_fallback', 'form.contact'] },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: { id: true, createdAt: true, metadata: true },
+      }),
     ]);
+
+    // Map leads into a consistent shape for the UI with site-aware source labels
+    const SITE_LABELS: Record<string, string> = {
+      main: 'אתר ראשי',
+      leumit: 'Leumit MedTech',
+      biz: 'Business',
+      landing: 'קמפיין',
+    };
+
+    const recentLeads = recentLeadLogs.map((log) => {
+      const meta = (log.metadata as Record<string, unknown>) || {};
+      const site = (meta.site as string) || 'main';
+      return {
+        id: log.id,
+        name: (meta.name as string) || '—',
+        email: (meta.email as string) || '—',
+        phone: (meta.phone as string) || null,
+        company: (meta.company as string) || null,
+        site,
+        source: (meta.sourceLabel as string) || SITE_LABELS[site] || 'אתר',
+        siteShort: SITE_LABELS[site] || site,
+        createdAt: log.createdAt,
+      };
+    });
 
     return {
       stats: {
@@ -151,7 +184,7 @@ async function getDashboardStats() {
       },
       recentUsers: recentUsers.map(u => ({ ...u, status: u.isActive ? 'active' : 'pending' })),
       recentNews: recentNews.map(n => ({ ...n, views: Math.floor(Math.random() * 500) })),
-      recentLeads: MOCK_STATS.recentLeads,
+      recentLeads: recentLeads.length > 0 ? recentLeads : MOCK_STATS.recentLeads.map(l => ({ ...l, site: 'main', siteShort: 'אתר ראשי', phone: null, company: null })),
       systemStatus: MOCK_STATS.systemStatus,
     };
   } catch (error) {
@@ -226,7 +259,7 @@ export default async function AdminDashboardPage() {
       trend: 'up',
       icon: Mail,
       color: 'border-l-purple-600',
-      href: '/admin/leads',
+      href: '/admin/analytics',
     },
     {
       label: 'פניות היום',
@@ -319,28 +352,48 @@ export default async function AdminDashboardPage() {
               </Link>
             </div>
             <div className="divide-y divide-slate-100">
-              {recentLeads.map((lead, idx) => (
-                <div key={lead.id} className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 transition-colors">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
-                      {lead.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-slate-900 text-sm sm:text-base">{lead.name}</p>
-                      <p className="text-xs sm:text-sm text-slate-500 truncate">{lead.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 sm:gap-6 mr-12 sm:mr-0">
-                    <span className="text-xs sm:text-sm text-slate-500 bg-slate-100 px-2 sm:px-3 py-1">
-                      {lead.source}
-                    </span>
-                    <span className="text-xs sm:text-sm text-slate-400 flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      {formatTimeAgo(lead.createdAt)}
-                    </span>
-                  </div>
+              {recentLeads.length === 0 ? (
+                <div className="px-6 py-12 text-center text-sm text-slate-400">
+                  אין לידים עדיין. לידים מטפסי יצירת קשר יופיעו כאן.
                 </div>
-              ))}
+              ) : (
+                recentLeads.map((lead) => {
+                  const site = (lead as { site?: string }).site || 'main';
+                  const siteShort = (lead as { siteShort?: string }).siteShort || 'אתר';
+                  const sourceStyles: Record<string, string> = {
+                    main: 'bg-blue-50 text-blue-700 border-blue-200',
+                    leumit: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+                    biz: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                    landing: 'bg-amber-50 text-amber-700 border-amber-200',
+                  };
+                  const badgeClass = sourceStyles[site] || 'bg-slate-50 text-slate-700 border-slate-200';
+                  return (
+                    <div key={lead.id} className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                          {lead.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium text-slate-900 text-sm sm:text-base">{lead.name}</p>
+                          <p className="text-xs sm:text-sm text-slate-500 truncate">{lead.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 sm:gap-4 mr-12 sm:mr-0">
+                        <span
+                          className={`text-xs font-semibold border px-2.5 py-1 rounded-full ${badgeClass}`}
+                          title={`מקור: ${lead.source}`}
+                        >
+                          {siteShort}
+                        </span>
+                        <span className="text-xs sm:text-sm text-slate-400 flex items-center gap-1 whitespace-nowrap">
+                          <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          {formatTimeAgo(lead.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 

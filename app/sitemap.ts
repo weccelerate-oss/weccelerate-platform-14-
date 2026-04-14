@@ -50,16 +50,12 @@ const STATIC_PAGES = [
 const SUBDOMAIN_PAGES = {
   leumit: [
     { path: '/', priority: 0.9, changeFreq: 'weekly' as const },
-    { path: '/dashboard', priority: 0.8, changeFreq: 'daily' as const },
-    { path: '/services', priority: 0.7, changeFreq: 'monthly' as const },
   ],
   biz: [
-    { path: '/', priority: 0.8, changeFreq: 'weekly' as const },
-    { path: '/dashboard', priority: 0.7, changeFreq: 'daily' as const },
+    { path: '/', priority: 0.9, changeFreq: 'weekly' as const },
   ],
   landing: [
-    { path: '/medtech-2024', priority: 0.9, changeFreq: 'weekly' as const },
-    { path: '/startup-program', priority: 0.9, changeFreq: 'weekly' as const },
+    { path: '/', priority: 0.7, changeFreq: 'monthly' as const },
   ],
 };
 
