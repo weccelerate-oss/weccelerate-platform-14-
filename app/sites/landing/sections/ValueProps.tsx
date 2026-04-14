@@ -57,10 +57,10 @@ export default function ValueProps() {
                 <motion.div
                   whileHover={{ y: -8 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className="group h-full rounded-2xl border border-white/8 bg-gradient-to-b from-white/[0.02] to-transparent hover:border-[#c8a951]/30 hover:from-[#c8a951]/[0.04] transition-all duration-500 text-center overflow-hidden"
+                  className="group h-full rounded-2xl border border-white/8 bg-gradient-to-b from-white/[0.02] to-transparent hover:border-[#c8a951]/30 hover:from-[#c8a951]/[0.04] transition-all duration-500 text-center flex flex-col"
                 >
-                  {/* Image with floating icon */}
-                  <div className="relative aspect-[4/3] overflow-hidden">
+                  {/* Image wrapper */}
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl">
                     <SafeImage
                       src={value.image}
                       alt={value.title}
@@ -69,17 +69,20 @@ export default function ValueProps() {
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050914] via-[#050914]/30 to-transparent" />
+                  </div>
 
+                  {/* Floating icon — uses negative margin on a flex item to overlap the image above */}
+                  <div className="relative flex justify-center -mt-8 mb-4 z-10">
                     <motion.div
                       whileHover={{ rotate: 12, scale: 1.15 }}
                       transition={{ type: 'spring', stiffness: 400 }}
-                      className="absolute -bottom-7 left-1/2 -translate-x-1/2 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#c8a951] to-[#e8d48b] border-4 border-[#050914] shadow-xl shadow-[#c8a951]/30"
+                      className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#c8a951] to-[#e8d48b] border-4 border-[#050914] shadow-xl shadow-[#c8a951]/40"
                     >
-                      <Icon className="w-7 h-7 text-[#070b1e]" />
+                      <Icon className="w-8 h-8 text-[#070b1e]" />
                     </motion.div>
                   </div>
 
-                  <div className="p-8 pt-12">
+                  <div className="px-8 pb-8 pt-2 flex-1">
                     <h3 className="text-xl font-bold text-white mb-2">{value.title}</h3>
                     <p className="text-[#e8d48b] font-semibold text-sm mb-4">{value.headline}</p>
                     <p className="text-white/55 text-sm leading-relaxed">{value.description}</p>
