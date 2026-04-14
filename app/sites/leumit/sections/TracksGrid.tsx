@@ -28,7 +28,7 @@ const TRACKS: Track[] = [
     description:
       'חוות דעת מרופאים מומחים, ליווי בניסויים קליניים, ועדת הלסינקי ואישורים רפואיים.',
     highlights: ['רופאים מומחים', 'ניסויים קליניים', 'ועדת הלסינקי'],
-    image: '/images/landing-assets/leumit/track-clinical.jpg',
+    image: '/images/landing-assets/leumit/track-clinical.png',
   },
   {
     icon: TrendingUp,
@@ -36,7 +36,7 @@ const TRACKS: Track[] = [
     description:
       'תוכנית עסקית מותאמת למשקיעי MedTech, מודל פיננסי ריאלי ומצגת גיוס שמשכנעת.',
     highlights: ['תוכנית עסקית', 'מודל פיננסי', 'Pitch Deck'],
-    image: '/images/landing-assets/leumit/track-business.jpg',
+    image: '/images/landing-assets/leumit/track-business.png',
   },
   {
     icon: Users,
@@ -44,7 +44,7 @@ const TRACKS: Track[] = [
     description:
       'סימולציות פגישות, הכנה לשאלות קשות, וגישה לרשת של 200+ משקיעי MedTech מובילים.',
     highlights: ['סימולציות', '200+ משקיעים', 'Term Sheet'],
-    image: '/images/landing-assets/leumit/track-investors.jpg',
+    image: '/images/landing-assets/leumit/track-investors.png',
   },
   {
     icon: Megaphone,
@@ -52,7 +52,7 @@ const TRACKS: Track[] = [
     description:
       'מיצוב מותג רפואי, אסטרטגיית Go-to-Market, הכנה לכנסים בינלאומיים ו-PR מקצועי.',
     highlights: ['מיצוב מותג', 'Go-to-Market', 'כנסים בינלאומיים'],
-    image: '/images/landing-assets/leumit/track-marketing.jpg',
+    image: '/images/landing-assets/leumit/track-marketing.png',
   },
   {
     icon: Database,
@@ -60,7 +60,7 @@ const TRACKS: Track[] = [
     description:
       'גישה ייחודית לדאטה אנונימית ממאגר לאומית עם 720,000+ מטופלים, באישור ועדת הלסינקי.',
     highlights: ['720K+ רשומות', 'דאטה אנונימית', 'אישור הלסינקי'],
-    image: '/images/landing-assets/leumit/track-data.jpg',
+    image: '/images/landing-assets/leumit/track-data.png',
   },
   {
     icon: ShieldCheck,
@@ -68,7 +68,7 @@ const TRACKS: Track[] = [
     description:
       'ייעוץ רגולטורי ישיר למסלול FDA האמריקאי, סימון CE אירופי וליווי משרד הבריאות הישראלי.',
     highlights: ['FDA Pathway', 'CE Marking', 'משרד הבריאות'],
-    image: '/images/landing-assets/leumit/track-fda.jpg',
+    image: '/images/landing-assets/leumit/track-fda.png',
   },
 ];
 

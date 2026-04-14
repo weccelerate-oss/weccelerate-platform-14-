@@ -12,7 +12,7 @@ const VALUES = [
     headline: '200+ יזמים · $150M+ גיוסים',
     description:
       'לא התחלנו אתמול. בנינו עשרות סטארטאפים, ראינו את כל התרחישים, ואנחנו יודעים מה עובד — ומה לא.',
-    image: '/images/landing-assets/landing/value-experience.jpg',
+    image: '/images/landing-assets/landing/value-experience.png',
   },
   {
     icon: Target,
@@ -20,7 +20,7 @@ const VALUES = [
     headline: 'מהרעיון ועד השוק — הכול',
     description:
       'אסטרטגיה, פיננסים, פיתוח מוצר, שיווק, משפטי ומשקיעים. הכול תחת גג אחד, בלי צורך להתפזר בין ספקים.',
-    image: '/images/landing-assets/landing/value-360.jpg',
+    image: '/images/landing-assets/landing/value-360.png',
   },
   {
     icon: Users2,
@@ -28,7 +28,7 @@ const VALUES = [
     headline: 'כל המומחים — במחיר של אחד',
     description:
       'אתם מקבלים CTO, מנהל מוצר, יועץ עסקי, אנשי שיווק, ויועצים משפטיים — כולם עובדים על החברה שלכם.',
-    image: '/images/landing-assets/landing/value-team.jpg',
+    image: '/images/landing-assets/landing/value-team.png',
   },
 ];
 

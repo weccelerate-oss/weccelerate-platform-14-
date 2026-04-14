@@ -39,7 +39,7 @@ export default function AdvisoryBoard() {
       {/* Subtle background image */}
       <div className="absolute inset-0 z-0 opacity-20">
         <SafeImage
-          src="/images/landing-assets/leumit/advisory-bg.jpg"
+          src="/images/landing-assets/leumit/advisory-bg.png"
           alt=""
           fill
           className="object-cover"

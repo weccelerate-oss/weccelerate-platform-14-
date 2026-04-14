@@ -13,7 +13,7 @@ const PHASES = [
     description:
       'ניתוח הזדמנות עסקית, מחקר שוק ראשוני, בדיקת התאמה לליבת הארגון וגיבוש הצעת ערך מקדמית.',
     deliverables: ['דוח היתכנות', 'ניתוח שוק', 'המלצה אסטרטגית'],
-    image: '/images/landing-assets/biz/phase-01-discovery.jpg',
+    image: '/images/landing-assets/biz/phase-01-discovery.png',
   },
   {
     num: '02',
@@ -23,7 +23,7 @@ const PHASES = [
     description:
       'בניית מודל עסקי מלא, מצגת למשקיעים, תוכנית פיננסית, הגדרת KPI-ים ותוכנית יישום מפורטת.',
     deliverables: ['Business Model', 'מודל פיננסי', 'Pitch Deck', 'תוכנית עבודה'],
-    image: '/images/landing-assets/biz/phase-02-design.jpg',
+    image: '/images/landing-assets/biz/phase-02-design.png',
   },
   {
     num: '03',
@@ -33,7 +33,7 @@ const PHASES = [
     description:
       'פיתוח מוצר מינימלי מתפקד, בדיקות שוק, פיילוטים ראשונים עם לקוחות, ואיסוף דאטה לאימות המודל.',
     deliverables: ['MVP מוכן', 'פיילוטים', 'Product-Market Fit'],
-    image: '/images/landing-assets/biz/phase-03-mvp.jpg',
+    image: '/images/landing-assets/biz/phase-03-mvp.png',
   },
   {
     num: '04',
@@ -43,7 +43,7 @@ const PHASES = [
     description:
       'השקה מסחרית, גיוס סבב ראשון מחברות הון סיכון ברשת שלנו, ובניית צוות עצמאי. היציאה שלכם מתוזמנת להצלחה.',
     deliverables: ['חברה עצמאית', 'סבב גיוס', 'צוות מנהל'],
-    image: '/images/landing-assets/biz/phase-04-launch.jpg',
+    image: '/images/landing-assets/biz/phase-04-launch.png',
   },
 ];
 
@@ -57,7 +57,19 @@ export default function SolutionTimeline() {
           'linear-gradient(180deg, #070b1e 0%, #0a1020 50%, #070b1e 100%)',
       }}
     >
-      <div className="container-corporate">
+      {/* Background blueprint pattern (graceful fallback) */}
+      <div className="absolute inset-0 z-0 opacity-15">
+        <SafeImage
+          src="/images/landing-assets/biz/timeline-bg.png"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e] via-transparent to-[#070b1e]" />
+      </div>
+
+      <div className="container-corporate relative z-10">
         <div className="text-center mb-16 max-w-3xl mx-auto">
           <ScrollReveal variant="up">
             <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-[0.25em] mb-4">

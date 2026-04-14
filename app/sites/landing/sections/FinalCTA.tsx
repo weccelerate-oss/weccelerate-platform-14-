@@ -11,7 +11,7 @@ export default function FinalCTA() {
       {/* Background image (graceful) */}
       <div className="absolute inset-0 z-0 opacity-30">
         <SafeImage
-          src="/images/landing-assets/landing/cta-bg.jpg"
+          src="/images/landing-assets/landing/cta-bg.png"
           alt=""
           fill
           className="object-cover"

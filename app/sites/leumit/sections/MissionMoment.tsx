@@ -11,7 +11,7 @@ export default function MissionMoment() {
     <section className="relative min-h-[80vh] flex items-center overflow-hidden">
       {/* Big edge-to-edge background image */}
       <SafeImage
-        src="/images/landing-assets/leumit/mission-moment.jpg"
+        src="/images/landing-assets/leumit/mission-moment.png"
         alt="חזון: לעזור לישראלים להוביל בחדשנות רפואית"
         fill
         className="object-cover z-0"

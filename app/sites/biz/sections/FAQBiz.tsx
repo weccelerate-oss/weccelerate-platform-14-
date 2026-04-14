@@ -60,7 +60,7 @@ export default function FAQBiz() {
                 className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-emerald-500/20 group"
               >
                 <SafeImage
-                  src="/images/landing-assets/biz/faq-side.jpg"
+                  src="/images/landing-assets/biz/faq-side.png"
                   alt="צוות הייעוץ העסקי שלנו"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"

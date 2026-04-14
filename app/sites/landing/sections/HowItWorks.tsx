@@ -12,7 +12,7 @@ const STEPS = [
     title: 'שיחת היכרות',
     duration: '20 דקות · חינם',
     description: 'נכיר אתכם, נשמע על הרעיון, נבין מה הצרכים והאתגרים.',
-    image: '/images/landing-assets/landing/step-1-call.jpg',
+    image: '/images/landing-assets/landing/step-1-call.png',
   },
   {
     num: '2',
@@ -20,7 +20,7 @@ const STEPS = [
     title: 'תוכנית פעולה',
     duration: 'תוך שבוע',
     description: 'נבנה יחד מסלול אישי: מה לעשות, באיזה סדר, ומה יעלה.',
-    image: '/images/landing-assets/landing/step-2-plan.jpg',
+    image: '/images/landing-assets/landing/step-2-plan.png',
   },
   {
     num: '3',
@@ -28,7 +28,7 @@ const STEPS = [
     title: 'ליווי צמוד',
     duration: 'עד ההצלחה',
     description: 'הצוות שלנו עובד לצד שלכם — לא במקומכם. אנחנו שותפים, לא ספקים.',
-    image: '/images/landing-assets/landing/step-3-support.jpg',
+    image: '/images/landing-assets/landing/step-3-support.png',
   },
   {
     num: '4',
@@ -36,7 +36,7 @@ const STEPS = [
     title: 'השקה והצלחה',
     duration: 'יחד',
     description: 'מהגיוס הראשון ועד הכניסה לשוק הבינלאומי — ממשיכים לצד שלכם.',
-    image: '/images/landing-assets/landing/step-4-success.jpg',
+    image: '/images/landing-assets/landing/step-4-success.png',
   },
 ];
 

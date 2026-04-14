@@ -48,6 +48,18 @@ export default function CTAForm() {
           'linear-gradient(180deg, #040B16 0%, #060F1F 50%, #040B16 100%)',
       }}
     >
+      {/* Background image (graceful fallback) */}
+      <div className="absolute inset-0 z-0 opacity-25">
+        <Image
+          src="/images/landing-assets/leumit/cta-bg.png"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#040B16] via-[#040B16]/60 to-[#040B16]" />
+      </div>
+
       {/* ambient glow */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] pointer-events-none"

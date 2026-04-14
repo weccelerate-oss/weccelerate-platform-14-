@@ -22,7 +22,7 @@ const TESTIMONIALS: Testimonial[] = [
     company: 'Gesher',
     quote:
       'הם עזרו לי בתוכנית העסקית, בשיווק, בפיתוח הפלטפורמה, וגם גייסו לי כספים. הכול במקום אחד, עם אנשים שאכפת להם באמת.',
-    image: '/images/landing-assets/landing/testimonial-1.jpg',
+    image: '/images/landing-assets/landing/testimonial-1.png',
     result: 'גיוס מוצלח',
     initials: 'רל',
   },
@@ -32,7 +32,7 @@ const TESTIMONIALS: Testimonial[] = [
     company: 'Grouping',
     quote:
       'אני יזם ותיק ועבדתי עם הרבה יועצים. הצוות של WeCcelerate הוא הראשון שעשה בפועל — לא רק דיבר. מקצועיים ברמה הכי גבוהה.',
-    image: '/images/landing-assets/landing/testimonial-2.jpg',
+    image: '/images/landing-assets/landing/testimonial-2.png',
     result: 'MVP תוך 4 חודשים',
     initials: 'גש',
   },
@@ -42,7 +42,7 @@ const TESTIMONIALS: Testimonial[] = [
     company: 'Arine',
     quote:
       'פיתחנו מוצר פיזי מאפס. בלעדיהם לא היינו מצליחים. הליווי קצה לקצה עשה את כל ההבדל — מהעיצוב ועד הייצור.',
-    image: '/images/landing-assets/landing/testimonial-3.jpg',
+    image: '/images/landing-assets/landing/testimonial-3.png',
     result: 'מוצר בייצור',
     initials: 'אס',
   },

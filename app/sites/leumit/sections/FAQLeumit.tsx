@@ -74,7 +74,7 @@ export default function FAQLeumit() {
                 className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-cyan-500/20 group"
               >
                 <SafeImage
-                  src="/images/landing-assets/leumit/faq-side.jpg"
+                  src="/images/landing-assets/leumit/faq-side.png"
                   alt="צוות הייעוץ הרפואי שלנו זמין למענה"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"

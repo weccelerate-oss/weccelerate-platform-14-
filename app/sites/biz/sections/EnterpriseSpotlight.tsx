@@ -22,7 +22,7 @@ export default function EnterpriseSpotlight() {
                 className="relative aspect-[5/4] sm:aspect-[16/11] rounded-2xl sm:rounded-3xl overflow-hidden border border-emerald-500/20"
               >
                 <SafeImage
-                  src="/images/landing-assets/biz/spotlight-main.jpg"
+                  src="/images/landing-assets/biz/spotlight-main.png"
                   alt="ארגונים מובילים בישראל בחרו ב-WeCcelerate Business"
                   fill
                   className="object-cover"
@@ -80,7 +80,7 @@ export default function EnterpriseSpotlight() {
                 className="hidden lg:block absolute -bottom-12 -right-8 w-48 h-32 rounded-2xl overflow-hidden border-4 border-[#070b1e] shadow-2xl shadow-emerald-500/20 z-10"
               >
                 <SafeImage
-                  src="/images/landing-assets/biz/spotlight-detail.jpg"
+                  src="/images/landing-assets/biz/spotlight-detail.png"
                   alt="פירוט מיזם"
                   fill
                   className="object-cover"

@@ -45,7 +45,7 @@ export default function BioScanShowcase() {
               transition={{ type: 'spring', stiffness: 200, damping: 25 }}
             >
               <SafeImage
-                src="/images/landing-assets/leumit/section-divider-1.jpg"
+                src="/images/landing-assets/leumit/section-divider-1.png"
                 alt="הצצה למערכת הדאטה הרפואית של לאומית"
                 fill
                 className="object-cover"

@@ -17,37 +17,37 @@ const VALUES = [
     icon: UsersRound,
     title: 'צוות יעודי מהיום הראשון',
     description: 'CTO, מנהל מוצר, דיזיינר, מפתחים — צוות שלם מתכנסים סביב המיזם שלכם מיד.',
-    image: '/images/landing-assets/biz/value-team.jpg',
+    image: '/images/landing-assets/biz/value-team.png',
   },
   {
     icon: Workflow,
     title: 'מתודולוגיה מוכחת',
     description: '40+ מיזמים שהוקמו תחת הגג שלנו. אנחנו לא מנסים — אנחנו יודעים מה עובד.',
-    image: '/images/landing-assets/biz/value-method.jpg',
+    image: '/images/landing-assets/biz/value-method.png',
   },
   {
     icon: Network,
     title: 'רשת 200+ משקיעים',
     description: 'גישה ישירה לקרנות הון סיכון, אנג׳לים ולקוחות אסטרטגיים בישראל ובחו״ל.',
-    image: '/images/landing-assets/biz/value-network.jpg',
+    image: '/images/landing-assets/biz/value-network.png',
   },
   {
     icon: HandshakeIcon,
     title: 'שותפות אסטרטגית',
     description: 'אנחנו לא ספקים — אנחנו שותפים. אתם חלק מכל החלטה מהותית לאורך הדרך.',
-    image: '/images/landing-assets/biz/value-partnership.jpg',
+    image: '/images/landing-assets/biz/value-partnership.png',
   },
   {
     icon: DollarSign,
     title: 'גמישות בתמחור',
     description: 'Equity, Success Fee, Retainer, או שילוב. המודל מתאים את עצמו למבנה ולצרכים שלכם.',
-    image: '/images/landing-assets/biz/value-pricing.jpg',
+    image: '/images/landing-assets/biz/value-pricing.png',
   },
   {
     icon: ShieldCheck,
     title: 'יציאה נקייה',
     description: 'IP מלא נשאר אצלכם. הסכם שותפות ברור, ללא מלכודות, עם נקודות יציאה שקופות.',
-    image: '/images/landing-assets/biz/value-ip.jpg',
+    image: '/images/landing-assets/biz/value-ip.png',
   },
 ];
 

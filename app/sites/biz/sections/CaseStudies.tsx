@@ -18,7 +18,7 @@ const CASES: CaseStudy[] = [
   {
     category: 'SaaS B2B',
     title: 'פלטפורמת ניהול לתעשיית הייצור',
-    image: '/images/landing-assets/biz/case-saas.jpg',
+    image: '/images/landing-assets/biz/case-saas.png',
     result: '$2.5M',
     metric: 'גויסו תוך 14 חודשים',
     description:
@@ -27,7 +27,7 @@ const CASES: CaseStudy[] = [
   {
     category: 'Hardware · IoT',
     title: 'מוצר חכם לחקלאות מדייקת',
-    image: '/images/landing-assets/biz/case-hardware.jpg',
+    image: '/images/landing-assets/biz/case-hardware.png',
     result: '3 אב טיפוסים',
     metric: 'בשלושה חודשים',
     description:
@@ -36,7 +36,7 @@ const CASES: CaseStudy[] = [
   {
     category: 'MedTech',
     title: 'יחידה חדשה לטלה-רפואה',
-    image: '/images/landing-assets/biz/case-medtech.jpg',
+    image: '/images/landing-assets/biz/case-medtech.png',
     result: '1,800+',
     metric: 'משתמשים פעילים בפיילוט',
     description:

@@ -12,7 +12,7 @@ const PROBLEMS = [
     description:
       'הפרויקט המבטיח של השנה שעברה עדיין לא הגיע לאור. ה-POC תקוע ב-R&D. הפיילוט מחכה לתקציב הבא.',
     pain: 'אתם מפספסים זמן יקר — והמתחרים כבר שם.',
-    image: '/images/landing-assets/biz/problem-stuck.jpg',
+    image: '/images/landing-assets/biz/problem-stuck.png',
   },
   {
     icon: Users2,
@@ -20,7 +20,7 @@ const PROBLEMS = [
     description:
       'אין לכם ידיים פנויות לבנות מוצר חדש מאפס בלי לפגוע בליבה. הגיוס לוקח חודשים, והידע הטכני חסר.',
     pain: 'אתם יודעים מה צריך לעשות — רק לא יודעים מי יעשה את זה.',
-    image: '/images/landing-assets/biz/problem-overload.jpg',
+    image: '/images/landing-assets/biz/problem-overload.png',
   },
   {
     icon: TrendingDown,
@@ -28,7 +28,7 @@ const PROBLEMS = [
     description:
       'ההנהלה והדירקטוריון רוצים לראות תוצאות מוכחות לפני שמתחייבים. אבל חדשנות לא עובדת ככה — היא דורשת אמונה מוקדמת.',
     pain: 'אין לכם עצם המתודולוגיה שמאזנת בין סיכון לתוצאה.',
-    image: '/images/landing-assets/biz/problem-risk.jpg',
+    image: '/images/landing-assets/biz/problem-risk.png',
   },
 ];
 
