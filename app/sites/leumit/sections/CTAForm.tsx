@@ -147,8 +147,8 @@ export default function CTAForm() {
           </div>
 
           {/* Right — form */}
-          <ScrollReveal variant="right" delay={200}>
-            <div className="xl:col-span-3">
+          <ScrollReveal variant="right" delay={200} className="xl:col-span-3">
+            <div>
               <div className="relative rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 sm:p-8 md:p-10 backdrop-blur-sm">
                 {submitted ? (
                   <div className="text-center py-10">
