@@ -9,7 +9,7 @@ import { FloatingOrbs, Sparkles, GradientBlob } from '@/components/landing-helpe
 
 export default function HeroLeumit() {
   return (
-    <section className="relative min-h-[88vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[100vh] sm:min-h-[88vh] flex items-center overflow-hidden">
       <Image
         src="/images/hero/hero-medtech.jpg"
         alt="ליווי MedTech בשותפות עם לאומית"
@@ -53,41 +53,41 @@ export default function HeroLeumit() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent z-[3]" />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent z-[3]" />
 
-      <div className="container-corporate relative z-10 py-20">
+      <div className="container-corporate relative z-10 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto text-center">
           {/* Big partnership lockup */}
           <ScrollReveal variant="up">
             <motion.div
-              className="relative inline-block mb-8"
+              className="relative inline-block mb-6 sm:mb-8"
               animate={{ y: [0, -4, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
               {/* Soft radial glow behind logo */}
               <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[140px] rounded-full pointer-events-none"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[340px] h-[120px] sm:h-[140px] rounded-full pointer-events-none"
                 style={{
                   background:
                     'radial-gradient(ellipse at center, rgba(6,182,212,0.15) 0%, rgba(212,175,55,0.08) 50%, transparent 80%)',
                 }}
               />
               <Image
-                src="/images/leumit-weccelerate.png"
+                src="/images/leumit-weccelerate-transparent.png"
                 alt="Leumit × WeCcelerate Strategic Partnership"
-                width={400}
-                height={100}
-                className="relative h-20 sm:h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_30px_rgba(6,182,212,0.4)]"
+                width={500}
+                height={140}
+                className="relative h-20 sm:h-28 md:h-32 lg:h-36 w-auto object-contain drop-shadow-[0_0_40px_rgba(6,182,212,0.45)]"
                 priority
               />
             </motion.div>
           </ScrollReveal>
 
           <ScrollReveal variant="up" delay={50}>
-            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase tracking-[0.22em] px-5 py-2.5 rounded-full mb-8 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em] px-3 sm:px-5 py-2 sm:py-2.5 rounded-full mb-6 sm:mb-8 backdrop-blur-sm max-w-[90vw]">
               <span
-                className="w-2 h-2 rounded-full bg-cyan-400"
+                className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-cyan-400 flex-shrink-0"
                 style={{ boxShadow: '0 0 10px 2px rgba(6,182,212,0.6)' }}
               />
-              שותפות אסטרטגית · Leumit × WeCcelerate
+              <span className="truncate">שותפות אסטרטגית · Leumit × WeCcelerate</span>
             </div>
           </ScrollReveal>
 
@@ -98,7 +98,7 @@ export default function HeroLeumit() {
           </ScrollReveal>
 
           <ScrollReveal variant="up" delay={200}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-8 leading-[1.05]">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-6 sm:mb-8 leading-[1.1] sm:leading-[1.05] px-2 sm:px-0">
               יש לך רעיון{' '}
               <span className="bg-gradient-to-l from-cyan-400 via-cyan-300 to-[#D4AF37] bg-clip-text text-transparent">
                 לסטארטאפ רפואי
@@ -110,7 +110,7 @@ export default function HeroLeumit() {
           </ScrollReveal>
 
           <ScrollReveal variant="up" delay={300}>
-            <p className="text-lg sm:text-xl text-white/60 leading-relaxed mb-12 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-white/60 leading-relaxed mb-8 sm:mb-12 max-w-2xl mx-auto px-2 sm:px-0">
               ליווי מעטפת 360° ליזמי רפואה דיגיטלית — מהרעיון לאישור הרגולטורי, עם גישה
               למאגר המטופלים של לאומית, רופאים מומחים וייעוץ FDA ישיר.
             </p>
@@ -118,24 +118,24 @@ export default function HeroLeumit() {
 
           <ScrollReveal variant="up" delay={400}>
             <motion.div
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-14 px-4 sm:px-0 max-w-md sm:max-w-none mx-auto"
               animate={{ y: [0, -4, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
               <a
                 href="#contact"
-                className="group inline-flex items-center gap-3 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white px-9 py-4 text-base font-bold hover:scale-[1.05] hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300 rounded-lg shadow-lg shadow-cyan-500/20 relative overflow-hidden"
+                className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white px-6 sm:px-9 py-4 text-sm sm:text-base font-bold hover:scale-[1.05] hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300 rounded-lg shadow-lg shadow-cyan-500/20 relative overflow-hidden"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <Stethoscope className="w-5 h-5 relative" />
+                <Stethoscope className="w-5 h-5 relative flex-shrink-0" />
                 <span className="relative">קבלו שיחת ייעוץ רפואית</span>
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform relative" />
+                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform relative flex-shrink-0" />
               </a>
               <a
                 href="#tracks"
-                className="inline-flex items-center gap-2 border border-white/15 text-white/70 px-8 py-4 font-medium hover:bg-white/5 hover:border-white/30 hover:text-white transition-all rounded-lg"
+                className="inline-flex items-center justify-center gap-2 border border-white/15 text-white/70 px-6 sm:px-8 py-4 text-sm sm:text-base font-medium hover:bg-white/5 hover:border-white/30 hover:text-white transition-all rounded-lg"
               >
-                <ShieldCheck className="w-5 h-5" />
+                <ShieldCheck className="w-5 h-5 flex-shrink-0" />
                 צפו בתוכנית המלאה
               </a>
             </motion.div>

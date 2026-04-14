@@ -40,7 +40,7 @@ export default function BioScanShowcase() {
           {/* Left — visual */}
           <ScrollReveal variant="left">
             <motion.div
-              className="relative aspect-[4/5] sm:aspect-[5/4] rounded-3xl overflow-hidden border border-cyan-500/20 group"
+              className="relative aspect-square sm:aspect-[5/4] lg:aspect-[4/5] rounded-2xl sm:rounded-3xl overflow-hidden border border-cyan-500/20 group"
               whileHover={{ scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 200, damping: 25 }}
             >
@@ -57,30 +57,30 @@ export default function BioScanShowcase() {
 
               {/* Floating data card overlay */}
               <motion.div
-                className="absolute top-6 right-6 bg-[#040B16]/85 border border-cyan-400/40 backdrop-blur-md rounded-2xl p-4 shadow-xl shadow-cyan-500/20"
+                className="absolute top-3 sm:top-6 right-3 sm:right-6 bg-[#040B16]/85 border border-cyan-400/40 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl shadow-cyan-500/20"
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <div className="text-[10px] uppercase tracking-wider text-cyan-300/80 mb-1">
+                <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-cyan-300/80 mb-1">
                   גישה לדאטה
                 </div>
-                <div className="text-3xl font-bold bg-gradient-to-l from-cyan-300 to-[#D4AF37] bg-clip-text text-transparent tabular-nums">
+                <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-l from-cyan-300 to-[#D4AF37] bg-clip-text text-transparent tabular-nums">
                   720K+
                 </div>
-                <div className="text-[10px] text-white/50 mt-1">מטופלים אנונימיים</div>
+                <div className="text-[9px] sm:text-[10px] text-white/50 mt-1">מטופלים אנונימיים</div>
               </motion.div>
 
               {/* Bottom floating tag */}
               <motion.div
-                className="absolute bottom-6 left-6 bg-[#040B16]/85 border border-[#D4AF37]/40 backdrop-blur-md rounded-2xl p-4 shadow-xl shadow-[#D4AF37]/10"
+                className="absolute bottom-3 sm:bottom-6 left-3 sm:left-6 bg-[#040B16]/85 border border-[#D4AF37]/40 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl shadow-[#D4AF37]/10"
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
               >
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs font-semibold text-emerald-300">מחובר · LIVE</span>
+                  <span className="text-[10px] sm:text-xs font-semibold text-emerald-300">מחובר · LIVE</span>
                 </div>
-                <div className="text-xs text-white/60 mt-1.5">8.7M ביקורים השנה</div>
+                <div className="text-[10px] sm:text-xs text-white/60 mt-1.5">8.7M ביקורים השנה</div>
               </motion.div>
 
               {/* Animated scan line */}

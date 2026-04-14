@@ -155,7 +155,7 @@ async function getDashboardStats() {
       landing: 'קמפיין',
     };
 
-    const recentLeads = recentLeadLogs.map((log) => {
+    const recentLeads = recentLeadLogs.map((log: { id: string; createdAt: Date; metadata: unknown }) => {
       const meta = (log.metadata as Record<string, unknown>) || {};
       const site = (meta.site as string) || 'main';
       return {
@@ -357,9 +357,9 @@ export default async function AdminDashboardPage() {
                   אין לידים עדיין. לידים מטפסי יצירת קשר יופיעו כאן.
                 </div>
               ) : (
-                recentLeads.map((lead) => {
-                  const site = (lead as { site?: string }).site || 'main';
-                  const siteShort = (lead as { siteShort?: string }).siteShort || 'אתר';
+                recentLeads.map((lead: { id: string; name: string; email: string; createdAt: Date; site?: string; siteShort?: string; source?: string }) => {
+                  const site = lead.site || 'main';
+                  const siteShort = lead.siteShort || 'אתר';
                   const sourceStyles: Record<string, string> = {
                     main: 'bg-blue-50 text-blue-700 border-blue-200',
                     leumit: 'bg-cyan-50 text-cyan-700 border-cyan-200',

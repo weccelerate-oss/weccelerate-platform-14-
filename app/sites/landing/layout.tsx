@@ -37,13 +37,12 @@ export default function LandingLayout({ children }: LandingLayoutProps) {
 
       <header className="absolute top-0 left-0 right-0 z-50">
         <nav className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="relative h-12 md:h-14 w-36 md:w-44 drop-shadow-[0_0_15px_rgba(200,169,81,0.3)]">
+          <div className="relative h-12 sm:h-14 md:h-16 w-36 sm:w-44 md:w-52 drop-shadow-[0_0_20px_rgba(212,175,55,0.4)]">
             <Image
-              src="/images/logos/weccelerate-logo-wide.jpeg"
+              src="/images/weccelerate-gold.png"
               alt="WeCcelerate"
               fill
               className="object-contain object-right"
-              style={{ mixBlendMode: 'screen' }}
               priority
             />
           </div>
@@ -61,23 +60,22 @@ export default function LandingLayout({ children }: LandingLayoutProps) {
 
       <footer className="bg-[#030713] border-t border-white/5 py-10">
         <div className="container mx-auto px-4 flex flex-col items-center gap-4">
-          <div className="relative h-10 w-32">
+          <div className="relative h-12 w-40">
             <Image
-              src="/images/logos/weccelerate-logo-wide.jpeg"
+              src="/images/weccelerate-gold.png"
               alt="WeCcelerate"
               fill
-              className="object-contain"
-              style={{ mixBlendMode: 'screen' }}
+              className="object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]"
             />
           </div>
-          <div className="text-center text-xs text-white/30">
+          <div className="text-center text-xs text-white/30 px-4 leading-relaxed">
             © {new Date().getFullYear()} WeCcelerate Ltd. ·{' '}
             <a href="/privacy" className="hover:text-white/60 transition-colors">
               מדיניות פרטיות
             </a>{' '}
             ·{' '}
-            <a href="/terms" className="hover:text-white/60 transition-colors">
-              תנאי שימוש
+            <a href="/accessibility" className="hover:text-white/60 transition-colors">
+              הצהרת נגישות
             </a>{' '}
             ·{' '}
             <a href="https://weccelerate.co.il" className="text-[#c8a951]/70 hover:text-[#c8a951] transition-colors">

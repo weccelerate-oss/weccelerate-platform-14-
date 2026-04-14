@@ -61,19 +61,19 @@ export default function LeumitLayout({ children }: LeumitLayoutProps) {
           </div>
         </div>
 
-        <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
+        <nav className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-3">
+          <Link href="/" className="flex items-center gap-3 group flex-shrink min-w-0">
             <Image
-              src="/images/leumit-weccelerate.png"
+              src="/images/leumit-weccelerate-transparent.png"
               alt="Leumit × WeCcelerate"
-              width={280}
-              height={64}
-              className="h-11 md:h-12 w-auto object-contain group-hover:opacity-90 transition-opacity drop-shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+              width={320}
+              height={80}
+              className="h-10 sm:h-12 md:h-14 w-auto object-contain group-hover:opacity-90 transition-opacity drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]"
               priority
             />
           </Link>
 
-          <div className="hidden md:flex items-center gap-6 text-sm text-white/70">
+          <div className="hidden lg:flex items-center gap-6 text-sm text-white/70">
             <a href="#tracks" className="hover:text-cyan-400 transition-colors">
               מסלולים
             </a>
@@ -90,7 +90,7 @@ export default function LeumitLayout({ children }: LeumitLayoutProps) {
 
           <a
             href="#contact"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white font-bold px-5 py-2.5 rounded-lg shadow-lg shadow-cyan-500/20 hover:scale-[1.03] transition-transform text-sm"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg shadow-lg shadow-cyan-500/20 hover:scale-[1.03] transition-transform text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
           >
             קבלו ייעוץ
           </a>
@@ -104,11 +104,11 @@ export default function LeumitLayout({ children }: LeumitLayoutProps) {
           <div className="grid md:grid-cols-4 gap-10">
             <div className="md:col-span-2">
               <Image
-                src="/images/leumit-weccelerate.png"
+                src="/images/leumit-weccelerate-transparent.png"
                 alt="Leumit WeCcelerate"
-                width={240}
-                height={60}
-                className="h-10 w-auto object-contain mb-5"
+                width={280}
+                height={80}
+                className="h-12 sm:h-14 w-auto object-contain mb-5 drop-shadow-[0_0_20px_rgba(6,182,212,0.2)]"
               />
               <p className="text-white/50 leading-relaxed mb-5 max-w-md text-sm">
                 שותפות אסטרטגית להאצת חדשנות רפואית בישראל. ליווי מלא ליזמי MedTech — מרעיון לאישור רגולטורי ולהשקה בינלאומית.
@@ -169,12 +169,12 @@ export default function LeumitLayout({ children }: LeumitLayoutProps) {
             <p className="text-white/30">
               © {new Date().getFullYear()} WeCcelerate Ltd. בשותפות עם לאומית שירותי בריאות.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <Link href="/privacy" className="text-white/30 hover:text-white/60 transition-colors">
                 מדיניות פרטיות
               </Link>
-              <Link href="/terms" className="text-white/30 hover:text-white/60 transition-colors">
-                תנאי שימוש
+              <Link href="/accessibility" className="text-white/30 hover:text-white/60 transition-colors">
+                הצהרת נגישות
               </Link>
               <Link href="https://www.leumit.co.il" className="text-cyan-400/70 hover:text-cyan-400 transition-colors">
                 leumit.co.il ↗

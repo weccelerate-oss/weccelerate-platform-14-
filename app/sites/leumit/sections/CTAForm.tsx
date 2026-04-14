@@ -80,11 +80,11 @@ export default function CTAForm() {
                     }}
                   />
                   <Image
-                    src="/images/leumit-weccelerate.png"
+                    src="/images/leumit-weccelerate-transparent.png"
                     alt="Leumit × WeCcelerate"
-                    width={280}
-                    height={70}
-                    className="relative h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.25)]"
+                    width={320}
+                    height={90}
+                    className="relative h-16 sm:h-20 w-auto object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.3)]"
                   />
                 </motion.div>
               </div>
@@ -149,7 +149,7 @@ export default function CTAForm() {
           {/* Right — form */}
           <ScrollReveal variant="right" delay={200}>
             <div className="lg:col-span-3">
-              <div className="relative rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-8 md:p-10 backdrop-blur-sm">
+              <div className="relative rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 sm:p-8 md:p-10 backdrop-blur-sm">
                 {submitted ? (
                   <div className="text-center py-10">
                     <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/15 border border-cyan-400/30">
