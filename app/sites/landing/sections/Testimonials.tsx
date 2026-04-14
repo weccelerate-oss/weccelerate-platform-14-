@@ -22,7 +22,7 @@ const TESTIMONIALS: Testimonial[] = [
     company: 'Gesher',
     quote:
       'הם עזרו לי בתוכנית העסקית, בשיווק, בפיתוח הפלטפורמה, וגם גייסו לי כספים. הכול במקום אחד, עם אנשים שאכפת להם באמת.',
-    image: '/images/landing-assets/landing/testimonial-1.png',
+    image: '/images/landing-assets/landing/value-team.png',
     result: 'גיוס מוצלח',
     initials: 'רל',
   },

@@ -50,7 +50,7 @@ export default function FAQLanding() {
                 className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-[#c8a951]/25 group"
               >
                 <SafeImage
-                  src="/images/landing-assets/landing/faq-side.png"
+                  src="/images/landing-assets/landing/testimonial-1.png"
                   alt="צוות הייעוץ של WeCcelerate זמין לעזור"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
