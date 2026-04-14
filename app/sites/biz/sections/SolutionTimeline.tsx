@@ -2,6 +2,7 @@
 
 import { Search, Target, Rocket, Award } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { SafeImage } from '@/components/landing-helpers/SafeImage';
 
 const PHASES = [
   {
@@ -12,6 +13,7 @@ const PHASES = [
     description:
       'ניתוח הזדמנות עסקית, מחקר שוק ראשוני, בדיקת התאמה לליבת הארגון וגיבוש הצעת ערך מקדמית.',
     deliverables: ['דוח היתכנות', 'ניתוח שוק', 'המלצה אסטרטגית'],
+    image: '/images/landing-assets/biz/phase-01-discovery.jpg',
   },
   {
     num: '02',
@@ -21,6 +23,7 @@ const PHASES = [
     description:
       'בניית מודל עסקי מלא, מצגת למשקיעים, תוכנית פיננסית, הגדרת KPI-ים ותוכנית יישום מפורטת.',
     deliverables: ['Business Model', 'מודל פיננסי', 'Pitch Deck', 'תוכנית עבודה'],
+    image: '/images/landing-assets/biz/phase-02-design.jpg',
   },
   {
     num: '03',
@@ -30,6 +33,7 @@ const PHASES = [
     description:
       'פיתוח מוצר מינימלי מתפקד, בדיקות שוק, פיילוטים ראשונים עם לקוחות, ואיסוף דאטה לאימות המודל.',
     deliverables: ['MVP מוכן', 'פיילוטים', 'Product-Market Fit'],
+    image: '/images/landing-assets/biz/phase-03-mvp.jpg',
   },
   {
     num: '04',
@@ -39,6 +43,7 @@ const PHASES = [
     description:
       'השקה מסחרית, גיוס סבב ראשון מחברות הון סיכון ברשת שלנו, ובניית צוות עצמאי. היציאה שלכם מתוזמנת להצלחה.',
     deliverables: ['חברה עצמאית', 'סבב גיוס', 'צוות מנהל'],
+    image: '/images/landing-assets/biz/phase-04-launch.jpg',
   },
 ];
 
@@ -99,27 +104,42 @@ export default function SolutionTimeline() {
 
                       {/* Content */}
                       <div className="flex-1 pb-8 md:pb-0">
-                        <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-6 md:p-8 hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all duration-500">
-                          <div className="flex flex-wrap items-center gap-3 mb-3">
-                            <h3 className="text-xl md:text-2xl font-bold text-white">
-                              {phase.title}
-                            </h3>
-                            <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-                              {phase.duration}
-                            </span>
+                        <div className="rounded-2xl border border-white/8 bg-white/[0.02] hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all duration-500 overflow-hidden group">
+                          {/* Phase image strip */}
+                          <div className="relative h-32 sm:h-36 overflow-hidden">
+                            <SafeImage
+                              src={phase.image}
+                              alt={phase.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-700"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0a1020] via-[#0a1020]/30 to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent" />
                           </div>
-                          <p className="text-white/55 leading-relaxed mb-5 text-sm md:text-base">
-                            {phase.description}
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {phase.deliverables.map((d, i) => (
-                              <span
-                                key={i}
-                                className="text-[11px] text-white/50 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full"
-                              >
-                                ✓ {d}
+
+                          <div className="p-6 md:p-8">
+                            <div className="flex flex-wrap items-center gap-3 mb-3">
+                              <h3 className="text-xl md:text-2xl font-bold text-white">
+                                {phase.title}
+                              </h3>
+                              <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+                                {phase.duration}
                               </span>
-                            ))}
+                            </div>
+                            <p className="text-white/55 leading-relaxed mb-5 text-sm md:text-base">
+                              {phase.description}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {phase.deliverables.map((d, i) => (
+                                <span
+                                  key={i}
+                                  className="text-[11px] text-white/50 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full"
+                                >
+                                  ✓ {d}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </div>

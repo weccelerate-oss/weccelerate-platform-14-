@@ -10,10 +10,11 @@
 
 ## טבלת תוכן
 
-- [Subdomain: LEUMIT (10 תמונות)](#leumit-images)
-- [Subdomain: BIZ (8 תמונות)](#biz-images)
-- [Subdomain: LANDING (9 תמונות)](#landing-images)
+- [Subdomain: LEUMIT (11 תמונות)](#leumit-images)
+- [Subdomain: BIZ (18 תמונות)](#biz-images)
+- [Subdomain: LANDING (13 תמונות)](#landing-images)
 - [Decorative Patterns (משותפים, 3 תמונות)](#decorative-patterns)
+- [**עדכון V2 — 18 תמונות נוספות**](#v2-additions) — תמונות לסקשנים ה-Solution Timeline, Value Grid, How It Works, Final CTA, Advisory Board, ועוד
 
 ---
 
@@ -412,3 +413,237 @@ background. Smooth curves, slightly asymmetric, elegant. SVG vector or PNG trans
 3. אם משהו לא נטען — פתחו DevTools → Network ובדקו אילו תמונות מחזירות 404.
 
 הקוד מטפל ב-fallback: אם תמונה חסרה, היא פשוט לא תוצג ולא תשבור את הדף.
+
+---
+
+# V2 ADDITIONS
+
+הוספת 18 תמונות חדשות לסקשנים שהועשרו בגרסה השנייה. כל הפרומפטים שומרים על אותו סגנון אחיד: כהה, מינימליסטי, אלגנטי, פלטה תואמת לכל סאבדומיין.
+
+## LEUMIT — תמונות נוספות
+
+### V2-1. `public/images/landing-assets/leumit/advisory-bg.jpg`
+**שימוש:** רקע דקורטיבי תת-סף ל-AdvisoryBoard
+**יחס:** 21:9 (banner רחב)
+
+```
+Wide cinematic banner: abstract dark blue medical pattern — subtle
+ECG heartbeat lines, DNA helix wireframes, and floating data points
+in cyan (#06B6D4) glow. Ultra-minimal, almost like a hidden background
+texture. Deep navy (#040B16) base. Style: scientific, premium,
+sophisticated. 5-10% visual weight only — it's a backdrop, not a focal
+point. Photorealistic with subtle digital art elements. 2520×1080.
+```
+
+## BIZ — תמונות נוספות (10 סך הכל)
+
+### V2-2 → V2-7. Value Grid Cards (6 תמונות)
+
+נושא: 6 ערכים אסטרטגיים של החברה. כל תמונה צריכה להיות מינימליסטית, סמלית, ולהוסיף עומק לכרטיס בלי להעמיס.
+
+#### V2-2. `public/images/landing-assets/biz/value-team.jpg`
+**שימוש:** ValueGrid #1 — צוות יעודי
+**יחס:** 4:3
+
+```
+Top-down cinematic shot of a sleek modern conference table with 5
+empty designer chairs around it, a single open laptop showing a
+team org chart, two coffee cups, a notebook, and warm gold lighting
+from above. Mood: ready for collaboration, dedicated team, focused.
+No people. Photorealistic, premium corporate aesthetic. 1600×1200.
+```
+
+#### V2-3. `public/images/landing-assets/biz/value-method.jpg`
+**שימוש:** ValueGrid #2 — מתודולוגיה מוכחת
+**יחס:** 4:3
+
+```
+Close-up macro of an architectural blueprint in deep navy with
+glowing emerald (#10B981) and gold lines, showing a multi-step
+business process diagram. Subtle technical drawing aesthetic, ruler
+and pencil partially visible at the edge. Premium engineering / strategy
+mood. Cinematic side lighting. Photorealistic, 1600×1200.
+```
+
+#### V2-4. `public/images/landing-assets/biz/value-network.jpg`
+**שימוש:** ValueGrid #3 — רשת 200+ משקיעים
+**יחס:** 4:3
+
+```
+Abstract visualization of a global network — glowing emerald nodes
+connected by thin gold lines, forming a constellation pattern over
+a dark navy background. Deep depth, particles in the foreground.
+Suggests connectivity, scale, premium investor network. Style: data-art,
+elegant, scientific. Photorealistic with digital art elements. 1600×1200.
+```
+
+#### V2-5. `public/images/landing-assets/biz/value-partnership.jpg`
+**שימוש:** ValueGrid #4 — שותפות אסטרטגית
+**יחס:** 4:3
+
+```
+Cinematic close-up of two hands shaking firmly across a dark wood
+table — one clearly an executive, the other a co-founder. Warm gold
+side lighting. Shallow depth of field. Mood: trust, partnership,
+commitment. Photorealistic, 1600×1200.
+```
+
+#### V2-6. `public/images/landing-assets/biz/value-pricing.jpg`
+**שימוש:** ValueGrid #5 — גמישות בתמחור
+**יחס:** 4:3
+
+```
+Top-down shot of a dark wood desk with three small abstract objects
+representing different pricing models: a small gold coin (success fee),
+a folded piece of paper (retainer agreement), and a small puzzle piece
+(equity). Soft gold lighting. Minimal, symbolic, premium. Photorealistic,
+1600×1200.
+```
+
+#### V2-7. `public/images/landing-assets/biz/value-ip.jpg`
+**שימוש:** ValueGrid #6 — IP מלא נשאר אצלכם
+**יחס:** 4:3
+
+```
+Close-up of an official-looking embossed seal on dark navy paper —
+features an abstract IP / patent shield symbol in gold leaf with
+the words "INTELLECTUAL PROPERTY PROTECTED" elegantly engraved.
+Soft side lighting creates depth. Premium legal document aesthetic.
+Photorealistic, 1600×1200.
+```
+
+### V2-8 → V2-11. Solution Timeline Phase Images (4 תמונות)
+
+#### V2-8. `public/images/landing-assets/biz/phase-01-discovery.jpg`
+**שימוש:** Timeline phase 01 — אבחון והיתכנות
+**יחס:** 16:9
+
+```
+Cinematic wide shot: a magnifying glass over a dark wood desk
+focused on a market analysis chart, surrounded by sticky notes,
+a coffee cup, and an open laptop with research data. Warm gold
+side lamp light. Mood: discovery, careful analysis, exploration.
+No people. Photorealistic, 1920×1080.
+```
+
+#### V2-9. `public/images/landing-assets/biz/phase-02-design.jpg`
+**שימוש:** Timeline phase 02 — עיצוב המודל העסקי
+**יחס:** 16:9
+
+```
+Top-down shot of designer's hands sketching a business model canvas
+on a large dark notebook, with a fountain pen, financial calculator,
+and tablet showing a pitch deck slide. Warm cinematic lighting.
+Mood: creative, strategic, careful planning. Photorealistic, 1920×1080.
+```
+
+#### V2-10. `public/images/landing-assets/biz/phase-03-mvp.jpg`
+**שימוש:** Timeline phase 03 — בניית MVP
+**יחס:** 16:9
+
+```
+Cinematic shot of a developer's workspace at night: triple monitor
+setup glowing with code, mechanical keyboard, mug of coffee, and a
+dark navy background with subtle emerald LED accents. Mood: focused
+build mode, late-night sprint, MVP creation. No people, just the
+glowing setup. Photorealistic, 1920×1080.
+```
+
+#### V2-11. `public/images/landing-assets/biz/phase-04-launch.jpg`
+**שימוש:** Timeline phase 04 — השקה ו-Spin-off
+**יחס:** 16:9
+
+```
+Cinematic wide shot of a rocket launch silhouette against a sunrise
+over Tel Aviv skyline — golden hour, dramatic clouds, gold and emerald
+sky tones. Symbolic of "lift-off" and successful spin-off. Premium,
+inspirational, photorealistic. 1920×1080.
+```
+
+## LANDING — תמונות נוספות (5 סך הכל)
+
+### V2-12 → V2-15. How It Works Step Images (4 תמונות)
+
+#### V2-12. `public/images/landing-assets/landing/step-1-call.jpg`
+**שימוש:** HowItWorks step 1 — שיחת היכרות
+**יחס:** 4:3
+
+```
+Close-up of a smartphone on a dark wood desk showing an incoming
+WhatsApp video call from a "WeCcelerate Advisor". Around the phone:
+a notebook, pen, and a small cup of coffee. Warm gold lamp lighting.
+Mood: friendly, approachable, beginning of a journey. Photorealistic,
+1600×1200.
+```
+
+#### V2-13. `public/images/landing-assets/landing/step-2-plan.jpg`
+**שימוש:** HowItWorks step 2 — תוכנית פעולה
+**יחס:** 4:3
+
+```
+Top-down view of an open notebook with a hand-drawn roadmap / mind
+map in gold ink, with branches going to "Strategy", "Product", "Funding",
+"Marketing". A stylish pen and a coffee cup beside it. Warm gold
+lighting. Mood: clarity, plan-making, intentional design. Photorealistic,
+1600×1200.
+```
+
+#### V2-14. `public/images/landing-assets/landing/step-3-support.jpg`
+**שימוש:** HowItWorks step 3 — ליווי צמוד
+**יחס:** 4:3
+
+```
+Cinematic shot of two professionals standing side-by-side at a glass
+whiteboard, both pointing at a shared idea — one is the entrepreneur,
+the other is the WeCcelerate advisor. View from behind, faces partially
+visible in profile. Warm gold ambient light. Mood: partnership,
+mentorship, hands-on collaboration. Photorealistic, 1600×1200.
+```
+
+#### V2-15. `public/images/landing-assets/landing/step-4-success.jpg`
+**שימוש:** HowItWorks step 4 — השקה והצלחה
+**יחס:** 4:3
+
+```
+Top-down shot of celebration moment: a glass of champagne on a dark
+wood desk next to a laptop showing a "Funding Round Closed" banner
+in gold, a confetti scatter, and a small framed photo of a startup
+team. Warm celebratory gold lighting. Mood: success, achievement,
+victory. Photorealistic, 1600×1200.
+```
+
+### V2-16. `public/images/landing-assets/landing/cta-bg.jpg`
+**שימוש:** רקע ל-FinalCTA section (כבר בספק המקורי, הוספנו אותו לקוד)
+**יחס:** 21:9
+
+```
+Wide cinematic banner: a sunrise over Tel Aviv skyline, golden hour
+light breaking through dark clouds. Symbolic "new beginning" mood.
+Deep navy sky transitioning to warm gold horizon. No text overlay
+needed. Photorealistic, premium, inspirational. 2520×1080.
+```
+
+---
+
+## סדר עדיפות חדש (V2)
+
+**עדיפות גבוהה — מקסימום אימפקט:**
+1. `biz/phase-01-discovery.jpg` → `biz/phase-04-launch.jpg` (4 תמונות) — Solution Timeline משודרג
+2. `landing/step-1-call.jpg` → `landing/step-4-success.jpg` (4 תמונות) — HowItWorks משודרג
+3. `biz/value-team.jpg` → `biz/value-ip.jpg` (6 תמונות) — Value Grid משודרג
+
+**עדיפות בינונית:**
+4. `landing/cta-bg.jpg` — רקע FinalCTA
+5. `leumit/advisory-bg.jpg` — backdrop של AdvisoryBoard
+
+---
+
+## טיפ ליצירת batch ב-Midjourney
+
+לרבים מהפרומפטים האלה — אם אתם משתמשים ב-Midjourney, הוסיפו את הסיומת:
+```
+--ar 4:3 --style raw --v 6.1 --s 250
+```
+לקבלת תוצאות אחידות וקינמטיות יותר. עבור 16:9 השתמשו ב-`--ar 16:9`, ועבור 21:9 ב-`--ar 21:9`.
+
+עבור DALL-E 3, פשוט הדביקו את הפרומפט ובסוף הוסיפו: *"In wide cinematic 4:3 format, photorealistic"*.

@@ -1,18 +1,33 @@
 'use client';
 
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles as SparklesIcon } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { SafeImage } from '@/components/landing-helpers/SafeImage';
+import { Sparkles } from '@/components/landing-helpers/FloatingDecor';
 
 export default function FinalCTA() {
   return (
     <section className="relative py-24 md:py-32 overflow-hidden">
+      {/* Background image (graceful) */}
+      <div className="absolute inset-0 z-0 opacity-30">
+        <SafeImage
+          src="/images/landing-assets/landing/cta-bg.jpg"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+      </div>
+
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 z-[1]"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(200,169,81,0.08) 0%, #070b1e 70%)',
+            'radial-gradient(ellipse at center, rgba(200,169,81,0.12) 0%, #070b1e 70%)',
         }}
       />
+
+      <Sparkles color="#C8A951" count={25} className="z-[2]" />
 
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] pointer-events-none"
@@ -30,7 +45,7 @@ export default function FinalCTA() {
         <div className="max-w-3xl mx-auto text-center">
           <ScrollReveal variant="up">
             <div className="inline-flex items-center gap-2 bg-[#c8a951]/10 border border-[#c8a951]/30 text-[#e8d48b] text-xs font-bold uppercase tracking-[0.22em] px-5 py-2.5 rounded-full mb-8 backdrop-blur-sm">
-              <Sparkles className="w-4 h-4" />
+              <SparklesIcon className="w-4 h-4" />
               השבוע נותרו 3 מקומות
             </div>
           </ScrollReveal>

@@ -1,7 +1,9 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { MessageCircle, Map, Users, Award } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { SafeImage } from '@/components/landing-helpers/SafeImage';
 
 const STEPS = [
   {
@@ -10,6 +12,7 @@ const STEPS = [
     title: 'שיחת היכרות',
     duration: '20 דקות · חינם',
     description: 'נכיר אתכם, נשמע על הרעיון, נבין מה הצרכים והאתגרים.',
+    image: '/images/landing-assets/landing/step-1-call.jpg',
   },
   {
     num: '2',
@@ -17,6 +20,7 @@ const STEPS = [
     title: 'תוכנית פעולה',
     duration: 'תוך שבוע',
     description: 'נבנה יחד מסלול אישי: מה לעשות, באיזה סדר, ומה יעלה.',
+    image: '/images/landing-assets/landing/step-2-plan.jpg',
   },
   {
     num: '3',
@@ -24,6 +28,7 @@ const STEPS = [
     title: 'ליווי צמוד',
     duration: 'עד ההצלחה',
     description: 'הצוות שלנו עובד לצד שלכם — לא במקומכם. אנחנו שותפים, לא ספקים.',
+    image: '/images/landing-assets/landing/step-3-support.jpg',
   },
   {
     num: '4',
@@ -31,6 +36,7 @@ const STEPS = [
     title: 'השקה והצלחה',
     duration: 'יחד',
     description: 'מהגיוס הראשון ועד הכניסה לשוק הבינלאומי — ממשיכים לצד שלכם.',
+    image: '/images/landing-assets/landing/step-4-success.jpg',
   },
 ];
 
@@ -51,27 +57,49 @@ export default function HowItWorks() {
           </ScrollReveal>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {STEPS.map((step, idx) => {
             const Icon = step.icon;
             return (
               <ScrollReveal key={idx} variant="up" delay={idx * 100}>
-                <div className="relative h-full p-6 rounded-2xl border border-white/8 bg-white/[0.02] hover:border-[#c8a951]/25 hover:bg-[#c8a951]/[0.02] transition-all duration-500">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="relative flex-shrink-0">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#c8a951]/15 to-[#c8a951]/5 border border-[#c8a951]/25 flex items-center justify-center">
-                        <Icon className="w-6 h-6 text-[#c8a951]" />
-                      </div>
-                      <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-[#c8a951] text-[#070b1e] text-xs font-bold flex items-center justify-center">
-                        {step.num}
-                      </div>
+                <motion.div
+                  whileHover={{ y: -6 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  className="group relative h-full rounded-2xl border border-white/8 bg-white/[0.02] hover:border-[#c8a951]/30 hover:bg-[#c8a951]/[0.02] transition-all duration-500 overflow-hidden"
+                >
+                  {/* Step image */}
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <SafeImage
+                      src={step.image}
+                      alt={step.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      sizes="(max-width: 768px) 100vw, 25vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#070b1e] via-[#070b1e]/30 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#c8a951]/0 to-transparent group-hover:from-[#c8a951]/10 transition-all duration-500" />
+
+                    {/* Floating number + icon */}
+                    <div className="absolute bottom-3 right-4 flex items-center gap-2">
+                      <motion.div
+                        whileHover={{ rotate: 12, scale: 1.1 }}
+                        transition={{ type: 'spring', stiffness: 400 }}
+                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#c8a951]/30 to-[#e8d48b]/20 border border-[#c8a951]/40 backdrop-blur-md flex items-center justify-center"
+                      >
+                        <Icon className="w-6 h-6 text-[#e8d48b]" />
+                      </motion.div>
+                    </div>
+                    <div className="absolute top-3 left-3 w-9 h-9 rounded-full bg-[#c8a951] text-[#070b1e] text-base font-bold flex items-center justify-center shadow-lg shadow-[#c8a951]/30">
+                      {step.num}
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-bold text-white mb-1">{step.title}</h3>
-                  <p className="text-[#e8d48b]/70 text-xs font-semibold mb-3">{step.duration}</p>
-                  <p className="text-white/55 text-sm leading-relaxed">{step.description}</p>
-                </div>
+                  <div className="p-6 pt-5">
+                    <h3 className="text-lg font-bold text-white mb-1">{step.title}</h3>
+                    <p className="text-[#e8d48b]/70 text-xs font-semibold mb-3">{step.duration}</p>
+                    <p className="text-white/55 text-sm leading-relaxed">{step.description}</p>
+                  </div>
+                </motion.div>
               </ScrollReveal>
             );
           })}

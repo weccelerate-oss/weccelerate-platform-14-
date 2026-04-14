@@ -31,6 +31,8 @@ function getSubdomain(hostname: string): string | null {
   return null;
 }
 
+const SITE_COOKIE = 'wec-site';
+
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || '';
@@ -66,12 +68,42 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
 
-  const subdomain = getSubdomain(hostname);
-  const siteFolder = subdomain ? SUBDOMAIN_MAP[subdomain] : 'main';
+  // Site selection priority:
+  // 1. Real subdomain (production / *.localhost)
+  // 2. ?site= query param (Vercel preview URL fallback) — also persisted as cookie
+  // 3. Persisted cookie (so user keeps the site after first visit)
+  // 4. Fallback to 'main'
+  const fromHost = getSubdomain(hostname);
+  const fromQuery = url.searchParams.get('site');
+  const fromCookie = request.cookies.get(SITE_COOKIE)?.value;
+
+  let siteFolder = 'main';
+  let shouldSetCookie: string | null = null;
+
+  if (fromHost) {
+    siteFolder = SUBDOMAIN_MAP[fromHost];
+  } else if (fromQuery && SUBDOMAIN_MAP[fromQuery]) {
+    siteFolder = SUBDOMAIN_MAP[fromQuery];
+    shouldSetCookie = fromQuery;
+  } else if (fromCookie && SUBDOMAIN_MAP[fromCookie]) {
+    siteFolder = SUBDOMAIN_MAP[fromCookie];
+  }
 
   // Rewrite to site folder
   url.pathname = `/sites/${siteFolder}${pathname === '/' ? '' : pathname}`;
+  // Strip ?site= from the rewritten URL (we keep it in user-visible URL via NextResponse though)
+  url.searchParams.delete('site');
   const response = NextResponse.rewrite(url);
   response.headers.set('x-site', siteFolder);
+
+  if (shouldSetCookie) {
+    // Persist site selection for 30 days so user doesn't have to re-add ?site
+    response.cookies.set(SITE_COOKIE, shouldSetCookie, {
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/',
+      sameSite: 'lax',
+    });
+  }
+
   return response;
 }
