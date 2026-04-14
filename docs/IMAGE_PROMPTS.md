@@ -647,3 +647,163 @@ needed. Photorealistic, premium, inspirational. 2520×1080.
 לקבלת תוצאות אחידות וקינמטיות יותר. עבור 16:9 השתמשו ב-`--ar 16:9`, ועבור 21:9 ב-`--ar 21:9`.
 
 עבור DALL-E 3, פשוט הדביקו את הפרומפט ובסוף הוסיפו: *"In wide cinematic 4:3 format, photorealistic"*.
+
+---
+
+# V3 ADDITIONS — סקשנים ויזואליים חדשים
+
+נוספו 3 סקשנים חדשים גדולים (אחד לכל סאבדומיין) ועוד 3 תמונות צד ל-FAQ. כל סקשן חדש זקוק לתמונה גדולה ומרשימה — אלה הסקשנים הכי בולטים בכל דף.
+
+## LEUMIT V3 — MissionMoment + FAQ side
+
+### V3-1. `public/images/landing-assets/leumit/mission-moment.jpg`
+**שימוש:** רקע edge-to-edge לסקשן MissionMoment בין TracksGrid ל-AdvisoryBoard
+**יחס:** 21:9 (ultra-wide cinematic)
+**משקל ויזואלי:** הכי גבוה — זו תמונה של 80vh
+
+```
+Ultra-wide cinematic shot of an Israeli medical research facility at dusk:
+view from inside a glass-walled lab looking out toward Tel Aviv skyline
+glowing in the background. Inside the lab: blurred silhouettes of two
+researchers in white coats working on a holographic medical visualization
+showing a glowing human silhouette and DNA strands. Cyan and gold ambient
+lighting throughout. Mood: hope, breakthrough, mission, the future of
+Israeli medical innovation. Dark navy palette with cyan (#06B6D4) and
+gold (#D4AF37) accent lights. Cinematic atmospheric mist. Premium movie-poster
+quality. Photorealistic, shot on ARRI Alexa, anamorphic lens. 2520×1080.
+```
+
+### V3-2. `public/images/landing-assets/leumit/faq-side.jpg`
+**שימוש:** תמונת צד דקורטיבית לכרטיס ה-FAQ
+**יחס:** 4:5 (פורטרט)
+
+```
+Cinematic portrait of a senior medical advisor in a white coat with a
+stethoscope, mid-50s, friendly approachable smile, looking slightly
+off-camera as if mid-conversation. Setting: warm-lit modern medical
+clinic with subtle cyan LED accents in the background. Soft golden hour
+window light. Shallow depth of field, warm but professional mood.
+Suggests "we're here to answer your questions". Photorealistic, 85mm
+lens, f/2.0. 1200×1500.
+```
+
+## BIZ V3 — EnterpriseSpotlight + FAQ side
+
+### V3-3. `public/images/landing-assets/biz/spotlight-main.jpg`
+**שימוש:** תמונה ראשית גדולה לסקשן EnterpriseSpotlight (60% רוחב)
+**יחס:** 16:11 (כמעט ריבועי-רחב)
+**משקל ויזואלי:** הכי גבוה ב-biz
+
+```
+Cinematic editorial shot of a high-end corporate boardroom at golden hour:
+two executives (silhouetted from behind, no faces visible) standing at
+a long marble table, looking at a large glass screen showing a venture
+business plan with charts in emerald (#10B981) and gold. Through the
+floor-to-ceiling windows behind them, the Tel Aviv skyline glows at sunset.
+Premium navy and emerald color palette with warm gold accents. Mood:
+serious, strategic, important decisions being made. Atmospheric, deep
+shadows, dramatic lighting. Photorealistic, ARRI Alexa style. 1600×1100.
+```
+
+### V3-4. `public/images/landing-assets/biz/spotlight-detail.jpg`
+**שימוש:** תמונה משנית קטנה (תוויית polaroid צפה ב-EnterpriseSpotlight)
+**יחס:** 3:2
+
+```
+Macro close-up of executive hands signing a partnership document with
+a premium fountain pen on dark wood. Subtle emerald and gold reflections.
+Soft directional light from the side. Mood: agreement, commitment,
+partnership. Photorealistic, premium corporate, 1200×800.
+```
+
+### V3-5. `public/images/landing-assets/biz/faq-side.jpg`
+**שימוש:** תמונת צד דקורטיבית ל-FAQ של biz
+**יחס:** 4:5 (פורטרט)
+
+```
+Cinematic portrait of a senior business consultant / venture builder in
+a tailored dark navy suit, mid-40s, confident professional smile, looking
+slightly off-camera as if mid-meeting. Setting: modern executive office
+with glass walls and Tel Aviv skyline blurred in background. Warm
+emerald LED accent lighting. Soft golden side light. Shallow depth of
+field. Mood: experienced, trustworthy, strategic. Photorealistic, 85mm
+lens, f/2.0. 1200×1500.
+```
+
+## LANDING V3 — JourneyShowcase + FAQ side
+
+### V3-6 → V3-8. JourneyShowcase Polaroid Photos (3 תמונות)
+
+הסקשן החדש מציג 3 פולארואידים מסובבים בזוויות שונות שמתיישרים בריחוף. כל תמונה היא רגע מהמסע של היזם.
+
+#### V3-6. `public/images/landing-assets/landing/journey-idea.jpg`
+**שימוש:** Polaroid #1 — שלב הרעיון
+**יחס:** 4:5 (פורטרט)
+
+```
+Top-down warm photograph of a person's hands sketching a rough idea on
+a napkin in a sunlit Tel Aviv cafe — fountain pen, espresso cup, scattered
+notes, a smartphone face-down. Warm gold morning light. Mood: spontaneous
+inspiration, "the moment an idea is born", entrepreneurial spark.
+Premium lifestyle photography. Photorealistic, 1200×1500.
+```
+
+#### V3-7. `public/images/landing-assets/landing/journey-build.jpg`
+**שימוש:** Polaroid #2 — שלב הפיתוח
+**יחס:** 4:5 (פורטרט)
+
+```
+Cinematic photo of a diverse team of 4 startup founders standing in a
+huddle around a glass whiteboard covered in colorful sticky notes and
+sketches. Warm modern co-working space with exposed brick walls, plants,
+golden hour light streaming through large windows. Energy, collaboration,
+focus. Mood: building together, momentum. Photorealistic, 35mm, f/2.8.
+1200×1500.
+```
+
+#### V3-8. `public/images/landing-assets/landing/journey-success.jpg`
+**שימוש:** Polaroid #3 — שלב ההצלחה
+**יחס:** 4:5 (פורטרט)
+
+```
+Joyful celebration moment: a diverse startup team raising glasses of
+champagne in toast around a long table, confetti in the air, golden
+warm lighting, faces partially visible smiling. Tel Aviv skyline visible
+through windows behind them. Mood: victory, achievement, milestone
+celebration after closing a funding round. Premium lifestyle, 35mm,
+photorealistic. 1200×1500.
+```
+
+### V3-9. `public/images/landing-assets/landing/faq-side.jpg`
+**שימוש:** תמונת צד דקורטיבית ל-FAQ של landing
+**יחס:** 4:5 (פורטרט)
+
+```
+Cinematic portrait of a friendly female business advisor in casual smart
+clothing (blazer over t-shirt), early 30s, warm approachable smile,
+holding a notebook and pen, looking directly at camera. Setting: modern
+co-working space with warm gold lighting and out-of-focus plants in the
+background. Mood: approachable, knowledgeable, here-to-help. Photorealistic,
+85mm lens, f/2.0. 1200×1500.
+```
+
+---
+
+## סדר עדיפות מעודכן (V3)
+
+**עדיפות ה-מקסימום (אלה ה-game changers):**
+1. ⭐ `leumit/mission-moment.jpg` — הסקשן הכי בולט בעמוד leumit (21:9 ultra-wide)
+2. ⭐ `biz/spotlight-main.jpg` — הסקשן הכי בולט בעמוד biz (16:11)
+3. ⭐ `landing/journey-*.jpg` (3 תמונות) — סקשן ה-polaroids האייקוני בעמוד landing
+
+**עדיפות גבוהה:**
+4. `leumit/faq-side.jpg`, `biz/faq-side.jpg`, `landing/faq-side.jpg` — תמונות צד ל-FAQ
+5. `biz/spotlight-detail.jpg` — תמונה משנית קטנה ל-EnterpriseSpotlight
+
+**סך תמונות חדשות ב-V3:** 9 (סה״כ במסמך כולו: ~57)
+
+---
+
+## טיפ למיתוג עקבי
+
+לאחר שיצרתם את התמונה הראשונה שאתם אוהבים, השתמשו ב-`--cref [URL]` ב-Midjourney או ב-`reference image` ב-DALL-E כדי לשמור על style consistency. פלטה אחת, אווירה אחת, רגש אחד — לאורך כל הדפים.

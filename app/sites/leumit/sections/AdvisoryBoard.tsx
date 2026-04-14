@@ -31,12 +31,6 @@ const ADVISORS: Advisor[] = [
     bio: 'מומחה שיווק דיגיטלי, PR ומיצוב מותג. מלווה סטארטאפים רפואיים בכניסה לשווקים בינלאומיים.',
     image: '/images/team/avraham.jpg',
   },
-  {
-    name: 'ד״ר סוזן הלפרט',
-    role: 'יועצת רגולציה · יועצת FDA לשעבר',
-    bio: 'מומחית רגולציה רפואית בכירה עם ניסיון של למעלה מ-20 שנה ב-FDA האמריקאי. מובילה את ליווי המסלול הרגולטורי לסטארטאפים שלנו.',
-    image: '/images/landing-assets/leumit/advisor-fda.jpg',
-  },
 ];
 
 export default function AdvisoryBoard() {
@@ -76,7 +70,7 @@ export default function AdvisoryBoard() {
           </ScrollReveal>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {ADVISORS.map((advisor, idx) => (
             <ScrollReveal key={idx} variant="up" delay={idx * 120}>
               <div className="group relative rounded-2xl overflow-hidden border border-white/8 bg-gradient-to-b from-white/[0.02] to-transparent hover:border-cyan-500/30 transition-all duration-500">

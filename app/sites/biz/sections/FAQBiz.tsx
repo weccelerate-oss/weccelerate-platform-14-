@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronDown, MessageCircleQuestion } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { SafeImage } from '@/components/landing-helpers/SafeImage';
 
 const FAQS = [
   {
@@ -48,21 +50,67 @@ export default function FAQBiz() {
   return (
     <section id="faq" className="relative py-20 md:py-28 bg-[#070b1e]">
       <div className="container-corporate">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <ScrollReveal variant="up">
-              <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-[0.25em] mb-4">
-                שאלות נפוצות
-              </p>
-            </ScrollReveal>
-            <ScrollReveal variant="up" delay={100}>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-                השאלות של מנכ״לים
-              </h2>
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 max-w-6xl mx-auto items-start">
+          {/* Left side — sticky decorative image */}
+          <div className="lg:col-span-4 lg:sticky lg:top-24">
+            <ScrollReveal variant="left">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+                className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-emerald-500/20 group"
+              >
+                <SafeImage
+                  src="/images/landing-assets/biz/faq-side.jpg"
+                  alt="צוות הייעוץ העסקי שלנו"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#070b1e] via-[#070b1e]/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent" />
+
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 backdrop-blur-md flex items-center justify-center shadow-xl shadow-emerald-500/20"
+                >
+                  <MessageCircleQuestion className="w-7 h-7 text-emerald-300" />
+                </motion.div>
+
+                <div className="absolute bottom-6 left-6 right-6">
+                  <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/80 mb-1.5">
+                    מענה ישיר ממנכ״ל
+                  </p>
+                  <p className="text-white font-bold text-base sm:text-lg leading-tight">
+                    יש לכם שאלה אסטרטגית?
+                  </p>
+                  <a
+                    href="#contact"
+                    className="inline-flex items-center gap-1.5 mt-3 text-sm text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
+                  >
+                    תאמו שיחה אישית ←
+                  </a>
+                </div>
+              </motion.div>
             </ScrollReveal>
           </div>
 
-          <div className="space-y-3">
+          {/* Right side — FAQ */}
+          <div className="lg:col-span-8">
+            <div className="text-right mb-10">
+              <ScrollReveal variant="up">
+                <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-[0.25em] mb-4">
+                  שאלות נפוצות
+                </p>
+              </ScrollReveal>
+              <ScrollReveal variant="up" delay={100}>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+                  השאלות של מנכ״לים
+                </h2>
+              </ScrollReveal>
+            </div>
+
+            <div className="space-y-3">
             {FAQS.map((faq, idx) => {
               const isOpen = openIdx === idx;
               return (
@@ -107,6 +155,7 @@ export default function FAQBiz() {
                 </ScrollReveal>
               );
             })}
+            </div>
           </div>
         </div>
       </div>

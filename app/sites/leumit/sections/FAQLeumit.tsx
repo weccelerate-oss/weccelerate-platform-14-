@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronDown, MessageCircleQuestion } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { SafeImage } from '@/components/landing-helpers/SafeImage';
 
 interface FAQ {
   question: string;
@@ -62,26 +64,74 @@ export default function FAQLeumit() {
       />
 
       <div className="container-corporate">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <ScrollReveal variant="up">
-              <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-[0.25em] mb-4">
-                שאלות נפוצות
-              </p>
-            </ScrollReveal>
-            <ScrollReveal variant="up" delay={100}>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-                מה עוד אתם רוצים לדעת?
-              </h2>
-            </ScrollReveal>
-            <ScrollReveal variant="up" delay={200}>
-              <p className="text-white/55 text-lg">
-                כל השאלות החשובות — עם תשובות ישירות וכנות.
-              </p>
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 max-w-6xl mx-auto items-start">
+          {/* Left side — sticky decorative image */}
+          <div className="lg:col-span-4 lg:sticky lg:top-24">
+            <ScrollReveal variant="left">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+                className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-cyan-500/20 group"
+              >
+                <SafeImage
+                  src="/images/landing-assets/leumit/faq-side.jpg"
+                  alt="צוות הייעוץ הרפואי שלנו זמין למענה"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#040B16] via-[#040B16]/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent" />
+
+                {/* Floating icon */}
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 backdrop-blur-md flex items-center justify-center shadow-xl shadow-cyan-500/20"
+                >
+                  <MessageCircleQuestion className="w-7 h-7 text-cyan-300" />
+                </motion.div>
+
+                {/* Bottom caption */}
+                <div className="absolute bottom-6 left-6 right-6">
+                  <p className="text-xs uppercase tracking-[0.18em] text-cyan-300/80 mb-1.5">
+                    מענה אישי
+                  </p>
+                  <p className="text-white font-bold text-base sm:text-lg leading-tight">
+                    יש לכם שאלה שלא מופיעה כאן?
+                  </p>
+                  <a
+                    href="#contact"
+                    className="inline-flex items-center gap-1.5 mt-3 text-sm text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
+                  >
+                    שאלו אותנו ישירות ←
+                  </a>
+                </div>
+              </motion.div>
             </ScrollReveal>
           </div>
 
-          <div className="space-y-3">
+          {/* Right side — FAQ accordion */}
+          <div className="lg:col-span-8">
+            <div className="text-right mb-10">
+              <ScrollReveal variant="up">
+                <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-[0.25em] mb-4">
+                  שאלות נפוצות
+                </p>
+              </ScrollReveal>
+              <ScrollReveal variant="up" delay={100}>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+                  מה עוד אתם רוצים לדעת?
+                </h2>
+              </ScrollReveal>
+              <ScrollReveal variant="up" delay={200}>
+                <p className="text-white/55 text-base sm:text-lg">
+                  כל השאלות החשובות — עם תשובות ישירות וכנות.
+                </p>
+              </ScrollReveal>
+            </div>
+
+            <div className="space-y-3">
             {LEUMIT_FAQS.map((faq, idx) => {
               const isOpen = openIdx === idx;
               return (
@@ -126,6 +176,7 @@ export default function FAQLeumit() {
                 </ScrollReveal>
               );
             })}
+            </div>
           </div>
         </div>
       </div>

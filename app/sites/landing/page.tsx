@@ -1,6 +1,7 @@
 import HeroLanding from './sections/HeroLanding';
 import MultiSelectForm from './sections/MultiSelectForm';
 import ValueProps from './sections/ValueProps';
+import JourneyShowcase from './sections/JourneyShowcase';
 import HowItWorks from './sections/HowItWorks';
 import Testimonials from './sections/Testimonials';
 import FAQLanding from './sections/FAQLanding';
@@ -12,6 +13,7 @@ export default function LandingPage() {
       <HeroLanding />
       <MultiSelectForm />
       <ValueProps />
+      <JourneyShowcase />
       <HowItWorks />
       <Testimonials />
       <FAQLanding />
