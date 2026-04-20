@@ -1,6 +1,0 @@
-{
-  "/(portal)/portal/dashboard/page": "app/(portal)/portal/dashboard/page.js",
-  "/(portal)/portal/page": "app/(portal)/portal/page.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/sites/main/page": "app/sites/main/page.js"
-}

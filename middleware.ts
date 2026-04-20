@@ -33,10 +33,38 @@ function getSubdomain(hostname: string): string | null {
 
 const SITE_COOKIE = 'wec-site';
 
+// Legacy / alternate domains that should 308-redirect to the canonical
+// weccelerate.co.il, preserving subdomain, path and query string.
+const ALTERNATE_DOMAINS = ['wecc-ltd.com', 'www.wecc-ltd.com'];
+const CANONICAL_DOMAIN = 'weccelerate.co.il';
+
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || '';
   const pathname = url.pathname;
+
+  // ==========================================================================
+  // 1. Alternate-domain redirect (wecc-ltd.com → weccelerate.co.il)
+  //    Preserves: subdomain, path, query string. Uses 308 (permanent, method-
+  //    preserving) so POST → POST and search engines treat it as canonical.
+  // ==========================================================================
+  const hostnameNoPort = hostname.split(':')[0].toLowerCase();
+  const matchedAlt = ALTERNATE_DOMAINS.find(
+    (d) => hostnameNoPort === d || hostnameNoPort.endsWith('.' + d)
+  );
+  if (matchedAlt) {
+    // If a subdomain existed on the old host (e.g. leumit.wecc-ltd.com),
+    // carry it over (→ leumit.weccelerate.co.il). Strip www as it redirects
+    // to the apex.
+    let sub = hostnameNoPort.slice(0, -matchedAlt.length).replace(/\.$/, '');
+    if (sub === 'www') sub = '';
+    const targetHost = sub ? `${sub}.${CANONICAL_DOMAIN}` : CANONICAL_DOMAIN;
+    const target = new URL(
+      pathname + url.search,
+      `https://${targetHost}`
+    );
+    return NextResponse.redirect(target, 308);
+  }
 
   // Skip any path that has a file extension (static assets)
   if (/\.\w+$/.test(pathname)) {
