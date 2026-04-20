@@ -103,7 +103,7 @@ const partnersLogos = [
 export function HomepageContent({ news, events, videos, stories }: HomepageContentProps) {
   return (
     <div className="bg-[#070b1e] min-h-screen">
-      <LiveTicker updates={news} speed={4} pauseOnHover={true} />
+      <LiveTicker updates={news.map((n) => ({ ...n, urgencyLevel: (n.urgencyLevel?.toLowerCase?.() ?? 'normal') as 'normal' | 'important' | 'urgent' | 'breaking' }))} speed={4} pauseOnHover={true} />
 
       <main id="main-content">
         <HeroSection />

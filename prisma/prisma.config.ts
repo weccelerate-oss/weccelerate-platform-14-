@@ -28,7 +28,7 @@ if (!databaseUrl) {
   console.error('❌ DATABASE_URL environment variable is not set!');
   console.error('');
   console.error('Please create a .env file with:');
-  console.error('DATABASE_URL="postgresql://postgres.lyjikgtnvndnzlslqoyt:Maorarg050%21@aws-1-eu-central-1.pooler.supabase.com:5432/postgres"');
+  console.error('DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"');
   console.error('');
   throw new Error('DATABASE_URL is required');
 }

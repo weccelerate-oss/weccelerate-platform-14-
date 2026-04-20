@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await auth();
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'לא מורשה' }, { status: 401 });
     }
 

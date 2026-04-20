@@ -60,7 +60,15 @@ async function getNewsFromDB() {
 
     if (dbNews.length === 0) return mockNewsUpdates;
 
-    return dbNews.map(news => ({
+    return dbNews.map((news: {
+      id: string;
+      title: string;
+      link?: string | null;
+      urgencyLevel: string;
+      createdAt: Date;
+      excerpt?: string | null;
+      isPinned?: boolean | null;
+    }) => ({
       id: news.id,
       title: news.title,
       link: news.link || undefined,
@@ -101,7 +109,24 @@ async function getVideosFromDB() {
 
     if (dbVideos.length === 0) return mockVideos;
 
-    return dbVideos.map(video => {
+    return dbVideos.map((video: {
+      id: string;
+      title: string;
+      description?: string | null;
+      category: string;
+      youtubeUrl?: string | null;
+      vimeoUrl?: string | null;
+      videoUrl?: string | null;
+      embedUrl?: string | null;
+      thumbnail?: string | null;
+      duration?: number | null;
+      publishAt?: Date | null;
+      createdAt: Date;
+      views?: number | null;
+      speaker?: string | null;
+      isFeatured?: boolean | null;
+      tags?: string[] | null;
+    }) => {
       const videoUrl = video.youtubeUrl || video.vimeoUrl || video.videoUrl || video.embedUrl || '';
       return {
         id: video.id,
@@ -134,7 +159,20 @@ async function getSuccessStoriesFromDB() {
 
     if (dbStories.length === 0) return mockSuccessStories;
 
-    return dbStories.map(story => ({
+    return dbStories.map((story: {
+      id: string;
+      companyName: string;
+      logoUrl?: string | null;
+      industry?: string | null;
+      website?: string | null;
+      quote: string;
+      personName: string | null;
+      personRole?: string | null;
+      personImage?: string | null;
+      metrics?: unknown;
+      projectLink?: string | null;
+      isFeatured?: boolean | null;
+    }) => ({
       id: story.id,
       companyName: story.companyName,
       logoUrl: story.logoUrl || undefined,

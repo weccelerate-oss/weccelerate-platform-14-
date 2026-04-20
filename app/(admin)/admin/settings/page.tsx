@@ -14,13 +14,20 @@ export const metadata: Metadata = {
   description: 'הגדרות מערכת',
 };
 
-async function getSettings() {
+type SiteSetting = {
+  id: string;
+  key: string;
+  value: unknown;
+  description?: string | null;
+};
+
+async function getSettings(): Promise<SiteSetting[]> {
   try {
     const { prisma } = await import('@/lib/db');
     const settings = await prisma.siteSetting.findMany({
       orderBy: { key: 'asc' },
     });
-    return settings;
+    return settings as SiteSetting[];
   } catch (error) {
     console.warn('[Admin Settings] Database error:', error);
     return [];

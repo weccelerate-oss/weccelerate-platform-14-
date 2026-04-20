@@ -474,7 +474,7 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                         direction: 'rtl',
                         fontSize: '13px',
                       }}
-                      formatter={(value: number, name: string) => [`${value} פניות`, name]}
+                      formatter={(value, name) => [`${(value as number) ?? 0} פניות`, String(name ?? '')]}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -582,8 +582,8 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                     direction: 'rtl',
                     fontSize: '13px',
                   }}
-                  formatter={(value: number) => [value, 'פניות']}
-                  labelFormatter={(label: string) => label}
+                  formatter={(value: number | undefined) => [value ?? 0, 'פניות']}
+                  labelFormatter={(label: unknown) => String(label ?? '')}
                 />
                 <Bar dataKey="total" name="סה״כ פניות" fill="#c8a951" radius={[4, 4, 0, 0]} />
               </BarChart>

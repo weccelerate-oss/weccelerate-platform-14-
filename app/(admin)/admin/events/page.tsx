@@ -175,11 +175,13 @@ async function getEvents() {
   }
 }
 
+type EventRow = { status?: string | null; registeredCount?: number | null; isFeatured?: boolean | null };
+
 async function getEventStats() {
   const events = await getEvents();
-  const upcoming = events.filter(e => e.status === 'UPCOMING').length;
-  const totalRegistrations = events.reduce((sum, e) => sum + (e.registeredCount || 0), 0);
-  const featured = events.filter(e => e.isFeatured).length;
+  const upcoming = events.filter((e: EventRow) => e.status === 'UPCOMING').length;
+  const totalRegistrations = events.reduce((sum: number, e: EventRow) => sum + (e.registeredCount || 0), 0);
+  const featured = events.filter((e: EventRow) => e.isFeatured).length;
   return { total: events.length, upcoming, totalRegistrations, featured };
 }
 

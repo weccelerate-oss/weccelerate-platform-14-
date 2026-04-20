@@ -100,7 +100,7 @@ export async function GET() {
       },
     });
 
-    const completedSlugs = progress.map((p) => p.lesson.slug);
+    const completedSlugs = progress.map((p: { lesson: { slug: string } }) => p.lesson.slug);
 
     return NextResponse.json({ completedSlugs });
   } catch (error) {

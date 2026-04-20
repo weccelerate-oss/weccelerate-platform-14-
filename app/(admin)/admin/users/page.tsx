@@ -47,9 +47,9 @@ export default async function UsersManagementPage() {
 
   const stats = {
     total: users.length,
-    active: users.filter((u) => u.isActive).length,
-    entrepreneurs: users.filter((u) => u.role === 'ENTREPRENEUR').length,
-    mentors: users.filter((u) => u.role === 'MENTOR').length,
+    active: users.filter((u: { isActive?: boolean | null }) => u.isActive).length,
+    entrepreneurs: users.filter((u: { role?: string | null }) => u.role === 'ENTREPRENEUR').length,
+    mentors: users.filter((u: { role?: string | null }) => u.role === 'MENTOR').length,
   };
 
   return (

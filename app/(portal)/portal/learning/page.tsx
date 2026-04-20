@@ -22,7 +22,7 @@ export default async function LearningPage() {
         lesson: { select: { slug: true } },
       },
     });
-    completedSlugs = progress.map((p) => p.lesson.slug);
+    completedSlugs = progress.map((p: { lesson: { slug: string } }) => p.lesson.slug);
   } catch {
     // DB might not have the table yet — graceful fallback
     completedSlugs = [];

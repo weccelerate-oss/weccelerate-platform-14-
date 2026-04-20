@@ -20,7 +20,7 @@ import {
   Phone,
   Building2,
   ExternalLink,
-  User,
+  User as UserIcon,
   UserCheck,
   UserX,
   ChevronDown,
@@ -205,7 +205,7 @@ export function UsersTable({ users }: UsersTableProps) {
       {/* Table */}
       {filteredUsers.length === 0 ? (
         <div className="p-12 text-center">
-          <User className="w-12 h-12 mx-auto text-slate-300 mb-4" />
+          <UserIcon className="w-12 h-12 mx-auto text-slate-300 mb-4" />
           <p className="text-slate-500">לא נמצאו משתמשים</p>
         </div>
       ) : (

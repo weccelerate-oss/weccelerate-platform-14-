@@ -53,6 +53,21 @@ const categoryConfig: Record<VideoCategory, {
     labelHe: 'הייליט',
     color: 'bg-coral-100 text-coral-700',
   },
+  podcast: {
+    label: 'Podcast',
+    labelHe: 'פודקאסט',
+    color: 'bg-indigo-100 text-indigo-700',
+  },
+  reels: {
+    label: 'Reels',
+    labelHe: 'רילס',
+    color: 'bg-pink-100 text-pink-700',
+  },
+  tv_interview: {
+    label: 'TV Interview',
+    labelHe: 'ראיון טלוויזיה',
+    color: 'bg-blue-100 text-blue-700',
+  },
 };
 
 // =============================================================================

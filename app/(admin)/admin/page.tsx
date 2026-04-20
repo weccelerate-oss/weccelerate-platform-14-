@@ -182,8 +182,8 @@ async function getDashboardStats() {
         leadsThisWeek,
         pageViewsToday: contactsToday,
       },
-      recentUsers: recentUsers.map(u => ({ ...u, status: u.isActive ? 'active' : 'pending' })),
-      recentNews: recentNews.map(n => ({ ...n, views: Math.floor(Math.random() * 500) })),
+      recentUsers: recentUsers.map((u: { id: string; name?: string | null; email?: string | null; company?: string | null; createdAt: Date; isActive?: boolean | null }) => ({ ...u, status: u.isActive ? 'active' : 'pending' })),
+      recentNews: recentNews.map((n: Record<string, unknown>) => ({ ...n, views: Math.floor(Math.random() * 500) })),
       recentLeads: recentLeads.length > 0 ? recentLeads : MOCK_STATS.recentLeads.map(l => ({ ...l, site: 'main', siteShort: 'אתר ראשי', phone: null, company: null })),
       systemStatus: MOCK_STATS.systemStatus,
     };
@@ -484,7 +484,7 @@ export default async function AdminDashboardPage() {
               </Link>
             </div>
             <div className="divide-y divide-slate-100">
-              {recentNews.map((news) => (
+              {recentNews.map((news: { id: string; title: string; urgencyLevel: string; isActive?: boolean | null }) => (
                 <div key={news.id} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
                     <UrgencyBadge level={news.urgencyLevel} />
@@ -516,7 +516,7 @@ export default async function AdminDashboardPage() {
               </Link>
             </div>
             <div className="divide-y divide-slate-100">
-              {recentUsers.slice(0, 4).map((user) => (
+              {recentUsers.slice(0, 4).map((user: { id: string; name?: string | null; email?: string | null; company?: string | null; createdAt: Date }) => (
                 <div key={user.id} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-200 flex items-center justify-center text-slate-600 font-semibold flex-shrink-0">

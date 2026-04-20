@@ -4,6 +4,13 @@
  * The password will be hashed with bcrypt before storing
  */
 
+import 'dotenv/config';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load .env.local if it exists (takes priority over .env)
+config({ path: resolve(process.cwd(), '.env.local') });
+
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
@@ -28,30 +35,42 @@ async function setAdminPassword() {
   const prisma = new PrismaClient({ adapter });
 
   try {
-    // Check if user exists
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      console.error(`❌ User not found: ${email}`);
-      process.exit(1);
-    }
-
-    // Check if user is admin
-    if (user.role !== 'ADMIN') {
-      console.error(`⚠️  User is ${user.role}, not ADMIN`);
-    }
-
     // Hash password with bcrypt
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
 
-    // Update password
-    await prisma.user.update({
-      where: { email },
-      data: { password: hashedPassword },
-    });
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({ where: { email } });
 
-    console.log(`✅ Password updated for ${email}`);
-    console.log('🔒 Password has been securely hashed with bcrypt');
+    if (existingUser) {
+      // Update existing user's password and make them admin
+      await prisma.user.update({
+        where: { email },
+        data: {
+          password: hashedPassword,
+          role: 'ADMIN',
+          isActive: true,
+        },
+      });
+      console.log(`✅ Updated existing user: ${email}`);
+      console.log(`🔒 Password set and role updated to ADMIN`);
+    } else {
+      // Create new admin user
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          name: 'Admin',
+          password: hashedPassword,
+          role: 'ADMIN',
+          isActive: true,
+          language: 'he',
+          timezone: 'Asia/Jerusalem',
+        },
+      });
+      console.log(`✅ Created new ADMIN user: ${email}`);
+      console.log(`🆔 User ID: ${newUser.id}`);
+      console.log('🔒 Password has been securely hashed with bcrypt');
+    }
   } catch (error) {
     console.error('❌ Error:', error);
     process.exit(1);

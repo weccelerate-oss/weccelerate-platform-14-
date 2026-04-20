@@ -302,7 +302,7 @@ export default async function DashboardPage() {
   // Get authenticated user
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect('/login?callbackUrl=/portal/dashboard');
   }
 
@@ -400,7 +400,13 @@ export default async function DashboardPage() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
       <DashboardContent
-          user={session.user}
+          user={{
+            id: session.user.id,
+            name: session.user.name ?? '',
+            email: session.user.email ?? '',
+            role: (session.user.role as string | undefined) ?? '',
+            image: session.user.image ?? null,
+          }}
           project={data.project}
           notifications={data.notifications}
           activities={data.activities}

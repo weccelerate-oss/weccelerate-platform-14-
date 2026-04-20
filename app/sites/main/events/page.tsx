@@ -35,7 +35,19 @@ async function getEventsData() {
   try {
     const events = await getEvents({ limit: 50 });
     if (events.length > 0) {
-      return events.map((e) => ({
+      return events.map((e: {
+        id: string;
+        name: string;
+        slug: string;
+        description?: string | null;
+        date: Date | string;
+        time?: string | null;
+        city?: string | null;
+        category?: string | null;
+        imageUrl?: string | null;
+        status?: string | null;
+        registrationLink?: string | null;
+      }) => ({
         id: e.id,
         name: e.name,
         slug: e.slug,

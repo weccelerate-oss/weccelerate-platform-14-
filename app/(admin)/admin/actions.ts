@@ -555,21 +555,21 @@ export async function deleteUserAction(id: string) {
 
 export interface StoryFormData {
   companyName: string;
-  logoUrl?: string;
-  industry?: string;
-  website?: string;
+  logoUrl?: string | null;
+  industry?: string | null;
+  website?: string | null;
   quote: string;
-  quoteEn?: string;
-  personName?: string;
-  personRole?: string;
-  personImage?: string;
+  quoteEn?: string | null;
+  personName?: string | null;
+  personRole?: string | null;
+  personImage?: string | null;
   slug: string;
-  fullStory?: string;
-  fullStoryEn?: string;
-  projectLink?: string;
-  collaborationDate?: string;
-  programName?: string;
-  metrics?: { label: string; value: string }[];
+  fullStory?: string | null;
+  fullStoryEn?: string | null;
+  projectLink?: string | null;
+  collaborationDate?: string | null;
+  programName?: string | null;
+  metrics?: { label: string; value: string }[] | null;
   order: number;
   isActive: boolean;
   isFeatured: boolean;

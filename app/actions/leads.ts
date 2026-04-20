@@ -53,6 +53,7 @@ export interface FormState {
   success: boolean;
   message: string;
   errors?: Record<string, string[]>;
+  leadId?: string;
 }
 
 // =============================================================================
@@ -423,6 +424,8 @@ export async function createLeadAction(data: {
   company?: string;
   message?: string;
   sourceUrl?: string;
+  referrerUrl?: string;
+  leadSource?: string;
   formType?: string;
   site?: string;
 }): Promise<FormState> {

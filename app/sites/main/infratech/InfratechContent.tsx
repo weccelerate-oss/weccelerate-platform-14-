@@ -1,8 +1,47 @@
 'use client';
-// @ts-nocheck -- ported from plain JSX; runtime-tested, TS strict checks disabled
 /* eslint-disable */
 
 import { useState, useEffect, useRef, useCallback } from "react";
+
+// ===== TYPES =====
+type Photo = { id: number; name: string; data: string; type: string; room: string };
+type Finding = { location: string; description: string; severity: string; defect_type: string };
+type Recommendation = { location: string; action: string; annex_needed: string | null };
+type CostItem = { description: string; estimated_cost: number };
+type Annex = { id: string; name: string; trigger: string; keywords: string[]; steps: string };
+type Expert = { id: string; name: string; role: string; education: string; experience: string };
+type FindingsObj = {
+  findings?: Finding[];
+  case_description?: string;
+  building_type?: string;
+  recommendations?: Recommendation[];
+  cost_items?: CostItem[];
+  matchedAnnexes?: Annex[];
+  expert?: Expert;
+  approver?: Expert;
+};
+type InspectionData = {
+  id?: number | string;
+  clientName: string;
+  address: string;
+  callNumber: string;
+  buildingType: string;
+  expert: string;
+  approver: string;
+  date: string;
+  notes: string;
+  photos: Photo[];
+  findings: FindingsObj | null;
+  report: unknown;
+  status?: string;
+};
+
+declare global {
+  interface Window {
+    SpeechRecognition?: any;
+    webkitSpeechRecognition?: any;
+  }
+}
 
 // ===== CONSTANTS & DATA =====
 const EXPERTS = [
@@ -47,7 +86,7 @@ const PRICE_LIST = {
 };
 
 // ===== AI PROCESSING =====
-async function processWithAI(prompt, systemPrompt) {
+async function processWithAI(prompt: string, systemPrompt: string): Promise<string> {
   try {
     const res = await fetch("/api/infratech-ai", {
       method: "POST",
@@ -62,11 +101,11 @@ async function processWithAI(prompt, systemPrompt) {
     const data = await res.json();
     return data.content?.[0]?.text || "שגיאה בעיבוד";
   } catch (e) {
-    return "שגיאה בחיבור ל-AI: " + e.message;
+    return "שגיאה בחיבור ל-AI: " + (e instanceof Error ? e.message : String(e));
   }
 }
 
-async function processFieldNotes(rawText, defectType) {
+async function processFieldNotes(rawText: string, defectType: string): Promise<string> {
   const sys = `אתה מנוע עיבוד שפה של מערכת אינפרטק לאבחון ליקויי בנייה. 
 תפקידך: לקחת תיאור גולמי (כפי שנאמר בשטח ע"י בודק) ולנסח אותו מחדש בשפה הנדסית-משפטית מקצועית.
 
@@ -112,7 +151,7 @@ async function processFieldNotes(rawText, defectType) {
 // ===== COMPONENTS =====
 
 // Sidebar Navigation
-function Sidebar({ active, onNav, inspectionCount }) {
+function Sidebar({ active, onNav, inspectionCount }: { active: string; onNav: (id: string) => void; inspectionCount: number }) {
   const items = [
     { id: "dashboard", icon: "📊", label: "לוח בקרה" },
     { id: "new", icon: "➕", label: "ביקורת חדשה" },
@@ -142,8 +181,8 @@ function Sidebar({ active, onNav, inspectionCount }) {
             direction: "rtl", textAlign: "right", transition: "all 0.2s",
             fontFamily: "inherit",
           }}
-          onMouseEnter={e => { if (active !== it.id) e.target.style.background = "rgba(255,255,255,0.04)"; }}
-          onMouseLeave={e => { if (active !== it.id) e.target.style.background = "transparent"; }}
+          onMouseEnter={e => { if (active !== it.id) (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)"; }}
+          onMouseLeave={e => { if (active !== it.id) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
           >
             <span style={{ fontSize: 18 }}>{it.icon}</span>
             <span>{it.label}</span>
@@ -164,21 +203,21 @@ function Sidebar({ active, onNav, inspectionCount }) {
 }
 
 // Voice Recorder
-function VoiceRecorder({ onTranscript }) {
+function VoiceRecorder({ onTranscript }: { onTranscript: (t: string) => void }) {
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [transcript, setTranscript] = useState("");
-  const intervalRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   const startRecording = () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SR();
       recognition.lang = 'he-IL';
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.onresult = (e) => {
+      recognition.onresult = (e: any) => {
         let t = '';
         for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
         setTranscript(t);
@@ -198,7 +237,7 @@ function VoiceRecorder({ onTranscript }) {
     if (transcript) onTranscript(transcript);
   };
 
-  const fmt = (s) => `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+  const fmt = (s: number) => `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 
   return (
     <div style={{
@@ -239,13 +278,13 @@ function VoiceRecorder({ onTranscript }) {
 }
 
 // Photo Manager
-function PhotoManager({ photos, onAdd, onRemove }) {
-  const fileRef = useRef(null);
-  const handleFile = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(f => {
+function PhotoManager({ photos, onAdd, onRemove }: { photos: Photo[]; onAdd: (p: Photo) => void; onRemove: (id: number) => void }) {
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach((f: File) => {
       const reader = new FileReader();
-      reader.onload = (ev) => onAdd({ id: Date.now() + Math.random(), name: f.name, data: ev.target.result, type: "דיגיטלי", room: "" });
+      reader.onload = (ev) => onAdd({ id: Date.now() + Math.random(), name: f.name, data: String(ev.target?.result ?? ''), type: "דיגיטלי", room: "" });
       reader.readAsDataURL(f);
     });
   };
@@ -262,7 +301,7 @@ function PhotoManager({ photos, onAdd, onRemove }) {
           <span style={{ fontSize: 28 }}>📷</span>
           <span>הוסף תמונה</span>
         </button>
-        {photos.map((ph, i) => (
+        {photos.map((ph: Photo, i: number) => (
           <div key={ph.id} style={{ position: "relative", width: 110, height: 110, borderRadius: 14, overflow: "hidden", border: "2px solid #d6e9f8" }}>
             <img src={ph.data} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             <button onClick={() => onRemove(ph.id)} style={{
@@ -282,9 +321,9 @@ function PhotoManager({ photos, onAdd, onRemove }) {
 }
 
 // Dashboard
-function Dashboard({ inspections, onSelect, onNew }) {
-  const statusColors = { draft: "#f39c12", processing: "#3498db", ready: "#27ae60", approved: "#2c3e50" };
-  const statusLabels = { draft: "טיוטה", processing: "בעיבוד AI", ready: "מוכן לסקירה", approved: "מאושר" };
+function Dashboard({ inspections, onSelect, onNew }: { inspections: InspectionData[]; onSelect: (i: InspectionData) => void; onNew: () => void }) {
+  const statusColors: Record<string, string> = { draft: "#f39c12", processing: "#3498db", ready: "#27ae60", approved: "#2c3e50" };
+  const statusLabels: Record<string, string> = { draft: "טיוטה", processing: "בעיבוד AI", ready: "מוכן לסקירה", approved: "מאושר" };
 
   return (
     <div>
@@ -302,10 +341,10 @@ function Dashboard({ inspections, onSelect, onNew }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
         {[
           { label: "סה\"כ תיקים", value: inspections.length, icon: "📁", color: "#3498db" },
-          { label: "בעיבוד", value: inspections.filter(i => i.status === "processing").length, icon: "⚙️", color: "#f39c12" },
-          { label: "מוכנים לסקירה", value: inspections.filter(i => i.status === "ready").length, icon: "✅", color: "#27ae60" },
-          { label: "מאושרים", value: inspections.filter(i => i.status === "approved").length, icon: "📋", color: "#2c3e50" },
-        ].map((s, i) => (
+          { label: "בעיבוד", value: inspections.filter((i: InspectionData) => i.status === "processing").length, icon: "⚙️", color: "#f39c12" },
+          { label: "מוכנים לסקירה", value: inspections.filter((i: InspectionData) => i.status === "ready").length, icon: "✅", color: "#27ae60" },
+          { label: "מאושרים", value: inspections.filter((i: InspectionData) => i.status === "approved").length, icon: "📋", color: "#2c3e50" },
+        ].map((s: { label: string; value: number; icon: string; color: string }, i: number) => (
           <div key={i} style={{
             background: "#fff", borderRadius: 16, padding: "20px 18px",
             boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: "1px solid #eef2f7",
@@ -338,7 +377,7 @@ function Dashboard({ inspections, onSelect, onNew }) {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {inspections.map(insp => (
+          {inspections.map((insp: InspectionData) => (
             <div key={insp.id} onClick={() => onSelect(insp)} style={{
               background: "#fff", borderRadius: 14, padding: "18px 22px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.03)", border: "1px solid #eef2f7",
@@ -358,9 +397,9 @@ function Dashboard({ inspections, onSelect, onNew }) {
               <div style={{ fontSize: 12, color: "#7f8c8d" }}>{insp.expert}</div>
               <span style={{
                 padding: "5px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                background: statusColors[insp.status] + "15",
-                color: statusColors[insp.status],
-              }}>{statusLabels[insp.status]}</span>
+                background: statusColors[insp.status || ''] + "15",
+                color: statusColors[insp.status || ''],
+              }}>{statusLabels[insp.status || '']}</span>
             </div>
           ))}
         </div>
@@ -370,17 +409,17 @@ function Dashboard({ inspections, onSelect, onNew }) {
 }
 
 // New Inspection Wizard
-function NewInspection({ onComplete, onCancel }) {
+function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionData) => void; onCancel: () => void }) {
   const [step, setStep] = useState(0);
-  const [data, setData] = useState({
+  const [data, setData] = useState<InspectionData>({
     clientName: "", address: "", callNumber: "", buildingType: "דירה",
     expert: "adi_b", approver: "tal_y", date: new Date().toISOString().split("T")[0],
     notes: "", photos: [], findings: null, report: null,
   });
   const [processing, setProcessing] = useState(false);
-  const [processLog, setProcessLog] = useState([]);
+  const [processLog, setProcessLog] = useState<string[]>([]);
 
-  const update = (k, v) => setData(p => ({ ...p, [k]: v }));
+  const update = <K extends keyof InspectionData>(k: K, v: InspectionData[K]) => setData((p: InspectionData) => ({ ...p, [k]: v }));
 
   // AI Processing
   const runAIProcessing = async () => {
@@ -416,10 +455,10 @@ function NewInspection({ onComplete, onCancel }) {
       await new Promise(r => setTimeout(r, 400));
 
       // Match annexes
-      const matchedAnnexes = [];
+      const matchedAnnexes: Annex[] = [];
       const allText = JSON.stringify(parsed).toLowerCase();
-      ANNEXES.forEach(a => {
-        if (a.keywords.some(k => allText.includes(k))) matchedAnnexes.push(a);
+      ANNEXES.forEach((a: Annex) => {
+        if (a.keywords.some((k: string) => allText.includes(k))) matchedAnnexes.push(a);
       });
 
       setProcessLog(p => [...p, `📎 נמצאו ${matchedAnnexes.length} נספחים רלוונטיים`]);
@@ -442,7 +481,7 @@ function NewInspection({ onComplete, onCancel }) {
       await new Promise(r => setTimeout(r, 500));
       setStep(3);
     } catch (e) {
-      setProcessLog(p => [...p, "❌ שגיאה: " + e.message]);
+      setProcessLog(p => [...p, "❌ שגיאה: " + (e instanceof Error ? e.message : String(e))]);
     }
     setProcessing(false);
   };
@@ -471,17 +510,17 @@ function NewInspection({ onComplete, onCancel }) {
         <div style={{ background: "#fff", borderRadius: 20, padding: 32, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", marginBottom: 24, marginTop: 0 }}>📋 פרטי לקוח וביקורת</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-            {[
-              { label: "שם הלקוח", key: "clientName", placeholder: "שם מלא" },
-              { label: "מספר קריאה", key: "callNumber", placeholder: "מס' קריאה מ\"בינה\"" },
-              { label: "כתובת הנכס", key: "address", placeholder: "רחוב, עיר" },
-              { label: "תאריך ביקורת", key: "date", type: "date" },
-            ].map(f => (
+            {([
+              { label: "שם הלקוח", key: "clientName" as const, placeholder: "שם מלא" },
+              { label: "מספר קריאה", key: "callNumber" as const, placeholder: "מס' קריאה מ\"בינה\"" },
+              { label: "כתובת הנכס", key: "address" as const, placeholder: "רחוב, עיר" },
+              { label: "תאריך ביקורת", key: "date" as const, type: "date" },
+            ]).map((f: { label: string; key: 'clientName' | 'callNumber' | 'address' | 'date'; placeholder?: string; type?: string }) => (
               <div key={f.key}>
                 <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 6 }}>{f.label}</label>
                 <input
                   type={f.type || "text"} placeholder={f.placeholder}
-                  value={data[f.key]} onChange={e => update(f.key, e.target.value)}
+                  value={data[f.key] as string} onChange={e => update(f.key, e.target.value)}
                   style={{
                     width: "100%", padding: "12px 14px", borderRadius: 10, border: "1.5px solid #d6e9f8",
                     fontSize: 14, direction: "rtl", fontFamily: "inherit", outline: "none",
@@ -531,7 +570,7 @@ function NewInspection({ onComplete, onCancel }) {
         <div style={{ background: "#fff", borderRadius: 20, padding: 32, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", marginBottom: 24, marginTop: 0 }}>🎤 תיעוד שטח</h2>
           
-          <VoiceRecorder onTranscript={t => update("notes", (data.notes ? data.notes + " " : "") + t)} />
+          <VoiceRecorder onTranscript={(t: string) => update("notes", (data.notes ? data.notes + " " : "") + t)} />
           
           <div style={{ marginTop: 20 }}>
             <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 6 }}>
@@ -556,8 +595,8 @@ function NewInspection({ onComplete, onCancel }) {
             <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 10 }}>📷 תמונות ממצאים</label>
             <PhotoManager
               photos={data.photos}
-              onAdd={ph => update("photos", [...data.photos, ph])}
-              onRemove={id => update("photos", data.photos.filter(p => p.id !== id))}
+              onAdd={(ph: Photo) => update("photos", [...data.photos, ph])}
+              onRemove={(id: number) => update("photos", data.photos.filter((p: Photo) => p.id !== id))}
             />
           </div>
 
@@ -586,7 +625,7 @@ function NewInspection({ onComplete, onCancel }) {
           }}>
             <div style={{ color: "#7f8c8d", marginBottom: 12 }}>INFRATECH AI ENGINE v2.0</div>
             <div style={{ color: "#7f8c8d", marginBottom: 16 }}>{'='	.repeat(40)}</div>
-            {processLog.map((log, i) => (
+            {processLog.map((log: string, i: number) => (
               <div key={i} style={{ marginBottom: 8, color: log.startsWith("❌") ? "#e74c3c" : log.startsWith("✅") ? "#27ae60" : "#5dade2" }}>
                 {'>'} {log}
               </div>
@@ -602,7 +641,7 @@ function NewInspection({ onComplete, onCancel }) {
 
       {/* Step 3: Report Preview */}
       {step === 3 && data.findings && (
-        <ReportPreview data={data} onApprove={(finalData) => {
+        <ReportPreview data={data} onApprove={(finalData: InspectionData) => {
           onComplete({ ...data, ...finalData, status: "ready" });
         }} onBack={() => setStep(1)} />
       )}
@@ -611,12 +650,12 @@ function NewInspection({ onComplete, onCancel }) {
 }
 
 // Report Preview & Editor
-function ReportPreview({ data, onApprove, onBack }) {
+function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onApprove: (d: InspectionData) => void; onBack: () => void }) {
   const findings = data.findings;
   const expert = findings?.expert || EXPERTS[0];
   const approver = findings?.approver || EXPERTS[0];
 
-  const totalCost = (findings?.cost_items || []).reduce((s, i) => s + (i.estimated_cost || 0), 0);
+  const totalCost = (findings?.cost_items || []).reduce((s: number, i: CostItem) => s + (i.estimated_cost || 0), 0);
 
   return (
     <div>
@@ -721,7 +760,7 @@ function ReportPreview({ data, onApprove, onBack }) {
           </div>
 
           {/* Detailed Findings */}
-          {(findings?.findings || []).map((f, i) => (
+          {(findings?.findings || []).map((f: Finding, i: number) => (
             <div key={i} style={{ marginBottom: 16, padding: "12px 16px", background: i % 2 === 0 ? "#fff" : "#fafbfc", borderRadius: 6, border: "1px solid #eee" }}>
               <div style={{ display: "flex", gap: 10, alignItems: "baseline", marginBottom: 6 }}>
                 <span style={{ fontWeight: 800, fontSize: 13, color: "#1a3c5e" }}>1.4.{i + 1}</span>
@@ -747,7 +786,7 @@ function ReportPreview({ data, onApprove, onBack }) {
             2. מסקנות והמלצות לביצוע
           </div>
 
-          {(findings?.recommendations || []).map((r, i) => (
+          {(findings?.recommendations || []).map((r: Recommendation, i: number) => (
             <div key={i} style={{ marginBottom: 14, padding: "10px 14px", background: "#f8fafe", borderRadius: 6, borderRight: "3px solid #2471a3" }}>
               <div style={{ fontWeight: 700, fontSize: 13, color: "#1a3c5e", marginBottom: 4 }}>2.2.{i + 1} {r.location}</div>
               <div style={{ fontSize: 12.5, color: "#2c3e50", lineHeight: 1.7 }}>{r.action}</div>
@@ -786,7 +825,7 @@ function ReportPreview({ data, onApprove, onBack }) {
               </tr>
             </thead>
             <tbody>
-              {(findings?.cost_items || []).map((c, i) => (
+              {(findings?.cost_items || []).map((c: CostItem, i: number) => (
                 <tr key={i}>
                   <td style={{ padding: "8px 12px", fontSize: 12, border: "1px solid #ddd", fontWeight: 700 }}>{i + 1}.</td>
                   <td style={{ padding: "8px 12px", fontSize: 12, border: "1px solid #ddd" }}>{c.description}</td>
@@ -809,7 +848,7 @@ function ReportPreview({ data, onApprove, onBack }) {
         </div>
 
         {/* Matched Annexes */}
-        {findings?.matchedAnnexes?.length > 0 && (
+        {(findings?.matchedAnnexes?.length ?? 0) > 0 && (
           <div style={{ marginTop: 32 }}>
             <div style={{
               fontSize: 16, fontWeight: 800, color: "#1a3c5e", padding: "8px 0",
@@ -817,7 +856,7 @@ function ReportPreview({ data, onApprove, onBack }) {
             }}>
               נספחים מצורפים
             </div>
-            {findings.matchedAnnexes.map((a, i) => (
+            {(findings?.matchedAnnexes ?? []).map((a: Annex, i: number) => (
               <div key={i} style={{ padding: "10px 14px", background: "#f0f6fb", borderRadius: 6, marginBottom: 8, border: "1px solid #d6e9f8" }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#1a3c5e" }}>📎 נספח: {a.name}</div>
                 <div style={{ fontSize: 12, color: "#5b7a94", marginTop: 4 }}>{a.steps}</div>
@@ -951,8 +990,8 @@ function ExpertProfiles() {
 // ===== MAIN APP =====
 export default function InfratechContent() {
   const [page, setPage] = useState("dashboard");
-  const [inspections, setInspections] = useState([]);
-  const [selectedInspection, setSelectedInspection] = useState(null);
+  const [inspections, setInspections] = useState<InspectionData[]>([]);
+  const [selectedInspection, setSelectedInspection] = useState<InspectionData | null>(null);
 
   // Load from storage
   useEffect(() => {
@@ -965,17 +1004,17 @@ export default function InfratechContent() {
   }, []);
 
   // Save to storage
-  const saveInspections = async (data) => {
+  const saveInspections = async (data: InspectionData[]) => {
     setInspections(data);
     try { if (typeof window !== "undefined") localStorage.setItem("infratech-inspections", JSON.stringify(data)); } catch {}
   };
 
-  const handleNewComplete = (data) => {
-    const newInsp = {
+  const handleNewComplete = (data: InspectionData) => {
+    const newInsp: InspectionData = {
       ...data,
       id: Date.now(),
       date: data.date || new Date().toISOString().split("T")[0],
-      expert: EXPERTS.find(e => e.id === data.expert)?.name || "לא ידוע",
+      expert: EXPERTS.find((e: Expert) => e.id === data.expert)?.name || "לא ידוע",
     };
     saveInspections([newInsp, ...inspections]);
     setPage("dashboard");
@@ -1003,7 +1042,7 @@ export default function InfratechContent() {
         {page === "dashboard" && (
           <Dashboard
             inspections={inspections}
-            onSelect={(insp) => { setSelectedInspection(insp); setPage("view"); }}
+            onSelect={(insp: InspectionData) => { setSelectedInspection(insp); setPage("view"); }}
             onNew={() => setPage("new")}
           />
         )}
@@ -1017,7 +1056,7 @@ export default function InfratechContent() {
           <ReportPreview
             data={selectedInspection}
             onApprove={() => {
-              const updated = inspections.map(i => i.id === selectedInspection.id ? { ...i, status: "approved" } : i);
+              const updated: InspectionData[] = inspections.map((i: InspectionData) => i.id === selectedInspection?.id ? { ...i, status: "approved" } : i);
               saveInspections(updated);
               setPage("dashboard");
             }}

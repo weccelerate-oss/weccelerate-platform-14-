@@ -160,7 +160,7 @@ async function getAnalyticsData() {
       take: 500,
     });
 
-    const recentActivity = recentLogs.map((log) => ({
+    const recentActivity = recentLogs.map((log: { id: string; action: string; metadata: unknown; createdAt: Date }) => ({
       id: log.id,
       action: log.action,
       label: ACTION_LABELS[log.action] || log.action,
@@ -179,7 +179,7 @@ async function getAnalyticsData() {
       take: 1000,
     });
 
-    const monthActivity = monthLogs.map((log) => ({
+    const monthActivity = monthLogs.map((log: { id: string; action: string; metadata: unknown; createdAt: Date }) => ({
       id: log.id,
       action: log.action,
       label: ACTION_LABELS[log.action] || log.action,

@@ -56,8 +56,12 @@ export interface EventLocation {
 export interface Event {
   /** Unique identifier */
   id: string;
+  /** URL slug */
+  slug?: string;
   /** Event name/title */
   name: string;
+  /** City (shortcut for location.city) */
+  city?: string;
   /** Event description */
   description?: string;
   /** ISO date string for the event date */

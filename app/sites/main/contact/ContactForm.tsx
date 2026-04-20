@@ -174,7 +174,7 @@ export function ContactForm() {
       return undefined;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return error.errors[0]?.message;
+        return error.issues[0]?.message;
       }
       return undefined;
     }

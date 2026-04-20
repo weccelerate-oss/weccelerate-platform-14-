@@ -39,7 +39,7 @@ async function getArticlesData() {
   try {
     const news = await getNewsUpdates({ limit: 50, activeOnly: true });
     if (news.length > 0) {
-      return news.map((n) => ({
+      return news.map((n: Record<string, unknown> & { id: string; title: string; excerpt?: string | null; link?: string | null; urgencyLevel?: string; isPinned?: boolean; publishAt?: Date | string | null; createdAt: Date | string }) => ({
         id: n.id,
         title: n.title,
         excerpt: n.excerpt ?? null,
