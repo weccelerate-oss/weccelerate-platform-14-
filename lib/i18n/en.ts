@@ -844,6 +844,7 @@ export const en: Record<string, string> = {
   'login.form.connecting': 'Signing in...',
   'login.form.successMsg': 'Signed in successfully!',
   'login.form.redirecting': 'Signed in successfully! Redirecting...',
+  'login.form.resetSuccess': 'Password updated successfully! Sign in with your new password.',
   'login.form.error.emailRequired': 'Email is required',
   'login.form.error.emailInvalid': 'Invalid email address',
   'login.form.error.passwordRequired': 'Password is required',

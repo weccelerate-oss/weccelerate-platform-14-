@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'wecc-ltd.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.wecc-ltd.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'images.unsplash.com',
       },
       {
@@ -28,6 +36,34 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+
+  // Domain redirects
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'wecc-ltd.com',
+          },
+        ],
+        destination: 'https://weccelerate.co.il/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: '*.wecc-ltd.com',
+          },
+        ],
+        destination: 'https://weccelerate.co.il/:path*',
+        permanent: true,
+      },
+    ];
   },
 
   // Performance

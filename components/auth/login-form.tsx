@@ -42,6 +42,7 @@ export function LoginForm() {
   const { t, dir } = useLanguage();
   const callbackUrl = searchParams.get('callbackUrl') || '/portal';
   const errorParam = searchParams.get('error');
+  const resetSuccess = searchParams.get('reset') === 'true';
 
   const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState<FormData>({
@@ -158,6 +159,21 @@ export function LoginForm() {
     <div className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl overflow-hidden">
       {/* Form */}
       <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        {/* Password Reset Success Banner */}
+        {resetSuccess && !isSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3"
+            role="status"
+          >
+            <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" aria-hidden="true" />
+            <span className="text-emerald-400 text-sm">
+              {t('login.form.resetSuccess')}
+            </span>
+          </motion.div>
+        )}
+
         {/* General Error */}
         <AnimatePresence mode="wait">
           {(errors.general || getInitialError()) && (

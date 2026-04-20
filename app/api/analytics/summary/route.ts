@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth/auth.config';
 
 const TRACKED_ACTIONS = [
   'click.phone',
@@ -11,6 +12,12 @@ const TRACKED_ACTIONS = [
 ];
 
 export async function GET() {
+  // Admin-only endpoint
+  const session = await auth();
+  if (!session?.user || (session.user as any).role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized - Admin only' }, { status: 401 });
+  }
+
   try {
     const { prisma } = await import('@/lib/db');
 

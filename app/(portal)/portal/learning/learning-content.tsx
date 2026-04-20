@@ -317,16 +317,23 @@ function CategoryCard({
       {/* Category Header */}
       <button
         onClick={() => onToggleCategory(category.slug)}
-        className="w-full flex items-center gap-4 p-5 sm:p-6 hover:bg-white/[0.02] transition-colors text-right"
+        className="w-full flex items-center gap-4 p-5 sm:p-6 hover:bg-white/[0.02] transition-colors text-right relative overflow-hidden"
       >
-        <div className={cn('p-3 rounded-xl text-white', colors.bg)}>
+        {/* Category background image */}
+        {category.image && (
+          <div className="absolute inset-0 pointer-events-none">
+            <img src={category.image} alt="" className="w-full h-full object-cover opacity-[0.06]" />
+            <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#0d1321]/80" />
+          </div>
+        )}
+        <div className={cn('p-3 rounded-xl text-white relative z-10', colors.bg)}>
           {ICON_MAP[category.icon] || <BookOpen className="w-6 h-6" />}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 relative z-10">
           <h2 className="text-lg sm:text-xl font-bold text-white">{category.name}</h2>
           <p className="text-sm text-white/50 mt-0.5 line-clamp-1">{category.description}</p>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-3 flex-shrink-0 relative z-10">
           {/* Mini progress */}
           <div className="hidden sm:flex items-center gap-2">
             <div className="w-20 h-2 bg-white/[0.06] rounded-full overflow-hidden">

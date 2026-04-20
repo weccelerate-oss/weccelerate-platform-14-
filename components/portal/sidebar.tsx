@@ -19,6 +19,7 @@ import {
   Calendar,
   MessageSquare,
   BookOpen,
+  GraduationCap,
   Users,
   BarChart3,
   Settings,
@@ -71,7 +72,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   {
     label: 'מרכז למידה',
     href: '/portal/learning',
-    icon: <BookOpen className="w-5 h-5" />,
+    icon: <GraduationCap className="w-5 h-5" />,
   },
   {
     label: 'ניהול משתמשים',

@@ -102,9 +102,13 @@ export function DashboardContent({
   return (
     <>
       {/* Greeting */}
-      <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-2">
-        <h1 className="text-lg sm:text-xl font-bold text-white" suppressHydrationWarning>{greeting}, {firstName}</h1>
-        <p className="text-xs text-white/50">הנה סיכום ההתקדמות של הפרויקט שלך</p>
+      <div className="relative px-4 sm:px-6 lg:px-8 pt-6 pb-2 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <img src="/images/portal/dashboard-hero.png" alt="" className="w-full h-full object-cover opacity-[0.06]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/60 to-[#070b1e]" />
+        </div>
+        <h1 className="relative z-10 text-lg sm:text-xl font-bold text-white" suppressHydrationWarning>{greeting}, {firstName}</h1>
+        <p className="relative z-10 text-xs text-white/50">הנה סיכום ההתקדמות של הפרויקט שלך</p>
       </div>
 
       {/* Dashboard Content */}

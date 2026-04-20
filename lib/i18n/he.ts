@@ -845,6 +845,7 @@ export const he: Record<string, string> = {
   'login.form.connecting': 'מתחבר...',
   'login.form.successMsg': 'התחברת בהצלחה!',
   'login.form.redirecting': 'התחברת בהצלחה! מעביר אותך...',
+  'login.form.resetSuccess': 'הסיסמה עודכנה בהצלחה! התחברו עם הסיסמה החדשה.',
   'login.form.error.emailRequired': 'נדרש אימייל',
   'login.form.error.emailInvalid': 'אימייל לא תקין',
   'login.form.error.passwordRequired': 'נדרשת סיסמה',

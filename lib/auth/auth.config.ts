@@ -56,14 +56,15 @@ callbacks: {
     return session;
   },
   redirect({ url, baseUrl }) {
-    // Always redirect to portal/admin after login
-    if (url.includes('/api/auth')) {
-      return `${baseUrl}/admin`;
-    }
+    // If a callbackUrl was provided (e.g. signOut({ callbackUrl: '/login' })), respect it
     if (url.startsWith(baseUrl)) {
       return url;
     }
-    return `${baseUrl}/admin`;
+    if (url.startsWith('/')) {
+      return `${baseUrl}${url}`;
+    }
+    // Default: redirect to portal
+    return `${baseUrl}/portal`;
   },
 },  trustHost: true,
 });

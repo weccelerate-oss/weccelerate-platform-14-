@@ -24,6 +24,7 @@ export interface CategoryData {
   description: string;
   icon: string;
   color: string;
+  image: string;
   subcategories: SubcategoryData[];
 }
 
@@ -39,6 +40,7 @@ export const COURSES_DATA: CategoryData[] = [
     description: 'הבנת עולם הפיננסים והדוחות הכספיים - הבסיס לכל יזם',
     icon: 'TrendingUp',
     color: 'blue',
+    image: '/images/portal/course-financial.png',
     subcategories: [
       {
         name: 'דוחות כספיים',
@@ -168,6 +170,7 @@ export const COURSES_DATA: CategoryData[] = [
     description: 'בניית תשתית עסקית חזקה - מתוכנית עסקית ועד מודל הכנסות',
     icon: 'Briefcase',
     color: 'emerald',
+    image: '/images/portal/course-business.png',
     subcategories: [
       {
         name: 'תוכנית עסקית',
@@ -225,6 +228,7 @@ export const COURSES_DATA: CategoryData[] = [
     description: 'הכל על גיוס הון, סוגי משקיעים ואסטרטגיות צמיחה',
     icon: 'Rocket',
     color: 'violet',
+    image: '/images/portal/course-investments.png',
     subcategories: [
       {
         name: 'השקעות',
@@ -426,6 +430,7 @@ export const COURSES_DATA: CategoryData[] = [
     description: 'עקרונות ניהול זמן, כלים פרקטיים ושיטות עבודה יעילות ליזם',
     icon: 'Clock',
     color: 'amber',
+    image: '/images/portal/course-time.png',
     subcategories: [
       {
         name: 'עקרונות ניהול זמן',

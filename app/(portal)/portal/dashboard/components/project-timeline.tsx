@@ -82,8 +82,8 @@ export function ProjectTimeline({ dealActivities, dealStatus }: TimelineProps) {
   if (activities.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-white/[0.04] flex items-center justify-center">
-          <Clock className="w-6 h-6 text-white/20" />
+        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden opacity-40">
+          <img src="/images/portal/empty-state.png" alt="" className="w-full h-full object-cover" />
         </div>
         <p className="text-sm text-white/50">אין פעילויות עדיין</p>
         <p className="text-xs text-white/30 mt-1">הפעילויות שלך ב-WeCcelerate יופיעו כאן</p>
@@ -106,8 +106,13 @@ export function ProjectTimeline({ dealActivities, dealStatus }: TimelineProps) {
   return (
     <div className="space-y-5">
       {/* Progress summary */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1">
+      <div className="relative flex items-center gap-4 p-3 rounded-xl overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0 pointer-events-none">
+          <img src="/images/portal/timeline-progress.png" alt="" className="w-full h-full object-cover opacity-[0.05]" />
+          <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#0d1321]/90" />
+        </div>
+        <div className="flex-1 relative z-10">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-white/70">
               {doneCount} מתוך {totalCount} פעילויות הושלמו
@@ -124,7 +129,7 @@ export function ProjectTimeline({ dealActivities, dealStatus }: TimelineProps) {
           </div>
         </div>
         {progressPercent === 100 && (
-          <div className="p-2 bg-emerald-500/10 rounded-xl">
+          <div className="p-2 bg-emerald-500/10 rounded-xl relative z-10">
             <Trophy className="w-5 h-5 text-emerald-400" />
           </div>
         )}

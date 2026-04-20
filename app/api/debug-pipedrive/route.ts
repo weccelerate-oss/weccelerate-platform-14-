@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth/auth.config';
 
 export async function GET() {
+  // Admin-only endpoint
+  const session = await auth();
+  if (!session?.user || (session.user as any).role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized - Admin only' }, { status: 401 });
+  }
+
   const results: Record<string, unknown> = {};
 
   // Check env vars

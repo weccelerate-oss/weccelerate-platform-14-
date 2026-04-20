@@ -122,8 +122,8 @@ export function RecentActivity({ activities }: RecentActivityProps) {
   if (!activities || activities.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-white/[0.04] flex items-center justify-center">
-          <Clock className="w-5 h-5 text-white/20" />
+        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden opacity-40">
+          <img src="/images/portal/empty-state.png" alt="" className="w-full h-full object-cover" />
         </div>
         <p className="text-sm text-white/50">אין פעילות אחרונה</p>
         <p className="text-xs text-white/30 mt-1">הפעילות שלך תופיע כאן</p>
@@ -132,7 +132,11 @@ export function RecentActivity({ activities }: RecentActivityProps) {
   }
 
   return (
-    <div className="space-y-0.5">
+    <div className="relative space-y-0.5">
+      {/* Decorative background */}
+      <div className="absolute top-0 left-0 w-24 h-24 pointer-events-none opacity-[0.04]">
+        <img src="/images/portal/activity-icons.png" alt="" className="w-full h-full object-contain" />
+      </div>
       {activities.slice(0, 6).map((activity, index) => {
         const config = getConfig(activity.action);
 

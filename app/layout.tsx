@@ -10,6 +10,7 @@
 
 import type { Metadata, Viewport } from "next";
 import { Inter, Heebo } from "next/font/google";
+import Script from "next/script";
 
 import { GeoSchema } from "@/components/seo/GeoSchema";
 import { SkipToContent } from "@/components/ui/SkipToContent";
@@ -197,6 +198,20 @@ export default function RootLayout({
           href={`${SITE_CONFIG.url}/llms.txt`}
         />
       </head>
+
+      {/* Google Analytics */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-BQDD91KSJG"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-BQDD91KSJG');
+        `}
+      </Script>
 
       <body className={`font-heebo antialiased bg-white text-slate-900`}>
         <LanguageProvider>
