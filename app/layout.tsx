@@ -157,11 +157,15 @@ export default function RootLayout({
         {/* Sitemap reference */}
         <link rel="sitemap" type="application/xml" href={`${SITE_CONFIG.url}/sitemap.xml`} />
 
-        {/* GEO Schema - The Holy Grail JSON-LD for AI/LLM Optimization */}
+        {/* GEO Schema - The Holy Grail JSON-LD for AI/LLM Optimization.
+            FAQ intentionally excluded: it was causing Google to see a duplicate
+            FAQPage (the @graph ends up rendered twice in head by Next.js/React
+            streaming). Reintroduce per-page with a dedicated component if
+            needed. */}
         <GeoSchema
           path="/"
           pageTitle="WeCcelerate - Venture Builder & Startup Accelerator Israel"
-          includeFaq={true}
+          includeFaq={false}
         />
 
         {/* Additional meta for Hebrew optimization */}
