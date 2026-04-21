@@ -72,13 +72,20 @@ export function middleware(request: NextRequest) {
   }
 
   // Skip for auth, admin, portal, login routes
+  // Also skip Next.js metadata routes (opengraph-image, twitter-image, icon,
+  // apple-icon) so social share previews work without being rewritten into
+  // /sites/main and 404-ing.
   if (pathname.startsWith('/api/') ||
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/admin') ||
       pathname.startsWith('/portal') ||
       pathname.startsWith('/login') ||
       pathname.startsWith('/forgot-password') ||
-      pathname.startsWith('/reset-password')) {
+      pathname.startsWith('/reset-password') ||
+      pathname === '/opengraph-image' ||
+      pathname === '/twitter-image' ||
+      pathname === '/icon' ||
+      pathname === '/apple-icon') {
     return NextResponse.next();
   }
 
