@@ -43,7 +43,7 @@ export function HeroBackground() {
         loop
         muted
         playsInline
-        src="/hero-bg3.mp4"
+        src="/hero-bg4.mp4"
         poster="/hero-bg-poster.jpeg"
         style={{
           display: 'block',
