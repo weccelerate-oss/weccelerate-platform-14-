@@ -5,7 +5,7 @@
  * All UI rendering and i18n happens in HomepageContent.tsx (client component).
  */
 
-export const dynamic = 'force-dynamic'; // Always fetch fresh data from DB
+export const revalidate = 300; // ISR: refresh cached HTML every 5 minutes
 
 import { Metadata } from 'next';
 

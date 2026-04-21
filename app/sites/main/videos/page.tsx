@@ -2,7 +2,7 @@
  * Videos Listing Page — Server Component (Data Fetching Only)
  */
 
-export const dynamic = 'force-dynamic'; // Always fetch fresh data from DB
+export const revalidate = 600; // ISR: refresh cached HTML every 10 minutes
 
 import { Metadata } from 'next';
 import { getVideos } from '@/lib/db-repository';

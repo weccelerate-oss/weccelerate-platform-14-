@@ -32,44 +32,44 @@ async function getProjectData(userId: string) {
   try {
     const { prisma } = await import('@/lib/db');
 
-    // Fetch user's active project with files
-    const project = await prisma.project.findFirst({
-      where: {
-        userId,
-        isArchived: false,
-      },
-      include: {
-        files: {
-          orderBy: { uploadedAt: 'desc' },
-          take: 20,
+    // Project + notifications can run in parallel. Activities depend on project.id,
+    // so run the first two together, then activities.
+    const [project, notifications] = await Promise.all([
+      prisma.project.findFirst({
+        where: {
+          userId,
+          isArchived: false,
         },
-        notes: {
-          where: { isPrivate: false },
-          orderBy: { createdAt: 'desc' },
-          take: 5,
-        },
-        user: {
-          select: {
-            name: true,
-            email: true,
-            phone: true,
-            company: true,
+        include: {
+          files: {
+            orderBy: { uploadedAt: 'desc' },
+            take: 20,
+          },
+          notes: {
+            where: { isPrivate: false },
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+          },
+          user: {
+            select: {
+              name: true,
+              email: true,
+              phone: true,
+              company: true,
+            },
           },
         },
-      },
-    });
+      }),
+      prisma.notification.findMany({
+        where: {
+          userId,
+          isRead: false,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+    ]);
 
-    // Get user's notifications
-    const notifications = await prisma.notification.findMany({
-      where: {
-        userId,
-        isRead: false,
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    });
-
-    // Get recent activity
     const activities = await prisma.activityLog.findMany({
       where: {
         OR: [
@@ -309,82 +309,80 @@ export default async function DashboardPage() {
   // Fetch project data
   const data = await getProjectData(session.user.id);
 
-  // Fetch purchased products and activities from Pipedrive if project has a deal linked
+  // Fetch Pipedrive data and Google Drive files in parallel — they're independent
   let dealProducts: { id: number; name: string; price: number; quantity: number; sum: number; currency: string; completed: boolean; active: boolean }[] = [];
   let dealActivities: { id: number; type: string; subject: string; done: boolean; dueDate: string | null; dueTime: string | null; addTime: string; markedDoneTime: string | null; location: string | null }[] = [];
   let dealStatus: string | undefined;
-  if (data.project?.pipedriveId) {
-    try {
-      const { pipedriveClient } = await import('@/lib/pipedrive');
-      console.log(`[Dashboard] Fetching Pipedrive data for deal ${data.project.pipedriveId}, client ready: ${pipedriveClient.isReady()}`);
-
-      // Fetch deal first to get pipeline_id
-      const deal = await pipedriveClient.getDeal(data.project.pipedriveId);
-      console.log(`[Dashboard] Deal fetched: ${deal ? deal.title : 'null'}, status: ${deal?.status}`);
-
-      // Then fetch products and activities in parallel
-      const [products, activities] = await Promise.all([
-        pipedriveClient.getDealProducts(data.project.pipedriveId),
-        pipedriveClient.getDealActivities(data.project.pipedriveId),
-      ]);
-
-      dealStatus = deal?.status || 'open';
-
-      dealProducts = products.map((p) => ({
-        id: p.id,
-        name: p.name,
-        price: p.item_price,
-        quantity: p.quantity,
-        sum: p.sum,
-        currency: p.currency || 'ILS',
-        completed: dealStatus === 'won' || !p.active_flag,
-        active: p.active_flag && dealStatus === 'open',
-      }));
-
-      dealActivities = activities
-        .filter((a) => a.type !== 'note')
-        .map((a) => ({
-          id: a.id,
-          type: a.type,
-          subject: a.subject,
-          done: a.done,
-          dueDate: a.due_date,
-          dueTime: a.due_time,
-          addTime: a.add_time,
-          markedDoneTime: a.marked_as_done_time,
-          location: a.location,
-        }))
-        .sort((a, b) => {
-          // Done activities last, then sort by due date
-          if (a.done !== b.done) return a.done ? 1 : -1;
-          return (b.dueDate || b.addTime).localeCompare(a.dueDate || a.addTime);
-        });
-    } catch (err) {
-      console.warn('[Dashboard] Failed to fetch Pipedrive data:', err);
-    }
-  }
-
-  // Fetch files from Google Drive Portal folder
   let driveFiles: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; downloadLink: string; modifiedTime: string }[] = [];
+
   if (data.project?.pipedriveId) {
-    try {
-      const { findDriveFolder, listAllPdfs } = await import('@/lib/google-drive');
-      const portalRootId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID;
-      if (portalRootId) {
-        const entrepreneurFolder = await findDriveFolder(portalRootId, data.project.pipedriveId);
-        if (entrepreneurFolder) {
-          const files = await listAllPdfs(entrepreneurFolder);
-          driveFiles = files.map(f => ({
-            id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
-            webViewLink: f.webViewLink, webContentLink: f.webContentLink,
-            downloadLink: f.downloadLink,
-            modifiedTime: f.modifiedTime,
-          }));
-        }
+    const pipedriveId = data.project.pipedriveId;
+
+    const pipedrivePromise = (async () => {
+      try {
+        const { pipedriveClient } = await import('@/lib/pipedrive');
+        const deal = await pipedriveClient.getDeal(pipedriveId);
+        const [products, activities] = await Promise.all([
+          pipedriveClient.getDealProducts(pipedriveId),
+          pipedriveClient.getDealActivities(pipedriveId),
+        ]);
+        dealStatus = deal?.status || 'open';
+
+        dealProducts = products.map((p) => ({
+          id: p.id,
+          name: p.name,
+          price: p.item_price,
+          quantity: p.quantity,
+          sum: p.sum,
+          currency: p.currency || 'ILS',
+          completed: dealStatus === 'won' || !p.active_flag,
+          active: p.active_flag && dealStatus === 'open',
+        }));
+
+        dealActivities = activities
+          .filter((a) => a.type !== 'note')
+          .map((a) => ({
+            id: a.id,
+            type: a.type,
+            subject: a.subject,
+            done: a.done,
+            dueDate: a.due_date,
+            dueTime: a.due_time,
+            addTime: a.add_time,
+            markedDoneTime: a.marked_as_done_time,
+            location: a.location,
+          }))
+          .sort((a, b) => {
+            if (a.done !== b.done) return a.done ? 1 : -1;
+            return (b.dueDate || b.addTime).localeCompare(a.dueDate || a.addTime);
+          });
+      } catch (err) {
+        console.warn('[Dashboard] Failed to fetch Pipedrive data:', err);
       }
-    } catch (err) {
-      console.warn('[Dashboard] Google Drive error:', err);
-    }
+    })();
+
+    const drivePromise = (async () => {
+      try {
+        const { findDriveFolder, listAllPdfs } = await import('@/lib/google-drive');
+        const portalRootId = process.env.GOOGLE_DRIVE_PORTAL_FOLDER_ID;
+        if (portalRootId) {
+          const entrepreneurFolder = await findDriveFolder(portalRootId, pipedriveId);
+          if (entrepreneurFolder) {
+            const files = await listAllPdfs(entrepreneurFolder);
+            driveFiles = files.map(f => ({
+              id: f.id, name: f.name, mimeType: f.mimeType, size: f.size,
+              webViewLink: f.webViewLink, webContentLink: f.webContentLink,
+              downloadLink: f.downloadLink,
+              modifiedTime: f.modifiedTime,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn('[Dashboard] Google Drive error:', err);
+      }
+    })();
+
+    await Promise.all([pipedrivePromise, drivePromise]);
   }
 
   // Match activities to WeCcelerate services (needs driveFiles to determine completion)

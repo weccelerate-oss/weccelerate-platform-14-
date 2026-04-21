@@ -77,7 +77,8 @@ export function middleware(request: NextRequest) {
       pathname.startsWith('/admin') ||
       pathname.startsWith('/portal') ||
       pathname.startsWith('/login') ||
-      pathname.startsWith('/register')) {
+      pathname.startsWith('/forgot-password') ||
+      pathname.startsWith('/reset-password')) {
     return NextResponse.next();
   }
 

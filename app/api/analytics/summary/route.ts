@@ -27,57 +27,46 @@ export async function GET() {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    // Get all relevant logs for the last 30 days
-    const logs = await prisma.activityLog.findMany({
-      where: {
-        action: { in: TRACKED_ACTIONS },
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      select: {
-        action: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'asc' },
-    });
+    // Push aggregation to Postgres with grouped counts + period totals — avoids
+    // streaming thousands of rows into Node memory on every request.
+    const [todayCount, weekCount, monthGroup, dailyRaw] = await Promise.all([
+      prisma.activityLog.count({
+        where: { action: { in: TRACKED_ACTIONS }, createdAt: { gte: todayStart } },
+      }),
+      prisma.activityLog.count({
+        where: { action: { in: TRACKED_ACTIONS }, createdAt: { gte: weekAgo } },
+      }),
+      prisma.activityLog.groupBy({
+        by: ['action'],
+        where: { action: { in: TRACKED_ACTIONS }, createdAt: { gte: monthStart } },
+        _count: { _all: true },
+      }),
+      prisma.$queryRaw<Array<{ day: Date; action: string; count: bigint }>>`
+        SELECT date_trunc('day', "createdAt") AS day, "action", COUNT(*)::bigint AS count
+        FROM "ActivityLog"
+        WHERE "action" = ANY(${TRACKED_ACTIONS}::text[])
+          AND "createdAt" >= ${thirtyDaysAgo}
+        GROUP BY day, "action"
+        ORDER BY day ASC
+      `,
+    ]);
 
-    // Aggregate by action for current month
     const byAction: Record<string, number> = {};
-    for (const a of TRACKED_ACTIONS) {
-      byAction[a] = 0;
-    }
-
-    let contactsToday = 0;
-    let contactsThisWeek = 0;
+    for (const a of TRACKED_ACTIONS) byAction[a] = 0;
     let contactsThisMonth = 0;
-
-    // Build daily breakdown for last 30 days
-    const dailyMap: Record<string, Record<string, number>> = {};
-
-    for (const log of logs) {
-      const date = new Date(log.createdAt);
-      const dayKey = date.toISOString().split('T')[0];
-
-      // Daily breakdown
-      if (!dailyMap[dayKey]) {
-        dailyMap[dayKey] = { total: 0 };
-      }
-      dailyMap[dayKey][log.action] = (dailyMap[dayKey][log.action] || 0) + 1;
-      dailyMap[dayKey].total += 1;
-
-      // Period totals
-      if (date >= monthStart) {
-        contactsThisMonth++;
-        byAction[log.action] = (byAction[log.action] || 0) + 1;
-      }
-      if (date >= weekAgo) {
-        contactsThisWeek++;
-      }
-      if (date >= todayStart) {
-        contactsToday++;
-      }
+    for (const row of monthGroup) {
+      byAction[row.action] = row._count._all;
+      contactsThisMonth += row._count._all;
     }
 
-    // Convert daily map to sorted array
+    const dailyMap: Record<string, Record<string, number>> = {};
+    for (const row of dailyRaw) {
+      const dayKey = new Date(row.day).toISOString().split('T')[0];
+      const count = Number(row.count);
+      if (!dailyMap[dayKey]) dailyMap[dayKey] = { total: 0 };
+      dailyMap[dayKey][row.action] = count;
+      dailyMap[dayKey].total += count;
+    }
     const daily = Object.entries(dailyMap)
       .map(([date, counts]) => ({ date, ...counts }))
       .sort((a, b) => a.date.localeCompare(b.date));
@@ -85,8 +74,8 @@ export async function GET() {
     return NextResponse.json({
       daily,
       totals: {
-        today: contactsToday,
-        thisWeek: contactsThisWeek,
+        today: todayCount,
+        thisWeek: weekCount,
         thisMonth: contactsThisMonth,
       },
       byAction,

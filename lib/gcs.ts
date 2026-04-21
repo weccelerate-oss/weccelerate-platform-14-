@@ -108,6 +108,7 @@ export const MAX_FILE_SIZES = {
   image: 10 * 1024 * 1024,     // 10MB
   video: 500 * 1024 * 1024,    // 500MB
   avatar: 5 * 1024 * 1024,     // 5MB
+  other: 25 * 1024 * 1024,     // 25MB
 } as const;
 
 // =============================================================================
@@ -687,7 +688,7 @@ export async function listFiles(
         size: parseInt(file.metadata.size?.toString() || '0', 10),
         updated: new Date(file.metadata.updated || Date.now()),
       })),
-      nextPageToken: apiResponse?.nextPageToken,
+      nextPageToken: (apiResponse as { nextPageToken?: string } | undefined)?.nextPageToken,
     };
     
   } catch (error) {

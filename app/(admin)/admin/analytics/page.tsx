@@ -1,5 +1,12 @@
 import { Metadata } from 'next';
-import { AnalyticsDashboard } from './analytics-dashboard';
+import dynamicImport from 'next/dynamic';
+
+// Defer the recharts-heavy dashboard until after the page HTML/server data is ready.
+// Route-level code-split already, but this also pushes JS eval off the initial paint.
+const AnalyticsDashboard = dynamicImport(
+  () => import('./analytics-dashboard').then((m) => m.AnalyticsDashboard),
+  { loading: () => <div className="p-8 text-slate-500">טוען דוח...</div> },
+);
 
 export const metadata: Metadata = {
   title: 'אנליטיקס | מערכת ניהול WeCcelerate',
@@ -30,39 +37,64 @@ async function getAnalyticsData() {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    // ── Last 30 days for daily chart ──
-    const logs = await prisma.activityLog.findMany({
-      where: {
-        action: { in: TRACKED_ACTIONS },
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      select: { action: true, createdAt: true },
-      orderBy: { createdAt: 'asc' },
-    });
+    // ── Last 30 days — DB-level aggregation (no row streaming into Node) ──
+    const [todayCount, weekCount, monthGroup, dailyRaw, monthlyRaw, recentLogs, monthLogs] = await Promise.all([
+      prisma.activityLog.count({
+        where: { action: { in: TRACKED_ACTIONS }, createdAt: { gte: todayStart } },
+      }),
+      prisma.activityLog.count({
+        where: { action: { in: TRACKED_ACTIONS }, createdAt: { gte: weekAgo } },
+      }),
+      prisma.activityLog.groupBy({
+        by: ['action'],
+        where: { action: { in: TRACKED_ACTIONS }, createdAt: { gte: monthStart } },
+        _count: { _all: true },
+      }),
+      prisma.$queryRaw<Array<{ day: Date; action: string; count: bigint }>>`
+        SELECT date_trunc('day', "createdAt") AS day, "action", COUNT(*)::bigint AS count
+        FROM "ActivityLog"
+        WHERE "action" = ANY(${TRACKED_ACTIONS}::text[])
+          AND "createdAt" >= ${thirtyDaysAgo}
+        GROUP BY day, "action"
+      `,
+      prisma.$queryRaw<Array<{ month: Date; action: string; count: bigint }>>`
+        SELECT date_trunc('month', "createdAt") AS month, "action", COUNT(*)::bigint AS count
+        FROM "ActivityLog"
+        WHERE "action" = ANY(${TRACKED_ACTIONS}::text[])
+          AND "createdAt" >= ${new Date(now.getFullYear(), now.getMonth() - 11, 1)}
+        GROUP BY month, "action"
+      `,
+      prisma.activityLog.findMany({
+        where: { action: { in: TRACKED_ACTIONS }, createdAt: { gte: weekAgo } },
+        select: { id: true, action: true, metadata: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
+      }),
+      prisma.activityLog.findMany({
+        where: { action: { in: TRACKED_ACTIONS }, createdAt: { gte: monthStart } },
+        select: { id: true, action: true, metadata: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 1000,
+      }),
+    ]);
 
     const byAction: Record<string, number> = {};
     for (const a of TRACKED_ACTIONS) byAction[a] = 0;
-
-    let contactsToday = 0;
-    let contactsThisWeek = 0;
     let contactsThisMonth = 0;
+    for (const row of monthGroup) {
+      byAction[row.action] = row._count._all;
+      contactsThisMonth += row._count._all;
+    }
+    const contactsToday = todayCount;
+    const contactsThisWeek = weekCount;
 
     const dailyMap: Record<string, Record<string, number>> = {};
-
-    for (const log of logs) {
-      const date = new Date(log.createdAt);
-      const dayKey = date.toISOString().split('T')[0];
-
+    for (const row of dailyRaw) {
+      const dayKey = new Date(row.day).toISOString().split('T')[0];
+      const count = Number(row.count);
       if (!dailyMap[dayKey]) dailyMap[dayKey] = { total: 0 };
-      dailyMap[dayKey][log.action] = (dailyMap[dayKey][log.action] || 0) + 1;
-      dailyMap[dayKey].total += 1;
-
-      if (date >= monthStart) {
-        contactsThisMonth++;
-        byAction[log.action] = (byAction[log.action] || 0) + 1;
-      }
-      if (date >= weekAgo) contactsThisWeek++;
-      if (date >= todayStart) contactsToday++;
+      dailyMap[dayKey][row.action] = count;
+      dailyMap[dayKey].total += count;
     }
 
     // Fill missing days
@@ -87,31 +119,18 @@ async function getAnalyticsData() {
         action,
       }));
 
-    // ── Monthly history (last 12 months) ──
-    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
-
-    const monthlyLogs = await prisma.activityLog.findMany({
-      where: {
-        action: { in: TRACKED_ACTIONS },
-        createdAt: { gte: twelveMonthsAgo },
-      },
-      select: { action: true, createdAt: true },
-      orderBy: { createdAt: 'asc' },
-    });
-
-    // Build monthly buckets
+    // ── Monthly history (last 12 months) — already aggregated via monthlyRaw ──
     const monthlyMap: Record<string, Record<string, number>> = {};
-
-    for (const log of monthlyLogs) {
-      const d = new Date(log.createdAt);
+    for (const row of monthlyRaw) {
+      const d = new Date(row.month);
       const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-
+      const count = Number(row.count);
       if (!monthlyMap[monthKey]) {
         monthlyMap[monthKey] = { total: 0 };
         for (const a of TRACKED_ACTIONS) monthlyMap[monthKey][a] = 0;
       }
-      monthlyMap[monthKey][log.action] += 1;
-      monthlyMap[monthKey].total += 1;
+      monthlyMap[monthKey][row.action] = count;
+      monthlyMap[monthKey].total += count;
     }
 
     // Generate all 12 months (even empty ones)
@@ -149,17 +168,7 @@ async function getAnalyticsData() {
       });
     }
 
-    // ── Recent activity feed (last 7 days, individual entries) ──
-    const recentLogs = await prisma.activityLog.findMany({
-      where: {
-        action: { in: TRACKED_ACTIONS },
-        createdAt: { gte: weekAgo },
-      },
-      select: { id: true, action: true, metadata: true, createdAt: true },
-      orderBy: { createdAt: 'desc' },
-      take: 500,
-    });
-
+    // ── Recent activity feed (already fetched in the Promise.all above) ──
     const recentActivity = recentLogs.map((log: { id: string; action: string; metadata: unknown; createdAt: Date }) => ({
       id: log.id,
       action: log.action,
@@ -167,17 +176,6 @@ async function getAnalyticsData() {
       metadata: log.metadata as Record<string, unknown> | null,
       createdAt: log.createdAt.toISOString(),
     }));
-
-    // ── Monthly activity logs (for month tab) ──
-    const monthLogs = await prisma.activityLog.findMany({
-      where: {
-        action: { in: TRACKED_ACTIONS },
-        createdAt: { gte: monthStart },
-      },
-      select: { id: true, action: true, metadata: true, createdAt: true },
-      orderBy: { createdAt: 'desc' },
-      take: 1000,
-    });
 
     const monthActivity = monthLogs.map((log: { id: string; action: string; metadata: unknown; createdAt: Date }) => ({
       id: log.id,

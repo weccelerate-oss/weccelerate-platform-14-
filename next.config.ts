@@ -69,10 +69,30 @@ const nextConfig: NextConfig = {
   // Performance
   poweredByHeader: false,
   compress: true,
+  productionBrowserSourceMaps: false,
 
   // Experimental features
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'recharts', 'date-fns'],
+  },
+
+  // Long-term immutable caching for hashed build assets
+  async headers() {
+    return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        // Next.js optimized images — cache at the CDN edge
+        source: '/_next/image',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+    ];
   },
 
   // Ignore TypeScript errors during build

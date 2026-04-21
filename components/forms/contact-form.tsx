@@ -35,7 +35,7 @@ interface ContactFormProps {
   /** Form type for tracking */
   formType?: string;
   /** Callback when form is successfully submitted */
-  onSuccess?: (leadId?: number) => void;
+  onSuccess?: (leadId?: string) => void;
   /** Custom class name */
   className?: string;
   /** Show company field */

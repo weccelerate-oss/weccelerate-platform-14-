@@ -34,7 +34,6 @@ const config = {
   // Auth routes (should redirect if already logged in)
   authRoutes: [
     '/login',
-    '/register',
     '/forgot-password',
     '/reset-password',
   ],
