@@ -12,11 +12,8 @@
 
 import { z } from 'zod';
 import crypto from 'crypto';
-import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { hashPassword } from '@/lib/auth/auth.utils';
-
-const AUDIT_ALERT_EMAIL = process.env.AUDIT_ALERT_EMAIL || 'weccelerate@gmail.com';
 
 // =============================================================================
 // TYPES
@@ -41,101 +38,6 @@ function getBaseUrl(): string {
   if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return 'http://localhost:3000';
-}
-
-async function getRequestMeta(): Promise<{ ip: string; userAgent: string }> {
-  try {
-    const h = await headers();
-    const ip =
-      h.get('x-forwarded-for')?.split(',')[0].trim() ||
-      h.get('x-real-ip') ||
-      'unknown';
-    const userAgent = h.get('user-agent') || 'unknown';
-    return { ip, userAgent };
-  } catch {
-    return { ip: 'unknown', userAgent: 'unknown' };
-  }
-}
-
-type AuditEvent = 'reset_requested' | 'reset_completed';
-
-interface AuditPayload {
-  event: AuditEvent;
-  targetEmail: string;
-  userExists: boolean;
-  userActive?: boolean;
-  emailDelivered?: boolean;
-  ip: string;
-  userAgent: string;
-  timestamp: string;
-}
-
-async function sendAuditAlert(payload: AuditPayload): Promise<void> {
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('[Audit] RESEND_API_KEY missing — audit alert not sent', payload);
-    return;
-  }
-
-  try {
-    const { Resend } = await import('resend');
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
-    const eventLabel =
-      payload.event === 'reset_requested'
-        ? 'Password reset REQUESTED'
-        : 'Password reset COMPLETED';
-
-    const subject = `[WeCcelerate Security] ${eventLabel} — ${payload.targetEmail}`;
-
-    const rows = [
-      ['Event', eventLabel],
-      ['Target email', payload.targetEmail],
-      ['User exists', payload.userExists ? 'YES' : 'NO'],
-      ...(payload.userActive !== undefined
-        ? [['User active', payload.userActive ? 'YES' : 'NO']]
-        : []),
-      ...(payload.emailDelivered !== undefined
-        ? [['Email delivered', payload.emailDelivered ? 'YES' : 'NO']]
-        : []),
-      ['IP', payload.ip],
-      ['User-Agent', payload.userAgent],
-      ['Timestamp (UTC)', payload.timestamp],
-    ];
-
-    const html = `<!DOCTYPE html>
-<html><body style="font-family:system-ui,sans-serif;background:#0a0e27;color:#fff;padding:24px">
-  <h2 style="color:#c8a951;margin:0 0 16px">${eventLabel}</h2>
-  <p style="color:#fff;opacity:0.7;margin:0 0 20px">
-    A password reset event was triggered on weccelerate.co.il. Review the details below.
-  </p>
-  <table style="border-collapse:collapse;width:100%;max-width:600px">
-    ${rows
-      .map(
-        ([k, v]) => `
-      <tr>
-        <td style="padding:8px 12px;border:1px solid #2a2f4a;color:#8a92b2;width:180px">${k}</td>
-        <td style="padding:8px 12px;border:1px solid #2a2f4a;color:#fff;font-family:monospace">${v}</td>
-      </tr>`
-      )
-      .join('')}
-  </table>
-  <p style="color:#fff;opacity:0.4;font-size:12px;margin-top:20px">
-    This is an automated security audit notification from WeCcelerate.
-  </p>
-</body></html>`;
-
-    const text = rows.map(([k, v]) => `${k}: ${v}`).join('\n');
-
-    await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'WeCcelerate Security <noreply@weccelerate.com>',
-      to: AUDIT_ALERT_EMAIL,
-      subject,
-      html,
-      text,
-    });
-  } catch (error) {
-    console.error('[Audit] Failed to send audit alert:', error);
-  }
 }
 
 // =============================================================================
@@ -232,9 +134,6 @@ export async function requestPasswordReset(
   const email = parsed.data.email.toLowerCase().trim();
   const lang = (formData.get('lang') as string) || 'he';
 
-  const meta = await getRequestMeta();
-  let emailDelivered = false;
-
   try {
     // Look up user
     const user = await prisma.user.findUnique({
@@ -287,37 +186,13 @@ export async function requestPasswordReset(
 
         if (emailResult.error) {
           console.error('[Auth] Failed to send reset email:', emailResult.error);
-          await sendAuditAlert({
-            event: 'reset_requested',
-            targetEmail: email,
-            userExists: !!user,
-            userActive: user?.isActive ?? false,
-            emailDelivered: false,
-            ip: meta.ip,
-            userAgent: meta.userAgent,
-            timestamp: new Date().toISOString(),
-          });
           return {
             success: false,
             message: 'Email send failed',
           };
         }
-        emailDelivered = true;
       }
     }
-
-    // Audit: every reset request (user exists or not) — sent independently of
-    // the user-facing response so enumeration attempts are still logged.
-    await sendAuditAlert({
-      event: 'reset_requested',
-      targetEmail: email,
-      userExists: !!user,
-      userActive: user?.isActive ?? false,
-      emailDelivered,
-      ip: meta.ip,
-      userAgent: meta.userAgent,
-      timestamp: new Date().toISOString(),
-    });
 
     // Always return success (don't reveal if account exists)
     return {
@@ -411,17 +286,6 @@ export async function resetPassword(
     // Delete used token
     await prisma.verificationToken.deleteMany({
       where: { identifier: email.toLowerCase().trim() },
-    });
-
-    // Audit: password was actually changed — highest-priority alert
-    const completeMeta = await getRequestMeta();
-    await sendAuditAlert({
-      event: 'reset_completed',
-      targetEmail: email.toLowerCase().trim(),
-      userExists: true,
-      ip: completeMeta.ip,
-      userAgent: completeMeta.userAgent,
-      timestamp: new Date().toISOString(),
     });
 
     return {
