@@ -623,7 +623,6 @@ function Footer() {
       { name: t('footer.events'), href: '/events' },
       { name: t('footer.blog'), href: '/blog' },
       { name: t('footer.videos'), href: '/videos' },
-      { name: t('footer.mvpCalc'), href: '/tools/mvp-calculator' },
     ],
   };
 

@@ -195,10 +195,6 @@ The WeCcelerate team includes experienced professionals in:
 
 ## Tools & Resources
 
-### MVP Cost Calculator
-Free online tool to estimate development costs for your MVP.
-URL: https://weccelerate.co.il/tools/mvp-calculator
-
 ### Video Content
 Podcast episodes with ecosystem leaders, entrepreneur testimonials, TV interviews, and quick tips.
 URL: https://weccelerate.co.il/videos
@@ -222,7 +218,7 @@ A: WeCcelerate (וויסלרייט) is Israel's leading Venture Builder providin
 A: Fill out the contact form at weccelerate.co.il/contact. A representative will respond within 48 hours to schedule a free introductory meeting. We support founders from the idea stage through growth companies.
 
 **Q: How much does it cost to develop an MVP?**
-A: Costs vary by complexity. Basic mobile app MVP: 50,000-150,000 ILS ($15K-$40K). Web platform: 120,000-400,000 ILS ($30K-$100K). Complex SaaS: 250,000+ ILS ($65K+). Use our free calculator at /tools/mvp-calculator.
+A: Costs vary by complexity. Basic mobile app MVP: 50,000-150,000 ILS ($15K-$40K). Web platform: 120,000-400,000 ILS ($30K-$100K). Complex SaaS: 250,000+ ILS ($65K+).
 
 **Q: How long does MVP development take?**
 A: Typical MVP development takes 6-12 weeks depending on complexity. We use Agile and Lean Startup methodologies to deliver a working product quickly and iterate based on market feedback.
@@ -282,4 +278,3 @@ A: No, you don't need to be a doctor. WeCcelerate looks for teams with a combina
 - Investors Hub: https://weccelerate.co.il/investors
 - IP & Patents: https://weccelerate.co.il/ip-patents
 - MedTech Track: https://weccelerate.co.il/medtech
-- MVP Calculator: https://weccelerate.co.il/tools/mvp-calculator

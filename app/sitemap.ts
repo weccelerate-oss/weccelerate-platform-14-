@@ -42,9 +42,6 @@ const STATIC_PAGES = [
   { path: '/services/medtech-leumit', priority: 0.85, changeFreq: 'monthly' as const },
   { path: '/services/investors', priority: 0.8, changeFreq: 'monthly' as const },
   { path: '/services/investor-preparation', priority: 0.8, changeFreq: 'monthly' as const },
-
-  // Tools & resources
-  { path: '/tools/mvp-calculator', priority: 0.7, changeFreq: 'monthly' as const },
 ];
 
 const SUBDOMAIN_PAGES = {

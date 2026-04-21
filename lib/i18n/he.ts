@@ -119,7 +119,6 @@ export const he: Record<string, string> = {
   'footer.events': 'אירועים',
   'footer.blog': 'בלוג',
   'footer.videos': 'פודקאסטים וראיונות',
-  'footer.mvpCalc': 'מחשבון MVP',
   'footer.rights': 'כל הזכויות שמורות.',
   'footer.privacy': 'מדיניות פרטיות',
   'footer.terms': 'תנאי שימוש',

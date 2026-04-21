@@ -119,7 +119,6 @@ export const en: Record<string, string> = {
   'footer.events': 'Events',
   'footer.blog': 'Blog',
   'footer.videos': 'Videos',
-  'footer.mvpCalc': 'MVP Calculator',
   'footer.rights': 'All rights reserved.',
   'footer.privacy': 'Privacy Policy',
   'footer.terms': 'Terms of Service',
@@ -883,12 +882,7 @@ export const en: Record<string, string> = {
   'videos.section.reels.title': 'Reels',
   'videos.section.reels.subtitle': 'Quick tips, AI insights, daily motivation, and behind-the-scenes clips',
   'videos.videoCount': 'videos',
-  'videos.showLess': 'Show less',
-  'videos.showMore': 'Show more',
   'videos.moreVideos': 'videos',
-  'videos.cta.title': 'Want to be the next success story?',
-  'videos.cta.text': 'Join 350+ founders who completed the program and received end-to-end professional mentorship',
-  'videos.cta.button': "Let's Talk",
 
   // =========================================================================
   // FORGOT PASSWORD

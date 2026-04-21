@@ -60,10 +60,6 @@ WeCcelerate has an exclusive partnership with **Leumit Health Services** (לאו
 - Active in Tel Aviv and Jerusalem startup ecosystems
 - Working hours: Sunday-Thursday, 09:00-18:00 (Israel Time)
 
-## Tools
-
-- **MVP Cost Calculator**: Free tool to estimate development costs — https://weccelerate.co.il/tools/mvp-calculator
-
 ## Content & Media
 
 - **Videos**: Podcast episodes, entrepreneur testimonials, TV interviews, and quick tips — https://weccelerate.co.il/videos
@@ -120,7 +116,7 @@ A: WeCcelerate is Israel's leading Venture Builder providing 360° wrap-around s
 A: Apply through our website, attend a free consultation, and we'll match you with the right track — business consulting, product development, investor preparation, or MedTech accelerator.
 
 **Q: How much does MVP development cost?**
-A: Costs vary by complexity. Basic mobile app MVP: 50,000-150,000 ILS. Web platform: 120,000-400,000 ILS. Complex SaaS: 250,000+ ILS. Use our free calculator at /tools/mvp-calculator.
+A: Costs vary by complexity. Basic mobile app MVP: 50,000-150,000 ILS. Web platform: 120,000-400,000 ILS. Complex SaaS: 250,000+ ILS.
 
 **Q: What advantage does the Leumit partnership provide?**
 A: Access to anonymized medical data, clinical pilots in Leumit clinics, physician consultations, regulatory guidance, and enhanced investor credibility.
