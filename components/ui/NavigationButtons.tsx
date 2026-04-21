@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { TrackedLink } from '@/components/ui/TrackedLink';
 
 const GOOGLE_MAPS_URL =
@@ -42,35 +43,13 @@ function GoogleMapsLogo({ size = 20 }: { size?: number }) {
 
 function WazeLogo({ size = 20 }: { size?: number }) {
   return (
-    <svg
+    <Image
+      src="/images/logos/icon-waze.png"
+      alt=""
       width={size}
       height={size}
-      viewBox="0 0 48 48"
-      xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-    >
-      {/* Teal background circle */}
-      <circle cx="24" cy="24" r="24" fill="#33CCFF" />
-      {/* Ghost body */}
-      <path
-        d="M24 8C16 8 9.5 14.5 9.5 22.5c0 4 1.6 7.5 4.2 10.1.2.2.2.4.2.6l-.1 2.9c0 .6.7 1 1.2.6l3.2-2.3c.2-.2.5-.2.7-.2 1.5.4 3 .6 4.6.6 8 0 14.5-6.5 14.5-14.5S32 8 24 8z"
-        fill="#FFFFFF"
-      />
-      {/* Left eye */}
-      <ellipse cx="20" cy="21.5" rx="2.3" ry="2.8" fill="#333" />
-      <ellipse cx="20.7" cy="20.5" rx="0.8" ry="1" fill="#FFF" />
-      {/* Right eye */}
-      <ellipse cx="28" cy="21.5" rx="2.3" ry="2.8" fill="#333" />
-      <ellipse cx="28.7" cy="20.5" rx="0.8" ry="1" fill="#FFF" />
-      {/* Smile */}
-      <path
-        d="M20 28c0 0 2 2.5 4 2.5s4-2.5 4-2.5"
-        fill="none"
-        stroke="#333"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
+    />
   );
 }
 
