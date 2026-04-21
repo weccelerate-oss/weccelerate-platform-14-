@@ -51,9 +51,6 @@ const SUBDOMAIN_PAGES = {
   biz: [
     { path: '/', priority: 0.9, changeFreq: 'weekly' as const },
   ],
-  landing: [
-    { path: '/', priority: 0.7, changeFreq: 'monthly' as const },
-  ],
 };
 
 async function getDynamicContent() {
@@ -95,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/en${page.path}`,
       lastModified: now,
       changeFrequency: page.changeFreq,
-      priority: page.priority * 0.9,
+      priority: Math.round(page.priority * 0.9 * 100) / 100,
     });
   });
   
