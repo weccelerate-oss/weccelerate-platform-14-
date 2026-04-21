@@ -158,8 +158,8 @@ export function constructMetadata({
       images: [
         {
           url: ogImageUrl,
-          width: 512,
-          height: 512,
+          width: 581,
+          height: 312,
           alt: `${COMPANY_INFO.name} - ${title || 'Business Acceleration'}`,
         },
       ],

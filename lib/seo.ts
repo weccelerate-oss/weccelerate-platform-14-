@@ -898,8 +898,8 @@ export function constructMetadata(options: MetadataOptions): Metadata {
       images: [
         {
           url: image.startsWith('http') ? image : `${SITE_CONFIG.url}${image}`,
-          width: 512,
-          height: 512,
+          width: 581,
+          height: 312,
           alt: `${title} - WeCcelerate`,
         },
       ],
