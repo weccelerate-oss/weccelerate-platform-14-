@@ -177,20 +177,23 @@ export function constructMetadata({
       images: [ogImageUrl],
     },
 
-    // Verification (add your verification codes)
+    // Verification (codes sourced from env vars; set in Vercel/env.local)
     verification: {
       google: process.env.GOOGLE_SITE_VERIFICATION,
-      // yandex: process.env.YANDEX_VERIFICATION,
-      // bing: process.env.BING_VERIFICATION,
+      yandex: process.env.YANDEX_VERIFICATION,
+      other: {
+        'msvalidate.01': process.env.BING_SITE_VERIFICATION ?? '',
+      },
     },
 
     // App-specific
     applicationName: SEO_DEFAULTS.siteName,
     referrer: 'origin-when-cross-origin',
+    // Allow Google to auto-link tel:/mailto:/addresses in SERP snippets
     formatDetection: {
-      email: false,
-      address: false,
-      telephone: false,
+      email: true,
+      address: true,
+      telephone: true,
     },
 
     // Category

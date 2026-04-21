@@ -16,6 +16,7 @@
  * @module components/seo/GeoSchema
  */
 
+import Script from 'next/script';
 import {
   SITE_CONFIG,
   SEMANTIC_CORE,
@@ -370,10 +371,12 @@ function buildWebPageSchema(path: string, pageTitle: string) {
     datePublished: '2024-01-01T00:00:00+02:00',
     dateModified: new Date().toISOString(),
 
-    // Speakable — tells voice assistants & AI which content to read aloud
+    // Speakable — tells voice assistants & AI which content to read aloud.
+    // Narrow selector: only content authors explicitly mark with data-speakable,
+    // so Google Assistant/Alexa read the answer sentence, not headings/navigation.
     speakable: {
       '@type': 'SpeakableSpecification',
-      cssSelector: ['h1', 'h2', '[data-speakable]', 'main p:first-of-type'],
+      cssSelector: ['[data-speakable]'],
     },
   };
 }
@@ -569,10 +572,12 @@ export function GeoSchema({
     '@context': 'https://schema.org',
     '@graph': graphItems,
   };
-  
+
   return (
-    <script
+    <Script
+      id="geo-schema"
       type="application/ld+json"
+      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(jsonLd, null, 0),
       }}
@@ -589,10 +594,12 @@ export function OrganizationSchema() {
     '@context': 'https://schema.org',
     ...buildOrganizationSchema(),
   };
-  
+
   return (
-    <script
+    <Script
+      id="geo-organization-schema"
       type="application/ld+json"
+      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );
@@ -603,10 +610,12 @@ export function FaqPageSchema({ locale = 'he' }: { locale?: 'he' | 'en' }) {
     '@context': 'https://schema.org',
     ...buildFaqSchema(locale),
   };
-  
+
   return (
-    <script
+    <Script
+      id="geo-faq-schema"
       type="application/ld+json"
+      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );
@@ -617,10 +626,12 @@ export function ServicesSchema() {
     '@context': 'https://schema.org',
     ...buildServicesSchema(),
   };
-  
+
   return (
-    <script
+    <Script
+      id="geo-services-schema"
       type="application/ld+json"
+      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );

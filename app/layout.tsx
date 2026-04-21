@@ -138,8 +138,12 @@ export default function RootLayout({
         <link rel="canonical" href={SITE_CONFIG.url} />
 
         {/* Alternate languages */}
+        <link rel="alternate" hrefLang="he" href={SITE_CONFIG.url} />
         <link rel="alternate" hrefLang="he-IL" href={SITE_CONFIG.url} />
+        <link rel="alternate" hrefLang="en" href={`${SITE_CONFIG.url}/en`} />
         <link rel="alternate" hrefLang="en-US" href={`${SITE_CONFIG.url}/en`} />
+        <link rel="alternate" hrefLang="en-GB" href={`${SITE_CONFIG.url}/en`} />
+        <link rel="alternate" hrefLang="en-IL" href={`${SITE_CONFIG.url}/en`} />
         <link rel="alternate" hrefLang="x-default" href={SITE_CONFIG.url} />
 
         {/* RSS Feed */}
@@ -191,11 +195,16 @@ export default function RootLayout({
           href={`${SITE_CONFIG.url}/opensearch.xml`}
         />
 
-        {/* LLMs.txt — AI/LLM discovery */}
+        {/* LLMs.txt — AI/LLM discovery (short index + deep full-text) */}
         <link
           rel="llms"
           type="text/plain"
           href={`${SITE_CONFIG.url}/llms.txt`}
+        />
+        <link
+          rel="llms-full"
+          type="text/plain"
+          href={`${SITE_CONFIG.url}/llms-full.txt`}
         />
       </head>
 
