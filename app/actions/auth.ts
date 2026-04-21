@@ -12,8 +12,13 @@
 
 import { z } from 'zod';
 import crypto from 'crypto';
+import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { hashPassword } from '@/lib/auth/auth.utils';
+
+// Security: password resets for ADMIN accounts are redirected here, never to
+// the admin's own email in the DB. Change by setting ADMIN_RESET_EMAIL in env.
+const ADMIN_RESET_EMAIL = process.env.ADMIN_RESET_EMAIL || 'weccelerate@gmail.com';
 
 // =============================================================================
 // TYPES
@@ -38,6 +43,98 @@ function getBaseUrl(): string {
   if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return 'http://localhost:3000';
+}
+
+async function getRequestMeta(): Promise<{ ip: string; userAgent: string }> {
+  try {
+    const h = await headers();
+    const ip =
+      h.get('x-forwarded-for')?.split(',')[0].trim() ||
+      h.get('x-real-ip') ||
+      'unknown';
+    const userAgent = h.get('user-agent') || 'unknown';
+    return { ip, userAgent };
+  } catch {
+    return { ip: 'unknown', userAgent: 'unknown' };
+  }
+}
+
+function buildAdminResetEmail(
+  resetUrl: string,
+  requestedEmail: string,
+  meta: { ip: string; userAgent: string; timestamp: string }
+): { html: string; text: string } {
+  const rows: [string, string][] = [
+    ['Account', requestedEmail],
+    ['Requested at (UTC)', meta.timestamp],
+    ['Requester IP', meta.ip],
+    ['User-Agent', meta.userAgent],
+  ];
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8" /></head>
+<body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#070b1e,#0d1321);padding:28px 24px;text-align:center;">
+            <h1 style="margin:0;color:#c8a951;font-size:20px;letter-spacing:1px;">WeCcelerate — Admin Security</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px 24px;">
+            <h2 style="margin:0 0 12px;color:#1a1a2e;font-size:18px;">Admin password reset requested</h2>
+            <p style="margin:0 0 20px;color:#555;font-size:14px;line-height:1.7;">
+              Someone requested a password reset for an administrator account.
+              For security, this link was sent <strong>only</strong> to this mailbox — not to the admin's registered email.
+              If this request was not made by you, ignore this email and the password will remain unchanged.
+            </p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
+              ${rows
+                .map(
+                  ([k, v]) => `
+                <tr>
+                  <td style="padding:8px 12px;border:1px solid #eee;color:#666;font-size:13px;width:40%;background:#fafafa;">${k}</td>
+                  <td style="padding:8px 12px;border:1px solid #eee;color:#1a1a2e;font-size:13px;font-family:monospace;word-break:break-all;">${v}</td>
+                </tr>`
+                )
+                .join('')}
+            </table>
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr><td align="center" style="padding:4px 0 20px;">
+                <a href="${resetUrl}" target="_blank" style="display:inline-block;background:linear-gradient(to right,#c8a951,#e8d48b);color:#070b1e;font-weight:bold;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;">Reset Admin Password</a>
+              </td></tr>
+            </table>
+            <p style="margin:0 0 10px;color:#888;font-size:12px;line-height:1.6;">This link is valid for 1 hour and can be used once.</p>
+            <p style="margin:0;color:#c00;font-size:12px;line-height:1.6;">
+              If you did not request this reset, someone may be attempting to access the admin account.
+              Consider rotating credentials and reviewing access logs.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const text = [
+    'WeCcelerate — Admin password reset requested',
+    '',
+    'Someone requested a password reset for an administrator account.',
+    'For security, this link was sent only to this mailbox — not to the admin\'s registered email.',
+    'If this was not you, ignore this email.',
+    '',
+    ...rows.map(([k, v]) => `${k}: ${v}`),
+    '',
+    `Reset link: ${resetUrl}`,
+    '',
+    'This link is valid for 1 hour and can be used once.',
+  ].join('\n');
+
+  return { html, text };
 }
 
 // =============================================================================
@@ -138,11 +235,13 @@ export async function requestPasswordReset(
     // Look up user
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, isActive: true },
+      select: { id: true, isActive: true, role: true },
     });
 
     // If user exists and is active, create token and send email
     if (user?.isActive) {
+      const isAdmin = user.role === 'ADMIN';
+
       // Generate token
       const rawToken = crypto.randomBytes(32).toString('hex');
       const hashedToken = hashToken(rawToken);
@@ -174,12 +273,38 @@ export async function requestPasswordReset(
       } else {
         const { Resend } = await import('resend');
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const { html, text } = buildResetEmail(resetUrl, lang);
+
+        // SECURITY: admin reset links never go to the admin's registered email.
+        // They always go to ADMIN_RESET_EMAIL (dedicated monitoring mailbox),
+        // so compromising the admin's primary email cannot lead to account takeover.
+        let recipient: string;
+        let subject: string;
+        let html: string;
+        let text: string;
+
+        if (isAdmin) {
+          const meta = await getRequestMeta();
+          const built = buildAdminResetEmail(resetUrl, email, {
+            ip: meta.ip,
+            userAgent: meta.userAgent,
+            timestamp: new Date().toISOString(),
+          });
+          recipient = ADMIN_RESET_EMAIL;
+          subject = `[WeCcelerate Security] Admin password reset requested — ${email}`;
+          html = built.html;
+          text = built.text;
+        } else {
+          const built = buildResetEmail(resetUrl, lang);
+          recipient = email;
+          subject = lang === 'he' ? 'איפוס סיסמה — WeCcelerate' : 'Password Reset — WeCcelerate';
+          html = built.html;
+          text = built.text;
+        }
 
         const emailResult = await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL || 'WeCcelerate <noreply@weccelerate.com>',
-          to: email,
-          subject: lang === 'he' ? 'איפוס סיסמה — WeCcelerate' : 'Password Reset — WeCcelerate',
+          to: recipient,
+          subject,
           html,
           text,
         });
