@@ -395,6 +395,7 @@ export const he: Record<string, string> = {
   'login.forgotPassword': 'שכחתם סיסמה?',
   'login.noAccount': 'אין לכם חשבון?',
   'login.register': 'הרשמו כאן',
+  'login.contactAdmin': 'אין לכם גישה? פנו למנהל המערכת כדי לפתוח חשבון.',
 
   // =========================================================================
   // SERVICE PAGES

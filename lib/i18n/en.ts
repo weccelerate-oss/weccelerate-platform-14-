@@ -395,6 +395,7 @@ export const en: Record<string, string> = {
   'login.forgotPassword': 'Forgot password?',
   'login.noAccount': "Don't have an account?",
   'login.register': 'Register here',
+  'login.contactAdmin': "Don't have access? Contact the administrator to open an account.",
 
   // =========================================================================
   // SERVICE PAGES
