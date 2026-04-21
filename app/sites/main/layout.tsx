@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { CorporateNavbar } from '@/components/layout/CorporateNavbar';
 import { OrganizationSchema } from '@/components/seo/organization-schema';
 import { ServiceSchema } from '@/components/seo/service-schema';
-import { FAQSchema } from '@/components/seo/faq-schema';
 import { WhatsAppFloat } from '@/components/ui/WhatsAppFloat';
 import { AccessibilityWidget } from '@/components/ui/AccessibilityWidget';
 
@@ -18,14 +17,10 @@ export default function MainSiteLayout({ children }: MainSiteLayoutProps) {
         includeLeumitAffiliation={true} 
         variant="main" 
       />
-      <ServiceSchema 
-        services={['all']} 
-        site="main" 
-        includeRating={true} 
-      />
-      <FAQSchema 
-        includeDefaults={true}
-        lang="he"
+      <ServiceSchema
+        services={['all']}
+        site="main"
+        includeRating={true}
       />
 
       {/* Corporate Navbar — skip link handled globally in root layout */}
