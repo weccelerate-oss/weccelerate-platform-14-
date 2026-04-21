@@ -57,7 +57,7 @@ const nextConfig: NextConfig = {
         has: [
           {
             type: 'host',
-            value: '*.wecc-ltd.com',
+            value: 'www.wecc-ltd.com',
           },
         ],
         destination: 'https://weccelerate.co.il/:path*',
