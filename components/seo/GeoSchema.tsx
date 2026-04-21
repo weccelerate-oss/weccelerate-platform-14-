@@ -79,9 +79,9 @@ function buildOrganizationSchema() {
     },
     image: {
       '@type': 'ImageObject',
-      url: `${SITE_CONFIG.url}/og-image.jpg`,
-      width: 1200,
-      height: 630,
+      url: `${SITE_CONFIG.url}/logo.png`,
+      width: 512,
+      height: 512,
     },
     
     // CRITICAL: Parent Organization - Authority Transfer from Leumit
@@ -481,7 +481,7 @@ function buildLocalBusinessSchema() {
     '@type': 'LocalBusiness',
     '@id': `${SITE_CONFIG.url}/#localbusiness`,
     name: 'WeCcelerate - Venture Builder & Startup Accelerator',
-    image: `${SITE_CONFIG.url}/og-image.jpg`,
+    image: `${SITE_CONFIG.url}/logo.png`,
     telephone: '+972-55-564-7538',
     email: 'info@weccelerate.co.il',
     address: {

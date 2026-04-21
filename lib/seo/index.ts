@@ -433,7 +433,7 @@ export function constructMetadata({
   const canonicalUrl = `${SITE_CONFIG.url}${path}`;
   
   // OG Image with fallback
-  const ogImageUrl = ogImage || `${SITE_CONFIG.url}/og-image.jpg`;
+  const ogImageUrl = ogImage || `${SITE_CONFIG.url}/logo.png`;
   
   return {
     title: fullTitle,
@@ -475,8 +475,8 @@ export function constructMetadata({
       description: metaDescription,
       images: [{
         url: ogImageUrl,
-        width: 1200,
-        height: 630,
+        width: 512,
+        height: 512,
         alt: `WeCcelerate - ${title}`,
       }],
       ...(publishedTime && { publishedTime }),
