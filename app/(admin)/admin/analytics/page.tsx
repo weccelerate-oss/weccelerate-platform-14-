@@ -1,12 +1,5 @@
 import { Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
-
-// Defer the recharts-heavy dashboard until after the page HTML/server data is ready.
-// Route-level code-split already, but this also pushes JS eval off the initial paint.
-const AnalyticsDashboard = dynamicImport(
-  () => import('./analytics-dashboard').then((m) => m.AnalyticsDashboard),
-  { loading: () => <div className="p-8 text-slate-500">טוען דוח...</div> },
-);
+import { AnalyticsDashboard } from './analytics-dashboard';
 
 export const metadata: Metadata = {
   title: 'אנליטיקס | מערכת ניהול WeCcelerate',
