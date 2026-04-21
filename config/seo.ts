@@ -110,7 +110,7 @@ export const COMPANY_INFO = {
   },
   url: 'https://weccelerate.co.il',
   logo: 'https://weccelerate.co.il/logo.png',
-  image: 'https://weccelerate.co.il/opengraph-image.png',
+  image: 'https://weccelerate.co.il/opengraph-image.jpg',
   email: 'info@weccelerate.co.il',
   telephone: '+972-55-564-7538',
   foundingDate: '2020', // Update with real date
