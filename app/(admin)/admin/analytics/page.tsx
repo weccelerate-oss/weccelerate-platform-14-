@@ -15,6 +15,7 @@ const ACTION_LABELS: Record<string, string> = {
   'click.maps': 'ניווט Google Maps',
   'click.waze': 'ניווט Waze',
   'form.contact_submit': 'שליחת טופס',
+  'form.contact': 'שליחת טופס',
   'lead.contact_fallback': 'טופס (גיבוי)',
 };
 
