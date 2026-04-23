@@ -186,7 +186,7 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
           פניות יומיות — 30 ימים אחרונים
         </h2>
         <div className="w-full h-[220px] sm:h-[300px] -mr-4 sm:mr-0">
-          <ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={daily}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
@@ -388,7 +388,7 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             פירוט לפי ערוץ — החודש
           </h2>
           <div className="w-full h-[250px] sm:h-[300px]">
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={Object.entries(byAction)
                   .filter(([, count]) => count > 0)
@@ -445,7 +445,7 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
           {channels.length > 0 ? (
             <div>
               <div className="w-full h-[200px] sm:h-[220px]">
-                <ResponsiveContainer>
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={channels}
@@ -561,7 +561,7 @@ export function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             מגמת פניות — 12 חודשים אחרונים
           </h2>
           <div className="w-full h-[220px] sm:h-[280px] -mr-4 sm:mr-0">
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyHistory}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis
