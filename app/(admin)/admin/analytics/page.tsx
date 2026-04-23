@@ -179,22 +179,37 @@ async function getAnalyticsData() {
       createdAt: log.createdAt.toISOString(),
     }));
 
-    // Debug: raw distinct actions in the last 30 days (so we can see what's
-    // actually in the DB vs what the page is tracking).
-    const allActionsRaw = await prisma.$queryRaw<
-      Array<{ action: string; count: bigint }>
-    >`
-      SELECT "action", COUNT(*)::bigint AS count
-      FROM "ActivityLog"
-      WHERE "createdAt" >= ${thirtyDaysAgo}
-      GROUP BY "action"
-      ORDER BY count DESC
-    `;
+    // Debug: raw distinct actions ALL-TIME (no date filter) so we can see
+    // every row in the table. Also count total rows and surface the 5 most
+    // recent for visual confirmation.
+    const [allActionsRaw, totalRows, sampleRows] = await Promise.all([
+      prisma.$queryRaw<Array<{ action: string; count: bigint; latest: Date }>>`
+        SELECT "action", COUNT(*)::bigint AS count, MAX("createdAt") AS latest
+        FROM "ActivityLog"
+        GROUP BY "action"
+        ORDER BY count DESC
+      `,
+      prisma.activityLog.count(),
+      prisma.activityLog.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: { action: true, createdAt: true, metadata: true },
+      }),
+    ]);
     const allActions = allActionsRaw.map((r) => ({
       action: r.action,
       count: Number(r.count),
+      latest: r.latest ? new Date(r.latest).toISOString() : '—',
       tracked: TRACKED_ACTIONS.includes(r.action),
     }));
+    const debugInfo = {
+      totalRows,
+      sampleRows: sampleRows.map((r: { action: string; createdAt: Date; metadata: unknown }) => ({
+        action: r.action,
+        createdAt: r.createdAt.toISOString(),
+        name: ((r.metadata as Record<string, unknown> | null) || {}).name as string | undefined,
+      })),
+    };
 
     return {
       daily,
@@ -209,6 +224,7 @@ async function getAnalyticsData() {
       recentActivity,
       monthActivity,
       allActions,
+      debugInfo,
     };
   } catch (error) {
     console.error('[Analytics]', error);
@@ -221,6 +237,7 @@ async function getAnalyticsData() {
       recentActivity: [],
       monthActivity: [],
       allActions: [],
+      debugInfo: { totalRows: 0, sampleRows: [] },
     };
   }
 }
@@ -243,9 +260,9 @@ export default async function AnalyticsPage() {
 
       <main className="p-4 sm:p-8">
         {/* Debug panel — what's actually in ActivityLog vs what's tracked */}
-        <details className="mb-6 bg-white border border-slate-200 rounded-lg p-4 text-sm">
+        <details className="mb-6 bg-white border border-slate-200 rounded-lg p-4 text-sm" open>
           <summary className="cursor-pointer font-medium text-slate-700">
-            🔍 ניפוי: כל ה-actions ב-ActivityLog (30 ימים אחרונים) — {data.allActions.length} ייחודיים
+            🔍 ניפוי — ActivityLog: {data.debugInfo.totalRows} שורות, {data.allActions.length} actions ייחודיים
           </summary>
           <div className="mt-3 overflow-x-auto">
             <table className="min-w-full">
@@ -253,14 +270,15 @@ export default async function AnalyticsPage() {
                 <tr className="text-xs text-slate-500 border-b">
                   <th className="text-start py-2 pe-4">Action</th>
                   <th className="text-start py-2 pe-4">Count</th>
+                  <th className="text-start py-2 pe-4">הפעם האחרונה</th>
                   <th className="text-start py-2">סופר באנליטיקס?</th>
                 </tr>
               </thead>
               <tbody>
                 {data.allActions.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="py-3 text-slate-400">
-                      אין שום activity ב-30 ימים האחרונים
+                    <td colSpan={4} className="py-3 text-slate-400">
+                      הטבלה ריקה לגמרי
                     </td>
                   </tr>
                 ) : (
@@ -268,6 +286,7 @@ export default async function AnalyticsPage() {
                     <tr key={a.action} className="border-b border-slate-50">
                       <td className="py-2 pe-4 font-mono text-xs">{a.action}</td>
                       <td className="py-2 pe-4 font-mono">{a.count}</td>
+                      <td className="py-2 pe-4 font-mono text-xs">{a.latest}</td>
                       <td className="py-2">
                         {a.tracked ? (
                           <span className="text-emerald-600">✓ כן</span>
@@ -280,6 +299,20 @@ export default async function AnalyticsPage() {
                 )}
               </tbody>
             </table>
+            {data.debugInfo.sampleRows.length > 0 && (
+              <div className="mt-4 pt-4 border-t">
+                <div className="text-xs text-slate-500 mb-2">5 השורות האחרונות (כל תקופה):</div>
+                <ul className="space-y-1 font-mono text-xs">
+                  {data.debugInfo.sampleRows.map((r, i) => (
+                    <li key={i}>
+                      <span className="text-slate-400">{r.createdAt}</span> ·{' '}
+                      <span className="text-slate-700">{r.action}</span> ·{' '}
+                      <span className="text-slate-500">{r.name || '—'}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </details>
 
