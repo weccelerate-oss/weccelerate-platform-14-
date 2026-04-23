@@ -259,14 +259,27 @@ export async function reorderEventsAction(orderedIds: string[]) {
   try {
     await verifyAdmin();
 
-    // Update displayOrder for each event based on its position in the array
-    await Promise.all(
-      orderedIds.map((id, index) =>
+    if (!Array.isArray(orderedIds) || orderedIds.length === 0) {
+      return { success: false, error: 'לא התקבלה רשימת אירועים תקינה' };
+    }
+
+    // Fetch which IDs actually exist so a stale id (deleted elsewhere)
+    // doesn't poison the whole batch with P2025.
+    const existing = await prisma.event.findMany({
+      where: { id: { in: orderedIds } },
+      select: { id: true },
+    });
+    const existingIds = new Set(existing.map((e: { id: string }) => e.id));
+    const validOrderedIds = orderedIds.filter((id) => existingIds.has(id));
+
+    // Single transaction so all rows commit together or none do.
+    await prisma.$transaction(
+      validOrderedIds.map((id, index) =>
         prisma.event.update({
           where: { id },
           data: { displayOrder: index + 1 },
-        })
-      )
+        }),
+      ),
     );
 
     revalidatePath('/admin/events');
@@ -276,7 +289,8 @@ export async function reorderEventsAction(orderedIds: string[]) {
     return { success: true };
   } catch (error) {
     console.error('[Admin] Error reordering events:', error);
-    return { success: false, error: 'Failed to reorder events' };
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, error: `שגיאה בשמירת הסדר: ${message}` };
   }
 }
 
