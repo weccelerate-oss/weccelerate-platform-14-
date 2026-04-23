@@ -179,6 +179,23 @@ async function getAnalyticsData() {
       createdAt: log.createdAt.toISOString(),
     }));
 
+    // Debug: raw distinct actions in the last 30 days (so we can see what's
+    // actually in the DB vs what the page is tracking).
+    const allActionsRaw = await prisma.$queryRaw<
+      Array<{ action: string; count: bigint }>
+    >`
+      SELECT "action", COUNT(*)::bigint AS count
+      FROM "ActivityLog"
+      WHERE "createdAt" >= ${thirtyDaysAgo}
+      GROUP BY "action"
+      ORDER BY count DESC
+    `;
+    const allActions = allActionsRaw.map((r) => ({
+      action: r.action,
+      count: Number(r.count),
+      tracked: TRACKED_ACTIONS.includes(r.action),
+    }));
+
     return {
       daily,
       channels,
@@ -191,6 +208,7 @@ async function getAnalyticsData() {
       monthlyHistory,
       recentActivity,
       monthActivity,
+      allActions,
     };
   } catch (error) {
     console.error('[Analytics]', error);
@@ -202,6 +220,7 @@ async function getAnalyticsData() {
       monthlyHistory: [],
       recentActivity: [],
       monthActivity: [],
+      allActions: [],
     };
   }
 }
@@ -223,6 +242,47 @@ export default async function AnalyticsPage() {
       </header>
 
       <main className="p-4 sm:p-8">
+        {/* Debug panel — what's actually in ActivityLog vs what's tracked */}
+        <details className="mb-6 bg-white border border-slate-200 rounded-lg p-4 text-sm">
+          <summary className="cursor-pointer font-medium text-slate-700">
+            🔍 ניפוי: כל ה-actions ב-ActivityLog (30 ימים אחרונים) — {data.allActions.length} ייחודיים
+          </summary>
+          <div className="mt-3 overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="text-xs text-slate-500 border-b">
+                  <th className="text-start py-2 pe-4">Action</th>
+                  <th className="text-start py-2 pe-4">Count</th>
+                  <th className="text-start py-2">סופר באנליטיקס?</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.allActions.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="py-3 text-slate-400">
+                      אין שום activity ב-30 ימים האחרונים
+                    </td>
+                  </tr>
+                ) : (
+                  data.allActions.map((a) => (
+                    <tr key={a.action} className="border-b border-slate-50">
+                      <td className="py-2 pe-4 font-mono text-xs">{a.action}</td>
+                      <td className="py-2 pe-4 font-mono">{a.count}</td>
+                      <td className="py-2">
+                        {a.tracked ? (
+                          <span className="text-emerald-600">✓ כן</span>
+                        ) : (
+                          <span className="text-red-600">✗ לא</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </details>
+
         <AnalyticsDashboard data={data} />
       </main>
     </div>
