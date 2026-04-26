@@ -13,14 +13,20 @@ export const metadata: Metadata = constructMetadata({
     'מעטפת שיווקית מלאה למיזמים — פרסום דיגיטלי, יחסי ציבור, שיווק ברשתות חברתיות ואסטרטגיית שיווק מקיפה.',
   keywords: [
     'שיווק לסטארטאפים',
+    'שיווק למיזמים',
+    'שיווק ליזמים',
     'פרסום דיגיטלי',
     'יחסי ציבור סטארטאפ',
+    'יחסי ציבור מיזם',
     'Social Media Marketing',
     'Digital Advertising Israel',
     'שיווק דיגיטלי תל אביב',
     'content marketing startup',
     'PR Israel startups',
     'Google Ads management',
+    'אסטרטגיית שיווק למיזם',
+    'מיתוג למיזם',
+    'GTM strategy',
   ],
   path: '/services/marketing',
   locale: 'he',
@@ -41,8 +47,6 @@ export default function MarketingPage() {
         descriptionEn="Full marketing suite for startups — digital advertising, public relations, social media marketing, and comprehensive marketing strategy."
         path="/services/marketing"
         category="Marketing & Advertising"
-        ratingValue={4.8}
-        reviewCount={45}
         faqs={[
           {
             question: 'כמה עולה שיווק דיגיטלי לסטארטאפ?',

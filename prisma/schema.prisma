@@ -641,8 +641,50 @@ model SiteSetting {
   key         String   @unique
   value       Json     // Flexible JSON value
   description String?
-  
+
   updatedAt   DateTime @updatedAt
-  
+
   @@map("site_settings")
+}
+
+// =============================================================================
+// AI BOT VISIT TRACKING (GEO/AEO ANALYTICS)
+// =============================================================================
+//
+// Every hit from a known AI crawler (GPTBot, ClaudeBot, PerplexityBot, etc.)
+// is logged here via the /api/bot/log endpoint, which is called
+// fire-and-forget from middleware.ts. The admin page
+// `/admin/bot-analytics` aggregates this to measure GEO effectiveness:
+//
+//   - Which AI engines are scanning us?
+//   - Which pages do they visit most?
+//   - Is activity growing over time (the success signal for GEO/AEO)?
+//
+// Retention: up to the caller to prune. In production a cron job should
+// delete rows older than 90 days to keep the table compact.
+//
+model BotVisit {
+  id          String   @id @default(cuid())
+
+  // Bot identifier — e.g. "GPTBot", "ClaudeBot", "PerplexityBot".
+  // Source of truth: AI_BOT_SIGNATURES in middleware.ts.
+  bot         String
+
+  // Request context
+  path        String   // Pathname visited, e.g. "/guides/rayon-le-startup"
+  host        String   // Host header, e.g. "weccelerate.co.il"
+  method      String   @default("GET")
+
+  // Optional enrichment fields
+  referer     String?  // Referer header if present
+  country     String?  // Two-letter country code from Vercel geo (if available)
+  userAgent   String?  // Full UA string for debugging signature drift
+
+  timestamp   DateTime @default(now())
+
+  @@index([bot])
+  @@index([timestamp])
+  @@index([bot, timestamp])
+  @@index([path])
+  @@map("bot_visits")
 }

@@ -1,0 +1,21 @@
+# Security policy for weccelerate.co.il
+# RFC 9116 — https://www.rfc-editor.org/rfc/rfc9116
+#
+# This file signals to security researchers, reputation systems, and
+# automated scanners that the site is professionally maintained and
+# provides a clear channel for responsible disclosure.
+
+Contact: mailto:info@weccelerate.co.il
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: he, en
+Canonical: https://weccelerate.co.il/.well-known/security.txt
+
+# Additional contact details
+Acknowledgments: https://weccelerate.co.il/team
+Policy: https://weccelerate.co.il/privacy
+
+# Operational details (helpful to reputation systems)
+# Domain: weccelerate.co.il
+# Legal entity: WeCcelerate Ltd. (Israel)
+# Founded: 2016
+# Website hosted on Vercel; production traffic only.

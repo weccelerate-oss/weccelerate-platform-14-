@@ -42,8 +42,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: video.title,
     description: video.description ?? video.title,
     path: `/videos/${slug}`,
-    ogImage: thumb,
-    ogType: 'article',
+    image: thumb,
+    type: 'article',
     locale: 'he',
     publishedTime: (video.publishAt instanceof Date ? video.publishAt : new Date(video.publishAt)).toISOString(),
     keywords: [
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export async function generateStaticParams() {
   try {
     const videos = await getVideos({ limit: 200 });
-    return videos.map((v) => ({ slug: v.slug }));
+    return videos.map((v: { slug: string }) => ({ slug: v.slug }));
   } catch {
     return [];
   }

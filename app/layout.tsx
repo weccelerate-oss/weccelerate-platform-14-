@@ -40,7 +40,8 @@ const heebo = Heebo({
   subsets: ["hebrew", "latin"],
   display: "swap",
   variable: "--font-heebo",
-  preload: false,
+  // Heebo is the primary body font — preload to improve LCP on Hebrew pages.
+  preload: true,
 });
 
 // =============================================================================

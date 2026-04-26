@@ -22,6 +22,7 @@ import {
   Shield,
   BarChart3,
   Bell,
+  Bot,
   FileText,
   FolderKanban,
   Menu,
@@ -64,6 +65,7 @@ const NAV_ITEMS = [
     label: 'מערכת',
     items: [
       { label: 'אנליטיקס', href: '/admin/analytics', icon: BarChart3 },
+      { label: 'ביקורי AI Bots', href: '/admin/bot-analytics', icon: Bot },
       { label: 'הגדרות', href: '/admin/settings', icon: Settings },
     ],
   },

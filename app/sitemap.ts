@@ -12,6 +12,9 @@
 
 import { MetadataRoute } from 'next';
 import { SITE_CONFIG } from '@/lib/seo';
+import { GUIDES } from '@/lib/seo/guides-catalog';
+import { GUIDES_EN } from '@/lib/seo/guides-catalog-en';
+import { TEAM_SLUGS } from '@/lib/seo/founders';
 
 // =============================================================================
 // STATIC PAGES
@@ -30,6 +33,17 @@ const STATIC_PAGES = [
   { path: '/events', priority: 0.8, changeFreq: 'weekly' as const },
   { path: '/videos', priority: 0.8, changeFreq: 'weekly' as const },
   { path: '/blog', priority: 0.7, changeFreq: 'weekly' as const },
+  { path: '/faq', priority: 0.8, changeFreq: 'monthly' as const },
+  { path: '/guides', priority: 0.9, changeFreq: 'weekly' as const },
+  // Pillar pages — hub-and-spoke SEO strategy: each pillar consolidates a
+  // category cluster and pushes PageRank to the spokes via internal linking.
+  { path: '/funding-guide', priority: 0.9, changeFreq: 'monthly' as const },
+  { path: '/medtech-guide', priority: 0.9, changeFreq: 'monthly' as const },
+  // Hebrew terminology glossary — definitional-query magnet for LLM citation.
+  { path: '/glossary', priority: 0.85, changeFreq: 'monthly' as const },
+  // Comparison page — high commercial intent for "WeCcelerate vs X" queries.
+  { path: '/comparisons', priority: 0.85, changeFreq: 'monthly' as const },
+  { path: '/press', priority: 0.7, changeFreq: 'monthly' as const },
   { path: '/privacy', priority: 0.3, changeFreq: 'yearly' as const },
   { path: '/terms', priority: 0.3, changeFreq: 'yearly' as const },
 
@@ -112,6 +126,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic content
   events.forEach((e) => entries.push({ url: `${baseUrl}/events/${e.slug}`, lastModified: e.updatedAt, changeFrequency: 'weekly', priority: 0.7 }));
   videos.forEach((v) => entries.push({ url: `${baseUrl}/videos/${v.slug}`, lastModified: v.updatedAt, changeFrequency: 'monthly', priority: 0.6 }));
-  
+
+  // SEO guides — each targets a high-intent Hebrew commercial keyword
+  GUIDES.forEach((g) =>
+    entries.push({
+      url: `${baseUrl}/guides/${g.slug}`,
+      lastModified: new Date(g.lastUpdated),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    }),
+  );
+
+  // Author / founder pages — each founder gets a dedicated, indexable URL
+  // for press citations and Person entity resolution by LLMs.
+  TEAM_SLUGS.forEach((slug) =>
+    entries.push({
+      url: `${baseUrl}/team/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }),
+  );
+
+  // English guide translations (top 5 commercial keywords).
+  // Note: the `/en/guides` hub is already emitted by the STATIC_PAGES loop
+  // above (from the `/guides` entry × '/en' prefix). Only the individual
+  // guide slugs need explicit entries here.
+  GUIDES_EN.forEach((g) =>
+    entries.push({
+      url: `${baseUrl}/en/guides/${g.slug}`,
+      lastModified: new Date(g.lastUpdated),
+      changeFrequency: 'monthly',
+      priority: 0.75,
+    }),
+  );
+
   return entries;
 }

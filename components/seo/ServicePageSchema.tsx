@@ -18,8 +18,6 @@ interface ServicePageSchemaProps {
   descriptionEn: string;
   path: string;
   category: string;
-  ratingValue?: number;
-  reviewCount?: number;
   faqs?: { question: string; answer: string }[];
 }
 
@@ -31,8 +29,6 @@ export function ServicePageSchema({
   descriptionEn,
   path,
   category,
-  ratingValue = 4.8,
-  reviewCount = 52,
   faqs = [],
 }: ServicePageSchemaProps) {
   const pageUrl = `${SITE_URL}${path}`;
@@ -60,13 +56,6 @@ export function ServicePageSchema({
       },
       serviceType: category,
       url: pageUrl,
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue,
-        bestRating: 5,
-        worstRating: 1,
-        reviewCount,
-      },
     },
 
     // Breadcrumb

@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import { CorporateNavbar } from '@/components/layout/CorporateNavbar';
-import { OrganizationSchema } from '@/components/seo/organization-schema';
 import { ServiceSchema } from '@/components/seo/service-schema';
 import { WhatsAppFloat } from '@/components/ui/WhatsAppFloat';
 import { AccessibilityWidget } from '@/components/ui/AccessibilityWidget';
@@ -12,11 +11,12 @@ interface MainSiteLayoutProps {
 export default function MainSiteLayout({ children }: MainSiteLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* GEO Authority - JSON-LD Schemas */}
-      <OrganizationSchema 
-        includeLeumitAffiliation={true} 
-        variant="main" 
-      />
+      {/*
+        Organization JSON-LD is emitted ONCE from the root `app/layout.tsx`
+        via <GeoSchema /> — see components/seo/GeoSchema.tsx. A duplicate
+        <OrganizationSchema /> used to live here; it was removed 2026-04-24
+        because it emitted the same @id and contained factual errors.
+      */}
       <ServiceSchema
         services={['all']}
         site="main"

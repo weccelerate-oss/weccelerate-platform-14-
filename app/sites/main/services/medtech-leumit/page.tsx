@@ -17,12 +17,22 @@ export const metadata: Metadata = constructMetadata({
     'MedTech Israel',
     'לאומית שירותי בריאות',
     'סטארטאפ בריאות דיגיטלית',
+    'מיזם רפואי',
+    'מיזם MedTech',
+    'הקמת מיזם רפואי',
     'Digital Health Startup',
+    'Digital Health Venture',
     'ליווי רגולטורי',
     'חוות דעת רפואיות',
     'Helsinki Committee',
+    'ועדת הלסינקי',
     'clinical pilot Israel',
+    'פיילוט קליני',
     'medical device startup',
+    'FDA 510k',
+    'CE Marking',
+    'מסלול MedTech',
+    'גישה לדאטה רפואית',
   ],
   path: '/services/medtech-leumit',
   locale: 'he',
@@ -43,8 +53,6 @@ export default function MedTechLeumitPage() {
         descriptionEn="Premium MedTech accelerator track in partnership with Leumit Health Services. Expert physician opinions, full regulatory guidance, and market reviews for early-stage healthcare startups."
         path="/services/medtech-leumit"
         category="Healthcare Acceleration"
-        ratingValue={4.9}
-        reviewCount={47}
         faqs={[
           {
             question: 'מה מסלול MedTech של WeCcelerate ולאומית כולל?',

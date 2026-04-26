@@ -38,10 +38,96 @@ const SITE_COOKIE = 'wec-site';
 const ALTERNATE_DOMAINS = ['wecc-ltd.com', 'www.wecc-ltd.com'];
 const CANONICAL_DOMAIN = 'weccelerate.co.il';
 
+// AI crawler user-agent fragments. Case-insensitive substring match.
+// Sources: official docs for each crawler + robots.txt exclusion lists.
+const AI_BOT_SIGNATURES: ReadonlyArray<{ name: string; match: string }> = [
+  { name: 'GPTBot', match: 'gptbot' }, // OpenAI training
+  { name: 'ChatGPT-User', match: 'chatgpt-user' }, // ChatGPT live browse
+  { name: 'OAI-SearchBot', match: 'oai-searchbot' }, // ChatGPT Search
+  { name: 'ClaudeBot', match: 'claudebot' }, // Anthropic training
+  { name: 'Claude-Web', match: 'claude-web' }, // Claude live browse
+  { name: 'anthropic-ai', match: 'anthropic-ai' }, // Anthropic generic
+  { name: 'PerplexityBot', match: 'perplexitybot' }, // Perplexity crawl
+  { name: 'Perplexity-User', match: 'perplexity-user' }, // Perplexity live
+  { name: 'Google-Extended', match: 'google-extended' }, // Gemini training
+  { name: 'GoogleOther', match: 'googleother' }, // Google AI Overviews
+  { name: 'Applebot-Extended', match: 'applebot-extended' }, // Apple Intelligence
+  { name: 'CCBot', match: 'ccbot' }, // Common Crawl (feeds many LLMs)
+  { name: 'Meta-ExternalAgent', match: 'meta-externalagent' }, // Meta AI
+  { name: 'FacebookBot', match: 'facebookbot' }, // Meta (legacy)
+  { name: 'Bytespider', match: 'bytespider' }, // TikTok / Doubao
+  { name: 'cohere-ai', match: 'cohere-ai' }, // Cohere
+  { name: 'DuckAssistBot', match: 'duckassistbot' }, // DuckDuckGo AI
+  { name: 'Amazonbot', match: 'amazonbot' }, // Alexa / Amazon AI
+];
+
+function detectAiBot(userAgent: string): string | null {
+  const ua = userAgent.toLowerCase();
+  for (const sig of AI_BOT_SIGNATURES) {
+    if (ua.includes(sig.match)) return sig.name;
+  }
+  return null;
+}
+
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || '';
   const pathname = url.pathname;
+  const userAgent = request.headers.get('user-agent') || '';
+
+  // ==========================================================================
+  // 0. AI crawler detection — logs to Vercel runtime AND persists to DB for
+  //    long-term analytics. Both paths are fire-and-forget — if the DB
+  //    POST fails, the request still completes normally.
+  //
+  //    - Console log  → `vercel logs --since=7d | grep ai-bot` (short-term)
+  //    - DB write     → /admin/bot-analytics dashboard (long-term trends)
+  // ==========================================================================
+  const aiBot = detectAiBot(userAgent);
+  if (aiBot) {
+    console.log(
+      JSON.stringify({
+        event: 'ai-bot',
+        bot: aiBot,
+        path: pathname,
+        host: hostname,
+        ts: new Date().toISOString(),
+      }),
+    );
+
+    // Fire-and-forget POST to /api/bot/log. We intentionally do NOT await:
+    //   (a) middleware must not add latency to the request
+    //   (b) a DB outage must not break the bot's ability to index us
+    // The `catch` swallows errors — the console log above is our backup.
+    //
+    // Edge runtime limitation: we can't import prisma directly here (it's
+    // Node-only). So we call our own API route, which runs on Node.
+    try {
+      const origin =
+        request.headers.get('x-forwarded-proto') && hostname
+          ? `${request.headers.get('x-forwarded-proto')}://${hostname}`
+          : request.nextUrl.origin;
+      void fetch(`${origin}/api/bot/log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bot: aiBot,
+          path: pathname,
+          host: hostname,
+          method: request.method,
+          referer: request.headers.get('referer') ?? null,
+          country: request.headers.get('x-vercel-ip-country') ?? null,
+          userAgent: userAgent.slice(0, 512),
+        }),
+        // Important: don't hold the edge worker for long
+        signal: AbortSignal.timeout(2_000),
+      }).catch(() => {
+        /* swallow — console log above is our backup */
+      });
+    } catch {
+      /* never block on the telemetry path */
+    }
+  }
 
   // ==========================================================================
   // 1. Alternate-domain redirect (wecc-ltd.com → weccelerate.co.il)
@@ -131,6 +217,9 @@ export function middleware(request: NextRequest) {
   url.searchParams.delete('site');
   const response = NextResponse.rewrite(url);
   response.headers.set('x-site', siteFolder);
+  if (aiBot) {
+    response.headers.set('x-ai-bot', aiBot);
+  }
 
   if (shouldSetCookie) {
     // Persist site selection for 30 days so user doesn't have to re-add ?site

@@ -13,7 +13,10 @@ export const metadata: Metadata = constructMetadata({
     'ייעוץ עסקי מלא ליזמים — תוכנית עסקית, מחקר שוק, תוכנית פיננסית ותקציר מנהלים. בונים את היסודות לגיוס הון והצלחה עסקית.',
   keywords: [
     'ייעוץ עסקי לסטארטאפים',
+    'ייעוץ עסקי למיזמים',
+    'ייעוץ עסקי ליזמים',
     'תוכנית עסקית',
+    'תוכנית עסקית למיזם',
     'מחקר שוק',
     'Business Plan Israel',
     'Startup Consulting',
@@ -21,6 +24,10 @@ export const metadata: Metadata = constructMetadata({
     'תוכנית פיננסית',
     'executive summary',
     'ייעוץ עסקי ירושלים',
+    'ליווי מיזמים',
+    'בונה מיזמים',
+    'הקמת מיזם',
+    'יזמות',
   ],
   path: '/services/business-consulting',
   locale: 'he',
@@ -41,8 +48,6 @@ export default function BusinessConsultingPage() {
         descriptionEn="Full business consulting for entrepreneurs — business plan, market research, financial plan, and executive summary. Building the foundations for fundraising and business success."
         path="/services/business-consulting"
         category="Business Consulting"
-        ratingValue={4.9}
-        reviewCount={67}
         faqs={[
           {
             question: 'מה כולל ייעוץ עסקי של WeCcelerate?',

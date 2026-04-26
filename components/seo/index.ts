@@ -6,11 +6,11 @@
  */
 
 // Organization Schemas
-export {
-  OrganizationSchema,
-  LeumitPartnerSchema,
-  type OrganizationSchemaProps,
-} from './organization-schema';
+// NOTE: The main OrganizationSchema previously exported here was removed
+// 2026-04-24 (duplicate @id + factual errors). Organization JSON-LD is now
+// emitted exclusively by components/seo/GeoSchema.tsx in the root layout.
+// Only LeumitPartnerSchema remains, used on the /leumit subdomain.
+export { LeumitPartnerSchema } from './organization-schema';
 
 // Service Schemas
 export {

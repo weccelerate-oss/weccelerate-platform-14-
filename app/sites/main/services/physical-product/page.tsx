@@ -13,6 +13,7 @@ export const metadata: Metadata = constructMetadata({
     'מעיצוב תעשייתי דרך אב-טיפוס ועד לייצור המוני. תהליך הנדסי מקצה לקצה להבאת מוצר פיזי לשוק.',
   keywords: [
     'פיתוח מוצר פיזי',
+    'פיתוח מוצר למיזם',
     'אב טיפוס',
     'עיצוב תעשייתי',
     'Prototyping Israel',
@@ -21,6 +22,10 @@ export const metadata: Metadata = constructMetadata({
     'industrial design Israel',
     'הנדסת מוצר',
     '3D printing prototype',
+    'CNC machining',
+    'פיתוח חומרה למיזם',
+    'מיזם חומרה',
+    'IoT product development',
   ],
   path: '/services/physical-product',
   locale: 'he',
@@ -41,8 +46,6 @@ export default function PhysicalProductPage() {
         descriptionEn="From industrial design through prototyping to mass manufacturing. End-to-end engineering process to bring a physical product to market."
         path="/services/physical-product"
         category="Product Development"
-        ratingValue={4.7}
-        reviewCount={34}
         faqs={[
           {
             question: 'כמה עולה לפתח אב-טיפוס למוצר פיזי?',

@@ -169,13 +169,9 @@ const MEDICAL_REGULATION_SERVICE: ServiceData = {
       },
     },
   },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: 4.9,
-    reviewCount: 47,
-    bestRating: 5,
-    worstRating: 1,
-  },
+  // aggregateRating removed — Google policy forbids self-serving ratings on
+  // Service schema without a verifiable public review source. Re-add only when
+  // backed by Google Business Profile / Trustpilot / G2 reviews.
 };
 
 // MVP Development Service
@@ -237,13 +233,7 @@ const MVP_DEVELOPMENT_SERVICE: ServiceData = {
       },
     ],
   },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: 4.8,
-    reviewCount: 63,
-    bestRating: 5,
-    worstRating: 1,
-  },
+  // aggregateRating removed — see Medical Device Consulting above.
 };
 
 // Funding Strategy Service
@@ -306,13 +296,7 @@ const FUNDING_STRATEGY_SERVICE: ServiceData = {
       },
     ],
   },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: 4.9,
-    reviewCount: 89,
-    bestRating: 5,
-    worstRating: 1,
-  },
+  // aggregateRating removed — see Medical Device Consulting above.
 };
 
 // Factory Sourcing Service
@@ -374,13 +358,7 @@ const FACTORY_SOURCING_SERVICE: ServiceData = {
       },
     ],
   },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: 4.7,
-    reviewCount: 34,
-    bestRating: 5,
-    worstRating: 1,
-  },
+  // aggregateRating removed — see Medical Device Consulting above.
 };
 
 // =============================================================================
@@ -414,11 +392,14 @@ export function ServiceSchema({
       .map((s) => SERVICE_MAP[s]);
   }
 
-  // Remove ratings if not requested
+  // Note: aggregateRating was removed from all SERVICE_MAP entries — the
+  // `includeRating` flag is preserved for future compatibility when we
+  // re-introduce ratings backed by a verifiable public review source.
   if (!includeRating) {
     selectedServices = selectedServices.map((service) => {
-      const { aggregateRating, ...rest } = service;
-      return rest as ServiceData;
+      const copy: ServiceData = { ...service };
+      delete copy.aggregateRating;
+      return copy;
     });
   }
 

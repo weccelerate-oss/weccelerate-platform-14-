@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Script from 'next/script';
 import { constructMetadata } from '@/lib/seo';
 import TeamContent from './TeamContent';
+import { FOUNDER as SHARED_FOUNDER, CO_FOUNDERS as SHARED_CO_FOUNDERS } from '@/lib/seo/founders';
 
 // =============================================================================
 // METADATA
@@ -42,154 +43,105 @@ interface TeamMember {
   credentials?: string[];
 }
 
-const advisoryBoard: TeamMember[] = [
-  {
-    id: 'sharon',
-    name: 'שרון',
-    nameEn: 'Sharon',
-    role: 'חבר ועדה מייעצת',
-    roleEn: 'Advisory Board Member',
-    bio: 'מומחה בכיר בתעשיית הטכנולוגיה והחדשנות בישראל.',
-    image: '/images/team/sharon.jpg',
-    credentials: ['ועדה מייעצת'],
-  },
-  {
-    id: 'on',
-    name: 'און',
-    nameEn: 'On',
-    role: 'חבר ועדה מייעצת',
-    roleEn: 'Advisory Board Member',
-    bio: 'ניסיון עשיר בליווי סטארטאפים מהרעיון לשוק.',
-    image: '/images/team/on.jpg',
-    credentials: ['ועדה מייעצת'],
-  },
-  {
-    id: 'elia',
-    name: 'אליה',
-    nameEn: 'Elia',
-    role: 'חבר ועדה מייעצת',
-    roleEn: 'Advisory Board Member',
-    bio: 'רקע עמוק בפיתוח עסקי ואסטרטגיה טכנולוגית.',
-    image: '/images/team/elia.jpg',
-    credentials: ['ועדה מייעצת'],
-  },
-  {
-    id: 'shahar',
-    name: 'שחר',
-    nameEn: 'Shahar',
-    role: 'חבר ועדה מייעצת',
-    roleEn: 'Advisory Board Member',
-    bio: 'מומחה בהשקעות ופיתוח אקוסיסטם טכנולוגי.',
-    image: '/images/team/shahar.jpg',
-    credentials: ['ועדה מייעצת'],
-  },
-];
+// ENTITY-CRITICAL ROSTER — ONLY VERIFIED FOUNDERS
+// ------------------------------------------------------------
+// Google Knowledge Graph + LLMs require a Person entity to have enough
+// distinguishing information (full name, verified jobTitle, and ideally a
+// LinkedIn sameAs) to be treated as a real, trustworthy entity. First-name-
+// only entries ("Sharon", "On") degrade Organization E-E-A-T because search
+// engines and LLMs cannot resolve them to unique people, so they discount the
+// Organization's authority signal.
+//
+// This roster therefore contains ONLY:
+//   1. The CEO & founder (Alon Pinchas)
+//   2. Confirmed co-founders (Avraham Hinoch, Ido Sabag)
+//
+// UI display of other team members is handled separately inside TeamContent —
+// keeping them OUT of JSON-LD is intentional, not an oversight.
+// ------------------------------------------------------------
 
-const coreTeam: TeamMember[] = [
-  {
-    id: 'tomer',
-    name: 'תומר',
-    nameEn: 'Tomer',
-    role: 'צוות מוביל',
-    roleEn: 'Core Team',
-    bio: 'ליווי סטארטאפים מהאפיון הראשוני ועד השקה בשוק.',
-    image: '/images/team/tomer.jpg',
-  },
-  {
-    id: 'meital',
-    name: 'מיטל',
-    nameEn: 'Meital',
-    role: 'פיננסים',
-    roleEn: 'Finance',
-    bio: 'ניהול פיננסי, תקציב ותכנון כלכלי למיזמים.',
-    image: '/images/team/meital.jpg',
-    credentials: ['פיננסים'],
-  },
-  {
-    id: 'susan',
-    name: 'סוזן הלפרט',
-    nameEn: 'Susan Halperlt',
-    role: 'צוות מוביל',
-    roleEn: 'Core Team',
-    bio: 'מומחית בפיתוח עסקי בינלאומי ויצירת שותפויות אסטרטגיות.',
-    image: '/images/team/susan.jpg',
-  },
-  {
-    id: 'amir-shaul',
-    name: 'אמיר שאול',
-    nameEn: 'Amir Shaul',
-    role: 'צוות מוביל',
-    roleEn: 'Core Team',
-    bio: 'ניסיון בניהול מוצר וליווי טכנולוגי לסטארטאפים.',
-    image: '/images/team/amir-shaul.jpg',
-  },
-  {
-    id: 'dani-topaz',
-    name: 'דני טופז',
-    nameEn: 'Dani Topaz',
-    role: 'צוות מוביל',
-    roleEn: 'Core Team',
-    bio: 'מומחה באסטרטגיה עסקית וחיבור לשוק.',
-    image: '/images/team/dani-topaz.jpg',
-  },
-];
+// Founders are now loaded from the shared single-source-of-truth at
+// `lib/seo/founders.ts`. This module is also used by `/team/[slug]/page.tsx`
+// (author pages) — keeping them in sync without duplication.
+const founder: TeamMember = SHARED_FOUNDER;
+const coFounders: TeamMember[] = SHARED_CO_FOUNDERS;
 
 // =============================================================================
 // JSON-LD
 // =============================================================================
 
 function generateTeamSchema() {
-  const allMembers = [...advisoryBoard, ...coreTeam];
+  const SITE = 'https://weccelerate.co.il';
+  const ORG_ID = `${SITE}/#organization`;
+  // Order matters for JSON-LD: founder first, then co-founders.
+  // Advisory Board & Core Team are INTENTIONALLY excluded — see roster comment above.
+  const allMembers = [founder, ...coFounders];
+
+  const people = allMembers.map((member) => {
+    const personId = `${SITE}/team#${member.id}`;
+    const sameAs = member.linkedin ? [member.linkedin] : undefined;
+    return {
+      '@type': 'Person',
+      '@id': personId,
+      name: member.nameEn,
+      alternateName: member.name,
+      jobTitle: member.roleEn,
+      description: member.bio,
+      url: `${SITE}/team#${member.id}`,
+      image: `${SITE}${member.image}`,
+      ...(sameAs && { sameAs }),
+      worksFor: { '@id': ORG_ID },
+      memberOf: { '@id': ORG_ID },
+      knowsAbout: [
+        'Startup Acceleration',
+        'Venture Building',
+        'Entrepreneurship',
+        'Business Strategy',
+        ...(member.credentials ?? []),
+      ],
+      ...(member.credentials && member.credentials.length > 0 && {
+        hasCredential: member.credentials.map((c) => ({
+          '@type': 'EducationalOccupationalCredential',
+          credentialCategory: c,
+        })),
+      }),
+      nationality: { '@type': 'Country', name: 'Israel' },
+    };
+  });
+
   return {
     '@context': 'https://schema.org',
     '@graph': [
       {
         '@type': 'WebPage',
-        '@id': 'https://weccelerate.co.il/team',
-        name: 'הצוות שלנו - WeCcelerate',
+        '@id': `${SITE}/team#webpage`,
+        url: `${SITE}/team`,
+        name: 'הצוות שלנו — WeCcelerate',
         description: 'Advisory Board, Partners and Mentors of WeCcelerate Venture Builder',
-        isPartOf: {
-          '@type': 'WebSite',
-          '@id': 'https://weccelerate.co.il',
-          name: 'WeCcelerate',
-        },
+        isPartOf: { '@id': `${SITE}/#website` },
+        about: { '@id': ORG_ID },
+        inLanguage: 'he-IL',
         speakable: {
           '@type': 'SpeakableSpecification',
-          cssSelector: ['h1', 'h2', '[data-speakable]'],
+          cssSelector: ['[data-speakable]'],
         },
       },
-      ...allMembers.map((member) => ({
-        '@type': 'Person',
-        name: member.nameEn,
-        alternateName: member.name,
-        jobTitle: member.roleEn,
-        description: member.bio,
-        image: `https://weccelerate.co.il${member.image}`,
-        sameAs: member.linkedin ? [member.linkedin] : [],
-        worksFor: {
-          '@type': 'Organization',
-          '@id': 'https://weccelerate.co.il/#organization',
-          name: 'WeCcelerate',
-          url: 'https://weccelerate.co.il',
-        },
-        knowsAbout: [
-          'Startup Acceleration',
-          'Venture Building',
-          'Entrepreneurship',
-          'Business Strategy',
-          ...(member.credentials || []),
+      // Reinforce the Organization with explicit `founder` (Alon Pinchas + co-founders)
+      // and `member` links — bidirectional graph between Organization and each Person
+      // strengthens entity recognition for LLMs and Google Knowledge Graph.
+      {
+        '@type': 'Organization',
+        '@id': ORG_ID,
+        name: 'WeCcelerate',
+        url: SITE,
+        founder: [
+          { '@id': `${SITE}/team#${founder.id}` },
+          ...coFounders.map((c) => ({ '@id': `${SITE}/team#${c.id}` })),
         ],
-        ...(member.credentials && member.credentials.length > 0 && {
-          hasCredential: member.credentials.map((c) => ({
-            '@type': 'EducationalOccupationalCredential',
-            credentialCategory: c,
-          })),
-        }),
-        nationality: {
-          '@type': 'Country',
-          name: 'Israel',
-        },
-      })),
+        employee: { '@id': `${SITE}/team#${founder.id}` },
+        member: people.map((p) => ({ '@id': p['@id'] })),
+      },
+      ...people,
     ],
   };
 }

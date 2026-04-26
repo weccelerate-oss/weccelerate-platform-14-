@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: event.name,
     description,
     path: `/events/${slug}`,
-    ogImage: event.imageUrl ?? undefined,
+    image: event.imageUrl ?? undefined,
     locale: 'he',
     publishedTime: startDate.toISOString(),
     modifiedTime: (event.updatedAt instanceof Date ? event.updatedAt : new Date(event.updatedAt)).toISOString(),
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export async function generateStaticParams() {
   try {
     const events = await getEvents({ limit: 100 });
-    return events.map((e) => ({ slug: e.slug }));
+    return events.map((e: { slug: string }) => ({ slug: e.slug }));
   } catch {
     return [];
   }

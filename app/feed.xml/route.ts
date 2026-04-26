@@ -34,7 +34,14 @@ export async function GET() {
 
   try {
     const news = await getNewsUpdates({ limit: 50 });
-    items = news.map((n) => ({
+    items = news.map((n: {
+      id: string;
+      title: string;
+      link: string | null;
+      excerpt: string | null;
+      publishAt: Date;
+      imageUrl: string | null;
+    }) => ({
       id: n.id,
       title: n.title,
       link: n.link,

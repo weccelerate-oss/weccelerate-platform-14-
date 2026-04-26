@@ -7,6 +7,59 @@ Ordered by priority.
 
 ---
 
+## 🛡️ Reputation Recovery — Active Re-Evaluation Requests
+
+CyberGuard and similar anti-phishing systems flagged `weccelerate.co.il`
+because of cross-source contradictions (founding year, missing Crunchbase
+slug match). After fixing the on-site contradictions on 2026-04-26, you
+submitted re-evaluation requests to:
+
+| Reputation system | Submission URL | Submitted |
+|---|---|---|
+| Google Safe Browsing | https://safebrowsing.google.com/safebrowsing/report_error/ | ✅ 2026-04-26 |
+| FortiGuard (Fortinet) | https://www.fortiguard.com/faq/thank-you/wfrating-submission | ✅ 2026-04-26 |
+
+**Check verdict in 7-14 days**:
+- Google: re-test https://transparencyreport.google.com/safe-browsing/search?url=weccelerate.co.il
+- FortiGuard: re-test https://www.fortiguard.com/webfilter?q=weccelerate.co.il
+
+### Other reputation systems still to submit (recommended order)
+
+These cover the remaining ~80% of browser/AV reputation surface. Submit each
+with the same wording: "Site was flagged due to legacy data inconsistencies
+that have been resolved. Please re-evaluate."
+
+| Priority | System | Submission URL | Why it matters |
+|---|---|---|---|
+| 🔥 High | **Microsoft SmartScreen** | https://feedback.smartscreen.microsoft.com/feedback.aspx | Edge browser, Outlook attachments, Defender |
+| 🔥 High | **Norton SafeWeb** | https://safeweb.norton.com/report | Norton Antivirus, browser extensions |
+| 🔥 High | **Webroot BrightCloud** | https://www.brightcloud.com/tools/change-request.php | Many ISPs and corporate firewalls |
+| Medium | **McAfee SiteAdvisor** | https://www.trustedsource.org/en/feedback/url | McAfee AV, Trellix |
+| Medium | **Cisco Talos** | https://talosintelligence.com/reputation_center/sender_ip | Cisco Umbrella, Snort, enterprise networks |
+| Medium | **Sucuri SiteCheck** | https://sucuri.net/website-security/ | Many website firewalls and CMS hosts |
+| Low | **Trend Micro Site Safety** | https://global.sitesafety.trendmicro.com/ | Trend Micro AV |
+| Low | **Sophos** | https://www.sophos.com/en-us/threat-center/reassessment-request | Sophos AV/firewalls |
+| Low | **Kaspersky** | https://opentip.kaspersky.com/ | Kaspersky AV |
+| Low | **ESET** | https://help.eset.com/eset_kb/en-us/SOLN3585.html | ESET AV |
+
+**Pattern**: For each, look up `weccelerate.co.il` first to see the current
+verdict. If it's flagged, click "report incorrect classification" / "request
+re-evaluation". Most respond within 5-15 business days.
+
+### Self-monitoring tools (no account needed)
+
+Run these monthly to spot new reputation issues before they spread:
+- https://urlscan.io/?q=weccelerate.co.il — visual scan + verdict from 30+ engines
+- https://www.virustotal.com/gui/home/url — same idea, separate engine pool
+- https://www.urlvoid.com/scan/weccelerate.co.il — aggregator
+
+**If any engine shows new red flags**: triangulate the cause (check the
+response payload — usually it cites a specific source like "domain registered
+recently" or "low reputation score"), fix the source, then submit
+re-evaluation.
+
+---
+
 ## ✅ Resolved — Founding year (2026-04-26)
 
 Confirmed by Alon (CEO) on 2026-04-26: **WeCcelerate Ltd. was incorporated
@@ -21,10 +74,24 @@ journalists' quotes.
 
 ---
 
-## 🟡 P0 — Crunchbase slug correction (in progress)
+## 🟡 P0 — Crunchbase slug correction (profile edits done; slug rename pending)
+
+**Update 2026-04-26**: Alon confirmed he completed Crunchbase profile edits
+(founding year aligned to 2016, leadership, description). The remaining
+question is whether the URL slug itself was renamed.
 
 Current Crunchbase profile URL: `https://www.crunchbase.com/organization/weccelerat`
 (missing final **E**).
+
+### Quick check (do this now, takes 30 seconds)
+
+Open https://www.crunchbase.com/organization/weccelerate (with the **E**) in
+an incognito tab.
+- **If it loads our profile** → slug renamed successfully. Update the
+  hardcoded URLs (see "If yes" steps below).
+- **If it shows 404 or "claim this profile"** → slug still old; only content
+  was edited. Continue waiting on Crunchbase support, OR send the email
+  template below.
 
 **Status (2026-04-26)**: Alon confirmed he has performed edits on the
 Crunchbase profile. Profile content (founding year, leadership, description)
