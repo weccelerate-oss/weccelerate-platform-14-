@@ -105,8 +105,12 @@ async function seedUsers() {
       company: 'HealthAI Startup',
       position: 'מייסד ומנכ"ל',
       bio: 'יזם סדרתי בתחום הבריאות הדיגיטלית עם רקע בפיתוח תוכנה ורפואה.',
-      phone: '+972-50-123-4567',
-      linkedinUrl: 'https://linkedin.com/in/dannycohen',
+      // Demo user — phone & linkedinUrl intentionally null. Fake-looking
+      // demo data (e.g. a real-format phone number or LinkedIn slug) is a
+      // risk: if the seed ever runs in a non-dev environment it creates
+      // the illusion of a real person. Null values keep the demo obvious.
+      phone: null,
+      linkedinUrl: null,
       language: 'he',
     },
   });
@@ -177,16 +181,13 @@ async function seedNewsUpdates() {
       link: 'https://finance.walla.co.il/item/3565341',
       publishAt: new Date('2023-03-14'),
     },
-    {
-      title: 'חברי הילדות הבאר שבעים שכובשים את עולם היזמות',
-      titleEn: 'Beer Sheva childhood friends conquering the startup world',
-      excerpt: 'אלון פנחס ועידו סבג, שהכירו כילדים בשכונה ד\' בבאר שבע, הקימו יחד את WeCcelerate ב-2017. המאיץ מלווה יזמים משלב הרעיון דרך גיוסי Seed, Pre-Seed ולאחרונה גם סבבי A.',
-      urgencyLevel: 'IMPORTANT' as const,
-      isActive: true,
-      isPinned: false,
-      link: 'https://www.b7net.co.il/%D7%9E%D7%92%D7%96%D7%99%D7%9F/%D7%97%D7%91%D7%A8%D7%99-%D7%94%D7%99%D7%9C%D7%93%D7%95%D7%AA-%D7%94%D7%91%D7%90%D7%A8-%D7%A9%D7%91%D7%A2%D7%99%D7%9D-%D7%A9%D7%9B%D7%95%D7%91%D7%A9%D7%99%D7%9D-%D7%90%D7%AA-%D7%A2%D7%95%D7%9C%D7%9D-%D7%94%D7%99%D7%96%D7%9E%D7%95%D7%AA-505404',
-      publishAt: new Date('2022-05-09'),
-    },
+    // ============================================================
+    // REMOVED 2026-04-24 — B7Net "חברי הילדות מבאר שבע" record.
+    // The excerpt quoted the B7Net article verbatim, which states the
+    // founding year as 2017. The canonical incorporation year of
+    // WeCcelerate Ltd. is 2016 (confirmed by Alon on 2026-04-26).
+    // Same record also removed from scripts/seed-news.ts.
+    // ============================================================
     {
       title: 'WeCcelerate פותחת סניף בקנדה — חיזוק קשרים עם קרנות קנדיות',
       titleEn: 'WeCcelerate opens Canada branch to strengthen ties with Canadian funds',

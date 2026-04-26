@@ -69,16 +69,14 @@ const realArticles = [
     isActive: true,
     publishAt: new Date('2021-12-30T10:00:00.000Z'),
   },
-  {
-    title: 'חברי הילדות מבאר שבע שכובשים את עולם היזמות',
-    excerpt:
-      'אלון פנחס (31, כלכלן, לשעבר רואה חשבון באינטל) ועידו סבג (30, מהנדס מכונות), חברי ילדות משכונה ד׳ בבאר שבע, הקימו את WeCcelerate ב-2017 יחד עם אברהם הינוך. המאיץ מלווה יזמים משלב הרעיון דרך גיוסי Seed, Pre-Seed ולאחרונה גם סבבי A. השלושה מחויבים לאקוסיסטם החדשנות בנגב.',
-    link: 'https://www.b7net.co.il/%D7%9E%D7%92%D7%96%D7%99%D7%9F/%D7%97%D7%91%D7%A8%D7%99-%D7%94%D7%99%D7%9C%D7%93%D7%95%D7%AA-%D7%94%D7%91%D7%90%D7%A8-%D7%A9%D7%91%D7%A2%D7%99%D7%9D-%D7%A9%D7%9B%D7%95%D7%91%D7%A9%D7%99%D7%9D-%D7%90%D7%AA-%D7%A2%D7%95%D7%9C%D7%9D-%D7%94%D7%99%D7%96%D7%9E%D7%95%D7%AA-505404',
-    urgencyLevel: 'IMPORTANT' as const,
-    isPinned: false,
-    isActive: true,
-    publishAt: new Date('2022-05-09T12:00:00.000Z'),
-  },
+  // ============================================================
+  // REMOVED 2026-04-24 — B7Net "חברי הילדות מבאר שבע" record.
+  // The excerpt quoted the B7Net article verbatim, which states the founding
+  // year as 2017. The canonical incorporation year of WeCcelerate Ltd. is
+  // 2016 (confirmed by Alon, CEO, on 2026-04-26). We do not rewrite
+  // journalists' quotes, so seeding a news item whose excerpt contradicts
+  // our Organization schema is dropped instead.
+  // ============================================================
 
   // --- Urgent ---
   {

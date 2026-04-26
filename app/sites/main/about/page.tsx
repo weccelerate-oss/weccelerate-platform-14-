@@ -13,21 +13,31 @@ import AboutContent from './AboutContent';
 // =============================================================================
 
 export const metadata: Metadata = {
-  title: 'אודות WeCcelerate | וויסלרייט — Venture Builder ומאיץ סטארטאפים',
+  title: 'אודות WeCcelerate | וויסלרייט — בונה מיזמים ומאיץ סטארטאפים בישראל',
   description:
-    'הכירו את הצוות והחזון של WeCcelerate — חברת Venture Building ישראלית המלווה יזמים מהרעיון ועד להצלחה גלובלית. ייעוץ עסקי, פיתוח מוצר, קניין רוחני וגיוס הון.',
+    'WeCcelerate (וויסלרייט) — בונה המיזמים (Venture Builder) ומאיץ הסטארטאפים המוביל בישראל. מלווים יזמים מרעיון ועד הצלחה גלובלית: ייעוץ עסקי, פיתוח מוצר, גיוס הון, ומסלול MedTech בלעדי עם לאומית. 40+ מיזמים, 150M$+ גויסו.',
   keywords: [
     'וויסלרייט',
     'WeCcelerate',
     'Venture Builder ישראל',
+    'בונה מיזמים',
+    'בונה מיזמים ישראל',
     'מאיץ סטארטאפים',
+    'מאיץ מיזמים',
     'יזמות טכנולוגית',
+    'יזמות',
     'גיוס הון סטארטאפ',
+    'גיוס הון מיזם',
+    'ליווי מיזמים',
+    'ליווי יזמים',
+    'הקמת מיזם בישראל',
+    'מיזם הזנק',
+    'חברת הזנק',
   ],
   openGraph: {
-    title: 'אודות WeCcelerate — הצוות והחזון',
+    title: 'אודות WeCcelerate — בונה המיזמים המוביל בישראל',
     description:
-      'הכירו את השותפים וההנהלה מאחורי מאיץ הסטארטאפים המוביל בישראל.',
+      'הכירו את השותפים וההנהלה מאחורי בונה המיזמים (Venture Builder) ומאיץ הסטארטאפים המוביל בישראל. 40+ מיזמים, 150M$+ גויסו.',
     type: 'website',
     locale: 'he_IL',
   },
@@ -88,12 +98,18 @@ function generateAboutPageSchema() {
         logo: 'https://weccelerate.co.il/images/logo.svg',
         description:
           'Venture Builder ומאיץ סטארטאפים ישראלי — ליווי יזמים מקצה לקצה בתחומי הטכנולוגיה, הרפואה וההשקעות.',
+        // sameAs: official, owned WeCcelerate profiles. Twitter/X and GitHub
+        // are intentionally omitted — Twitter is not company-owned; GitHub
+        // is not user-facing. Including unowned profiles hurts entity
+        // resolution because LLMs/Google verify ownership by following these
+        // links.
         sameAs: [
-          'https://www.youtube.com/@WeCcelerate.Ltd1',
           'https://www.linkedin.com/company/weccelerate',
           'https://www.facebook.com/weccelerate',
-          'https://www.instagram.com/weccelerate',
+          'https://www.instagram.com/weccelerate.ltd',
+          'https://www.youtube.com/@WeCcelerate.Ltd1',
           'https://www.tiktok.com/@weccelerate',
+          'https://www.crunchbase.com/organization/weccelerat',
         ],
         employee: teamForSchema.map((p) => ({
           '@type': 'Person',

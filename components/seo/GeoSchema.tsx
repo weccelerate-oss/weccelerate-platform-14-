@@ -101,11 +101,46 @@ function buildOrganizationSchema() {
     },
     
     // Founding & Contact
-    foundingDate: '2020',
+    // Founding year confirmed by Alon (CEO) on 2026-04-26: WeCcelerate Ltd.
+    // was incorporated in 2016. Earlier code used 2020 which was incorrect
+    // and contradicted the LinkedIn company page and the B7Net article that
+    // quoted 2017. All canonical surfaces (llms.txt, llms-full.txt, footer,
+    // about page, schema) now align on 2016.
+    foundingDate: '2016',
     foundingLocation: {
       '@type': 'Place',
       name: 'Tel Aviv, Israel',
     },
+    // Founder — CRITICAL for entity recognition by LLMs + Google Knowledge Graph.
+    // Alon Pinchas is CEO & primary founder; Hinoch & Sabag are co-founders.
+    founder: [
+      {
+        '@type': 'Person',
+        '@id': `${SITE_CONFIG.url}/team#alon-pinchas`,
+        name: 'Alon Pinchas',
+        alternateName: 'אלון פנחס',
+        jobTitle: 'Founder & CEO',
+        worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
+        url: `${SITE_CONFIG.url}/team#alon-pinchas`,
+        image: `${SITE_CONFIG.url}/images/team/alon-pinchas.jpg`,
+      },
+      {
+        '@type': 'Person',
+        '@id': `${SITE_CONFIG.url}/team#avraham-hinoch`,
+        name: 'Avraham Hinoch',
+        alternateName: 'אברהם הינוך',
+        jobTitle: 'Co-Founder',
+        worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
+      },
+      {
+        '@type': 'Person',
+        '@id': `${SITE_CONFIG.url}/team#ido-sabag`,
+        name: 'Ido Sabag',
+        alternateName: 'עידו סבג',
+        jobTitle: 'Co-Founder',
+        worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
+      },
+    ],
     email: 'info@weccelerate.co.il',
     telephone: '+972-55-564-7538',
 
@@ -170,12 +205,21 @@ function buildOrganizationSchema() {
     ],
     
     // Social Profiles
+    // sameAs: only the verified, owned WeCcelerate social profiles.
+    // Twitter/X and GitHub are intentionally omitted — Twitter is not owned
+    // by the company; GitHub is not user-facing. Adding unowned profiles
+    // breaks entity recognition (Google/LLMs follow sameAs and penalize when
+    // they don't resolve to a matching brand).
     sameAs: [
-      'https://www.youtube.com/@WeCcelerate.Ltd1',
       'https://www.linkedin.com/company/weccelerate',
       'https://www.facebook.com/weccelerate',
-      'https://www.instagram.com/weccelerate',
+      'https://www.instagram.com/weccelerate.ltd',
+      'https://www.youtube.com/@WeCcelerate.Ltd1',
       'https://www.tiktok.com/@weccelerate',
+      // Crunchbase profile — currently under the misspelled slug `weccelerat`
+      // (missing final E). Profile is live and owned. Update the URL once
+      // Crunchbase support corrects the slug to `weccelerate`.
+      'https://www.crunchbase.com/organization/weccelerat',
     ],
 
     // Contact Points
@@ -498,12 +542,21 @@ function buildLocalBusinessSchema() {
       longitude: 34.7721,
     },
     url: SITE_CONFIG.url,
+    // sameAs: only the verified, owned WeCcelerate social profiles.
+    // Twitter/X and GitHub are intentionally omitted — Twitter is not owned
+    // by the company; GitHub is not user-facing. Adding unowned profiles
+    // breaks entity recognition (Google/LLMs follow sameAs and penalize when
+    // they don't resolve to a matching brand).
     sameAs: [
-      'https://www.youtube.com/@WeCcelerate.Ltd1',
       'https://www.linkedin.com/company/weccelerate',
       'https://www.facebook.com/weccelerate',
-      'https://www.instagram.com/weccelerate',
+      'https://www.instagram.com/weccelerate.ltd',
+      'https://www.youtube.com/@WeCcelerate.Ltd1',
       'https://www.tiktok.com/@weccelerate',
+      // Crunchbase profile — currently under the misspelled slug `weccelerat`
+      // (missing final E). Profile is live and owned. Update the URL once
+      // Crunchbase support corrects the slug to `weccelerate`.
+      'https://www.crunchbase.com/organization/weccelerat',
     ],
     openingHoursSpecification: [
       {

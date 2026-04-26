@@ -750,14 +750,20 @@ export const FAQ_DATA = FAQ_ITEMS;
 // SOCIAL MEDIA & CONTACT
 // =============================================================================
 
+// WeCcelerate's active, owned social profiles. Twitter/X and GitHub are
+// intentionally NOT included — Twitter is not owned by the company; GitHub
+// is not user-facing. Do not add additional profiles here unless the company
+// actually owns them — schema sameAs with dead/unowned URLs damages entity
+// recognition.
 export const SOCIAL_LINKS = {
   facebook: 'https://www.facebook.com/weccelerate',
   linkedin: 'https://www.linkedin.com/company/weccelerate',
+  instagram: 'https://www.instagram.com/weccelerate.ltd',
   youtube: 'https://www.youtube.com/@WeCcelerate.Ltd1',
-  twitter: 'https://twitter.com/WeCcelerate',
-  instagram: 'https://www.instagram.com/weccelerate',
-  github: 'https://github.com/weccelerate',
   tiktok: 'https://www.tiktok.com/@weccelerate',
+  // Crunchbase — currently at misspelled slug `weccelerat` (missing E).
+  // Update to `weccelerate` once Crunchbase support fixes the slug.
+  crunchbase: 'https://www.crunchbase.com/organization/weccelerat',
 } as const;
 
 export const CONTACT = {

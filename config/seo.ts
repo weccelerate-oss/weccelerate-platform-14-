@@ -113,7 +113,7 @@ export const COMPANY_INFO = {
   image: 'https://weccelerate.co.il/opengraph-image.jpg',
   email: 'info@weccelerate.co.il',
   telephone: '+972-55-564-7538',
-  foundingDate: '2020', // Update with real date
+  foundingDate: '2016',
   founders: [
     {
       '@type': 'Person',
@@ -134,7 +134,9 @@ export const COMPANY_INFO = {
   sameAs: [
     'https://www.linkedin.com/company/weccelerate',
     'https://www.facebook.com/weccelerate',
-    // Add more social profiles
+    'https://www.instagram.com/weccelerate.ltd',
+    'https://www.youtube.com/@WeCcelerate.Ltd1',
+    'https://www.tiktok.com/@weccelerate',
   ],
   openingHours: ['Su-Th 09:00-18:00'],
   priceRange: '₪₪₪',
