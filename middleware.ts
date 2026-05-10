@@ -69,6 +69,34 @@ function detectAiBot(userAgent: string): string | null {
   return null;
 }
 
+// Referer hostnames used by LLM web UIs. When a *real user* (not a bot) lands
+// on the site with one of these in the Referer header, it means they clicked
+// through from an LLM answer that cited us. This is the conversion event —
+// a citation that actually drove a visit.
+const LLM_REFERER_PATTERNS: ReadonlyArray<{ name: string; match: RegExp }> = [
+  { name: 'ChatGPT', match: /(^|\.)(chat\.openai\.com|chatgpt\.com)$/i },
+  { name: 'Perplexity', match: /(^|\.)perplexity\.ai$/i },
+  { name: 'Claude', match: /(^|\.)(claude\.ai|anthropic\.com)$/i },
+  { name: 'Gemini', match: /(^|\.)(gemini\.google\.com|bard\.google\.com)$/i },
+  { name: 'Copilot', match: /(^|\.)(copilot\.microsoft\.com|bing\.com)$/i },
+  { name: 'You.com', match: /(^|\.)you\.com$/i },
+  { name: 'DuckDuckGo-AI', match: /(^|\.)duckduckgo\.com$/i },
+  { name: 'Phind', match: /(^|\.)phind\.com$/i },
+];
+
+function detectLlmReferral(referer: string | null): string | null {
+  if (!referer) return null;
+  try {
+    const host = new URL(referer).hostname;
+    for (const pat of LLM_REFERER_PATTERNS) {
+      if (pat.match.test(host)) return pat.name;
+    }
+  } catch {
+    // Malformed Referer header — ignore.
+  }
+  return null;
+}
+
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || '';
@@ -76,21 +104,44 @@ export function middleware(request: NextRequest) {
   const userAgent = request.headers.get('user-agent') || '';
 
   // ==========================================================================
-  // 0. AI crawler detection — logs to Vercel runtime AND persists to DB for
-  //    long-term analytics. Both paths are fire-and-forget — if the DB
-  //    POST fails, the request still completes normally.
-  //
-  //    - Console log  → `vercel logs --since=7d | grep ai-bot` (short-term)
-  //    - DB write     → /admin/bot-analytics dashboard (long-term trends)
+  // 0. AI-related visit detection — two distinct events:
+  //    - "crawl"    : an AI bot fetched the page (e.g. ChatGPT-User reading
+  //                   the page mid-answer)
+  //    - "referral" : a real user clicked through from an LLM answer
+  //                   (Referer hostname == chatgpt.com / perplexity.ai / …)
+  //    Both persist to bot_visits via /api/bot/log; the dashboard splits them.
   // ==========================================================================
   const aiBot = detectAiBot(userAgent);
-  if (aiBot) {
+  const referer = request.headers.get('referer');
+  // Only count referrals when the visitor is NOT itself a bot — otherwise we'd
+  // attribute crawler hops between LLM-controlled pages as user traffic.
+  const llmReferral = !aiBot ? detectLlmReferral(referer) : null;
+
+  if (aiBot || llmReferral) {
+    const kind = aiBot ? 'crawl' : 'referral';
+    const botLabel = aiBot ?? llmReferral!;
+    const country = request.headers.get('x-vercel-ip-country') ?? null;
+    const region = request.headers.get('x-vercel-ip-country-region') ?? null;
+    // Vercel URL-encodes city names with spaces ("Tel%20Aviv"); decode safely.
+    const rawCity = request.headers.get('x-vercel-ip-city');
+    let city: string | null = null;
+    if (rawCity) {
+      try {
+        city = decodeURIComponent(rawCity);
+      } catch {
+        city = rawCity;
+      }
+    }
+
     console.log(
       JSON.stringify({
-        event: 'ai-bot',
-        bot: aiBot,
+        event: kind === 'crawl' ? 'ai-bot' : 'llm-referral',
+        bot: botLabel,
+        kind,
         path: pathname,
         host: hostname,
+        country,
+        city,
         ts: new Date().toISOString(),
       }),
     );
@@ -108,12 +159,15 @@ export function middleware(request: NextRequest) {
         ? `${request.headers.get('x-forwarded-proto')}://${hostname}`
         : request.nextUrl.origin;
     const logPayload = JSON.stringify({
-      bot: aiBot,
+      bot: botLabel,
+      kind,
       path: pathname,
       host: hostname,
       method: request.method,
-      referer: request.headers.get('referer') ?? null,
-      country: request.headers.get('x-vercel-ip-country') ?? null,
+      referer: referer ?? null,
+      country,
+      region,
+      city,
       userAgent: userAgent.slice(0, 512),
     });
     after(async () => {

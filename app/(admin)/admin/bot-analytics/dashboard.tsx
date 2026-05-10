@@ -19,6 +19,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { countryLabel } from '@/lib/seo/country-names';
 
 export interface BotCount {
   bot: string;
@@ -40,9 +41,12 @@ export interface BotAnalyticsData {
   recent: Array<{
     id: string;
     bot: string;
+    kind: 'crawl' | 'referral';
     path: string;
     host: string;
     country: string | null;
+    region: string | null;
+    city: string | null;
     timestamp: string;
   }>;
   geo: {
@@ -56,6 +60,51 @@ export interface BotAnalyticsData {
     firstLiveRetrieval: { timestamp: string; bot: string; path: string } | null;
     lastLiveRetrieval: { timestamp: string; bot: string; path: string } | null;
   };
+  referrals: {
+    total: number;
+    perSource: BotCount[];
+    first:
+      | { timestamp: string; bot: string; path: string; city: string | null; country: string | null }
+      | null;
+    last:
+      | { timestamp: string; bot: string; path: string; city: string | null; country: string | null }
+      | null;
+  };
+}
+
+// Friendly Hebrew label for what a URL path actually is on the site.
+function pathLabel(path: string): { label: string; icon: string } {
+  if (path === '/' || path === '') return { label: 'דף הבית', icon: '🏠' };
+  if (path === '/about') return { label: 'אודות', icon: 'ℹ️' };
+  if (path === '/team') return { label: 'הצוות', icon: '👥' };
+  if (path === '/press') return { label: 'בתקשורת', icon: '📰' };
+  if (path === '/contact') return { label: 'צור קשר', icon: '📞' };
+  if (path === '/medtech') return { label: 'מסלול MedTech', icon: '🩺' };
+  if (path === '/investors') return { label: 'משקיעים', icon: '💰' };
+  if (path === '/glossary') return { label: 'גלוסר', icon: '📖' };
+  if (path === '/faq') return { label: 'שאלות נפוצות', icon: '❓' };
+  if (path === '/blog') return { label: 'בלוג', icon: '✍️' };
+  if (path === '/guides') return { label: 'רשימת מדריכים', icon: '📚' };
+  if (path.startsWith('/en/guides/')) return { label: `מדריך EN: ${path.slice('/en/guides/'.length)}`, icon: '📘' };
+  if (path.startsWith('/guides/')) return { label: `מדריך: ${path.slice('/guides/'.length)}`, icon: '📘' };
+  if (path.startsWith('/en/glossary')) return { label: 'גלוסר באנגלית', icon: '📖' };
+  if (path.startsWith('/en/medtech-guide')) return { label: 'מדריך MedTech (EN)', icon: '🩺' };
+  if (path.startsWith('/en/funding-guide')) return { label: 'מדריך גיוס (EN)', icon: '💼' };
+  if (path.startsWith('/en/')) return { label: `דף באנגלית: ${path.slice(4)}`, icon: '🇬🇧' };
+  if (path.startsWith('/services/')) return { label: `שירות: ${path.slice('/services/'.length)}`, icon: '🛠️' };
+  if (path.startsWith('/team/')) return { label: `דף איש צוות: ${path.slice('/team/'.length)}`, icon: '👤' };
+  if (path.startsWith('/blog/')) return { label: `פוסט בלוג: ${path.slice('/blog/'.length)}`, icon: '✍️' };
+  if (path.startsWith('/events/')) return { label: `אירוע: ${path.slice('/events/'.length)}`, icon: '📅' };
+  if (path.startsWith('/videos/')) return { label: `סרטון: ${path.slice('/videos/'.length)}`, icon: '🎥' };
+  return { label: path, icon: '🌐' };
+}
+
+function locationLabel(city: string | null, country: string | null): string {
+  const c = countryLabel(country);
+  const cityPart = city ? city : null;
+  if (cityPart && c.name !== '—') return `${c.flag} ${cityPart}, ${c.name}`;
+  if (c.name !== '—') return `${c.flag} ${c.name}`;
+  return '—';
 }
 
 type Window = 'last7d' | 'last30d' | 'allTime';
@@ -294,6 +343,122 @@ function NextStepPanel({ geo }: { geo: BotAnalyticsData['geo'] }) {
   );
 }
 
+function ReferralsCard({
+  referrals,
+  liveRetrievalCrawls,
+}: {
+  referrals: BotAnalyticsData['referrals'];
+  liveRetrievalCrawls: number;
+}) {
+  const total = referrals.total;
+  // "Conversion": for every live-retrieval crawl (LLM read our page mid-answer),
+  // how many users actually clicked through? > 0 means the citation is
+  // compelling enough to drive traffic, not just be silently included.
+  const conversionPct =
+    liveRetrievalCrawls > 0 ? Math.round((total / liveRetrievalCrawls) * 100) : 0;
+
+  const daysSince = (iso: string) => {
+    const ms = Date.now() - new Date(iso).getTime();
+    const hours = Math.floor(ms / 3600000);
+    const days = Math.floor(ms / 86400000);
+    if (hours < 1) return 'לפני פחות משעה';
+    if (hours < 24) return `לפני ${hours} שעות`;
+    if (days === 1) return 'אתמול';
+    return `לפני ${days} ימים`;
+  };
+
+  return (
+    <section className="rounded-xl border-2 border-blue-200 bg-blue-50/40 p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-blue-200 px-3 py-1 text-xs font-bold text-blue-900">
+              👤 כניסות מ-LLMs
+            </span>
+            <h2 className="text-2xl font-bold text-blue-900">
+              משתמשים שלחצו על הקישור בתשובת ה-LLM
+            </h2>
+          </div>
+          <p className="mt-2 max-w-2xl text-sm text-blue-900">
+            <strong>זה ההמרה האמיתית.</strong> ChatGPT/Perplexity/Claude נתנו תשובה שמכילה קישור ל-WeCcelerate, ומשתמש <strong>לחץ עליו</strong> והגיע לאתר. זה הוכחה שלא רק שהציטוט קיים — אלא שהוא משכנע מספיק לקליק.
+          </p>
+        </div>
+        <div className="text-end">
+          <div className="text-5xl font-bold text-blue-900">{total}</div>
+          <div className="text-xs font-medium uppercase tracking-wide text-blue-700">
+            כניסות מ-LLMs
+          </div>
+        </div>
+      </div>
+
+      {/* Per-source breakdown */}
+      {referrals.perSource.length > 0 ? (
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {referrals.perSource.slice(0, 8).map((r) => (
+            <div key={r.bot} className="rounded-lg border border-blue-200 bg-white p-3">
+              <div className="text-xs font-medium text-blue-700">{r.bot}</div>
+              <div className="text-2xl font-bold text-blue-900">{r.count}</div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-5 rounded-lg border border-dashed border-blue-300 bg-white/60 p-4 text-center text-sm text-blue-800">
+          עדיין אף משתמש לא לחץ על קישור מ-LLM. כשזה יקרה — תקבל מייל אוטומטי.
+        </div>
+      )}
+
+      {/* Conversion ratio */}
+      {liveRetrievalCrawls > 0 && (
+        <div className="mt-4 rounded-lg border border-blue-200 bg-white/60 p-4">
+          <div className="text-xs font-medium uppercase tracking-wide text-blue-700">
+            יחס המרה (Citation → Click)
+          </div>
+          <div className="mt-1 flex items-baseline gap-3">
+            <div className="text-3xl font-bold text-blue-900">{conversionPct}%</div>
+            <div className="text-xs text-blue-700">
+              ({total} כניסות / {liveRetrievalCrawls} ציטוטים)
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-blue-700">
+            על כל פעם שה-LLM שלף את הדף שלך כדי לצטט, ב-{conversionPct}% מהמקרים המשתמש גם לחץ והגיע לאתר.
+            {conversionPct >= 30 ? ' מצוין — הקישור משכנע.' : conversionPct >= 10 ? ' סביר.' : ' נמוך — נסה לחזק את ה-meta description שיגרום ליותר קליקים.'}
+          </p>
+        </div>
+      )}
+
+      {/* First & last referrals */}
+      {referrals.first && (
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-blue-200 bg-white/60 p-3">
+            <div className="text-xs font-medium text-blue-700">כניסה ראשונה אי פעם</div>
+            <div className="mt-1 text-sm font-semibold text-blue-900">
+              {daysSince(referrals.first.timestamp)}
+            </div>
+            <div className="text-xs text-blue-700">
+              {referrals.first.bot} → {referrals.first.path}
+              {referrals.first.city && ` · ${referrals.first.city}`}
+              {referrals.first.country && ` (${countryLabel(referrals.first.country).flag})`}
+            </div>
+          </div>
+          {referrals.last && (
+            <div className="rounded-lg border border-blue-200 bg-white/60 p-3">
+              <div className="text-xs font-medium text-blue-700">כניסה אחרונה</div>
+              <div className="mt-1 text-sm font-semibold text-blue-900">
+                {daysSince(referrals.last.timestamp)}
+              </div>
+              <div className="text-xs text-blue-700">
+                {referrals.last.bot} → {referrals.last.path}
+                {referrals.last.city && ` · ${referrals.last.city}`}
+                {referrals.last.country && ` (${countryLabel(referrals.last.country).flag})`}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function GeoStatusCard({ geo }: { geo: BotAnalyticsData['geo'] }) {
   const styles = GEO_STAGE_STYLES[geo.stage.color];
   const stageDots = [0, 1, 2, 3].map((n) => (
@@ -423,6 +588,9 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
       {/* GEO Status — top-of-page summary */}
       <GeoStatusCard geo={data.geo} />
 
+      {/* LLM Referrals — separate section that highlights real user click-throughs */}
+      <ReferralsCard referrals={data.referrals} liveRetrievalCrawls={data.geo.counts.liveRetrieval} />
+
       {/* Stat cards */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <StatCard
@@ -500,9 +668,12 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
 
       {/* Top paths */}
       <section className="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+        <h2 className="mb-1 text-lg font-semibold text-slate-900">
           10 הדפים המבוקרים ביותר ע"י bots (30 ימים)
         </h2>
+        <p className="mb-4 text-xs text-slate-500">
+          <strong>נתיב</strong> = הכתובת באתר שלך שהבוט נכנס אליה. <code className="rounded bg-slate-100 px-1">/</code> הוא דף הבית, <code className="rounded bg-slate-100 px-1">/en/...</code> הוא הגרסה האנגלית, <code className="rounded bg-slate-100 px-1">/guides/...</code> הוא מדריך, וכו׳.
+        </p>
         {data.topPaths30d.length === 0 ? (
           <div className="py-10 text-center text-slate-500">אין נתונים.</div>
         ) : (
@@ -511,18 +682,26 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
               <thead className="border-b border-slate-200 text-slate-500">
                 <tr>
                   <th className="py-2 font-medium">#</th>
-                  <th className="py-2 font-medium">נתיב</th>
+                  <th className="py-2 font-medium">דף באתר</th>
+                  <th className="py-2 font-medium">URL מלא</th>
                   <th className="py-2 font-medium">ביקורים</th>
                 </tr>
               </thead>
               <tbody>
-                {data.topPaths30d.map((row, i) => (
-                  <tr key={row.path} className="border-b border-slate-100">
-                    <td className="py-2 text-slate-500">{i + 1}</td>
-                    <td className="py-2 font-mono text-xs text-slate-800">{row.path}</td>
-                    <td className="py-2 font-semibold">{row.count.toLocaleString('he-IL')}</td>
-                  </tr>
-                ))}
+                {data.topPaths30d.map((row, i) => {
+                  const p = pathLabel(row.path);
+                  return (
+                    <tr key={row.path} className="border-b border-slate-100">
+                      <td className="py-2 text-slate-500">{i + 1}</td>
+                      <td className="py-2 text-slate-800">
+                        <span className="me-1">{p.icon}</span>
+                        {p.label}
+                      </td>
+                      <td className="py-2 font-mono text-xs text-slate-500">{row.path}</td>
+                      <td className="py-2 font-semibold">{row.count.toLocaleString('he-IL')}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -557,9 +736,13 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
 
       {/* Recent visits */}
       <section className="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+        <h2 className="mb-1 text-lg font-semibold text-slate-900">
           50 ביקורים אחרונים{botFilter !== 'ALL' ? ` · סינון: ${botFilter}` : ''}
         </h2>
+        <p className="mb-4 text-xs text-slate-500">
+          כל שורה היא <strong>אינטראקציה אחת</strong>. <span className="me-1">🤖 Crawl</span> = בוט AI הוריד את הדף (לרוב כדי לצטט בתשובה).
+          <span className="ms-3 me-1">👤 Referral</span> = משתמש אמיתי <strong>לחץ</strong> על קישור בתשובת LLM והגיע לאתר.
+        </p>
         {filteredRecent.length === 0 ? (
           <div className="py-10 text-center text-slate-500">אין ביקורים לסינון הזה.</div>
         ) : (
@@ -568,36 +751,56 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
               <thead className="border-b border-slate-200 text-slate-500">
                 <tr>
                   <th className="py-2 font-medium">זמן</th>
-                  <th className="py-2 font-medium">bot</th>
-                  <th className="py-2 font-medium">נתיב</th>
-                  <th className="py-2 font-medium">מארח</th>
-                  <th className="py-2 font-medium">מדינה</th>
+                  <th className="py-2 font-medium">סוג</th>
+                  <th className="py-2 font-medium">מקור</th>
+                  <th className="py-2 font-medium">דף באתר</th>
+                  <th className="py-2 font-medium">מיקום</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredRecent.map((r) => (
-                  <tr key={r.id} className="border-b border-slate-100">
-                    <td className="py-2 text-xs text-slate-500">
-                      {new Date(r.timestamp).toLocaleString('he-IL', {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </td>
-                    <td className="py-2">
-                      <span
-                        className="rounded-full px-2 py-0.5 text-xs font-semibold text-white"
-                        style={{ backgroundColor: data.botColors[r.bot] ?? '#64748b' }}
-                      >
-                        {r.bot}
-                      </span>
-                    </td>
-                    <td className="py-2 font-mono text-xs text-slate-800">{r.path}</td>
-                    <td className="py-2 text-xs text-slate-500">{r.host}</td>
-                    <td className="py-2 text-xs text-slate-500">{r.country ?? '—'}</td>
-                  </tr>
-                ))}
+                {filteredRecent.map((r) => {
+                  const p = pathLabel(r.path);
+                  const isReferral = r.kind === 'referral';
+                  return (
+                    <tr key={r.id} className="border-b border-slate-100">
+                      <td className="py-2 text-xs text-slate-500" title={new Date(r.timestamp).toLocaleString('he-IL')}>
+                        {new Date(r.timestamp).toLocaleString('he-IL', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </td>
+                      <td className="py-2 text-xs">
+                        {isReferral ? (
+                          <span className="rounded-full bg-blue-100 px-2 py-0.5 font-semibold text-blue-800" title="משתמש אמיתי לחץ על קישור בתשובת LLM">
+                            👤 Referral
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700" title="בוט AI הוריד את הדף">
+                            🤖 Crawl
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2">
+                        <span
+                          className="rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+                          style={{ backgroundColor: data.botColors[r.bot] ?? '#64748b' }}
+                          title={isReferral ? 'מקור הקליק (LLM שהפנה את המשתמש)' : 'סוג הבוט'}
+                        >
+                          {r.bot}
+                        </span>
+                      </td>
+                      <td className="py-2 text-xs text-slate-800" title={r.path}>
+                        <span className="me-1">{p.icon}</span>
+                        {p.label}
+                      </td>
+                      <td className="py-2 text-xs text-slate-600">
+                        {locationLabel(r.city, r.country)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

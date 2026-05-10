@@ -32,7 +32,7 @@ export const runtime = 'nodejs';
 const GEO_ALERT_RECIPIENT =
   process.env.GEO_ALERT_EMAIL ?? 'weccelerate@gmail.com';
 
-const KNOWN_BOTS = new Set([
+const KNOWN_CRAWL_BOTS = new Set([
   'GPTBot',
   'ChatGPT-User',
   'OAI-SearchBot',
@@ -53,13 +53,27 @@ const KNOWN_BOTS = new Set([
   'Amazonbot',
 ]);
 
+const KNOWN_REFERRAL_SOURCES = new Set([
+  'ChatGPT',
+  'Perplexity',
+  'Claude',
+  'Gemini',
+  'Copilot',
+  'You.com',
+  'DuckDuckGo-AI',
+  'Phind',
+]);
+
 interface BotLogPayload {
   bot: string;
+  kind?: 'crawl' | 'referral';
   path: string;
   host: string;
   method?: string;
   referer?: string | null;
   country?: string | null;
+  region?: string | null;
+  city?: string | null;
   userAgent?: string | null;
 }
 
@@ -70,11 +84,18 @@ function isValidPayload(value: unknown): value is BotLogPayload {
     typeof v.bot === 'string' &&
     typeof v.path === 'string' &&
     typeof v.host === 'string' &&
+    (v.kind === undefined || v.kind === 'crawl' || v.kind === 'referral') &&
     (v.method === undefined || typeof v.method === 'string') &&
     (v.referer === undefined || v.referer === null || typeof v.referer === 'string') &&
     (v.country === undefined || v.country === null || typeof v.country === 'string') &&
+    (v.region === undefined || v.region === null || typeof v.region === 'string') &&
+    (v.city === undefined || v.city === null || typeof v.city === 'string') &&
     (v.userAgent === undefined || v.userAgent === null || typeof v.userAgent === 'string')
   );
+}
+
+function botMatchesKind(bot: string, kind: 'crawl' | 'referral'): boolean {
+  return kind === 'crawl' ? KNOWN_CRAWL_BOTS.has(bot) : KNOWN_REFERRAL_SOURCES.has(bot);
 }
 
 export async function POST(req: NextRequest) {
@@ -86,7 +107,12 @@ export async function POST(req: NextRequest) {
     return new NextResponse(null, { status: 204 });
   }
 
-  if (!isValidPayload(payload) || !KNOWN_BOTS.has(payload.bot)) {
+  if (!isValidPayload(payload)) {
+    return new NextResponse(null, { status: 204 });
+  }
+
+  const kind = payload.kind ?? 'crawl';
+  if (!botMatchesKind(payload.bot, kind)) {
     return new NextResponse(null, { status: 204 });
   }
 
@@ -100,20 +126,23 @@ export async function POST(req: NextRequest) {
     await prisma.botVisit.create({
       data: {
         bot: payload.bot,
+        kind,
         path: payload.path.slice(0, 512),
         host: payload.host.slice(0, 255),
         method: (payload.method ?? 'GET').slice(0, 10),
         referer: payload.referer?.slice(0, 512) ?? null,
         country: payload.country?.slice(0, 8) ?? null,
+        region: payload.region?.slice(0, 64) ?? null,
+        city: payload.city?.slice(0, 128) ?? null,
         userAgent: payload.userAgent?.slice(0, 512) ?? null,
       },
     });
 
-    // Citation-milestone alert: when we see a live-retrieval bot for the
-    // first time ever (per bot kind), email the team. This is the moment
-    // GEO actually started paying off — actual users are getting our page
-    // back as part of an LLM answer.
-    if (categorizeBot(payload.bot) === 'live_retrieval') {
+    // Citation-milestone alert: when we see a live-retrieval bot OR an LLM
+    // referral for the first time ever (per source), email the team. Both
+    // events prove GEO/AEO is paying off — either an LLM read our page
+    // mid-answer (crawl) or a user clicked through from an LLM answer.
+    if (kind === 'referral' || categorizeBot(payload.bot) === 'live_retrieval') {
       await sendCitationAlertIfFirstTime(payload).catch((err) => {
         console.error(
           JSON.stringify({
@@ -151,63 +180,63 @@ export async function POST(req: NextRequest) {
 async function sendCitationAlertIfFirstTime(payload: BotLogPayload): Promise<void> {
   if (!process.env.RESEND_API_KEY) return;
 
-  const totalForThisBot = await prisma.botVisit.count({
-    where: { bot: payload.bot },
+  const kind = payload.kind ?? 'crawl';
+  const totalForThisSource = await prisma.botVisit.count({
+    where: { bot: payload.bot, kind },
   });
-  if (totalForThisBot !== 1) return;
+  if (totalForThisSource !== 1) return;
 
   const { Resend } = await import('resend');
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   const url = `https://${payload.host}${payload.path}`;
-  const liveBotsLabel = LIVE_RETRIEVAL_BOTS.includes(
-    payload.bot as (typeof LIVE_RETRIEVAL_BOTS)[number],
-  )
-    ? `Live retrieval bot — משתמש שאל ${
-        payload.bot === 'PerplexityBot' ? 'Perplexity' :
-        payload.bot.startsWith('ChatGPT') ? 'ChatGPT' :
-        payload.bot.startsWith('Claude') ? 'Claude' : 'LLM'
-      } ולמדה ה-LLM שלף את הדף שלך כדי לצטט.`
-    : 'Bot חדש זוהה.';
+  const locationLabel = [payload.city, payload.country]
+    .filter(Boolean)
+    .join(', ') || 'לא ידוע';
+
+  const isReferral = kind === 'referral';
+  const headline = isReferral
+    ? `משתמש מ-${payload.bot} נכנס לאתר! 🚀`
+    : `קיבלת ציטוט ראשון מ-${payload.bot} 🎯`;
+  const subjectLine = isReferral
+    ? `🚀 GEO/AEO milestone — משתמש ראשון מ-${payload.bot} הגיע לאתר`
+    : `🎯 GEO/AEO milestone — ${payload.bot} ביקר באתר בפעם הראשונה`;
+  const explainer = isReferral
+    ? `<strong>זה לא בוט — זה אדם אמיתי</strong>. משתמש ב-${payload.bot} שאל שאלה, קיבל תשובה שמצטטת את WeCcelerate, ולחץ על הקישור כדי להגיע לאתר. <em>זאת ההמרה — citation שגרמה לקליק.</em>`
+    : `זה לא בוט שסורק לאימון — זה בוט שמופעל <strong>בזמן אמת</strong> כשמשתמש שואל שאלה ב-LLM. אדם אמיתי שאל את ${payload.bot.split('-')[0]} משהו שגרם לו לגלוש לדף שלך כדי לצטט את התוכן בתשובה.`;
 
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
     to: GEO_ALERT_RECIPIENT,
-    subject: `🎯 GEO/AEO milestone — ${payload.bot} ביקר באתר בפעם הראשונה`,
+    subject: subjectLine,
     html: `
       <!DOCTYPE html>
       <html dir="rtl" lang="he">
       <body style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; color: #1e293b;">
-        <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; border-radius: 12px; margin-bottom: 24px;">
+        <div style="background: linear-gradient(135deg, ${isReferral ? '#3b82f6, #1d4ed8' : '#10b981, #059669'}); color: white; padding: 30px; border-radius: 12px; margin-bottom: 24px;">
           <div style="font-size: 14px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">GEO/AEO Milestone</div>
-          <h1 style="margin: 8px 0 0; font-size: 28px;">קיבלת ציטוט ראשון מ-${payload.bot} 🎯</h1>
+          <h1 style="margin: 8px 0 0; font-size: 28px;">${headline}</h1>
         </div>
 
-        <p style="font-size: 16px; line-height: 1.6;">${liveBotsLabel}</p>
+        <p style="font-size: 16px; line-height: 1.6;">${explainer}</p>
 
-        <div style="background: #f1f5f9; border-right: 4px solid #10b981; padding: 16px 20px; margin: 24px 0; border-radius: 6px;">
+        <div style="background: #f1f5f9; border-right: 4px solid ${isReferral ? '#3b82f6' : '#10b981'}; padding: 16px 20px; margin: 24px 0; border-radius: 6px;">
           <div style="font-size: 12px; color: #64748b; text-transform: uppercase;">דף שנקרא</div>
           <div style="font-size: 16px; font-family: monospace; margin-top: 4px;">${url}</div>
-          ${payload.country ? `<div style="font-size: 12px; color: #64748b; margin-top: 8px;">מדינה: ${payload.country}</div>` : ''}
+          <div style="font-size: 12px; color: #64748b; margin-top: 8px;">מיקום: ${locationLabel}</div>
         </div>
-
-        <h2 style="font-size: 18px; margin-top: 32px;">מה זה אומר</h2>
-        <p style="font-size: 14px; line-height: 1.6; color: #475569;">
-          זה לא בוט שסורק לאימון — זה בוט שמופעל <strong>בזמן אמת</strong> כשמשתמש שואל שאלה ב-LLM.
-          המשמעות: אדם אמיתי שאל את ${payload.bot.split('-')[0]} משהו שגרם לו לגלוש לדף שלך כדי לצטט את התוכן בתשובה.
-        </p>
 
         <h2 style="font-size: 18px; margin-top: 32px;">צעדים מומלצים</h2>
         <ol style="font-size: 14px; line-height: 1.8; color: #475569;">
           <li>בדוק את הדף שנקרא — הוא ההתחלה של ההצלחה ב-GEO. הרחב אותו ושכפל לדפים דומים.</li>
           <li>שאל את אותו ה-LLM מה הוא יודע על WeCcelerate — תראה אם אתה מצוטט בתשובה.</li>
-          <li>בדוק את <a href="https://weccelerate.co.il/admin/bot-analytics" style="color: #10b981;">דשבורד ה-Bot Analytics</a> לראות את המגמה.</li>
+          <li>בדוק את <a href="https://weccelerate.co.il/admin/bot-analytics" style="color: ${isReferral ? '#3b82f6' : '#10b981'};">דשבורד ה-Bot Analytics</a> לראות את המגמה.</li>
         </ol>
 
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
         <p style="font-size: 11px; color: #94a3b8; text-align: center;">
           הודעה אוטומטית מ-WeCcelerate GEO Alert<br>
-          נשלחת רק בפעם הראשונה שכל סוג של live-retrieval bot מופיע. ביקורים נוספים מאותו bot — לא ייצרו מייל נוסף.
+          נשלחת רק בפעם הראשונה שכל מקור (bot או LLM-referral) מופיע. ביקורים נוספים מאותו מקור — לא ייצרו מייל נוסף.
         </p>
       </body>
       </html>
@@ -218,6 +247,7 @@ async function sendCitationAlertIfFirstTime(payload: BotLogPayload): Promise<voi
     JSON.stringify({
       event: 'geo-citation-alert-sent',
       bot: payload.bot,
+      kind,
       path: payload.path,
       recipient: GEO_ALERT_RECIPIENT,
       ts: new Date().toISOString(),

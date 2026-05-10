@@ -118,31 +118,67 @@ async function getBotAnalytics(): Promise<BotAnalyticsData> {
       select: {
         id: true,
         bot: true,
+        kind: true,
         path: true,
         host: true,
         timestamp: true,
         country: true,
+        region: true,
+        city: true,
       },
     }),
   ]);
 
   // GEO stage signals — counts per category and first/last live-retrieval timestamps.
-  const [trainingCount, searchCount, liveRetrievalCount, firstLive, lastLive] =
-    await Promise.all([
-      prisma.botVisit.count({ where: { bot: { in: [...TRAINING_CRAWLERS] } } }),
-      prisma.botVisit.count({ where: { bot: { in: [...SEARCH_INDEX_BOTS] } } }),
-      prisma.botVisit.count({ where: { bot: { in: [...LIVE_RETRIEVAL_BOTS] } } }),
-      prisma.botVisit.findFirst({
-        where: { bot: { in: [...LIVE_RETRIEVAL_BOTS] } },
-        orderBy: { timestamp: 'asc' },
-        select: { timestamp: true, bot: true, path: true },
-      }),
-      prisma.botVisit.findFirst({
-        where: { bot: { in: [...LIVE_RETRIEVAL_BOTS] } },
-        orderBy: { timestamp: 'desc' },
-        select: { timestamp: true, bot: true, path: true },
-      }),
-    ]);
+  // Restrict to crawl rows so referral records don't double-count.
+  const [
+    trainingCount,
+    searchCount,
+    liveRetrievalCount,
+    firstLive,
+    lastLive,
+    referralCount,
+    perReferralAll,
+    firstReferral,
+    lastReferral,
+  ] = await Promise.all([
+    prisma.botVisit.count({
+      where: { kind: 'crawl', bot: { in: [...TRAINING_CRAWLERS] } },
+    }),
+    prisma.botVisit.count({
+      where: { kind: 'crawl', bot: { in: [...SEARCH_INDEX_BOTS] } },
+    }),
+    prisma.botVisit.count({
+      where: { kind: 'crawl', bot: { in: [...LIVE_RETRIEVAL_BOTS] } },
+    }),
+    prisma.botVisit.findFirst({
+      where: { kind: 'crawl', bot: { in: [...LIVE_RETRIEVAL_BOTS] } },
+      orderBy: { timestamp: 'asc' },
+      select: { timestamp: true, bot: true, path: true },
+    }),
+    prisma.botVisit.findFirst({
+      where: { kind: 'crawl', bot: { in: [...LIVE_RETRIEVAL_BOTS] } },
+      orderBy: { timestamp: 'desc' },
+      select: { timestamp: true, bot: true, path: true },
+    }),
+    prisma.botVisit.count({ where: { kind: 'referral' } }),
+    prisma.botVisit.groupBy({
+      by: ['bot'],
+      where: { kind: 'referral' },
+      _count: { _all: true },
+      orderBy: { _count: { bot: 'desc' } },
+    }),
+    prisma.botVisit.findFirst({
+      where: { kind: 'referral' },
+      orderBy: { timestamp: 'asc' },
+      select: { timestamp: true, bot: true, path: true, city: true, country: true },
+    }),
+    prisma.botVisit.findFirst({
+      where: { kind: 'referral' },
+      orderBy: { timestamp: 'desc' },
+      select: { timestamp: true, bot: true, path: true, city: true, country: true },
+    }),
+  ]);
 
   const stage = geoStage({
     training: trainingCount,
@@ -175,9 +211,12 @@ async function getBotAnalytics(): Promise<BotAnalyticsData> {
   type RecentRow = {
     id: string;
     bot: string;
+    kind: string;
     path: string;
     host: string;
     country: string | null;
+    region: string | null;
+    city: string | null;
     timestamp: Date;
   };
 
@@ -199,9 +238,12 @@ async function getBotAnalytics(): Promise<BotAnalyticsData> {
     recent: (recent as RecentRow[]).map((r) => ({
       id: r.id,
       bot: r.bot,
+      kind: (r.kind === 'referral' ? 'referral' : 'crawl') as 'crawl' | 'referral',
       path: r.path,
       host: r.host,
       country: r.country,
+      region: r.region,
+      city: r.city,
       timestamp: r.timestamp.toISOString(),
     })),
     geo: {
@@ -216,6 +258,31 @@ async function getBotAnalytics(): Promise<BotAnalyticsData> {
         : null,
       lastLiveRetrieval: lastLive
         ? { timestamp: lastLive.timestamp.toISOString(), bot: lastLive.bot, path: lastLive.path }
+        : null,
+    },
+    referrals: {
+      total: referralCount,
+      perSource: (perReferralAll as GroupByRow[]).map((r) => ({
+        bot: r.bot,
+        count: r._count._all,
+      })),
+      first: firstReferral
+        ? {
+            timestamp: firstReferral.timestamp.toISOString(),
+            bot: firstReferral.bot,
+            path: firstReferral.path,
+            city: firstReferral.city,
+            country: firstReferral.country,
+          }
+        : null,
+      last: lastReferral
+        ? {
+            timestamp: lastReferral.timestamp.toISOString(),
+            bot: lastReferral.bot,
+            path: lastReferral.path,
+            city: lastReferral.city,
+            country: lastReferral.country,
+          }
         : null,
     },
   };

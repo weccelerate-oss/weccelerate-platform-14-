@@ -666,8 +666,19 @@ model SiteSetting {
 model BotVisit {
   id          String   @id @default(cuid())
 
-  // Bot identifier — e.g. "GPTBot", "ClaudeBot", "PerplexityBot".
-  // Source of truth: AI_BOT_SIGNATURES in middleware.ts.
+  // What KIND of AI-related visit is this:
+  //   "crawl"    — an LLM bot fetched the page itself (citation read-through).
+  //                Examples: ChatGPT-User came to read /, PerplexityBot indexed.
+  //   "referral" — a real human visited via a link inside an LLM answer.
+  //                Detected by Referer header from chatgpt.com / perplexity.ai
+  //                / claude.ai / gemini.google.com / copilot.microsoft.com.
+  // The user-facing dashboard shows them in separate sections so you can
+  // tell "we got cited" (crawl) apart from "user clicked through" (referral).
+  kind        String   @default("crawl")
+
+  // For crawl: the bot's user-agent name (GPTBot, ClaudeBot, PerplexityBot…).
+  // For referral: a normalized source label (ChatGPT, Perplexity, Claude…).
+  // Source of truth for crawl: AI_BOT_SIGNATURES in middleware.ts.
   bot         String
 
   // Request context
@@ -676,15 +687,19 @@ model BotVisit {
   method      String   @default("GET")
 
   // Optional enrichment fields
-  referer     String?  // Referer header if present
+  referer     String?  // Referer header if present (always set for referrals)
   country     String?  // Two-letter country code from Vercel geo (if available)
+  region      String?  // Country subdivision (Vercel: x-vercel-ip-country-region)
+  city        String?  // City name from Vercel geo (Tel Aviv, Jerusalem, ...)
   userAgent   String?  // Full UA string for debugging signature drift
 
   timestamp   DateTime @default(now())
 
   @@index([bot])
+  @@index([kind])
   @@index([timestamp])
   @@index([bot, timestamp])
+  @@index([kind, timestamp])
   @@index([path])
   @@map("bot_visits")
 }
