@@ -14,7 +14,6 @@
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Script from 'next/script';
 import {
   ArrowLeft,
   ChevronDown,
@@ -717,8 +716,7 @@ export default function BusinessServicesPage() {
   return (
     <>
       {/* JSON-LD Structured Data */}
-      <Script
-        id="biz-services-schema"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generatePageSchema()),

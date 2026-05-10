@@ -14,8 +14,6 @@
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
-import Script from 'next/script';
 import {
   ArrowLeft,
   ChevronDown,
@@ -561,8 +559,7 @@ export default function MedTechServicesPage() {
   return (
     <>
       {/* JSON-LD Structured Data */}
-      <Script
-        id="medtech-services-schema"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generatePageSchema()),

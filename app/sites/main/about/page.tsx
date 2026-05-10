@@ -5,7 +5,6 @@
  */
 
 import { Metadata } from 'next';
-import Script from 'next/script';
 import AboutContent from './AboutContent';
 
 // =============================================================================
@@ -140,8 +139,7 @@ function generateAboutPageSchema() {
 export default function AboutPage() {
   return (
     <>
-      <Script
-        id="about-schema"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generateAboutPageSchema()),

@@ -14,8 +14,6 @@
  * @see https://schema.org/ProfessionalService
  */
 
-import Script from 'next/script';
-
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -423,10 +421,8 @@ export function ServiceSchema({
   };
 
   return (
-    <Script
-      id="service-schema"
+    <script
       type="application/ld+json"
-      strategy="afterInteractive"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(schema, null, 0),
       }}
@@ -440,10 +436,8 @@ export function ServiceSchema({
 
 export function MedicalRegulationServiceSchema() {
   return (
-    <Script
-      id="medical-service-schema"
+    <script
       type="application/ld+json"
-      strategy="afterInteractive"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify({
           '@context': 'https://schema.org',
@@ -456,10 +450,8 @@ export function MedicalRegulationServiceSchema() {
 
 export function FundingServiceSchema() {
   return (
-    <Script
-      id="funding-service-schema"
+    <script
       type="application/ld+json"
-      strategy="afterInteractive"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify({
           '@context': 'https://schema.org',

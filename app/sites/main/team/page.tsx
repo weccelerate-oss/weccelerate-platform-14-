@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import Script from 'next/script';
 import { constructMetadata } from '@/lib/seo';
 import TeamContent from './TeamContent';
 import { FOUNDER as SHARED_FOUNDER, CO_FOUNDERS as SHARED_CO_FOUNDERS } from '@/lib/seo/founders';
@@ -153,8 +152,7 @@ function generateTeamSchema() {
 export default function TeamPage() {
   return (
     <>
-      <Script
-        id="team-schema"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generateTeamSchema()),

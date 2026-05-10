@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import Script from 'next/script';
 import { constructMetadata } from '@/lib/seo';
 import { IpPatentsContent } from './IpPatentsContent';
 
@@ -59,8 +58,7 @@ const ipSchema = {
 export default function IPPatentsPage() {
   return (
     <>
-      <Script
-        id="ip-schema"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ipSchema) }}
       />

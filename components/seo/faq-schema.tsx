@@ -20,7 +20,6 @@
 
 'use client';
 
-import Script from 'next/script';
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -329,10 +328,8 @@ export function FAQSchema({
   };
 
   return (
-    <Script
-      id="faq-schema"
+    <script
       type="application/ld+json"
-      strategy="afterInteractive"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(schema, null, 0),
       }}

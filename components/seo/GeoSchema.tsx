@@ -16,7 +16,6 @@
  * @module components/seo/GeoSchema
  */
 
-import Script from 'next/script';
 import {
   SITE_CONFIG,
   SEMANTIC_CORE,
@@ -627,10 +626,8 @@ export function GeoSchema({
   };
 
   return (
-    <Script
-      id="geo-schema"
+    <script
       type="application/ld+json"
-      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(jsonLd, null, 0),
       }}
@@ -649,10 +646,8 @@ export function OrganizationSchema() {
   };
 
   return (
-    <Script
-      id="geo-organization-schema"
+    <script
       type="application/ld+json"
-      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );
@@ -665,10 +660,8 @@ export function FaqPageSchema({ locale = 'he' }: { locale?: 'he' | 'en' }) {
   };
 
   return (
-    <Script
-      id="geo-faq-schema"
+    <script
       type="application/ld+json"
-      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );
@@ -681,10 +674,8 @@ export function ServicesSchema() {
   };
 
   return (
-    <Script
-      id="geo-services-schema"
+    <script
       type="application/ld+json"
-      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );

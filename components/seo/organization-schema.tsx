@@ -16,8 +16,6 @@
  * @see https://schema.org/MedicalOrganization
  */
 
-import Script from 'next/script';
-
 // =============================================================================
 // LEUMIT-SPECIFIC ORGANIZATION SCHEMA
 // =============================================================================
@@ -78,10 +76,8 @@ export function LeumitPartnerSchema() {
   };
 
   return (
-    <Script
-      id="leumit-partner-schema"
+    <script
       type="application/ld+json"
-      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(schema, null, 0),
       }}

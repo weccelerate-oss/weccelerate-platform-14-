@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import Script from 'next/script';
 import { constructMetadata } from '@/lib/seo';
 import { MedTechPageContent } from './MedTechPageContent';
 
@@ -69,8 +68,7 @@ const medtechSchema = {
 export default function MedTechPage() {
   return (
     <>
-      <Script
-        id="medtech-schema"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(medtechSchema) }}
       />

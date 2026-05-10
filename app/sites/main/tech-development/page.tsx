@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import Script from 'next/script';
 import { constructMetadata } from '@/lib/seo';
 import { TechDevContent } from './TechDevContent';
 
@@ -59,8 +58,7 @@ const techDevSchema = {
 export default function TechDevelopmentPage() {
   return (
     <>
-      <Script
-        id="tech-dev-schema"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(techDevSchema) }}
       />

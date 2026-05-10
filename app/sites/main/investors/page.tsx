@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import Script from 'next/script';
 import { constructMetadata } from '@/lib/seo';
 import { InvestorsContent } from './InvestorsContent';
 
@@ -62,8 +61,7 @@ const investorsSchema = {
 export default function InvestorsPage() {
   return (
     <>
-      <Script
-        id="investors-schema"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(investorsSchema) }}
       />
