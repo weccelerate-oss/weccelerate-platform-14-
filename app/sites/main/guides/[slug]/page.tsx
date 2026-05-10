@@ -10,8 +10,13 @@ import {
   type Guide,
 } from '@/lib/seo/guides-catalog';
 import { getEnSlugFromHebrew } from '@/lib/seo/guides-catalog-en';
+import { prisma } from '@/lib/db';
+import { renderGeneratedGuide } from './generated-guide-view';
 
 export const revalidate = 86400;
+// Allow slugs that aren't in the static catalog — agent-generated guides
+// (GeneratedGuide table) are rendered through a fallback path.
+export const dynamicParams = true;
 
 type Params = { slug: string };
 
@@ -23,11 +28,35 @@ export function generateStaticParams() {
   return GUIDES.map((g) => ({ slug: g.slug }));
 }
 
+async function findGeneratedGuide(slug: string) {
+  try {
+    return await prisma.generatedGuide.findUnique({
+      where: { slug },
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
   const guide = getGuideBySlug(slug);
 
   if (!guide) {
+    // Fallback: agent-generated guide.
+    const gen = await findGeneratedGuide(slug);
+    if (gen && gen.status === 'published') {
+      return constructMetadata({
+        title: gen.titleHe,
+        description: gen.metaDescription,
+        path: `/guides/${slug}`,
+        locale: 'he',
+        type: 'article',
+        publishedTime: gen.publishedAt?.toISOString() ?? gen.createdAt.toISOString(),
+        modifiedTime: gen.updatedAt.toISOString(),
+        image: `${SITE_CONFIG.url}/og?slug=${encodeURIComponent(slug)}&locale=he`,
+      });
+    }
     return constructMetadata({
       title: 'מדריך לא נמצא',
       path: `/guides/${slug}`,
@@ -180,7 +209,14 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
   const { slug } = await params;
   const guide = getGuideBySlug(slug);
 
-  if (!guide) notFound();
+  if (!guide) {
+    // Fallback: agent-generated guide stored in DB.
+    const gen = await findGeneratedGuide(slug);
+    if (gen && gen.status === 'published') {
+      return renderGeneratedGuide(gen);
+    }
+    notFound();
+  }
 
   const relatedGuides = getRelatedGuides(guide);
   const category = GUIDE_CATEGORIES[guide.category];

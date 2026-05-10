@@ -751,3 +751,91 @@ model GeoProbe {
   @@index([query])
   @@map("geo_probes")
 }
+
+// =============================================================================
+// CONTENT AGENT — autonomous writer pipeline
+// =============================================================================
+// ContentGap = a topic the LLMs aren't citing us on (detected by analyzing
+// geo_probes results). The writer agent picks the highest-priority open gap
+// each day and generates a guide to address it.
+
+model ContentGap {
+  id            String   @id @default(cuid())
+
+  // Source of the gap signal
+  source        String   // 'probe-no-cite' | 'probe-low-rate' | 'manual'
+
+  // The query/topic that exposed the gap
+  query         String   @db.Text
+  category      String?  // mirrors ProbeQuery.category
+
+  // Severity 0-100, used as priority when picking the next gap to address
+  severity      Int      @default(50)
+
+  // Competitors who ARE cited for this query (so the writer can study them)
+  competitors   String[] @default([])
+
+  // Lifecycle
+  status        String   @default("open") // open | in_progress | published | rejected
+  rejectReason  String?
+  generatedGuideId String?  @unique
+  detectedAt    DateTime @default(now())
+  resolvedAt    DateTime?
+
+  @@index([status, severity])
+  @@index([detectedAt])
+  @@map("content_gaps")
+}
+
+// GeneratedGuide = a guide written by the writer agent. Lives separately from
+// the static lib/seo/guides-catalog.ts (manually-authored guides) so it has
+// a full audit trail (which model, which prompts, fact-check results).
+
+model GeneratedGuide {
+  id            String   @id @default(cuid())
+
+  // The /guides/[slug] URL. Must be unique site-wide.
+  slug          String   @unique
+
+  // SEO surfaces
+  titleHe       String
+  titleEn       String?
+  metaDescription String  @db.Text
+  category      String
+
+  // Body — markdown with embedded JSON-LD-friendly structure
+  contentHe     String   @db.Text
+  contentEn     String?  @db.Text
+
+  // Visuals
+  featuredImageUrl String?
+  socialImageUrl   String?
+
+  // Generation provenance
+  modelChain    String[] @default([])  // ['perplexity-sonar', 'claude-opus-4-7', ...]
+  citedSources  String[] @default([])  // URLs the writer used as research
+  internalLinks String[] @default([])  // /guides/X paths linked from this guide
+
+  // Quality metrics
+  factCheckScore Int?    // 0-100 from fact-checker stage
+  seoScore       Int?    // 0-100 from SEO linter
+  wordCount      Int?
+
+  // Lifecycle
+  status        String   @default("draft") // draft | published | retracted
+  publishedAt   DateTime?
+  retractedAt   DateTime?
+  retractReason String?
+
+  // Performance (filled in by daily cron after publish)
+  firstCitedAt  DateTime?  // when first GEO Probe shows we're cited for original gap
+  citationCount Int       @default(0)
+  botVisits     Int       @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([category])
+  @@map("generated_guides")
+}

@@ -66,6 +66,7 @@ const NAV_ITEMS = [
     items: [
       { label: 'אנליטיקס', href: '/admin/analytics', icon: BarChart3 },
       { label: 'ביקורי AI Bots', href: '/admin/bot-analytics', icon: Bot },
+      { label: 'תוכנית GEO/AEO', href: '/admin/geo-plan', icon: Bot },
       { label: 'הגדרות', href: '/admin/settings', icon: Settings },
     ],
   },

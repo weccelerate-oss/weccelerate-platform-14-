@@ -16,6 +16,14 @@
     {
       "path": "/api/cron/geo-probe",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/gap-analyze",
+      "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/cron/content-publish",
+      "schedule": "0 7 * * *"
     }
   ]
 }
