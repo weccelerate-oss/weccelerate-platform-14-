@@ -285,7 +285,95 @@ async function getBotAnalytics(): Promise<BotAnalyticsData> {
           }
         : null,
     },
+    probes: await getGeoProbeData(thirtyDaysAgo),
   };
+}
+
+async function getGeoProbeData(since: Date) {
+  // Use try/catch so the dashboard renders even before the geo_probes table
+  // exists (i.e. before the user runs `npm run db:push` for this schema).
+  try {
+    const [total, recent, byProvider, citationRate30d] = await Promise.all([
+      prisma.geoProbe.count(),
+      prisma.geoProbe.findMany({
+        orderBy: { timestamp: 'desc' },
+        take: 30,
+        select: {
+          id: true,
+          provider: true,
+          query: true,
+          category: true,
+          mentioned: true,
+          cited: true,
+          citedUrls: true,
+          timestamp: true,
+          error: true,
+        },
+      }),
+      prisma.geoProbe.groupBy({
+        by: ['provider'],
+        where: { timestamp: { gte: since } },
+        _count: { _all: true },
+      }),
+      prisma.$queryRaw<Array<{ provider: string; total: bigint; cited: bigint }>>`
+        SELECT provider,
+               COUNT(*)::bigint AS total,
+               SUM(CASE WHEN cited THEN 1 ELSE 0 END)::bigint AS cited
+        FROM geo_probes
+        WHERE timestamp >= ${since}
+          AND error IS NULL
+        GROUP BY provider
+      `,
+    ]);
+
+    type ProviderGroupRow = { provider: string; _count: { _all: number } };
+    type CitationRateRow = { provider: string; total: number; cited: number };
+    type RecentProbeRow = {
+      id: string;
+      provider: string;
+      query: string;
+      category: string | null;
+      mentioned: boolean;
+      cited: boolean;
+      citedUrls: string[];
+      timestamp: Date;
+      error: string | null;
+    };
+
+    return {
+      installed: true,
+      total,
+      perProvider30d: (byProvider as ProviderGroupRow[]).map((b) => ({
+        provider: b.provider,
+        count: b._count._all,
+      })),
+      citationRate30d: (citationRate30d as unknown as CitationRateRow[]).map((r) => ({
+        provider: r.provider,
+        total: Number(r.total),
+        cited: Number(r.cited),
+        rate: Number(r.total) > 0 ? Math.round((Number(r.cited) / Number(r.total)) * 100) : 0,
+      })),
+      recent: (recent as RecentProbeRow[]).map((r) => ({
+        id: r.id,
+        provider: r.provider,
+        query: r.query,
+        category: r.category,
+        mentioned: r.mentioned,
+        cited: r.cited,
+        citedUrls: r.citedUrls,
+        timestamp: r.timestamp.toISOString(),
+        error: r.error,
+      })),
+    };
+  } catch {
+    return {
+      installed: false as const,
+      total: 0,
+      perProvider30d: [],
+      citationRate30d: [],
+      recent: [],
+    };
+  }
 }
 
 export default async function BotAnalyticsPage() {

@@ -70,6 +70,23 @@ export interface BotAnalyticsData {
       | { timestamp: string; bot: string; path: string; city: string | null; country: string | null }
       | null;
   };
+  probes: {
+    installed: boolean;
+    total: number;
+    perProvider30d: Array<{ provider: string; count: number }>;
+    citationRate30d: Array<{ provider: string; total: number; cited: number; rate: number }>;
+    recent: Array<{
+      id: string;
+      provider: string;
+      query: string;
+      category: string | null;
+      mentioned: boolean;
+      cited: boolean;
+      citedUrls: string[];
+      timestamp: string;
+      error: string | null;
+    }>;
+  };
 }
 
 // Friendly Hebrew label for what a URL path actually is on the site.
@@ -374,6 +391,133 @@ function NextStepPanel({ geo }: { geo: BotAnalyticsData['geo'] }) {
   );
 }
 
+function GeoProbeCard({ probes }: { probes: BotAnalyticsData['probes'] }) {
+  if (!probes.installed) {
+    return (
+      <section className="rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/40 p-6">
+        <h2 className="text-lg font-bold text-violet-900">🤖 GEO Probe — לא מותקן עדיין</h2>
+        <p className="mt-1 text-sm text-violet-800">
+          טבלת <code>geo_probes</code> עדיין לא קיימת ב-DB. הרץ <code>npm run db:push</code> כדי להתקין, ואז הוסף API keys ב-Vercel:
+          <br />
+          <code className="rounded bg-violet-100 px-1">PERPLEXITY_API_KEY</code> ו/או <code className="rounded bg-violet-100 px-1">OPENAI_API_KEY</code>.
+        </p>
+      </section>
+    );
+  }
+
+  const totalRecent = probes.recent.length;
+  const citedRecent = probes.recent.filter((r) => r.cited).length;
+  const mentionedRecent = probes.recent.filter((r) => r.mentioned && !r.cited).length;
+  const failedRecent = probes.recent.filter((r) => r.error).length;
+
+  return (
+    <section className="rounded-xl border-2 border-violet-200 bg-violet-50/40 p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-violet-200 px-3 py-1 text-xs font-bold text-violet-900">
+              🤖 GEO Probe
+            </span>
+            <h2 className="text-2xl font-bold text-violet-900">בדיקה אקטיבית של LLMs</h2>
+          </div>
+          <p className="mt-2 max-w-2xl text-sm text-violet-900">
+            אייג'נט יומי שואל את ChatGPT, Perplexity ושאר ה-LLMs שאלות אמיתיות ובודק <strong>אם מצטטים אותנו</strong>. זה מודד את מה שלא רואים ב-Bot Analytics — האם הציטוט אכן מופיע בתשובות של משתמשים אמיתיים.
+          </p>
+        </div>
+        <div className="text-end">
+          <div className="text-5xl font-bold text-violet-900">{probes.total}</div>
+          <div className="text-xs font-medium uppercase tracking-wide text-violet-700">בדיקות בסה"כ</div>
+        </div>
+      </div>
+
+      {/* Citation rate per provider */}
+      {probes.citationRate30d.length > 0 ? (
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {probes.citationRate30d.map((r) => (
+            <div key={r.provider} className="rounded-lg border border-violet-200 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                {r.provider}
+              </div>
+              <div className="mt-1 flex items-baseline gap-3">
+                <div className="text-3xl font-bold text-violet-900">{r.rate}%</div>
+                <div className="text-xs text-violet-700">
+                  {r.cited} מצוטטים מתוך {r.total} בדיקות
+                </div>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-violet-100">
+                <div className="h-full bg-violet-600" style={{ width: `${r.rate}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-5 rounded-lg border border-dashed border-violet-300 bg-white/60 p-4 text-center text-sm text-violet-800">
+          טרם רצה בדיקה. הוסף API keys ב-Vercel והפעל ידנית עם:{' '}
+          <code className="rounded bg-violet-100 px-1 text-xs">curl -X POST /api/admin/geo-probe/run -H "x-admin-token: ..."</code>
+        </div>
+      )}
+
+      {/* Recent runs summary */}
+      {totalRecent > 0 && (
+        <div className="mt-5">
+          <div className="mb-2 text-xs font-medium text-violet-700">
+            30 בדיקות אחרונות: <span className="font-bold">{citedRecent}</span> מצוטטים, <span className="font-bold">{mentionedRecent}</span> אזכור-בלבד, <span className="font-bold">{failedRecent}</span> שגיאות
+          </div>
+          <div className="max-h-72 overflow-y-auto rounded-lg border border-violet-200 bg-white">
+            <table className="w-full text-right text-xs">
+              <thead className="border-b border-violet-100 bg-violet-50/60 text-violet-700">
+                <tr>
+                  <th className="px-2 py-1.5 font-medium">זמן</th>
+                  <th className="px-2 py-1.5 font-medium">Provider</th>
+                  <th className="px-2 py-1.5 font-medium">תוצאה</th>
+                  <th className="px-2 py-1.5 font-medium">שאלה</th>
+                </tr>
+              </thead>
+              <tbody>
+                {probes.recent.map((r) => (
+                  <tr key={r.id} className="border-b border-violet-100/60">
+                    <td className="px-2 py-1.5 text-violet-600">
+                      {new Date(r.timestamp).toLocaleString('he-IL', {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </td>
+                    <td className="px-2 py-1.5 font-mono text-[10px] text-violet-700">{r.provider}</td>
+                    <td className="px-2 py-1.5">
+                      {r.error ? (
+                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                          ⚠️ שגיאה
+                        </span>
+                      ) : r.cited ? (
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                          ✅ מצוטט
+                        </span>
+                      ) : r.mentioned ? (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                          📝 אזכור
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                          ❌ לא הופיע
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-2 py-1.5 text-violet-900" title={r.query}>
+                      {r.query.length > 60 ? `${r.query.slice(0, 60)}…` : r.query}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ReferralsCard({
   referrals,
   liveRetrievalCrawls,
@@ -621,6 +765,9 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
 
       {/* LLM Referrals — separate section that highlights real user click-throughs */}
       <ReferralsCard referrals={data.referrals} liveRetrievalCrawls={data.geo.counts.liveRetrieval} />
+
+      {/* GEO Probe — active LLM citation monitoring */}
+      <GeoProbeCard probes={data.probes} />
 
       {/* Stat cards */}
       <div className="flex flex-col gap-3 sm:flex-row">

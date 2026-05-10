@@ -703,3 +703,51 @@ model BotVisit {
   @@index([path])
   @@map("bot_visits")
 }
+
+// =============================================================================
+// GEO PROBE — active LLM citation monitoring
+// =============================================================================
+// While BotVisit is PASSIVE (we listen for AI bot visits), GeoProbe is ACTIVE:
+// once a day a cron asks ChatGPT / Perplexity / etc. real questions and stores
+// what they answered, whether WeCcelerate was mentioned, and whether the
+// canonical URL was cited. The dashboard graphs the citation rate over time.
+//
+// One row per (provider, query, run). A daily cron creates ~10–20 rows/day.
+
+model GeoProbe {
+  id          String   @id @default(cuid())
+
+  // Which LLM answered. Examples: 'perplexity-sonar', 'openai-gpt4o-search',
+  // 'anthropic-claude-3-5-sonnet'. Includes model version so trend graphs
+  // don't lie when the underlying model changes.
+  provider    String
+
+  // The exact prompt we asked. Kept verbatim so we can compare answers across
+  // runs.
+  query       String   @db.Text
+
+  // Optional grouping label, e.g. 'brand-he', 'generic-en', 'service'.
+  category    String?
+
+  // The full answer text returned by the LLM (truncated to 8 KB).
+  response    String   @db.Text
+
+  // URLs the LLM cited (parsed from response or returned via API metadata).
+  citedUrls   String[] @default([])
+
+  // Detection results computed at write time so dashboard queries stay fast.
+  mentioned   Boolean  @default(false)  // brand name appears in answer
+  cited       Boolean  @default(false)  // weccelerate.co.il in citedUrls
+  position    Int?                       // first-mention position (1 = first cited source)
+
+  // Run metadata
+  durationMs  Int?     // round-trip ms
+  error       String?  // populated if the probe failed (rate limit, network…)
+  timestamp   DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([provider, timestamp])
+  @@index([cited, timestamp])
+  @@index([query])
+  @@map("geo_probes")
+}
