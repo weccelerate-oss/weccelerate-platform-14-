@@ -14,7 +14,7 @@ import { runAllProbes } from '@/lib/seo/geo-probes';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutes — probe runs are slow.
+export const maxDuration = 60; // Hobby plan cap; Pro plan can extend to 800s
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('authorization');

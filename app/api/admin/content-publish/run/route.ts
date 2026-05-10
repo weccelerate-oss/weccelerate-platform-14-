@@ -14,7 +14,7 @@ import { writeNextGuide } from '@/lib/agents/content-writer';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 600;
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('x-admin-token');

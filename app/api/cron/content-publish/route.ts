@@ -15,7 +15,7 @@ import { writeNextGuide } from '@/lib/agents/content-writer';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 600; // up to 10 minutes — multi-stage agent
+export const maxDuration = 60; // Hobby plan cap; Pro plan can extend to 800s
 
 export async function GET(req: NextRequest) {
   if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {

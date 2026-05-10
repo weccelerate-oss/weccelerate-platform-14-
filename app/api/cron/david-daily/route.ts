@@ -20,7 +20,7 @@ import { DAVID, DAVID_EMAIL_FROM, DAVID_EMAIL_TO } from '@/lib/agents/david';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 800; // ~13 minutes — covers all 5 stages
+export const maxDuration = 60; // Hobby plan cap — Pro plan can extend to 800s
 
 interface StageResult {
   stage: string;
