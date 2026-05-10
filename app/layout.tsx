@@ -132,17 +132,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.leumit.co.il" />
         <link rel="dns-prefetch" href="https://api.weccelerate.co.il" />
 
-        {/* Canonical */}
-        <link rel="canonical" href={SITE_CONFIG.url} />
-
-        {/* Alternate languages */}
-        <link rel="alternate" hrefLang="he" href={SITE_CONFIG.url} />
-        <link rel="alternate" hrefLang="he-IL" href={SITE_CONFIG.url} />
-        <link rel="alternate" hrefLang="en" href={`${SITE_CONFIG.url}/en`} />
-        <link rel="alternate" hrefLang="en-US" href={`${SITE_CONFIG.url}/en`} />
-        <link rel="alternate" hrefLang="en-GB" href={`${SITE_CONFIG.url}/en`} />
-        <link rel="alternate" hrefLang="en-IL" href={`${SITE_CONFIG.url}/en`} />
-        <link rel="alternate" hrefLang="x-default" href={SITE_CONFIG.url} />
+        {/* Canonical + hreflang are emitted by Next.js metadata.alternates
+            (see lib/seo/metadata.ts). Manual <link> tags here caused
+            duplicate canonical detection in Bing. */}
 
         {/* RSS Feed */}
         <link

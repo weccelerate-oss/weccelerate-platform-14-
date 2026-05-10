@@ -89,10 +89,11 @@ export function constructMetadata({
   // Deduplicate keywords
   const uniqueKeywords = [...new Set(allKeywords)];
 
-  // Construct full title
-  const fullTitle = title
-    ? SEO_DEFAULTS.titleTemplate.replace('%s', title)
-    : SEO_DEFAULTS.defaultTitle;
+  // Construct full title — use the provided title as-is. The titleTemplate
+  // below is exposed for nested layouts that pass a bare string title; pages
+  // calling constructMetadata directly already build a complete title and
+  // should render it via title.absolute to avoid double-wrapping.
+  const fullTitle = title || SEO_DEFAULTS.defaultTitle;
 
   // Use provided description or default
   const metaDescription = description || SEO_DEFAULTS.defaultDescription;
@@ -115,7 +116,7 @@ export function constructMetadata({
   return {
     // Basic metadata
     title: {
-      default: fullTitle,
+      absolute: fullTitle,
       template: SEO_DEFAULTS.titleTemplate,
     },
     description: metaDescription,
