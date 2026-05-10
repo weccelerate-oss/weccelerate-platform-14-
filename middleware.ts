@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 
 const SUBDOMAIN_MAP: Record<string, string> = {
   leumit: 'leumit',
@@ -95,38 +95,39 @@ export function middleware(request: NextRequest) {
       }),
     );
 
-    // Fire-and-forget POST to /api/bot/log. We intentionally do NOT await:
-    //   (a) middleware must not add latency to the request
-    //   (b) a DB outage must not break the bot's ability to index us
-    // The `catch` swallows errors — the console log above is our backup.
+    // Persist via /api/bot/log. We use `after()` (Next.js 15+) so the
+    // request to /api/bot/log runs AFTER our response is sent to the bot —
+    // zero added latency, but the edge worker stays alive until the fetch
+    // resolves. A plain `void fetch(...)` was being killed by Vercel
+    // before the request reached our API route.
     //
-    // Edge runtime limitation: we can't import prisma directly here (it's
-    // Node-only). So we call our own API route, which runs on Node.
-    try {
-      const origin =
-        request.headers.get('x-forwarded-proto') && hostname
-          ? `${request.headers.get('x-forwarded-proto')}://${hostname}`
-          : request.nextUrl.origin;
-      void fetch(`${origin}/api/bot/log`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bot: aiBot,
-          path: pathname,
-          host: hostname,
-          method: request.method,
-          referer: request.headers.get('referer') ?? null,
-          country: request.headers.get('x-vercel-ip-country') ?? null,
-          userAgent: userAgent.slice(0, 512),
-        }),
-        // Important: don't hold the edge worker for long
-        signal: AbortSignal.timeout(2_000),
-      }).catch(() => {
+    // We can't import prisma directly here (Edge runtime, Node-only),
+    // hence the indirection through the Node-runtime route handler.
+    const origin =
+      request.headers.get('x-forwarded-proto') && hostname
+        ? `${request.headers.get('x-forwarded-proto')}://${hostname}`
+        : request.nextUrl.origin;
+    const logPayload = JSON.stringify({
+      bot: aiBot,
+      path: pathname,
+      host: hostname,
+      method: request.method,
+      referer: request.headers.get('referer') ?? null,
+      country: request.headers.get('x-vercel-ip-country') ?? null,
+      userAgent: userAgent.slice(0, 512),
+    });
+    after(async () => {
+      try {
+        await fetch(`${origin}/api/bot/log`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: logPayload,
+          signal: AbortSignal.timeout(5_000),
+        });
+      } catch {
         /* swallow — console log above is our backup */
-      });
-    } catch {
-      /* never block on the telemetry path */
-    }
+      }
+    });
   }
 
   // ==========================================================================
