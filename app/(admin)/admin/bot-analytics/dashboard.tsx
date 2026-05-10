@@ -107,6 +107,37 @@ function locationLabel(city: string | null, country: string | null): string {
   return '—';
 }
 
+/**
+ * For CRAWL events the IP comes from the LLM provider's edge data center
+ * (OpenAI/Anthropic/Perplexity POPs), NOT from the user who asked the question.
+ * A user in Tel Aviv asking ChatGPT can trigger a crawl from any OpenAI POP
+ * worldwide. We label these "📡 דרך {city}" to make that clear.
+ *
+ * For REFERRAL events the IP IS the actual user — they clicked a link in the
+ * LLM answer and landed on our site directly. We label those "👤 {city}".
+ */
+function locationDisplay(
+  kind: 'crawl' | 'referral',
+  city: string | null,
+  country: string | null,
+): { label: string; muted: boolean; tooltip: string } {
+  const loc = locationLabel(city, country);
+  if (kind === 'crawl') {
+    return {
+      label: loc === '—' ? '—' : `📡 דרך ${loc.replace(/^[^\s]+\s/, '')}`,
+      muted: true,
+      tooltip:
+        'IP של ה-LLM data center — לא של המשתמש האמיתי. ChatGPT/Perplexity מפנים בקשות דרך POPs בעולם, גם אם המשתמש בישראל.',
+    };
+  }
+  return {
+    label: loc === '—' ? '—' : `👤 ${loc}`,
+    muted: false,
+    tooltip:
+      'מיקום אמיתי של המשתמש שלחץ על הקישור בתשובת ה-LLM (לא ה-LLM עצמו).',
+  };
+}
+
 type Window = 'last7d' | 'last30d' | 'allTime';
 
 const WINDOW_LABELS: Record<Window, string> = {
@@ -739,10 +770,21 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
         <h2 className="mb-1 text-lg font-semibold text-slate-900">
           50 ביקורים אחרונים{botFilter !== 'ALL' ? ` · סינון: ${botFilter}` : ''}
         </h2>
-        <p className="mb-4 text-xs text-slate-500">
+        <p className="mb-3 text-xs text-slate-500">
           כל שורה היא <strong>אינטראקציה אחת</strong>. <span className="me-1">🤖 Crawl</span> = בוט AI הוריד את הדף (לרוב כדי לצטט בתשובה).
           <span className="ms-3 me-1">👤 Referral</span> = משתמש אמיתי <strong>לחץ</strong> על קישור בתשובת LLM והגיע לאתר.
         </p>
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          <span className="text-base">⚠️</span>
+          <div>
+            <div className="font-semibold">חשוב — מיקום ב-Crawl ≠ מיקום של המשתמש</div>
+            <p className="mt-1">
+              ב-<strong>🤖 Crawl</strong> ה-IP הוא של ה-data center של ChatGPT/Perplexity/Claude (OpenAI POPs בשווייץ/ספרד/פולין/ארה"ב), לא של המשתמש שאל את השאלה. <strong>משתמש בישראל ששואל ChatGPT — הסריקה תגיע מ-OpenAI ולא מישראל.</strong>
+              <br />
+              ב-<strong>👤 Referral</strong> לעומת זאת ה-IP <strong>הוא של המשתמש האמיתי</strong> — הוא לחץ על הקישור והגיע ישר לאתר. כאן תוכל לראות מאיזו עיר בישראל הוא בא.
+            </p>
+          </div>
+        </div>
         {filteredRecent.length === 0 ? (
           <div className="py-10 text-center text-slate-500">אין ביקורים לסינון הזה.</div>
         ) : (
@@ -795,8 +837,18 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
                         <span className="me-1">{p.icon}</span>
                         {p.label}
                       </td>
-                      <td className="py-2 text-xs text-slate-600">
-                        {locationLabel(r.city, r.country)}
+                      <td className="py-2 text-xs">
+                        {(() => {
+                          const loc = locationDisplay(r.kind, r.city, r.country);
+                          return (
+                            <span
+                              className={loc.muted ? 'text-slate-400' : 'font-semibold text-slate-700'}
+                              title={loc.tooltip}
+                            >
+                              {loc.label}
+                            </span>
+                          );
+                        })()}
                       </td>
                     </tr>
                   );
