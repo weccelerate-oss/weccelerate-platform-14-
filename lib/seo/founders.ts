@@ -59,6 +59,7 @@ export const FOUNDER: TeamPerson = {
   bioEn:
     'Founder & CEO of WeCcelerate — Israel\'s leading Venture Builder. Economist by training, former accountant at Intel. Led the founding of the accelerator and the mentorship of hundreds of Israeli startups from idea stage through Pre-Seed, Seed, and Series A fundraising. Co-founder of Firefly. Regular media commentator on the Israeli startup ecosystem (Channel 14 Economy, Globes, Reshet 13).',
   image: '/images/team/alon-pinchas.jpg',
+  linkedin: 'https://www.linkedin.com/in/alon-pinhas-589a97172/',
   credentials: ['מייסד', 'מנכ"ל', 'כלכלן'],
   isFounder: true,
   founderRank: 1,
@@ -86,6 +87,7 @@ export const CO_FOUNDERS: TeamPerson[] = [
     bioEn:
       'Co-Founder and VP Marketing at WeCcelerate. Active in mentoring entrepreneurs and developing strategic partnerships. Cited in Calcalist and CTech on national data infrastructure, startup marketing strategy, and the future of the industry.',
     image: '/images/team/avraham-hinoch.jpg',
+    linkedin: 'https://www.linkedin.com/in/avraham-heinoch-20168a231/',
     credentials: ['שותף מייסד', 'סמנכ"ל שיווק'],
     isFounder: true,
     founderRank: 2,
@@ -102,6 +104,7 @@ export const CO_FOUNDERS: TeamPerson[] = [
     bioEn:
       'Co-Founder of WeCcelerate. Mechanical engineer by training, childhood friend of Alon Pinchas from Be\'er Sheva. Focuses on business development and portfolio company support tracks.',
     image: '/images/team/ido-sabag.jpg',
+    linkedin: 'https://www.linkedin.com/in/ido-sabag-382b641b3/',
     credentials: ['שותף מייסד', 'מהנדס מכונות'],
     isFounder: true,
     founderRank: 3,

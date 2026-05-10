@@ -122,6 +122,7 @@ function buildOrganizationSchema() {
         worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
         url: `${SITE_CONFIG.url}/team#alon-pinchas`,
         image: `${SITE_CONFIG.url}/images/team/alon-pinchas.jpg`,
+        sameAs: ['https://www.linkedin.com/in/alon-pinhas-589a97172/'],
       },
       {
         '@type': 'Person',
@@ -130,6 +131,7 @@ function buildOrganizationSchema() {
         alternateName: 'אברהם הינוך',
         jobTitle: 'Co-Founder',
         worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
+        sameAs: ['https://www.linkedin.com/in/avraham-heinoch-20168a231/'],
       },
       {
         '@type': 'Person',
@@ -138,6 +140,7 @@ function buildOrganizationSchema() {
         alternateName: 'עידו סבג',
         jobTitle: 'Co-Founder',
         worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
+        sameAs: ['https://www.linkedin.com/in/ido-sabag-382b641b3/'],
       },
     ],
     email: 'info@weccelerate.co.il',
