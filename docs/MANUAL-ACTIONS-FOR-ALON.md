@@ -135,17 +135,17 @@ not 2020.
 
 ---
 
-## P1 — Real LinkedIn URLs for founders
+## ✅ Resolved — LinkedIn URLs for founders (2026-05-10)
 
-Needed to populate `sameAs` in the Team page Person schema. Send me the
-verified URLs and I'll add them to `app/sites/main/team/page.tsx`:
+Verified and added to `lib/seo/founders.ts` + `components/seo/GeoSchema.tsx`:
 
-- [ ] Alon Pinchas — LinkedIn URL: `_____________________`
-- [ ] Avraham Hinoch — LinkedIn URL: `_____________________`
-- [ ] Ido Sabag — LinkedIn URL: `_____________________`
+- ✅ Alon Pinchas:   https://www.linkedin.com/in/alon-pinhas-589a97172/
+- ✅ Avraham Hinoch: https://www.linkedin.com/in/avraham-heinoch-20168a231/
+- ✅ Ido Sabag:      https://www.linkedin.com/in/ido-sabag-382b641b3/
 
-Until then the `sameAs` field is intentionally omitted (empty `sameAs`
-hurts entity recognition).
+Person schema on every page now includes `sameAs` pointing to the
+founder's LinkedIn — strongest entity-recognition signal for Google
+Knowledge Graph and LLMs.
 
 ---
 
