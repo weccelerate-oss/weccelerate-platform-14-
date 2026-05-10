@@ -11,7 +11,6 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   LayoutDashboard,
-  Target,
   FolderOpen,
   GraduationCap,
   TrendingUp,
@@ -27,7 +26,6 @@ interface PortalNavbarProps {
 
 const NAV_LINKS = [
   { href: '/portal/dashboard', label: 'לוח בקרה', icon: LayoutDashboard },
-  { href: '/portal/project', label: 'הפרויקט שלי', icon: Target },
   { href: '/portal/learning', label: 'מרכז למידה', icon: GraduationCap },
 ];
 
