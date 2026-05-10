@@ -85,10 +85,14 @@ export async function POST(req: NextRequest) {
     return new NextResponse(null, { status: 204 });
   }
 
-  // Kick off the write; don't await. Return 204 immediately so middleware
-  // doesn't wait on DB roundtrip.
-  void prisma.botVisit
-    .create({
+  // AWAIT the write — Vercel serverless functions terminate as soon as the
+  // response is returned, so a fire-and-forget `void prisma.create(...)`
+  // gets killed before the DB write flushes. The DB roundtrip is ~100ms,
+  // and the caller (middleware) already runs this with its own 2s timeout
+  // and swallows any error, so awaiting here doesn't slow the user-facing
+  // request.
+  try {
+    await prisma.botVisit.create({
       data: {
         bot: payload.bot,
         path: payload.path.slice(0, 512),
@@ -98,21 +102,21 @@ export async function POST(req: NextRequest) {
         country: payload.country?.slice(0, 8) ?? null,
         userAgent: payload.userAgent?.slice(0, 512) ?? null,
       },
-    })
-    .catch((err: unknown) => {
-      // Failure modes: DB down, migration not applied, connection pool
-      // exhausted. Log to Vercel console; next request will retry. Never
-      // throw — middleware already forwarded the response by now.
-      console.error(
-        JSON.stringify({
-          event: 'bot-log-error',
-          error: err instanceof Error ? err.message : String(err),
-          bot: payload.bot,
-          path: payload.path,
-          ts: new Date().toISOString(),
-        }),
-      );
     });
+  } catch (err: unknown) {
+    // Failure modes: DB down, migration not applied, connection pool
+    // exhausted. Log to Vercel console — middleware already swallowed any
+    // error from this request, so a 500 here is harmless.
+    console.error(
+      JSON.stringify({
+        event: 'bot-log-error',
+        error: err instanceof Error ? err.message : String(err),
+        bot: payload.bot,
+        path: payload.path,
+        ts: new Date().toISOString(),
+      }),
+    );
+  }
 
   return new NextResponse(null, { status: 204 });
 }
