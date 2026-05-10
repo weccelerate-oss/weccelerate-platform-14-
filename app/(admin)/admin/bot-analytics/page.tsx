@@ -12,6 +12,12 @@
 
 import { Metadata } from 'next';
 import { prisma } from '@/lib/db';
+import {
+  TRAINING_CRAWLERS,
+  SEARCH_INDEX_BOTS,
+  LIVE_RETRIEVAL_BOTS,
+  geoStage,
+} from '@/lib/seo/bot-categories';
 import { BotAnalyticsDashboard, type BotAnalyticsData } from './dashboard';
 
 export const metadata: Metadata = {
@@ -120,6 +126,30 @@ async function getBotAnalytics(): Promise<BotAnalyticsData> {
     }),
   ]);
 
+  // GEO stage signals — counts per category and first/last live-retrieval timestamps.
+  const [trainingCount, searchCount, liveRetrievalCount, firstLive, lastLive] =
+    await Promise.all([
+      prisma.botVisit.count({ where: { bot: { in: [...TRAINING_CRAWLERS] } } }),
+      prisma.botVisit.count({ where: { bot: { in: [...SEARCH_INDEX_BOTS] } } }),
+      prisma.botVisit.count({ where: { bot: { in: [...LIVE_RETRIEVAL_BOTS] } } }),
+      prisma.botVisit.findFirst({
+        where: { bot: { in: [...LIVE_RETRIEVAL_BOTS] } },
+        orderBy: { timestamp: 'asc' },
+        select: { timestamp: true, bot: true, path: true },
+      }),
+      prisma.botVisit.findFirst({
+        where: { bot: { in: [...LIVE_RETRIEVAL_BOTS] } },
+        orderBy: { timestamp: 'desc' },
+        select: { timestamp: true, bot: true, path: true },
+      }),
+    ]);
+
+  const stage = geoStage({
+    training: trainingCount,
+    search: searchCount,
+    liveRetrieval: liveRetrievalCount,
+  });
+
   const dailyRows = dailyRaw30d.map((r: { day: Date; bot: string; count: bigint }) => ({
     day: r.day.toISOString().slice(0, 10),
     bot: r.bot,
@@ -174,6 +204,20 @@ async function getBotAnalytics(): Promise<BotAnalyticsData> {
       country: r.country,
       timestamp: r.timestamp.toISOString(),
     })),
+    geo: {
+      stage,
+      counts: {
+        training: trainingCount,
+        search: searchCount,
+        liveRetrieval: liveRetrievalCount,
+      },
+      firstLiveRetrieval: firstLive
+        ? { timestamp: firstLive.timestamp.toISOString(), bot: firstLive.bot, path: firstLive.path }
+        : null,
+      lastLiveRetrieval: lastLive
+        ? { timestamp: lastLive.timestamp.toISOString(), bot: lastLive.bot, path: lastLive.path }
+        : null,
+    },
   };
 }
 
