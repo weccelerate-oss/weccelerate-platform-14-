@@ -281,76 +281,92 @@ export async function runAllProbes(): Promise<ProbeRunSummary> {
     return summary; // No API keys configured — nothing to do.
   }
 
+  // Initialize per-provider counters
   for (const provider of activeProviders) {
     summary.byProvider[provider.name] = { ok: 0, cited: 0, mentioned: 0 };
-
-    for (const { query, category } of PROBE_QUERIES) {
-      summary.total += 1;
-      const start = Date.now();
-      try {
-        const answer = await provider.ask(query);
-        const detection = detectMentions(answer.response, answer.citedUrls);
-
-        await prisma.geoProbe.create({
-          data: {
-            provider: provider.name,
-            query,
-            category,
-            response: answer.response.slice(0, 8_000),
-            citedUrls: answer.citedUrls.slice(0, 50),
-            mentioned: detection.mentioned,
-            cited: detection.cited,
-            position: detection.position,
-            durationMs: Date.now() - start,
-          },
-        });
-
-        summary.succeeded += 1;
-        summary.byProvider[provider.name].ok += 1;
-        if (detection.mentioned) {
-          summary.mentioned += 1;
-          summary.byProvider[provider.name].mentioned += 1;
-        }
-        if (detection.cited) {
-          summary.cited += 1;
-          summary.byProvider[provider.name].cited += 1;
-        }
-      } catch (e: unknown) {
-        const err = e instanceof Error ? e.message : String(e);
-        // Persist the failure so we can see API outages on the timeline.
-        await prisma.geoProbe
-          .create({
-            data: {
-              provider: provider.name,
-              query,
-              category,
-              response: '',
-              citedUrls: [],
-              mentioned: false,
-              cited: false,
-              durationMs: Date.now() - start,
-              error: err.slice(0, 1_000),
-            },
-          })
-          .catch(() => {
-            /* swallow — DB might be down too */
-          });
-        summary.failed += 1;
-        console.error(
-          JSON.stringify({
-            event: 'geo-probe-error',
-            provider: provider.name,
-            query,
-            error: err,
-            ts: new Date().toISOString(),
-          }),
-        );
-      }
-
-      // Small spacing between requests to be polite to the providers.
-      await new Promise((r) => setTimeout(r, 400));
-    }
   }
 
+  // Parallelize: each provider × each query is one independent call. Build
+  // the full task list and run all of them concurrently. With 8 queries × 3
+  // providers = 24 calls, this fits within Vercel's 60s function budget
+  // because the slowest single call is ~10s and they all run in parallel.
+  // Each provider's API rate-limits are well above 24 RPM so we don't need
+  // to throttle.
+  const tasks: Promise<void>[] = [];
+  for (const provider of activeProviders) {
+    for (const { query, category } of PROBE_QUERIES) {
+      tasks.push(runOneProbe(provider, query, category, summary));
+    }
+  }
+  await Promise.allSettled(tasks);
+
   return summary;
+}
+
+async function runOneProbe(
+  provider: Provider,
+  query: string,
+  category: ProbeQuery['category'],
+  summary: ProbeRunSummary,
+): Promise<void> {
+  summary.total += 1;
+  const start = Date.now();
+  try {
+    const answer = await provider.ask(query);
+    const detection = detectMentions(answer.response, answer.citedUrls);
+
+    await prisma.geoProbe.create({
+      data: {
+        provider: provider.name,
+        query,
+        category,
+        response: answer.response.slice(0, 8_000),
+        citedUrls: answer.citedUrls.slice(0, 50),
+        mentioned: detection.mentioned,
+        cited: detection.cited,
+        position: detection.position,
+        durationMs: Date.now() - start,
+      },
+    });
+
+    summary.succeeded += 1;
+    summary.byProvider[provider.name].ok += 1;
+    if (detection.mentioned) {
+      summary.mentioned += 1;
+      summary.byProvider[provider.name].mentioned += 1;
+    }
+    if (detection.cited) {
+      summary.cited += 1;
+      summary.byProvider[provider.name].cited += 1;
+    }
+  } catch (e: unknown) {
+    const err = e instanceof Error ? e.message : String(e);
+    await prisma.geoProbe
+      .create({
+        data: {
+          provider: provider.name,
+          query,
+          category,
+          response: '',
+          citedUrls: [],
+          mentioned: false,
+          cited: false,
+          durationMs: Date.now() - start,
+          error: err.slice(0, 1_000),
+        },
+      })
+      .catch(() => {
+        /* swallow — DB might be down too */
+      });
+    summary.failed += 1;
+    console.error(
+      JSON.stringify({
+        event: 'geo-probe-error',
+        provider: provider.name,
+        query,
+        error: err,
+        ts: new Date().toISOString(),
+      }),
+    );
+  }
 }
