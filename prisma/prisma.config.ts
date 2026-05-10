@@ -20,8 +20,28 @@ import { config } from 'dotenv';
 config({ path: path.join(process.cwd(), '.env') });
 config({ path: path.join(process.cwd(), '.env.local') });
 
-// Get database URL from environment — prefer DIRECT_URL for CLI operations (avoids PgBouncer)
-const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+// Pick the right URL for CLI operations (db push, migrate, studio).
+//
+// Supabase's new architecture exposes two ports on the same pooler host:
+//   - 6543 (transaction mode): app runtime — fast but no DDL/session state
+//   - 5432 (session mode):     full Postgres — required for `prisma db push`
+//
+// DATABASE_URL in .env points at 6543 because that's what the app needs.
+// For CLI operations we derive the session-mode URL by swapping the port
+// (and dropping the pgbouncer flag — irrelevant in session mode).
+//
+// Old `db.<ref>.supabase.co:5432` direct host is deprecated and no longer
+// resolves, so we don't try DIRECT_URL anymore.
+function toSessionPoolerUrl(url: string): string {
+  return url
+    .replace(/:6543\b/, ':5432')
+    .replace(/[?&]pgbouncer=true/g, '')
+    .replace(/\?&/, '?')
+    .replace(/\?$/, '');
+}
+
+const baseUrl = process.env.DATABASE_URL || process.env.DIRECT_URL;
+const databaseUrl = baseUrl ? toSessionPoolerUrl(baseUrl) : undefined;
 
 // Validate DATABASE_URL exists
 if (!databaseUrl) {
