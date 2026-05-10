@@ -6,32 +6,16 @@
   },
   "crons": [
     {
-      "path": "/api/cron/monthly-report",
-      "schedule": "0 8 1 * *"
+      "path": "/api/cron/david-daily",
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/youtube-sync",
-      "schedule": "0 6 * * *"
+      "schedule": "0 4 * * *"
     },
     {
-      "path": "/api/cron/geo-probe",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/gap-analyze",
-      "schedule": "30 6 * * *"
-    },
-    {
-      "path": "/api/cron/content-publish",
-      "schedule": "0 7 * * *"
-    },
-    {
-      "path": "/api/cron/self-improve",
-      "schedule": "30 7 * * *"
-    },
-    {
-      "path": "/api/cron/daily-report",
-      "schedule": "0 8 * * *"
+      "path": "/api/cron/monthly-report",
+      "schedule": "0 8 1 * *"
     }
   ]
 }
