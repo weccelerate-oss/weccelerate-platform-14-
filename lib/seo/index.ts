@@ -411,8 +411,10 @@ export function constructMetadata({
   authors = ['WeCcelerate Team', 'Leumit Health Services'],
   noIndex = false,
 }: ConstructMetadataParams): Metadata {
-  // Construct title with Venture Builder template
-  const fullTitle = `${title} | WeCcelerate - Venture Builder & Startup Accelerator Israel`;
+  // Use the page-supplied title as-is. Don't pre-wrap with the brand suffix
+  // here — Next.js applies the parent layout's title.template to title.default,
+  // which would re-append the suffix and double-wrap it.
+  const fullTitle = title;
 
   const metaDescription = description || SITE_CONFIG.defaultDescription;
   
@@ -436,7 +438,7 @@ export function constructMetadata({
   const ogImageUrl = ogImage || `${SITE_CONFIG.url}/opengraph-image.jpg`;
   
   return {
-    title: fullTitle,
+    title: { absolute: fullTitle },
     description: metaDescription,
     keywords: uniqueKeywords,
     authors: authors.map(name => ({ name })),

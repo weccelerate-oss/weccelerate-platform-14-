@@ -853,7 +853,11 @@ export function constructMetadata(options: MetadataOptions): Metadata {
     authors = ['WeCcelerate Team'],
   } = options;
 
-  const fullTitle = `${title} | WeCcelerate - Venture Builder & Startup Accelerator Israel`;
+  // Use the page-supplied title as-is. Each caller is responsible for keeping
+  // it under ~60 chars including any brand suffix it wants. Don't pre-wrap
+  // here AND set title.template — Next.js applies the parent template to
+  // title.default, so pre-wrapping caused the suffix to appear twice.
+  const fullTitle = title;
 
   const fullDescription = description || SITE_CONFIG.defaultDescription;
 
@@ -870,7 +874,7 @@ export function constructMetadata(options: MetadataOptions): Metadata {
 
   return {
     title: {
-      default: fullTitle,
+      absolute: fullTitle,
       template: '%s | WeCcelerate - Venture Builder & Startup Accelerator Israel',
     },
     description: fullDescription,
