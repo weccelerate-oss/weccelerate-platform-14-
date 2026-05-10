@@ -199,11 +199,16 @@ const openai: Provider = {
 };
 
 /**
- * Anthropic Claude with web search tool.
+ * Anthropic Claude Haiku with web search tool.
+ * Haiku chosen over Sonnet for the probe: 5-10s per call vs 30-50s with
+ * Sonnet+web_search. 8 parallel calls fit comfortably under Vercel's 60s
+ * function budget, where Sonnet calls didn't.
+ * For probe purposes (measure citations) Haiku's reasoning is sufficient —
+ * the heavier writing is still done by Opus in content-writer.ts.
  * Docs: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool
  */
 const anthropic: Provider = {
-  name: 'anthropic-claude-sonnet',
+  name: 'anthropic-claude-haiku',
   hasKey: () => Boolean(process.env.ANTHROPIC_API_KEY),
   async ask(query: string): Promise<ProbeAnswer> {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -214,11 +219,12 @@ const anthropic: Provider = {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
         messages: [{ role: 'user', content: query }],
-        tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }],
+        tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
       }),
+      signal: AbortSignal.timeout(45_000),
     });
     if (!res.ok) {
       throw new Error(`Anthropic ${res.status}: ${await res.text()}`);
