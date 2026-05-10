@@ -12,7 +12,9 @@ import AboutContent from './AboutContent';
 // =============================================================================
 
 export const metadata: Metadata = {
-  title: 'אודות WeCcelerate | וויסלרייט — בונה מיזמים ומאיץ סטארטאפים בישראל',
+  // title.absolute bypasses the parent layout's title.template so the brand
+  // suffix isn't appended again to a title that already names WeCcelerate.
+  title: { absolute: 'אודות WeCcelerate | וויסלרייט — בונה מיזמים ומאיץ סטארטאפים בישראל' },
   description:
     'WeCcelerate (וויסלרייט) — בונה המיזמים (Venture Builder) ומאיץ הסטארטאפים המוביל בישראל. מלווים יזמים מרעיון ועד הצלחה גלובלית: ייעוץ עסקי, פיתוח מוצר, גיוס הון, ומסלול MedTech בלעדי עם לאומית. 40+ מיזמים, 150M$+ גויסו.',
   keywords: [

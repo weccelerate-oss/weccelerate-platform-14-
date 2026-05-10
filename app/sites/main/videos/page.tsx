@@ -14,7 +14,7 @@ import { VideosContent } from './VideosContent';
 // =============================================================================
 
 export const metadata: Metadata = {
-  title: 'סרטונים | WeCcelerate — פודקאסט, ראיונות, עדויות יזמים ו-Reels',
+  title: { absolute: 'סרטונים | WeCcelerate — פודקאסט, ראיונות, עדויות יזמים ו-Reels' },
   description:
     'צפו בתוכן הווידאו של WeCcelerate: פרקי פודקאסט עם מובילי אקוסיסטם הסטארטאפים, עדויות יזמים שגייסו הון, ראיונות בתקשורת ו-Reels עם טיפים מהירים ליזמים.',
   keywords: [

@@ -14,7 +14,7 @@ import { EventsContent } from './EventsContent';
 // =============================================================================
 
 export const metadata: Metadata = {
-  title: 'אירועים | WeCcelerate — מפגשים, וובינרים ודמו דייס',
+  title: { absolute: 'אירועים | WeCcelerate — מפגשים, וובינרים ודמו דייס' },
   description:
     'כל האירועים של WeCcelerate: מפגשי נטוורקינג, Demo Days, וובינרים מקצועיים, סדנאות ליזמים ואירועי חדשנות בתל אביב וירושלים.',
   keywords: [
