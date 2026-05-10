@@ -16,6 +16,7 @@
 
 import { prisma } from '@/lib/db';
 import { GUIDES, type Guide } from '@/lib/seo/guides-catalog';
+import { logDecision } from './decision-log';
 
 const MODEL_RESEARCH = 'claude-sonnet-4-6';
 const MODEL_WRITE = 'claude-opus-4-7';
@@ -37,14 +38,33 @@ export async function writeNextGuide(): Promise<WriteResult> {
     return { ok: false, reason: 'ANTHROPIC_API_KEY not set — agent disabled' };
   }
 
+  const startedAt = Date.now();
+
   // 1. Pick the highest-priority open gap.
   const gap = await prisma.contentGap.findFirst({
     where: { status: 'open' },
     orderBy: [{ severity: 'desc' }, { detectedAt: 'asc' }],
   });
   if (!gap) {
+    await logDecision({
+      agent: 'content-writer',
+      action: 'idle',
+      reasoning: 'אין ContentGap פתוח — כל השאילתות מצוטטות מספיק טוב או הסתיימו. ממתין ל-Gap Analyzer הבא.',
+      success: true,
+    });
     return { ok: false, reason: 'No open ContentGap to address' };
   }
+
+  await logDecision({
+    agent: 'content-writer',
+    action: 'picked-gap',
+    reasoning:
+      `בחרתי לכתוב על "${gap.query}" כי severity=${gap.severity} (הגבוה ביותר בתור). ` +
+      (gap.competitors.length > 0
+        ? `המתחרים שכן מצוטטים בנושא: ${gap.competitors.slice(0, 3).join(', ')} — ננתח את הגישה שלהם ונבנה תוכן עמוק יותר.`
+        : 'אף מתחרה לא מצוטט בעצמו → הזדמנות לתפוס מקום ראשון.'),
+    payload: { gapId: gap.id, query: gap.query, severity: gap.severity, competitors: gap.competitors },
+  });
 
   // Mark in-progress so a parallel run doesn't pick the same gap.
   await prisma.contentGap.update({
@@ -59,6 +79,27 @@ export async function writeNextGuide(): Promise<WriteResult> {
     const internalLinks = pickInternalLinks(article.titleHe, article.contentHe);
     const factCheck = await runFactCheck(article.contentHe, research.sources);
     const seoLint = lintSeo(article);
+
+    // Quality gate — refuse to publish if either score is too low.
+    const QUALITY_FLOOR = 60;
+    if (factCheck.score < QUALITY_FLOOR || seoLint.score < QUALITY_FLOOR) {
+      await logDecision({
+        agent: 'content-writer',
+        action: 'skipped-publish',
+        reasoning:
+          `דחיתי פרסום של המאמר על "${gap.query}". ` +
+          `Fact-check score: ${factCheck.score}/100 (סף ${QUALITY_FLOOR}). ` +
+          `SEO score: ${seoLint.score}/100 (סף ${QUALITY_FLOOR}). ` +
+          `הפער חוזר לתור — נסה שוב מחר עם מקורות נוספים.`,
+        payload: { gapId: gap.id, factCheck: factCheck.score, seo: seoLint.score, issues: seoLint.issues },
+        success: false,
+      });
+      await prisma.contentGap.update({
+        where: { id: gap.id },
+        data: { status: 'open', rejectReason: `quality below ${QUALITY_FLOOR}` },
+      });
+      return { ok: false, reason: 'Quality below threshold' };
+    }
 
     const slug = await deriveUniqueSlug(article.titleHe);
 
@@ -94,12 +135,36 @@ export async function writeNextGuide(): Promise<WriteResult> {
     // Push to IndexNow so Bing picks it up immediately. Best-effort.
     pingIndexNow(`https://weccelerate.co.il/guides/${slug}`).catch(() => {});
 
+    await logDecision({
+      agent: 'content-writer',
+      action: 'wrote-guide',
+      reasoning:
+        `פרסמתי "${article.titleHe}" → /guides/${slug}. ` +
+        `${countWords(article.contentHe)} מילים, ${research.sources.length} מקורות, ` +
+        `Fact-check ${factCheck.score}/100, SEO ${seoLint.score}/100, ` +
+        `${internalLinks.length} קישורים פנימיים. דחפתי ל-IndexNow → Bing אמור לסרוק תוך שעות.`,
+      payload: {
+        gapId: gap.id, guideId: generated.id, slug,
+        wordCount: countWords(article.contentHe), sources: research.sources.length,
+      },
+      success: true,
+      durationMs: Date.now() - startedAt,
+    });
+
     return { ok: true, guideId: generated.id, slug };
   } catch (err: unknown) {
     const reason = err instanceof Error ? err.message : String(err);
     await prisma.contentGap.update({
       where: { id: gap.id },
       data: { status: 'open', rejectReason: reason.slice(0, 1_000) },
+    });
+    await logDecision({
+      agent: 'content-writer',
+      action: 'failed',
+      reasoning: `נכשל בכתיבת המאמר על "${gap.query}". סיבה: ${reason.slice(0, 200)}. הפער חוזר לתור.`,
+      payload: { gapId: gap.id, error: reason },
+      success: false,
+      durationMs: Date.now() - startedAt,
     });
     return { ok: false, reason };
   }

@@ -24,6 +24,14 @@
     {
       "path": "/api/cron/content-publish",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/self-improve",
+      "schedule": "30 7 * * *"
+    },
+    {
+      "path": "/api/cron/daily-report",
+      "schedule": "0 8 * * *"
     }
   ]
 }

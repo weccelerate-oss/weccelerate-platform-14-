@@ -839,3 +839,64 @@ model GeneratedGuide {
   @@index([category])
   @@map("generated_guides")
 }
+
+// =============================================================================
+// AGENT DECISION LOG — explainability of every autonomous action
+// =============================================================================
+// Every meaningful decision the agent makes is logged here so the operator
+// can read /admin/daily-report and understand *why* the agent did what it
+// did, not just *what* it did. Examples:
+//   - "Picked gap 'מהי ועדת הלסינקי' because severity=100, competitors=[ynet, gov.il]"
+//   - "Skipped publish: fact-check score 45 below threshold 60"
+//   - "Adjusted strategy: gap X stayed unresolved 14 days post-publish — refresh queued"
+
+model AgentDecision {
+  id           String   @id @default(cuid())
+  timestamp    DateTime @default(now())
+
+  // Which agent made the decision
+  agent        String   // 'gap-analyzer' | 'content-writer' | 'self-improver' | 'competitor-watch'
+
+  // What kind of decision
+  action       String   // 'picked-gap' | 'wrote-guide' | 'skipped-publish' | 'queued-refresh' | etc.
+
+  // Free-form Hebrew explanation aimed at the operator
+  reasoning    String   @db.Text
+
+  // Structured payload — what entities were involved
+  payload      Json     @default("{}")
+
+  // Outcome tags
+  success      Boolean  @default(true)
+  durationMs   Int?
+
+  @@index([timestamp])
+  @@index([agent, timestamp])
+  @@index([action, timestamp])
+  @@map("agent_decisions")
+}
+
+// =============================================================================
+// COMPETITOR INTEL — who else gets cited and what they publish
+// =============================================================================
+
+model CompetitorMention {
+  id            String   @id @default(cuid())
+  detectedAt    DateTime @default(now())
+
+  // Domain that got cited (e.g. 'pitango.com', 'ourcrowd.com', 'janvest.com')
+  competitorHost String
+
+  // Which probe query they were cited in
+  query         String
+
+  // Which LLM cited them
+  provider      String
+
+  // The full URL the LLM cited (so we can crawl it later)
+  citedUrl      String
+
+  @@index([competitorHost, detectedAt])
+  @@index([detectedAt])
+  @@map("competitor_mentions")
+}

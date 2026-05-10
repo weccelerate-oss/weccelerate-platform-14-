@@ -12,6 +12,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logDecision } from './decision-log';
 
 const LOOKBACK_DAYS = 14;
 const NO_CITE_SEVERITY = 100;
@@ -111,6 +112,19 @@ export async function analyzeGaps(): Promise<AnalyzeSummary> {
       summary.newGaps += 1;
     }
   }
+
+  // Persist decision log so the morning digest can explain what changed.
+  await logDecision({
+    agent: 'gap-analyzer',
+    action: 'analyzed',
+    reasoning:
+      `סרקתי ${summary.queriesAnalyzed} שאילתות מ-${LOOKBACK_DAYS} הימים האחרונים. ` +
+      `פערים חדשים: ${summary.newGaps}. ` +
+      `פערים שעודכנו: ${summary.refreshedGaps}. ` +
+      `פערים שנסגרו (כי הציטוט מספיק חזק עכשיו): ${summary.resolvedGaps}.`,
+    payload: { ...summary },
+    success: true,
+  });
 
   return summary;
 }
