@@ -127,6 +127,173 @@ const GEO_STAGE_STYLES: Record<
   },
 };
 
+// =============================================================================
+// CATEGORY CONTENT — explains each bot category in detail. Always visible so
+// the dashboard is self-explanatory; no hover/click needed.
+// =============================================================================
+
+interface CategoryDetail {
+  emoji: string;
+  label: string;
+  bots: string[];
+  whatIsIt: string;
+  whenItFires: string;
+  meaning: string;
+  expectedFrequency: string;
+}
+
+const CATEGORY_DETAILS: Record<'training' | 'search' | 'liveRetrieval', CategoryDetail> = {
+  training: {
+    emoji: '🟡',
+    label: 'Training Crawlers — אימון מודלים',
+    bots: ['GPTBot (OpenAI)', 'ClaudeBot (Anthropic)', 'Google-Extended (Gemini)', 'CCBot (Common Crawl)', 'Meta-ExternalAgent', 'Bytespider (TikTok/Doubao)', 'Amazonbot', 'cohere-ai'],
+    whatIsIt: 'בוטים שסורקים את האתר באופן אוטומטי כדי להזין למודל AI חדש בעתיד.',
+    whenItFires: 'רץ ברקע פעם ב-3-14 ימים, לא קשור למשתמשים. מתחיל אחרי שה-URL נכנס ל-Bing/Google index.',
+    meaning: 'התוכן שלך יהיה זמין ל-LLMs בעדכון הבא של ה-knowledge cutoff (חודשים-שנה). זה לא ציטוט בפועל, אבל "זרע" לציטוטים עתידיים.',
+    expectedFrequency: 'יציב: 5-30 ביקורים בשבוע אחרי חודש',
+  },
+  search: {
+    emoji: '🔵',
+    label: 'Search Index — בונים את גרף הציטוט',
+    bots: ['PerplexityBot', 'OAI-SearchBot (ChatGPT Search)', 'DuckAssistBot'],
+    whatIsIt: 'בוטים של מנועי AI שבונים אינדקס לציטוט בזמן שאלה. ChatGPT Search ו-Perplexity מסתמכים עליהם.',
+    whenItFires: 'נכנסים לאחר שמנוע ה-AI גילה שהאתר רלוונטי (דרך sitemap או דרך Bing). פועלים פעם ביום עד פעם בשבוע.',
+    meaning: 'ה-LLM "יודע" על האתר שלך ומוכן לצטט אותו. ציטוטים live retrieval אמורים להתחיל תוך ימים-שבועות.',
+    expectedFrequency: 'יציב: 10-50 ביקורים בשבוע אחרי שבועיים',
+  },
+  liveRetrieval: {
+    emoji: '🟢',
+    label: 'Live Retrieval — ציטוטים אמיתיים ⭐',
+    bots: ['ChatGPT-User (משתמש ChatGPT עם web)', 'Perplexity-User', 'Claude-Web (משתמש Claude.ai)'],
+    whatIsIt: 'הסיגנל הכי חזק. בוט שנשלח ב**זמן אמת** כשמשתמש שאל את ה-LLM שאלה, וה-LLM החליט לגלוש לאתר שלך כדי לצטט בתשובה.',
+    whenItFires: 'רק כשמשתמש אנושי שואל שאלה רלוונטית. כל ביקור = שיחה אמיתית בה אתה מצוטט.',
+    meaning: 'GEO/AEO עובד בפועל. אדם אמיתי קיבל תשובה שמכילה את התוכן שלך. זה היעד של כל המאמץ.',
+    expectedFrequency: 'תלוי-באמת: יכול להיות 1 בשבוע (התחלה) עד 50+ בשבוע (אחרי שאתה brand מוכר)',
+  },
+};
+
+function CategoryCard({
+  category,
+  count,
+  details,
+  highlighted,
+}: {
+  category: 'training' | 'search' | 'liveRetrieval';
+  count: number;
+  details: CategoryDetail;
+  highlighted: boolean;
+}) {
+  const colorMap = {
+    training: { border: 'border-amber-200', bg: 'bg-amber-50/40', text: 'text-amber-900', muted: 'text-amber-700' },
+    search: { border: 'border-blue-200', bg: 'bg-blue-50/40', text: 'text-blue-900', muted: 'text-blue-700' },
+    liveRetrieval: highlighted
+      ? { border: 'border-emerald-300', bg: 'bg-emerald-50/60', text: 'text-emerald-900', muted: 'text-emerald-700' }
+      : { border: 'border-slate-200', bg: 'bg-slate-50/40', text: 'text-slate-500', muted: 'text-slate-500' },
+  };
+  const c = colorMap[category];
+
+  return (
+    <div className={`flex h-full flex-col rounded-lg border p-5 ${c.border} ${c.bg}`}>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className={`text-xs font-semibold uppercase tracking-wide ${c.muted}`}>
+            {details.emoji} {details.label.split('—')[0].trim()}
+          </div>
+          <div className="text-[10px] opacity-75 ${c.muted}">{details.label.split('—')[1]?.trim()}</div>
+        </div>
+        <div className={`text-3xl font-bold ${c.text}`}>{count}</div>
+      </div>
+
+      <dl className="mt-4 space-y-3 text-xs">
+        <div>
+          <dt className={`font-semibold ${c.text}`}>מה זה?</dt>
+          <dd className={`mt-0.5 ${c.muted}`}>{details.whatIsIt}</dd>
+        </div>
+        <div>
+          <dt className={`font-semibold ${c.text}`}>מתי זה קורה?</dt>
+          <dd className={`mt-0.5 ${c.muted}`}>{details.whenItFires}</dd>
+        </div>
+        <div>
+          <dt className={`font-semibold ${c.text}`}>מה זה אומר?</dt>
+          <dd className={`mt-0.5 ${c.muted}`}>{details.meaning}</dd>
+        </div>
+        <div>
+          <dt className={`font-semibold ${c.text}`}>בוטים בקטגוריה</dt>
+          <dd className={`mt-0.5 font-mono text-[11px] leading-relaxed ${c.muted}`}>
+            {details.bots.join(' · ')}
+          </dd>
+        </div>
+        <div className={`mt-3 rounded border-t pt-3 ${c.border}`}>
+          <dt className={`text-[10px] uppercase tracking-wide ${c.muted}`}>תדירות צפויה</dt>
+          <dd className={`mt-0.5 text-sm font-semibold ${c.text}`}>{details.expectedFrequency}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+function NextStepPanel({ geo }: { geo: BotAnalyticsData['geo'] }) {
+  const { stage, counts, lastLiveRetrieval } = geo;
+
+  let title: string;
+  let body: React.ReactNode;
+  let bgColor: string;
+
+  if (stage.stage === 0) {
+    title = '🚀 צעד הבא: לוודא שה-Bing index עובד';
+    bgColor = 'bg-slate-50 border-slate-200';
+    body = (
+      <ul className="list-disc space-y-1 pr-5 text-sm text-slate-700">
+        <li>בדוק ש-IndexNow פעיל: <code className="rounded bg-slate-200 px-1 text-xs">curl /api/indexnow/submit</code></li>
+        <li>וודא ש-sitemap הוגש ב-Bing Webmaster Tools</li>
+        <li>וודא שהאתר נטען ב-Bing search: <code>site:weccelerate.co.il</code></li>
+        <li>אחרי 24-72 שעות אמורים להופיע training crawlers ראשונים</li>
+      </ul>
+    );
+  } else if (stage.stage === 1) {
+    title = '⏳ צעד הבא: להמתין ל-search index';
+    bgColor = 'bg-amber-50 border-amber-200';
+    body = (
+      <ul className="list-disc space-y-1 pr-5 text-sm text-amber-900">
+        <li>OpenAI/Anthropic סורקים אותך לאימון — סימן טוב</li>
+        <li>תוך שבוע-שבועיים אמורים להופיע PerplexityBot ו-OAI-SearchBot</li>
+        <li>בינתיים: פרסם תוכן חדש — כל פרסום מואץ ע"י IndexNow ומגביר את הסיכוי</li>
+      </ul>
+    );
+  } else if (stage.stage === 2) {
+    title = '🎯 צעד הבא: ציטוטים אמיתיים בדרך';
+    bgColor = 'bg-blue-50 border-blue-200';
+    body = (
+      <ul className="list-disc space-y-1 pr-5 text-sm text-blue-900">
+        <li>PerplexityBot/OAI-SearchBot מאנדקסים — ה-LLM מכיר אותך</li>
+        <li>ה-ציטוט הראשון של live retrieval (ChatGPT-User/Perplexity-User) אמור להגיע תוך 1-3 שבועות</li>
+        <li>תקבל מייל אוטומטי ב-`weccelerate@gmail.com` ברגע שזה קורה</li>
+        <li>בינתיים: בדוק ידנית — שאל את Perplexity/ChatGPT שאלות רלוונטיות וראה אם אתה מצוטט</li>
+      </ul>
+    );
+  } else {
+    const isFresh = lastLiveRetrieval && Date.now() - new Date(lastLiveRetrieval.timestamp).getTime() < 86400000;
+    title = isFresh ? '🎉 GEO פעיל! ציטוט בעוד 24 השעות' : '✅ GEO פעיל';
+    bgColor = 'bg-emerald-50 border-emerald-300';
+    body = (
+      <ul className="list-disc space-y-1 pr-5 text-sm text-emerald-900">
+        <li><strong>אתה מצוטט בפועל</strong> — משתמשים מקבלים את התוכן שלך כתשובה ב-LLMs</li>
+        <li>בדוק את "10 הדפים המבוקרים" למטה — אלה הדפים שמייצרים את הציטוטים. הרחב אותם.</li>
+        <li>תקבל מייל ב-`weccelerate@gmail.com` כשעוד סוג של live retrieval bot יופיע (כרגע רק {(['ChatGPT-User', 'Perplexity-User', 'Claude-Web'].filter(b => geo.firstLiveRetrieval?.bot === b).length > 0) ? 'אחד' : 'אף אחד'} מדווח)</li>
+        <li>צעד הבא: להגדיל ציטוטים — Press Releases, Wikipedia, podcast appearances. כל אחד מהם מגביר את הסיכוי לעוד ציטוטים.</li>
+        <li>בדיקה ידנית: שאל את ChatGPT/Perplexity "What is WeCcelerate?" ובדוק שאתה מופיע בתשובה</li>
+      </ul>
+    );
+  }
+
+  return (
+    <div className={`mt-5 rounded-lg border p-4 ${bgColor}`}>
+      <h3 className="mb-2 text-base font-bold">{title}</h3>
+      {body}
+    </div>
+  );
+}
+
 function GeoStatusCard({ geo }: { geo: BotAnalyticsData['geo'] }) {
   const styles = GEO_STAGE_STYLES[geo.stage.color];
   const stageDots = [0, 1, 2, 3].map((n) => (
@@ -141,7 +308,9 @@ function GeoStatusCard({ geo }: { geo: BotAnalyticsData['geo'] }) {
   const daysSince = (iso: string) => {
     const ms = Date.now() - new Date(iso).getTime();
     const days = Math.floor(ms / 86400000);
-    if (days === 0) return 'היום';
+    const hours = Math.floor(ms / 3600000);
+    if (hours < 1) return 'לפני פחות משעה';
+    if (hours < 24) return `לפני ${hours} שעות`;
     if (days === 1) return 'אתמול';
     return `לפני ${days} ימים`;
   };
@@ -166,56 +335,30 @@ function GeoStatusCard({ geo }: { geo: BotAnalyticsData['geo'] }) {
         </div>
       </div>
 
-      {/* Category counts */}
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-4">
-          <div className="text-xs font-medium uppercase tracking-wide text-amber-700">
-            Training crawlers
-          </div>
-          <div className="mt-1 text-2xl font-bold text-amber-900">{geo.counts.training}</div>
-          <div className="mt-1 text-xs text-amber-700">
-            GPTBot, ClaudeBot, Google-Extended וכו׳ — אימון מודלים
-          </div>
-        </div>
-        <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-4">
-          <div className="text-xs font-medium uppercase tracking-wide text-blue-700">
-            Search index
-          </div>
-          <div className="mt-1 text-2xl font-bold text-blue-900">{geo.counts.search}</div>
-          <div className="mt-1 text-xs text-blue-700">
-            OAI-SearchBot, PerplexityBot — בונים את גרף הציטוט
-          </div>
-        </div>
-        <div
-          className={`rounded-lg border p-4 ${
-            geo.counts.liveRetrieval > 0
-              ? 'border-emerald-300 bg-emerald-50/60'
-              : 'border-slate-200 bg-slate-50/60'
-          }`}
-        >
-          <div
-            className={`text-xs font-medium uppercase tracking-wide ${
-              geo.counts.liveRetrieval > 0 ? 'text-emerald-700' : 'text-slate-500'
-            }`}
-          >
-            Live retrieval ⭐
-          </div>
-          <div
-            className={`mt-1 text-2xl font-bold ${
-              geo.counts.liveRetrieval > 0 ? 'text-emerald-900' : 'text-slate-400'
-            }`}
-          >
-            {geo.counts.liveRetrieval}
-          </div>
-          <div
-            className={`mt-1 text-xs ${
-              geo.counts.liveRetrieval > 0 ? 'text-emerald-700' : 'text-slate-500'
-            }`}
-          >
-            ChatGPT-User, Perplexity-User — משתמשים מקבלים אותך כתשובה
-          </div>
-        </div>
+      {/* Category cards with full inline explanations */}
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <CategoryCard
+          category="training"
+          count={geo.counts.training}
+          details={CATEGORY_DETAILS.training}
+          highlighted={false}
+        />
+        <CategoryCard
+          category="search"
+          count={geo.counts.search}
+          details={CATEGORY_DETAILS.search}
+          highlighted={false}
+        />
+        <CategoryCard
+          category="liveRetrieval"
+          count={geo.counts.liveRetrieval}
+          details={CATEGORY_DETAILS.liveRetrieval}
+          highlighted={geo.counts.liveRetrieval > 0}
+        />
       </div>
+
+      {/* Dynamic next-step interpretation */}
+      <NextStepPanel geo={geo} />
 
       {/* First/last citation timestamps */}
       {geo.firstLiveRetrieval && (
