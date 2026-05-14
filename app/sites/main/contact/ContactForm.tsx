@@ -16,6 +16,7 @@
 import { useActionState, useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { submitContactForm, type FormState } from '@/app/actions/leads';
+import { HoneypotFields } from '@/components/forms/HoneypotFields';
 import { useLanguage } from '@/lib/i18n';
 import { z } from 'zod';
 import {
@@ -234,6 +235,9 @@ export function ContactForm() {
       className="space-y-6"
       noValidate
     >
+      {/* Spam-filter envelope */}
+      <HoneypotFields />
+
       {/* Hidden tracking fields */}
       <input type="hidden" name="sourceUrl" value={currentUrl} />
       <input type="hidden" name="referrerUrl" value={referrer} />

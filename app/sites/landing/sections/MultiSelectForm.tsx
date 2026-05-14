@@ -18,6 +18,7 @@ import {
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { SafeImage } from '@/components/landing-helpers/SafeImage';
 import { Sparkles } from '@/components/landing-helpers/FloatingDecor';
+import { HoneypotFields } from '@/components/forms/HoneypotFields';
 
 interface Option {
   id: string;
@@ -218,6 +219,7 @@ export default function MultiSelectForm() {
             </>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
+              <HoneypotFields />
               {error && (
                 <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/25 text-red-300 text-sm">
                   {error}

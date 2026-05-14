@@ -9,6 +9,7 @@
 
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import { runSpamFilter, type SpamFilterResult } from '@/lib/leads/spam-filter';
 
 // =============================================================================
 // VALIDATION SCHEMAS
@@ -76,6 +77,151 @@ const SITE_SOURCE_LABELS: Record<string, string> = {
 function getSourceLabel(site: string | null | undefined): string {
   if (!site) return SITE_SOURCE_LABELS.main;
   return SITE_SOURCE_LABELS[site] || `אתר · ${site}`;
+}
+
+// =============================================================================
+// SPAM AUDIT — log every lead's filter decision so we can tune weights
+// =============================================================================
+
+/**
+ * Centralized routing helper. After validation, EVERY lead funnels through
+ * here so the spam decision and audit trail are consistent across the 4
+ * server actions (contact / application / newsletter / event).
+ *
+ * Returns the user-facing FormState. Always claims success on `drop` so the
+ * bot doesn't learn the filter exists.
+ */
+async function routeLeadThroughFilter(opts: {
+  leadData: {
+    name: string;
+    email: string;
+    phone?: string | null;
+    company?: string | null;
+    message?: string | null;
+  };
+  envelope: { honeypot?: string | null; renderedAtMs?: number | null };
+  meta: {
+    site: string | null;
+    sourceUrl: string | null;
+    formType: string;
+    extra?: Record<string, unknown>;
+    userSuccessMessage: string;
+  };
+}): Promise<FormState> {
+  const { leadData, envelope, meta } = opts;
+  const filter: SpamFilterResult = runSpamFilter({
+    name: leadData.name,
+    email: leadData.email,
+    phone: leadData.phone,
+    company: leadData.company,
+    message: leadData.message,
+    site: meta.site,
+    honeypot: envelope.honeypot,
+    renderedAtMs: envelope.renderedAtMs,
+  });
+
+  // Decision: drop. Log to audit only, return success silently.
+  if (filter.decision === 'drop') {
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: 'lead.spam_blocked',
+          description: `Spam blocked (score ${filter.score}): ${leadData.email}`,
+          metadata: {
+            email: leadData.email,
+            name: leadData.name,
+            phone: leadData.phone || null,
+            site: meta.site || 'main',
+            formType: meta.formType,
+            sourceUrl: meta.sourceUrl,
+            spamScore: filter.score,
+            spamCodes: filter.codes,
+            spamReasons: filter.reasons,
+            timestamp: new Date().toISOString(),
+          },
+        },
+      });
+    } catch (err) {
+      console.error('[Spam] audit log failed:', err);
+    }
+    return { success: true, message: meta.userSuccessMessage };
+  }
+
+  // Decision: review. Log to DB with status='review', skip Zapier.
+  if (filter.decision === 'review') {
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: 'lead.spam_review',
+          description: `Soft hold (score ${filter.score}): ${leadData.email}`,
+          metadata: {
+            ...leadData,
+            ...(meta.extra ?? {}),
+            site: meta.site || 'main',
+            sourceUrl: meta.sourceUrl,
+            formType: meta.formType,
+            sourceLabel: getSourceLabel(meta.site),
+            spamScore: filter.score,
+            spamCodes: filter.codes,
+            spamReasons: filter.reasons,
+            status: 'pending_review',
+            timestamp: new Date().toISOString(),
+          },
+        },
+      });
+    } catch (err) {
+      console.error('[Spam] review log failed:', err);
+    }
+    return { success: true, message: meta.userSuccessMessage };
+  }
+
+  // Decision: pass. Normal flow — Zapier + the standard activity log.
+  sendToZapier({
+    name: leadData.name,
+    email: leadData.email,
+    phone: leadData.phone || undefined,
+    company: leadData.company || undefined,
+    message: leadData.message || undefined,
+    formType: meta.formType,
+    site: meta.site,
+    sourceUrl: meta.sourceUrl,
+  });
+
+  try {
+    await prisma.activityLog.create({
+      data: {
+        action: meta.formType === 'contact' ? 'form.contact_submit' : `form.${meta.formType}`,
+        description: `${getSourceLabel(meta.site)} · ${leadData.name} · ${leadData.email}`,
+        metadata: {
+          ...leadData,
+          ...(meta.extra ?? {}),
+          site: meta.site || 'main',
+          sourceLabel: getSourceLabel(meta.site),
+          formType: meta.formType,
+          sourceUrl: meta.sourceUrl,
+          spamScore: filter.score,
+          spamCodes: filter.codes,
+          status: 'approved',
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+  } catch (err) {
+    console.error(`[${meta.formType}] DB log failed:`, err);
+  }
+
+  return { success: true, message: meta.userSuccessMessage };
+}
+
+/** Pull honeypot + timestamp envelope from FormData. */
+function readEnvelope(formData: FormData): { honeypot: string | null; renderedAtMs: number | null } {
+  const hp = formData.get('website');
+  const ts = formData.get('_ts');
+  const tsNum = typeof ts === 'string' ? Number(ts) : NaN;
+  return {
+    honeypot: typeof hp === 'string' ? hp : null,
+    renderedAtMs: Number.isFinite(tsNum) && tsNum > 0 ? tsNum : null,
+  };
 }
 
 async function sendToZapier(data: {
@@ -149,39 +295,23 @@ export async function submitContactForm(
   }
 
   const validData = validationResult.data;
-  const sourceLabel = getSourceLabel(site);
 
-  // Send to Zapier (fire-and-forget) — includes subdomain source
-  sendToZapier({ ...validData, formType, site, sourceUrl });
-
-  // Log to database — unified action name so admin counters work for all forms
-  try {
-    await prisma.activityLog.create({
-      data: {
-        action: 'form.contact_submit',
-        description: `${sourceLabel} · ${validData.name} · ${validData.email}`,
-        metadata: {
-          name: validData.name,
-          email: validData.email,
-          phone: validData.phone || null,
-          company: validData.company || null,
-          message: validData.message || null,
-          site: site || 'main',
-          sourceLabel,
-          formType,
-          sourceUrl: sourceUrl || null,
-          timestamp: new Date().toISOString(),
-        },
-      },
-    });
-  } catch (err) {
-    console.error('[Contact] DB log failed:', err);
-  }
-
-  return {
-    success: true,
-    message: 'תודה על פנייתך! ניצור איתך קשר בהקדם.',
-  };
+  return routeLeadThroughFilter({
+    leadData: {
+      name: validData.name,
+      email: validData.email,
+      phone: validData.phone,
+      company: validData.company || null,
+      message: validData.message || null,
+    },
+    envelope: readEnvelope(formData),
+    meta: {
+      site,
+      sourceUrl,
+      formType: formType || 'contact',
+      userSuccessMessage: 'תודה על פנייתך! ניצור איתך קשר בהקדם.',
+    },
+  });
 }
 
 // =============================================================================
@@ -221,39 +351,28 @@ export async function submitApplicationForm(
 
   const validData = validationResult.data;
 
-  // Send to Zapier
-  sendToZapier({ ...validData, formType: 'application' });
-
-  // Log to database
-  try {
-    await prisma.activityLog.create({
-      data: {
-        action: 'form.application',
-        description: `Application form: ${validData.email}`,
-        metadata: {
-          name: validData.name,
-          email: validData.email,
-          phone: validData.phone || null,
-          company: validData.company || null,
-          message: validData.message || null,
-          industry: validData.industry || null,
-          companySize: validData.companySize || null,
-          stage: validData.stage || null,
-          fundingNeeded: validData.fundingNeeded || null,
-          site: site || 'main',
-          sourceUrl: sourceUrl || null,
-          timestamp: new Date().toISOString(),
-        },
+  return routeLeadThroughFilter({
+    leadData: {
+      name: validData.name,
+      email: validData.email,
+      phone: validData.phone,
+      company: validData.company || null,
+      message: validData.message || null,
+    },
+    envelope: readEnvelope(formData),
+    meta: {
+      site,
+      sourceUrl,
+      formType: 'application',
+      extra: {
+        industry: validData.industry || null,
+        companySize: validData.companySize || null,
+        stage: validData.stage || null,
+        fundingNeeded: validData.fundingNeeded || null,
       },
-    });
-  } catch (err) {
-    console.error('[Application] DB log failed:', err);
-  }
-
-  return {
-    success: true,
-    message: 'תודה על הגשת המועמדות! נבדוק את הפרטים ונחזור אליך בהקדם.',
-  };
+      userSuccessMessage: 'תודה על הגשת המועמדות! נבדוק את הפרטים ונחזור אליך בהקדם.',
+    },
+  });
 }
 
 // =============================================================================
@@ -282,32 +401,24 @@ export async function submitNewsletterSignup(
   }
 
   const validData = validationResult.data;
+  const inferredName = validData.name || validData.email.split('@')[0];
 
-  // Send to Zapier
-  sendToZapier({ name: validData.name || validData.email.split('@')[0], email: validData.email, formType: 'newsletter' });
-
-  // Log to database
-  try {
-    await prisma.activityLog.create({
-      data: {
-        action: 'form.newsletter',
-        description: `Newsletter signup: ${validData.email}`,
-        metadata: {
-          email: validData.email,
-          name: validData.name || null,
-          site: site || 'main',
-          timestamp: new Date().toISOString(),
-        },
-      },
-    });
-  } catch (err) {
-    console.error('[Newsletter] DB log failed:', err);
-  }
-
-  return {
-    success: true,
-    message: 'תודה! נרשמת בהצלחה לניוזלטר.',
-  };
+  return routeLeadThroughFilter({
+    leadData: {
+      name: inferredName,
+      email: validData.email,
+      phone: null,
+      company: null,
+      message: null,
+    },
+    envelope: readEnvelope(formData),
+    meta: {
+      site,
+      sourceUrl: null,
+      formType: 'newsletter',
+      userSuccessMessage: 'תודה! נרשמת בהצלחה לניוזלטר.',
+    },
+  });
 }
 
 // =============================================================================
@@ -341,28 +452,43 @@ export async function submitEventRegistration(
 
   const validData = validationResult.data;
 
-  // Send to Zapier
-  sendToZapier({
-    ...validData,
-    message: eventName ? `הרשמה לאירוע: ${eventName}` : 'הרשמה לאירוע',
-    formType: 'event',
-  });
-
-  // Update event registration count with capacity check
+  // Capacity check first — if full, no point running the spam filter.
   if (eventId) {
     try {
       const event = await prisma.event.findUnique({
         where: { id: eventId },
         select: { capacity: true, registeredCount: true },
       });
-
       if (event?.capacity && event.registeredCount >= event.capacity) {
-        return {
-          success: false,
-          message: 'האירוע מלא - אין מקומות פנויים.',
-        };
+        return { success: false, message: 'האירוע מלא - אין מקומות פנויים.' };
       }
+    } catch (error) {
+      console.error('[Events] Capacity check failed:', error);
+    }
+  }
 
+  const result = await routeLeadThroughFilter({
+    leadData: {
+      name: validData.name,
+      email: validData.email,
+      phone: validData.phone,
+      company: validData.company || null,
+      message: eventName ? `הרשמה לאירוע: ${eventName}` : 'הרשמה לאירוע',
+    },
+    envelope: readEnvelope(formData),
+    meta: {
+      site,
+      sourceUrl: null,
+      formType: 'event',
+      extra: { eventId, eventName },
+      userSuccessMessage: 'נרשמת בהצלחה לאירוע! נשלח אליך אישור במייל.',
+    },
+  });
+
+  // Increment registration count only if the lead actually went through
+  // (we don't want to inflate counts on spam attempts).
+  if (eventId && result.success) {
+    try {
       await prisma.event.update({
         where: { id: eventId },
         data: { registeredCount: { increment: 1 } },
@@ -372,32 +498,7 @@ export async function submitEventRegistration(
     }
   }
 
-  // Log to database
-  try {
-    await prisma.activityLog.create({
-      data: {
-        action: 'form.event',
-        description: `Event registration: ${validData.email}`,
-        metadata: {
-          name: validData.name,
-          email: validData.email,
-          phone: validData.phone || null,
-          company: validData.company || null,
-          eventId,
-          eventName,
-          site: site || 'main',
-          timestamp: new Date().toISOString(),
-        },
-      },
-    });
-  } catch (err) {
-    console.error('[Event] DB log failed:', err);
-  }
-
-  return {
-    success: true,
-    message: 'נרשמת בהצלחה לאירוע! נשלח אליך אישור במייל.',
-  };
+  return result;
 }
 
 // =============================================================================
@@ -440,33 +541,20 @@ export async function createLeadAction(data: {
   const validData = parsed.data;
   const formType = validData.formType || 'api';
 
-  // Send to Zapier
-  sendToZapier(validData);
-
-  // Log to database
-  try {
-    await prisma.activityLog.create({
-      data: {
-        action: `form.${formType}`,
-        description: `Lead: ${validData.email}`,
-        metadata: {
-          name: validData.name,
-          email: validData.email,
-          phone: validData.phone || null,
-          company: validData.company || null,
-          message: validData.message || null,
-          sourceUrl: validData.sourceUrl || null,
-          site: validData.site || 'main',
-          timestamp: new Date().toISOString(),
-        },
-      },
-    });
-  } catch (err) {
-    console.error('[Lead] DB log failed:', err);
-  }
-
-  return {
-    success: true,
-    message: 'הפנייה נשלחה בהצלחה',
-  };
+  return routeLeadThroughFilter({
+    leadData: {
+      name: validData.name,
+      email: validData.email,
+      phone: validData.phone || null,
+      company: validData.company || null,
+      message: validData.message || null,
+    },
+    envelope: { honeypot: null, renderedAtMs: null }, // programmatic — no envelope
+    meta: {
+      site: validData.site || null,
+      sourceUrl: validData.sourceUrl || null,
+      formType,
+      userSuccessMessage: 'הפנייה נשלחה בהצלחה',
+    },
+  });
 }

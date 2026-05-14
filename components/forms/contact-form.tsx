@@ -22,6 +22,7 @@
 import { useActionState, useEffect, useState } from 'react';
 import { useSearchParams, usePathname } from 'next/navigation';
 import { submitContactForm, type FormState } from '@/app/actions/leads';
+import { HoneypotFields } from '@/components/forms/HoneypotFields';
 import { cn } from '@/lib/utils';
 import { Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -150,6 +151,8 @@ export function ContactForm({
 
       {/* Form */}
       <form action={formAction} className={cn('space-y-4', compact && 'space-y-3')}>
+        {/* Spam-filter envelope */}
+        <HoneypotFields />
         {/* Hidden tracking fields */}
         <input type="hidden" name="sourceUrl" value={sourceUrl} />
         <input type="hidden" name="referrerUrl" value={referrer} />
@@ -378,6 +381,7 @@ export function NewsletterForm({
 
   return (
     <form onSubmit={handleSubmit} className={cn('flex gap-2', className)}>
+      <HoneypotFields />
       <input
         type="email"
         name="email"

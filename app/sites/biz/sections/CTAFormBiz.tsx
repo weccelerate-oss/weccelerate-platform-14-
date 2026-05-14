@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { Send, CheckCircle2, Loader2, Calendar, Phone } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { HoneypotFields } from '@/components/forms/HoneypotFields';
 
 export default function CTAFormBiz() {
   const [isPending, setIsPending] = useState(false);
@@ -122,6 +123,7 @@ export default function CTAFormBiz() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    <HoneypotFields />
                     {error && (
                       <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/25 text-red-300 text-sm">
                         {error}
