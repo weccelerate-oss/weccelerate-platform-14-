@@ -73,7 +73,35 @@ That endpoint:
 
 ---
 
-## Zapier wiring (Google Forms → webhook)
+## Wiring Google Forms → webhook (no Zapier required)
+
+Use Google Apps Script — it's built into every Google Form, free, and doesn't depend on any third-party service. The drop-in script lives at [`docs/onboarding-apps-script.gs`](onboarding-apps-script.gs).
+
+**Setup (one time, ~5 minutes):**
+
+1. Open the form in edit mode:
+   <https://docs.google.com/forms/d/1G98etG6F7e7P4SB0e4DK-LE7WSm-oRo2n9TtmsQoH0Y/edit>
+2. Click the **⋮** menu (top right) → **Script editor**.
+3. Replace the placeholder code with the contents of `docs/onboarding-apps-script.gs`. Save (Ctrl/Cmd+S) and name it `WeCcelerate Onboarding`.
+4. Left sidebar → **Project Settings (⚙)** → scroll to **Script Properties** → **Add script property**:
+   - Property: `ONBOARDING_WEBHOOK_SECRET`
+   - Value: the secret from Vercel (the one set in `.env`)
+   Save.
+5. Left sidebar → **Triggers (⏰)** → **Add Trigger**:
+   - Choose function: `handleFormSubmit`
+   - Event source: `From form`
+   - Event type: `On form submit`
+   Save. Google will ask for `UrlFetch` + `Forms` permissions — approve.
+6. **Test**: in the script editor, pick `testWebhook` from the function dropdown → **Run**. Open **Executions** to see the response. A `200` log line means it works.
+7. Submit the form once with a real email. You should receive the Hebrew welcome email + see the new user in `/admin/users` with the `🤖 auto · google_form` badge.
+
+**If your form's question titles differ from the defaults**, edit the `FIELD_MAP` constant at the top of the script — each webhook field accepts multiple possible titles, first match wins.
+
+---
+
+## (Alternative) Zapier wiring
+
+If for some reason you can't use Apps Script:
 
 1. **Trigger**: "New Response in Spreadsheet" — point at the response sheet of the Google Form.
 2. **Action**: "Webhooks by Zapier → POST"
@@ -81,7 +109,7 @@ That endpoint:
    - Method: `POST`
    - Headers:
      - `Content-Type: application/json`
-     - `x-onboarding-secret: <paste the ONBOARDING_WEBHOOK_SECRET value>`
+     - `x-onboarding-secret: <ONBOARDING_WEBHOOK_SECRET>`
    - Body type: `JSON`
    - Body:
      ```json
@@ -92,12 +120,10 @@ That endpoint:
        "company": "{{company_column}}",
        "message": "{{message_column}}",
        "source": "google_form",
-       "raw": {
-         "<map every other form column here so it lands in intakeFormData>": "..."
-       }
+       "raw": { "<every other column>": "..." }
      }
      ```
-3. Turn on the Zap. Test by submitting the Google Form.
+3. Turn on the Zap.
 
 ---
 
