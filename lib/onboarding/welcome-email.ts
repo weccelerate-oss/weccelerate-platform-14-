@@ -5,6 +5,12 @@
  * Recipient: the entrepreneur's email captured from the intake form.
  * Body: name + email + one-time password + login link.
  *
+ * The logo is attached as an INLINE CID attachment rather than linked
+ * via <img src="https://..."> so it renders regardless of Gmail's
+ * "block remote images from untrusted senders" default. Costs ~100 KB
+ * per email but is the only reliable way to guarantee branding until
+ * the sender domain is verified in Resend.
+ *
  * If RESEND_API_KEY is missing or the call fails, we log and continue —
  * the user account is still created, the admin can resend manually.
  */
@@ -12,12 +18,32 @@
 import { Resend } from 'resend';
 
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev';
-const PORTAL_URL = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? 'https://weccelerate.co.il';
+// Hardcoded canonical URL — same reason as the logo: NEXTAUTH_URL /
+// AUTH_URL can resolve to localhost or a Vercel preview hostname in some
+// environments, and the welcome email must always point at production.
+const PORTAL_URL = 'https://weccelerate.co.il';
+const LOGO_PUBLIC_URL = 'https://weccelerate.co.il/images/weccelerate-gold.png';
+const LOGO_CID = 'weccelerate-logo';
 
 export interface WelcomeEmailInput {
   to: string;
   name: string;
   tempPassword: string;
+}
+
+/** Fetched lazily once per server instance, then reused. */
+let cachedLogoBuffer: Buffer | null = null;
+async function getLogoBuffer(): Promise<Buffer | null> {
+  if (cachedLogoBuffer) return cachedLogoBuffer;
+  try {
+    const res = await fetch(LOGO_PUBLIC_URL, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const arr = await res.arrayBuffer();
+    cachedLogoBuffer = Buffer.from(arr);
+    return cachedLogoBuffer;
+  } catch {
+    return null;
+  }
 }
 
 export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: boolean; error?: string }> {
@@ -26,7 +52,11 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
   }
 
   const loginUrl = `${PORTAL_URL}/login`;
-  const html = buildHtml(input, loginUrl);
+  const logoBuffer = await getLogoBuffer();
+  // Use cid: when we have the bytes (most reliable), fall back to https
+  // if for some reason the fetch failed.
+  const logoSrc = logoBuffer ? `cid:${LOGO_CID}` : LOGO_PUBLIC_URL;
+  const html = buildHtml(input, loginUrl, logoSrc);
   const text = buildText(input, loginUrl);
 
   try {
@@ -37,6 +67,19 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
       subject: 'ברוך הבא ל-WeCcelerate — פרטי הכניסה לפורטל',
       html,
       text,
+      ...(logoBuffer
+        ? {
+            attachments: [
+              {
+                filename: 'weccelerate-logo.png',
+                content: logoBuffer,
+                // contentId + inline disposition = renders inline via cid:
+                contentId: LOGO_CID,
+                contentDisposition: 'inline',
+              },
+            ],
+          }
+        : {}),
     });
     return { ok: true };
   } catch (err) {
@@ -45,11 +88,7 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
   }
 }
 
-function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: string): string {
-  // Hardcoded canonical URL — never use PORTAL_URL here, because in some
-  // environments that resolves to a Vercel preview hostname that Gmail's
-  // image proxy can't reach. The production logo is stable at this URL.
-  const logoUrl = 'https://weccelerate.co.il/images/weccelerate-gold.png';
+function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: string, logoSrc: string): string {
   const escName = escapeHtml(name);
   const escTo = escapeHtml(to);
   const escPwd = escapeHtml(tempPassword);
@@ -81,7 +120,7 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
       <!-- ============================================================ -->
       <tr>
         <td align="center" style="background:#070b1e;background-image:linear-gradient(135deg,#070b1e 0%,#0e1736 55%,#0a1024 100%);padding:40px 32px 32px;">
-          <img src="${logoUrl}" alt="WeCcelerate" width="200" height="56"
+          <img src="${logoSrc}" alt="WeCcelerate" width="200" height="56"
                style="display:block;height:auto;max-width:200px;width:200px;margin:0 auto 18px;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;"
                border="0" />
           <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#c8a951;font-weight:700;">
@@ -221,7 +260,7 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
       <!-- ============================================================ -->
       <tr>
         <td style="background:#070b1e;padding:24px 36px;text-align:center;">
-          <img src="${logoUrl}" alt="WeCcelerate" width="120" height="34"
+          <img src="${logoSrc}" alt="WeCcelerate" width="120" height="34"
                style="display:block;height:auto;max-width:120px;width:120px;margin:0 auto 10px;opacity:0.9;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;"
                border="0" />
           <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.7;">
