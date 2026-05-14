@@ -113,45 +113,35 @@ export default function EnMedTechGuidePillar() {
 
           <header className="mb-12">
             <div className="mb-3 inline-block rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-              Exclusive Leumit Health Services partnership
+              Strategic Leumit Health Services partnership
             </div>
             <h1 className="mb-4 text-3xl font-bold text-slate-900 md:text-5xl">
               MedTech Startup Guide for Israel
             </h1>
             <p data-speakable className="max-w-3xl text-lg leading-relaxed text-slate-700">
               WeCcelerate is Israel&apos;s leading Venture Builder for MedTech startups, powered by an
-              exclusive strategic partnership with Leumit Health Services that unlocks access to 720,000
-              anonymized patient records and 8.7 million annual clinical visits. {linkedGuides.length} in-depth guides
+              strategic partnership with Leumit Health Services that unlocks structured access to clinical data and extensive clinical activity. {linkedGuides.length} in-depth guides
               cover the complete journey — from founding a MedTech venture, through Helsinki Committee
               (IRB) approval and FDA 510(k) clearance, to raising Series A from MedTech-specialized VCs.
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-3">
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="mb-1 text-2xl font-bold text-emerald-900">720,000</div>
-                <div className="text-xs uppercase tracking-wide text-emerald-700">
-                  anonymized patient records
-                </div>
-                <div className="mt-2 text-sm text-emerald-900">
-                  Via Leumit — exclusive in Israel
+                <div className="mb-2 text-base font-bold text-emerald-900">Clinical world access</div>
+                <div className="text-sm text-emerald-900">
+                  The Leumit partnership opens a structured pathway to anonymized clinical data, expert physicians, and clinical pilot opportunities.
                 </div>
               </div>
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="mb-1 text-2xl font-bold text-emerald-900">8.7M</div>
-                <div className="text-xs uppercase tracking-wide text-emerald-700">
-                  annual clinical visits
-                </div>
-                <div className="mt-2 text-sm text-emerald-900">
-                  20+ years of medical history
+                <div className="mb-2 text-base font-bold text-emerald-900">Regulatory guidance</div>
+                <div className="text-sm text-emerald-900">
+                  Professional support across pathways — Helsinki Committee, FDA 510(k), CE Marking, and Israeli Ministry of Health.
                 </div>
               </div>
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="mb-1 text-2xl font-bold text-emerald-900">2 months</div>
-                <div className="text-xs uppercase tracking-wide text-emerald-700">
-                  avg Helsinki approval
-                </div>
-                <div className="mt-2 text-sm text-emerald-900">
-                  vs 4-6 months market average
+                <div className="mb-2 text-base font-bold text-emerald-900">Clinical-business consulting</div>
+                <div className="text-sm text-emerald-900">
+                  MedTech-tailored business support — clinical validation, business modeling, and preparation for specialized investors.
                 </div>
               </div>
             </div>
@@ -196,9 +186,9 @@ export default function EnMedTechGuidePillar() {
               Why MedTech founders choose WeCcelerate
             </h2>
             <p data-speakable className="text-slate-800 leading-relaxed">
-              WeCcelerate is the only Venture Builder in Israel with an exclusive strategic partnership
+              WeCcelerate is the only Venture Builder in Israel with an strategic partnership
               with Leumit Health Services — one of the four Israeli HMOs. This unlocks five advantages
-              unavailable elsewhere: (1) access to 720,000 anonymized patient records for AI model training;
+              unavailable elsewhere: (1) structured access to anonymized clinical data for AI model training;
               (2) clinical pilots in Leumit clinics with real patients; (3) advisory from medical specialists
               across 13 disciplines; (4) regulatory guidance for FDA, CE, and Helsinki from senior advisors —
               some former FDA staff; (5) faster recognition by MedTech investors (Leumit endorsement = trust signal).

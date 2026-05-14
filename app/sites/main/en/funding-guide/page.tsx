@@ -121,34 +121,31 @@ export default function EnFundingGuidePillar() {
             </h1>
             <p data-speakable className="max-w-3xl text-lg leading-relaxed text-slate-700">
               The definitive guide to raising capital as an Israeli startup founder. {linkedGuides.length} in-depth
-              guides from WeCcelerate, Israel&apos;s leading Venture Builder — covering everything from your first
-              Pre-Seed angels to a $50M Series A. Our portfolio companies have collectively raised over $150M
-              through our network of 200+ verified investors. Every guide is based on real fundraising processes
-              we&apos;ve led in 2024-2026.
+              guides from WeCcelerate, an Israeli Venture Builder — covering everything from your first
+              Pre-Seed angels to Series A. Professional support across the full fundraising journey, with
+              access to a network of investors and strategic partners.
             </p>
 
-            <dl className="mt-8 grid grid-cols-2 gap-6 rounded-xl border border-slate-200 bg-slate-50 p-6 md:grid-cols-4">
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-500">Portfolio</dt>
-                <dd className="mt-1 text-2xl font-bold text-slate-900">40+</dd>
-                <dd className="text-xs text-slate-600">ventures supported</dd>
+            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <div className="mb-2 text-base font-bold text-slate-900">Investor introductions</div>
+                <div className="text-sm text-slate-700">
+                  Warm introductions to a network of investors, angels, and strategic partners — matched to your stage and sector.
+                </div>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-500">Raised</dt>
-                <dd className="mt-1 text-2xl font-bold text-slate-900">$150M+</dd>
-                <dd className="text-xs text-slate-600">total portfolio</dd>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <div className="mb-2 text-base font-bold text-slate-900">Pitch preparation</div>
+                <div className="text-sm text-slate-700">
+                  Hands-on support building your Pitch Deck, Executive Summary, financial model, and investor-meeting practice.
+                </div>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-500">Investors</dt>
-                <dd className="mt-1 text-2xl font-bold text-slate-900">200+</dd>
-                <dd className="text-xs text-slate-600">verified network</dd>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <div className="mb-2 text-base font-bold text-slate-900">Structured process</div>
+                <div className="text-sm text-slate-700">
+                  Guidance through every stage of the round — from Term Sheet, through Due Diligence, to closing.
+                </div>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-500">Guides</dt>
-                <dd className="mt-1 text-2xl font-bold text-slate-900">{linkedGuides.length}</dd>
-                <dd className="text-xs text-slate-600">in this pillar</dd>
-              </div>
-            </dl>
+            </div>
           </header>
 
           <section className="mb-12">
@@ -192,8 +189,7 @@ export default function EnFundingGuidePillar() {
               WeCcelerate, Israel&apos;s leading Venture Builder, offers two fundraising services:
               (1) Investor preparation — pitch deck, financial model, data room, and 5 rounds of pitch
               practice with former-investor advisors. (2) Direct introductions to 200+ verified investors
-              in Israel and the US through warm intros. Our portfolio companies have raised $150M+
-              collectively, with an average time-to-close of 4 months from first investor meeting.
+              in Israel and the US through warm intros. Our portfolio companies have raised significant capital raisedcollectively, with an average time-to-close of 4 months from first investor meeting.
             </p>
           </section>
 

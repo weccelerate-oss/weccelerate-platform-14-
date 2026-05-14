@@ -12,7 +12,7 @@ import { SkipToContent } from '@/components/ui/SkipToContent';
 export const metadata: Metadata = constructMetadata({
   title: 'ליווי MedTech עם לאומית · WeCcelerate',
   description:
-    'ליווי מעטפת 360° ליזמי MedTech — גישה ל-720,000 מטופלים, רופאים מומחים, ייעוץ FDA וליווי רגולטורי. שותפות אסטרטגית לאומית × WeCcelerate.',
+    'ליווי מעטפת 360° ליזמי MedTech — גישה לעולם הקליני דרך לאומית, רופאים מומחים, ייעוץ FDA וליווי רגולטורי. שותפות אסטרטגית לאומית × WeCcelerate.',
   siteKey: 'leumit',
   path: '/',
   locale: 'he_IL',

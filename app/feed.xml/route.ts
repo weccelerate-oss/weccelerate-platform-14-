@@ -79,7 +79,7 @@ ${enclosure}    </item>`;
   <channel>
     <title>WeCcelerate — עדכונים, חדשות ומאמרים</title>
     <link>${escapeXml(siteUrl)}</link>
-    <description>עדכונים, חדשות ותכני בלוג של WeCcelerate — Venture Builder ומאיץ הסטארטאפים המוביל בישראל.</description>
+    <description>עדכונים, חדשות ותכני בלוג של WeCcelerate — Venture Builder ומאיץ סטארטאפים בישראל.</description>
     <language>he-IL</language>
     <copyright>© ${now.getFullYear()} WeCcelerate Ltd.</copyright>
     <lastBuildDate>${toRfc822(now)}</lastBuildDate>

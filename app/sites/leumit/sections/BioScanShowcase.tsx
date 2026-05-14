@@ -10,12 +10,12 @@ const FEATURES = [
   {
     icon: Database,
     title: 'גישה למאגר אנונימי',
-    text: 'דאטה מ-720,000+ מטופלים — הגדול בישראל',
+    text: 'דאטה מ-מאגר נתונים קליני בשותפות לאומית',
   },
   {
     icon: Activity,
     title: 'ניטור בזמן אמת',
-    text: '8.7 מיליון ביקורים שנתיים מנותחים אלגוריתמית',
+    text: 'פעילות קלינית רחבת היקף מנותחים אלגוריתמית',
   },
   {
     icon: ShieldCheck,
@@ -80,7 +80,7 @@ export default function BioScanShowcase() {
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] sm:text-xs font-semibold text-emerald-300">מחובר · LIVE</span>
                 </div>
-                <div className="text-[10px] sm:text-xs text-white/60 mt-1.5">8.7M ביקורים השנה</div>
+                <div className="text-[10px] sm:text-xs text-white/60 mt-1.5">פעילות קלינית רחבה</div>
               </motion.div>
 
               {/* Animated scan line */}

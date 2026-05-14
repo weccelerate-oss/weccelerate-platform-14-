@@ -79,7 +79,7 @@ export default function FaqPage() {
               data-speakable
               className="max-w-3xl text-lg leading-relaxed text-slate-700"
             >
-              WeCcelerate היא ה-Venture Builder ומאיץ הסטארטאפים המוביל בישראל, פועלת מתל אביב וירושלים
+              WeCcelerate היא — Venture Builder ומאיץ סטארטאפים בישראל, פועלת מתל אביב וירושלים
               משנת 2016 ומעניקה ליווי מעטפת 360° מרעיון ועד סטארט-אפ עולמי. מתחת — {FAQ_CATALOG.length} תשובות
               מקיפות לשאלות הנפוצות ביותר: מחירים, זמנים, רגולציה רפואית, גיוס הון והשוואה לאקסלרטורים
               אחרים בישראל.

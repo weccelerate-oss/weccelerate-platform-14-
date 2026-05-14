@@ -111,7 +111,7 @@ const COMPETITORS: Competitor[] = [
     duration: '6 חודשים, ממוקד פיתוח',
     strength: 'גישה ישירה ל-Pitango שלוחות בארץ ובחו"ל לסבבים הבאים.',
     weccelerateAdvantage:
-      'Pitango First ממוקדים בעצמם — אם לא תקבל מהם Series A, נשארת בלי הפנייה. WeCcelerate מחברת ל-200+ משקיעים מאומתים, לא רק קרן אחת.',
+      'Pitango First ממוקדים בעצמם — אם לא תקבל מהם Series A, נשארת בלי הפנייה. WeCcelerate מחברת ל-רשת משקיעים, יזמים ושותפים אסטרטגיים, לא רק קרן אחת.',
   },
 ];
 
@@ -133,7 +133,7 @@ const WECCELERATE_ROW: Record<(typeof HEAD_TO_HEAD_KEYS)[number], string> = {
   'תחום עיקרי': 'MedTech, AI, B2B SaaS, Corporate Venture Building',
   'גישה לדאטה רפואית': '✅ 720K תיקי לאומית — בלעדי בישראל',
   'צוות אופרטיבי': '✅ פיתוח, מוצר, שיווק, משפט מובנים',
-  'רשת משקיעים': '200+ משקיעים מאומתים, היכרויות חמות',
+  'רשת משקיעים': 'רשת משקיעים, יזמים ושותפים אסטרטגיים, היכרויות חמות',
   'יחס לחברה אחרי': 'שותפות ארוכת-טווח, ליווי גם לאחר הסבב',
 };
 
@@ -165,7 +165,7 @@ function buildComparisonsSchema() {
         '@id': `${SITE_CONFIG.url}/comparisons#article`,
         headline: 'WeCcelerate vs מאיצי סטארטאפים בישראל — השוואה מלאה',
         description:
-          'השוואה מפורטת בין WeCcelerate למאיצי הסטארטאפים המובילים בישראל. מודל, אקוויטי, יתרונות ייחודיים.',
+          'השוואה מפורטת בין WeCcelerate למאיצי סטארטאפים בישראל. מודל, אקוויטי, יתרונות ייחודיים.',
         url: `${SITE_CONFIG.url}/comparisons`,
         inLanguage: 'he-IL',
         datePublished: '2026-04-23T00:00:00+03:00',
@@ -244,7 +244,7 @@ export default function ComparisonsPage() {
               <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
                 WeCcelerate
               </span>
-              <span className="text-sm text-blue-900">בונה המיזמים המוביל בישראל</span>
+              <span className="text-sm text-blue-900">בונה מיזמים בישראל</span>
             </div>
             <dl className="grid gap-4 md:grid-cols-2">
               {HEAD_TO_HEAD_KEYS.map((key) => (

@@ -142,10 +142,9 @@ export default function PressPage() {
               WeCcelerate בתקשורת
             </h1>
             <p data-speakable className="max-w-3xl text-lg leading-relaxed text-slate-700">
-              WeCcelerate היא ה-Venture Builder המוביל בישראל, מוכרת על ידי רשות החדשנות
-              הישראלית ובעלת שותפות אסטרטגית בלעדית עם לאומית שירותי בריאות. חברה ב-Start-Up Nation
-              Central וב-IATI. חברות בפורטפוליו גייסו יחד מעל 150 מיליון דולר. בעמוד זה אזכורים,
-              שותפויות ופרסומים רשמיים.
+              WeCcelerate היא Venture Builder ומאיץ סטארטאפים בישראל, מוכרת על ידי רשות החדשנות
+              הישראלית ובעלת שותפות אסטרטגית עם לאומית שירותי בריאות. חברה ב-Start-Up Nation
+              Central וב-IATI. בעמוד זה אזכורים, שותפויות ופרסומים רשמיים.
             </p>
           </header>
 

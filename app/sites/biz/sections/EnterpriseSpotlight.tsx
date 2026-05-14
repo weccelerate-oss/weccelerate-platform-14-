@@ -40,12 +40,12 @@ export default function EnterpriseSpotlight() {
                 >
                   <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-emerald-300/80 mb-1 flex items-center gap-1.5">
                     <TrendingUp className="w-3 h-3" />
-                    תוצאה
+                    היתרון
                   </div>
-                  <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-l from-emerald-300 to-[#D4AF37] bg-clip-text text-transparent tabular-nums">
-                    $150M+
+                  <div className="text-base sm:text-lg font-bold bg-gradient-to-l from-emerald-300 to-[#D4AF37] bg-clip-text text-transparent">
+                    תהליך מובנה
                   </div>
-                  <div className="text-[9px] sm:text-[10px] text-white/50 mt-1">גויסו ע״י לקוחותינו</div>
+                  <div className="text-[9px] sm:text-[10px] text-white/50 mt-1">מ-Feasibility ועד Spin-off</div>
                 </motion.div>
 
                 {/* Floating stat card bottom right */}
@@ -56,10 +56,10 @@ export default function EnterpriseSpotlight() {
                 >
                   <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#D4AF37]/80 mb-1 flex items-center gap-1.5">
                     <Building className="w-3 h-3" />
-                    מיזמים
+                    הצוות
                   </div>
-                  <div className="text-2xl sm:text-3xl font-bold text-white tabular-nums">40+</div>
-                  <div className="text-[9px] sm:text-[10px] text-white/50 mt-1">שהוקמו לארגונים</div>
+                  <div className="text-base sm:text-lg font-bold text-white">צוות מומחים</div>
+                  <div className="text-[9px] sm:text-[10px] text-white/50 mt-1">בלי לבנות יחידה פנימית</div>
                 </motion.div>
 
                 {/* Bottom-left brand badge */}

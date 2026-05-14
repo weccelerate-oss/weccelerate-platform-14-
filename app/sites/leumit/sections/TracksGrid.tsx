@@ -42,8 +42,8 @@ const TRACKS: Track[] = [
     icon: Users,
     title: 'הכנה למשקיעים',
     description:
-      'סימולציות פגישות, הכנה לשאלות קשות, וגישה לרשת של 200+ משקיעי MedTech מובילים.',
-    highlights: ['סימולציות', '200+ משקיעים', 'Term Sheet'],
+      'סימולציות פגישות, הכנה לשאלות קשות, וגישה לרשת משקיעי MedTech וקרנות הון סיכון.',
+    highlights: ['סימולציות', 'רשת משקיעים', 'Term Sheet'],
     image: '/images/landing-assets/leumit/track-investors.png',
   },
   {
@@ -58,8 +58,8 @@ const TRACKS: Track[] = [
     icon: Database,
     title: 'גישה לדאטה רפואי',
     description:
-      'גישה ייחודית לדאטה אנונימית ממאגר לאומית עם 720,000+ מטופלים, באישור ועדת הלסינקי.',
-    highlights: ['720K+ רשומות', 'דאטה אנונימית', 'אישור הלסינקי'],
+      'גישה לדאטה אנונימית דרך השותפות עם לאומית, באישור ועדת הלסינקי ובהתאם לרגולציית הגנת הפרטיות.',
+    highlights: ['דאטה אנונימית', 'אישור הלסינקי', 'שותפות לאומית'],
     image: '/images/landing-assets/leumit/track-data.png',
   },
   {

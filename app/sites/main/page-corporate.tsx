@@ -58,8 +58,8 @@ import { constructMetadata } from '@/lib/seo/metadata';
 // =============================================================================
 
 export const metadata: Metadata = constructMetadata({
-  title: 'WeCcelerate | וויסלרייט - הפלטפורמה המובילה להאצת סטארטאפים בישראל',
-  description: 'WeCcelerate (וויסלרייט) בשיתוף לאומית שירותי בריאות - הפלטפורמה המובילה בישראל להקמת סטארטאפים רפואיים וטכנולוגיים. ליווי יזמים משלב הרעיון, פיתוח MVP, גישה לדאטה רפואי וחיבור למשקיעים.',
+  title: 'WeCcelerate | וויסלרייט - פלטפורמה לליווי סטארטאפיםלהאצת סטארטאפים בישראל',
+  description: 'WeCcelerate (וויסלרייט) בשיתוף לאומית שירותי בריאות - פלטפורמה לליווי סטארטאפיםלהקמת סטארטאפים רפואיים וטכנולוגיים. ליווי יזמים משלב הרעיון, פיתוח MVP, גישה לדאטה רפואי וחיבור למשקיעים.',
   siteKey: 'main',
   path: '/',
   keywords: [
@@ -84,7 +84,7 @@ function HeroSection() {
       <div className="absolute inset-0">
         <Image
           src="/images/hero/corporate-hero.jpg"
-          alt="WeCcelerate - המאיץ העסקי המוביל"
+          alt="WeCcelerate - מאיץ עסקי"
           fill
           priority
           className="object-cover opacity-30"
@@ -114,8 +114,7 @@ function HeroSection() {
           </h1>
 
           <p className="text-2xl md:text-3xl text-white font-light mb-4 leading-relaxed">
-            הפלטפורמה המובילה בישראל
-            <br />
+            פלטפורמה לליווי סטארטאפים<br />
             <strong className="font-semibold">להאצת סטארטאפים רפואיים וטכנולוגיים</strong>
           </p>
 
@@ -515,7 +514,7 @@ function Footer() {
               </div>
             </div>
             <p className="text-slate-400 max-w-sm mb-6">
-              הפלטפורמה המובילה בישראל להאצת סטארטאפים רפואיים וטכנולוגיים,
+              פלטפורמה לליווי סטארטאפים,
               בשיתוף לאומית שירותי בריאות.
             </p>
             <div className="flex items-center gap-4">

@@ -61,7 +61,7 @@ export default function CaseStudies() {
           </ScrollReveal>
           <ScrollReveal variant="up" delay={200}>
             <p className="text-lg text-white/55 leading-relaxed">
-              שלוש דוגמאות מתוך 40+ מיזמים שהקמנו לארגונים בישראל. מוכנים לדבר על שלכם?
+              שלוש דוגמאות מתוך סטארטאפים שהקמנו לארגונים בישראל. מוכנים לדבר על שלכם?
             </p>
           </ScrollReveal>
         </div>
@@ -121,24 +121,20 @@ export default function CaseStudies() {
           ))}
         </div>
 
-        {/* Stats bar */}
+        {/* Value-prop bar — what enterprises gain */}
         <ScrollReveal variant="up" delay={400}>
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto p-8 rounded-2xl border border-white/8 bg-gradient-to-r from-emerald-500/[0.03] to-[#D4AF37]/[0.03]">
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto p-8 rounded-2xl border border-white/8 bg-gradient-to-r from-emerald-500/[0.03] to-[#D4AF37]/[0.03]">
             <div className="text-center md:border-l border-white/10 first:border-l-0 md:px-4">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">$150M+</div>
-              <div className="text-xs text-white/40">גויסו ע״י לקוחות</div>
+              <div className="text-base font-bold text-white mb-1">צוות מומחים</div>
+              <div className="text-xs text-white/60">הנדסה, מוצר, פיננסים ויחסי משקיעים — בלי לבנות צוות פנימי</div>
             </div>
             <div className="text-center md:border-l border-white/10 md:px-4">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">40+</div>
-              <div className="text-xs text-white/40">מיזמים שהוקמו</div>
+              <div className="text-base font-bold text-white mb-1">תהליך מובנה</div>
+              <div className="text-xs text-white/60">מ-Feasibility ועד Spin-off — מתודולוגיה שעוברת רגולציה ושוק</div>
             </div>
             <div className="text-center md:border-l border-white/10 md:px-4">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">200+</div>
-              <div className="text-xs text-white/40">משקיעים ברשת</div>
-            </div>
-            <div className="text-center md:border-l border-white/10 md:px-4">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">6+</div>
-              <div className="text-xs text-white/40">שנות ניסיון מצטבר</div>
+              <div className="text-base font-bold text-white mb-1">חיבור לאקוסיסטם</div>
+              <div className="text-xs text-white/60">היכרות עם משקיעים, שותפים אסטרטגיים ושוק היזמות הישראלי</div>
             </div>
           </div>
         </ScrollReveal>

@@ -21,14 +21,14 @@ const VALUES = [
   },
   {
     icon: Workflow,
-    title: 'מתודולוגיה מוכחת',
-    description: '40+ מיזמים שהוקמו תחת הגג שלנו. אנחנו לא מנסים — אנחנו יודעים מה עובד.',
+    title: 'מתודולוגיה מובנית',
+    description: 'תהליך עבודה מוסדר לכל שלב — מ-Feasibility ועד Spin-off. ידע ותהליכים שעוברים מסטארטאפ לסטארטאפ.',
     image: '/images/landing-assets/biz/value-method.png',
   },
   {
     icon: Network,
-    title: 'רשת 200+ משקיעים',
-    description: 'גישה ישירה לקרנות הון סיכון, אנג׳לים ולקוחות אסטרטגיים בישראל ובחו״ל.',
+    title: 'רשת משקיעים ושותפים',
+    description: 'היכרות עם משקיעים, אנג׳לים ושותפים אסטרטגיים — בהתאמה לשלב, לתחום ולמודל העסקי שלכם.',
     image: '/images/landing-assets/biz/value-network.png',
   },
   {

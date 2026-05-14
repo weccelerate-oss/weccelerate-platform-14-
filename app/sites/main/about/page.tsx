@@ -12,42 +12,42 @@ import AboutContent from './AboutContent';
 // =============================================================================
 
 export const metadata: Metadata = {
-  // title.absolute bypasses the parent layout's title.template so the brand
-  // suffix isn't appended again to a title that already names WeCcelerate.
-  title: { absolute: 'אודות WeCcelerate | וויסלרייט — בונה מיזמים ומאיץ סטארטאפים בישראל' },
-  description:
-    'WeCcelerate (וויסלרייט) — בונה המיזמים (Venture Builder) ומאיץ הסטארטאפים המוביל בישראל. מלווים יזמים מרעיון ועד הצלחה גלובלית: ייעוץ עסקי, פיתוח מוצר, גיוס הון, ומסלול MedTech בלעדי עם לאומית. 40+ מיזמים, 150M$+ גויסו.',
-  keywords: [
-    'וויסלרייט',
-    'WeCcelerate',
-    'Venture Builder ישראל',
-    'בונה מיזמים',
-    'בונה מיזמים ישראל',
-    'מאיץ סטארטאפים',
-    'מאיץ מיזמים',
-    'יזמות טכנולוגית',
-    'יזמות',
-    'גיוס הון סטארטאפ',
-    'גיוס הון מיזם',
-    'ליווי מיזמים',
-    'ליווי יזמים',
-    'הקמת מיזם בישראל',
-    'מיזם הזנק',
-    'חברת הזנק',
-  ],
-  openGraph: {
-    title: 'אודות WeCcelerate — בונה המיזמים המוביל בישראל',
-    description:
-      'הכירו את השותפים וההנהלה מאחורי בונה המיזמים (Venture Builder) ומאיץ הסטארטאפים המוביל בישראל. 40+ מיזמים, 150M$+ גויסו.',
-    type: 'website',
-    locale: 'he_IL',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'אודות WeCcelerate — הצוות והחזון',
-    description:
-      'הכירו את השותפים וההנהלה מאחורי מאיץ הסטארטאפים המוביל בישראל.',
-  },
+ // title.absolute bypasses the parent layout's title.template so the brand
+ // suffix isn't appended again to a title that already names WeCcelerate.
+ title: { absolute: 'אודות WeCcelerate | וויסלרייט — בונה מיזמים ומאיץ סטארטאפים בישראל' },
+ description:
+ 'WeCcelerate (וויסלרייט) — בונה המיזמים (Venture Builder) ומאיץ סטארטאפים בישראל. מלווים יזמים מרעיון ועד הצלחה גלובלית: ייעוץ עסקי, פיתוח מוצר, גיוס הון, ומסלול MedTech בלעדי עם לאומית. ליווי סטארטאפים בכל שלבי הפיתוח.',
+ keywords: [
+ 'וויסלרייט',
+ 'WeCcelerate',
+ 'Venture Builder ישראל',
+ 'בונה מיזמים',
+ 'בונה מיזמים ישראל',
+ 'מאיץ סטארטאפים',
+ 'מאיץ מיזמים',
+ 'יזמות טכנולוגית',
+ 'יזמות',
+ 'גיוס הון סטארטאפ',
+ 'גיוס הון מיזם',
+ 'ליווי מיזמים',
+ 'ליווי יזמים',
+ 'הקמת מיזם בישראל',
+ 'מיזם הזנק',
+ 'חברת הזנק',
+ ],
+ openGraph: {
+ title: 'אודות WeCcelerate — בונה מיזמים בישראל',
+ description:
+ 'הכירו את השותפים וההנהלה מאחורי בונה המיזמים (Venture Builder) ומאיץ סטארטאפים בישראל. ליווי סטארטאפים בכל שלבי הפיתוח.',
+ type: 'website',
+ locale: 'he_IL',
+ },
+ twitter: {
+ card: 'summary_large_image',
+ title: 'אודות WeCcelerate — הצוות והחזון',
+ description:
+ 'הכירו את השותפים וההנהלה מאחורי מאיץ סטארטאפים בישראל.',
+ },
 };
 
 // =============================================================================
@@ -55,17 +55,17 @@ export const metadata: Metadata = {
 // =============================================================================
 
 interface SchemaPerson {
-  name: string;
-  jobTitle: string;
-  image: string;
+ name: string;
+ jobTitle: string;
+ image: string;
 }
 
 const teamForSchema: SchemaPerson[] = [
-  { name: 'Alon Pinchas', jobTitle: 'CEO & Founder', image: '/images/team/alon.jpg' },
-  { name: 'Ido Sabag', jobTitle: 'VP & Head of Technology', image: '/images/ido2.png' },
-  { name: 'Avraham Hinuch', jobTitle: 'VP of Marketing', image: '/images/team/avraham.jpg' },
-  { name: 'Noam Ohayon', jobTitle: 'Head of Business Development', image: '/images/noam2.png' },
-  { name: 'Lioz Zohar', jobTitle: 'Head of Strategy', image: '/images/team/lioz.jpg' },
+ { name: 'Alon Pinchas', jobTitle: 'CEO & Founder', image: '/images/team/alon.jpg' },
+ { name: 'Ido Sabag', jobTitle: 'VP & Head of Technology', image: '/images/ido2.png' },
+ { name: 'Avraham Hinuch', jobTitle: 'VP of Marketing', image: '/images/team/avraham.jpg' },
+ { name: 'Noam Ohayon', jobTitle: 'Head of Business Development', image: '/images/noam2.png' },
+ { name: 'Lioz Zohar', jobTitle: 'Head of Strategy', image: '/images/team/lioz.jpg' },
 ];
 
 // =============================================================================
@@ -73,65 +73,65 @@ const teamForSchema: SchemaPerson[] = [
 // =============================================================================
 
 function generateAboutPageSchema() {
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'AboutPage',
-        '@id': 'https://weccelerate.co.il/about',
-        name: 'אודות WeCcelerate',
-        description:
-          'WeCcelerate — חברת Venture Building ישראלית. ייעוץ, פיתוח וליווי סטארטאפים.',
-        inLanguage: 'he',
-        isPartOf: {
-          '@type': 'WebSite',
-          '@id': 'https://weccelerate.co.il',
-          name: 'WeCcelerate',
-          url: 'https://weccelerate.co.il',
-        },
-      },
-      {
-        '@type': 'Organization',
-        '@id': 'https://weccelerate.co.il/#organization',
-        name: 'WeCcelerate',
-        alternateName: 'וויסלרייט',
-        url: 'https://weccelerate.co.il',
-        logo: 'https://weccelerate.co.il/images/logo.svg',
-        description:
-          'Venture Builder ומאיץ סטארטאפים ישראלי — ליווי יזמים מקצה לקצה בתחומי הטכנולוגיה, הרפואה וההשקעות.',
-        // sameAs: official, owned WeCcelerate profiles. Twitter/X and GitHub
-        // are intentionally omitted — Twitter is not company-owned; GitHub
-        // is not user-facing. Including unowned profiles hurts entity
-        // resolution because LLMs/Google verify ownership by following these
-        // links.
-        sameAs: [
-          'https://www.linkedin.com/company/weccelerate',
-          'https://www.facebook.com/weccelerate',
-          'https://www.instagram.com/weccelerate.ltd',
-          'https://www.youtube.com/@WeCcelerate.Ltd1',
-          'https://www.tiktok.com/@weccelerate',
-          'https://www.crunchbase.com/organization/weccelerat',
-        ],
-        employee: teamForSchema.map((p) => ({
-          '@type': 'Person',
-          name: p.name,
-          jobTitle: p.jobTitle,
-          image: `https://weccelerate.co.il${p.image}`,
-          worksFor: {
-            '@type': 'Organization',
-            name: 'WeCcelerate',
-          },
-        })),
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'בית', item: 'https://weccelerate.co.il' },
-          { '@type': 'ListItem', position: 2, name: 'אודות', item: 'https://weccelerate.co.il/about' },
-        ],
-      },
-    ],
-  };
+ return {
+ '@context': 'https://schema.org',
+ '@graph': [
+ {
+ '@type': 'AboutPage',
+ '@id': 'https://weccelerate.co.il/about',
+ name: 'אודות WeCcelerate',
+ description:
+ 'WeCcelerate — חברת Venture Building ישראלית. ייעוץ, פיתוח וליווי סטארטאפים.',
+ inLanguage: 'he',
+ isPartOf: {
+ '@type': 'WebSite',
+ '@id': 'https://weccelerate.co.il',
+ name: 'WeCcelerate',
+ url: 'https://weccelerate.co.il',
+ },
+ },
+ {
+ '@type': 'Organization',
+ '@id': 'https://weccelerate.co.il/#organization',
+ name: 'WeCcelerate',
+ alternateName: 'וויסלרייט',
+ url: 'https://weccelerate.co.il',
+ logo: 'https://weccelerate.co.il/images/logo.svg',
+ description:
+ 'Venture Builder ומאיץ סטארטאפים ישראלי — ליווי יזמים מקצה לקצה בתחומי הטכנולוגיה, הרפואה וההשקעות.',
+ // sameAs: official, owned WeCcelerate profiles. Twitter/X and GitHub
+ // are intentionally omitted — Twitter is not company-owned; GitHub
+ // is not user-facing. Including unowned profiles hurts entity
+ // resolution because LLMs/Google verify ownership by following these
+ // links.
+ sameAs: [
+ 'https://www.linkedin.com/company/weccelerate',
+ 'https://www.facebook.com/weccelerate',
+ 'https://www.instagram.com/weccelerate.ltd',
+ 'https://www.youtube.com/@WeCcelerate.Ltd1',
+ 'https://www.tiktok.com/@weccelerate',
+ 'https://www.crunchbase.com/organization/weccelerat',
+ ],
+ employee: teamForSchema.map((p) => ({
+ '@type': 'Person',
+ name: p.name,
+ jobTitle: p.jobTitle,
+ image: `https://weccelerate.co.il${p.image}`,
+ worksFor: {
+ '@type': 'Organization',
+ name: 'WeCcelerate',
+ },
+ })),
+ },
+ {
+ '@type': 'BreadcrumbList',
+ itemListElement: [
+ { '@type': 'ListItem', position: 1, name: 'בית', item: 'https://weccelerate.co.il' },
+ { '@type': 'ListItem', position: 2, name: 'אודות', item: 'https://weccelerate.co.il/about' },
+ ],
+ },
+ ],
+ };
 }
 
 // =============================================================================
@@ -139,15 +139,15 @@ function generateAboutPageSchema() {
 // =============================================================================
 
 export default function AboutPage() {
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(generateAboutPageSchema()),
-        }}
-      />
-      <AboutContent />
-    </>
-  );
+ return (
+ <>
+ <script
+ type="application/ld+json"
+ dangerouslySetInnerHTML={{
+ __html: JSON.stringify(generateAboutPageSchema()),
+ }}
+ />
+ <AboutContent />
+ </>
+ );
 }

@@ -387,8 +387,7 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
           <section className="mb-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white">
             <h2 className="mb-3 text-2xl font-bold">{guide.ctaLabel}</h2>
             <p className="mb-5 opacity-90">
-              The WeCcelerate team has supported 40+ ventures that collectively raised over
-              $150M. Start with a free introductory call.
+              The WeCcelerate team has supported ventures launched that collectively significant capital raised. Start with a free introductory call.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link

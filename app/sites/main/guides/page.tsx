@@ -84,10 +84,9 @@ export default function GuidesHubPage() {
               data-speakable
               className="max-w-3xl text-lg leading-relaxed text-slate-700"
             >
-              WeCcelerate היא ה-Venture Builder ומאיץ הסטארטאפים המוביל בישראל. {GUIDES.length} מדריכים
+              WeCcelerate היא — Venture Builder ומאיץ סטארטאפים בישראל. {GUIDES.length} מדריכים
               מקצועיים מכסים את כל מה שיזם ישראלי צריך לדעת — מרעיון לסטארטאפ, דרך בניית MVP וגיוס
-              משקיעים, ועד אישורי FDA ו-CE למוצרים רפואיים. מעודכן ל-2026, מבוסס על ליווי של 40+ ונצ'רים
-              שגייסו מעל 150 מיליון דולר.
+              משקיעים, ועד אישורי FDA ו-CE למוצרים רפואיים. מעודכן ל-2026, מבוסס על ליווי של סטארטאפים מתחומי AI, MedTech, SaaS.
             </p>
           </header>
 

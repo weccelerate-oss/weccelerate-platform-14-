@@ -114,7 +114,7 @@ const realArticles = [
   {
     title: 'WeCcelerate מופיעה ב-Startup Nation Finder כמאיץ מוביל',
     excerpt:
-      'Leumit WeCcelerate נכללת בפלטפורמת Startup Nation Finder של Start-Up Nation Central — הגוף המוביל בישראל למיפוי אקוסיסטם החדשנות. הפרופיל מפרט את שירותי המאיץ בתחום הבריאות הדיגיטלית.',
+      'Leumit WeCcelerate נכללת בפלטפורמת Startup Nation Finder של Start-Up Nation Central — הגוף פעיל בישראל למיפוי אקוסיסטם החדשנות. הפרופיל מפרט את שירותי המאיץ בתחום הבריאות הדיגיטלית.',
     link: 'https://finder.startupnationcentral.org/program_page/leumit-weccelerate1',
     urgencyLevel: 'NORMAL' as const,
     isPinned: false,

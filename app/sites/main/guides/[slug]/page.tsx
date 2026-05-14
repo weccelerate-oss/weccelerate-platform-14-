@@ -396,7 +396,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
           <section className="mb-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white">
             <h2 className="mb-3 text-2xl font-bold">{guide.ctaLabel}</h2>
             <p className="mb-5 opacity-90">
-              צוות WeCcelerate ליווה 40+ ונצ&apos;רים שגייסו יחד מעל 150 מיליון דולר.
+              צוות WeCcelerate ליווה סטארטאפים בפורטפוליו.
               שיחת הכרות ראשונה ללא עלות.
             </p>
             <div className="flex flex-wrap gap-3">

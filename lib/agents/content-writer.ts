@@ -437,6 +437,29 @@ function lintPolicy(a: ArticlePayload): PolicyLintResult {
     if (p.re.test(text)) violations.push(p.label);
   }
 
+  // Banned price commitments — specific NIS / USD amounts attached to a service.
+  const bannedPrices: Array<{ re: RegExp; label: string }> = [
+    { re: /\d{1,3}(?:,\d{3})*\s*ש[\"״]?ח/, label: 'specific NIS price' },
+    { re: /\$\s?\d{1,3}(?:,\d{3})*\s+(?:for|עבור|תמורת)/i, label: 'specific USD price' },
+    { re: /\b(?:עולה|costs?)\s+\$?\d{1,3}(?:,\d{3})*/i, label: '"costs X" price commitment' },
+    { re: /equity[\-\s]?for[\-\s]?services.*?\d+[\-–]\d+%/i, label: 'specific equity %' },
+    { re: /\b\d+[\-–]\d+%\s+(?:אקוויטי|equity|פלוס\s+דיוויי)/i, label: 'specific equity range' },
+  ];
+  for (const p of bannedPrices) {
+    if (p.re.test(text)) violations.push(p.label);
+  }
+
+  // Banned time commitments — specific weeks/months promises attached to a service.
+  const bannedTimes: Array<{ re: RegExp; label: string }> = [
+    { re: /\bתוך\s+\d+[\-–]\d+\s*(שבועות|חודשים|שבועיים)/, label: 'time commitment "within X weeks/months"' },
+    { re: /\bב[\-]?\d+[\-–]\d+\s*(שבועות|חודשים)\s+(?:בלבד|מתחילת|במקום)/, label: 'specific timeframe vs market average' },
+    { re: /\bwithin\s+\d+[\-–]\d+\s+(weeks|months)/i, label: 'time commitment "within X weeks/months"' },
+    { re: /\bin\s+\d+[\-–]\d+\s+(weeks|months)\s+(?:vs|instead\s+of)/i, label: 'specific time vs market average' },
+  ];
+  for (const p of bannedTimes) {
+    if (p.re.test(text)) violations.push(p.label);
+  }
+
   return { passed: violations.length === 0, violations };
 }
 
