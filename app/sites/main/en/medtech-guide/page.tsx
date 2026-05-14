@@ -213,10 +213,10 @@ export default function EnMedTechGuidePillar() {
               Six tracks, FDA-experienced advisors, dedicated landing page with quick contact form.
             </p>
             <a
-              href="https://leumit.weccelerate.co.il"
+              href="https://weccelerate.co.il/services/medtech-leumit"
               className="inline-block rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700"
             >
-              leumit.weccelerate.co.il →
+              More on the MedTech track with Leumit →
             </a>
           </section>
 

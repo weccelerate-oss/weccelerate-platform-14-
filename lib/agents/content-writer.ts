@@ -17,6 +17,7 @@
 import { prisma } from '@/lib/db';
 import { GUIDES, type Guide } from '@/lib/seo/guides-catalog';
 import { logDecision } from './decision-log';
+import { DAVID_WRITING_RULES_HE, VERIFIED_FACTS } from './writing-rules';
 
 const MODEL_RESEARCH = 'claude-sonnet-4-6';
 const MODEL_WRITE = 'claude-opus-4-7';
@@ -79,6 +80,29 @@ export async function writeNextGuide(): Promise<WriteResult> {
     const internalLinks = pickInternalLinks(article.titleHe, article.contentHe);
     const factCheck = await runFactCheck(article.contentHe, research.sources);
     const seoLint = lintSeo(article);
+    const policyLint = lintPolicy(article);
+
+    // Policy gate — hard reject if rules are violated, regardless of other scores.
+    if (!policyLint.passed) {
+      await logDecision({
+        agent: 'content-writer',
+        action: 'skipped-publish-policy',
+        reasoning:
+          `דחיתי את המאמר על "${gap.query}" — הפר את כללי הכתיבה: ` +
+          policyLint.violations.join('; ') +
+          `. הפער חוזר לתור עם הוראה לכתוב בלי להמציא נתונים על WeCcelerate.`,
+        payload: { gapId: gap.id, violations: policyLint.violations },
+        success: false,
+      });
+      await prisma.contentGap.update({
+        where: { id: gap.id },
+        data: {
+          status: 'open',
+          rejectReason: `Policy violations: ${policyLint.violations.join('; ')}. נסה שוב בלי להמציא נתונים.`,
+        },
+      });
+      return { ok: false, reason: `Policy: ${policyLint.violations[0]}` };
+    }
 
     // Quality gate — refuse to publish if either score is too low.
     const QUALITY_FLOOR = 60;
@@ -258,27 +282,36 @@ async function runWrite(query: string, outline: string, sources: string[]): Prom
     messages: [
       {
         role: 'user',
-        content: `Write the full Hebrew guide using this outline:
+        content: `${DAVID_WRITING_RULES_HE}
+
+---
+
+עובדות מאומתות על WeCcelerate (אלה המספרים היחידים שמותר לציין):
+${JSON.stringify(VERIFIED_FACTS, null, 2)}
+
+---
+
+עכשיו תכתוב את המדריך המלא בעברית לפי ה-outline הבא:
 
 ${outline}
 
-Research sources (cite when relevant):
+מקורות מחקר (תצטט כשרלוונטי, רק מקורות חיצוניים מהרשימה):
 ${sources.slice(0, 12).join('\n')}
 
-Requirements:
-- 1800-2500 words of Hebrew (RTL).
-- Each major section should have one quotable sentence (LLM-citation-bait): a definition, a stat, or a clear claim. These short sentences are what AI engines pull as snippets.
-- Include the H1, then a 2-line lede, then sections. Use markdown.
-- Internal links use the Hebrew anchor "[anchor](/guides/relevant-slug)" where relevant. Add a "## מדריכים קשורים" section at the end.
-- Add a "## שאלות נפוצות" section with 5-7 FAQ Q&A pairs.
-- Tone: WeCcelerate (Israel's Venture Builder). Practical, Israeli context, evidence-based.
+דרישות מבניות:
+- 1800-2500 מילים בעברית (RTL).
+- בכל סקציה ראשית — משפט אחד citation-bait: הגדרה ברורה, עובדה כללית מתחום (לא על WeCcelerate ספציפית), או הסבר תהליך.
+- מבנה: H1, פסקת מבוא קצרה, סקציות.
+- קישורים פנימיים: רק [anchor](/guides/SLUG) של מדריכים שמופיעים ברשימה: ${(GUIDES as readonly Guide[]).map((g) => g.slug).join(', ')}
+- סקציה "## שאלות נפוצות" עם 5-7 שאלות. התשובות בלשון תיאור-שירות, לא הבטחה.
+- סקציה "## איך WeCcelerate יכולה לעזור" — תיאור הvalue שהיזם מקבל מהשירותים, בלשון "אנחנו מציעים", לא "אנחנו עושים".
 
-Return JSON only:
+החזר רק JSON:
 {
   "titleHe": "...",
-  "titleEn": "... (optional, English title)",
-  "metaDescription": "150-160 char Hebrew",
-  "contentHe": "full markdown",
+  "titleEn": "... (אופציונלי)",
+  "metaDescription": "150-160 תווים בעברית, value-prop לא הבטחה",
+  "contentHe": "מלא markdown",
   "contentEn": null
 }`,
       },
@@ -354,6 +387,57 @@ function lintSeo(a: ArticlePayload): SeoLintResult {
   const hasFaq = /##\s*שאלות נפוצות/i.test(a.contentHe);
   if (!hasFaq) { issues.push('missing FAQ section'); score -= 15; }
   return { score: Math.max(0, score), issues };
+}
+
+/**
+ * Policy lint — kills any article that breaks the writing rules:
+ *   - Links to leumit.weccelerate.co.il (the broken subdomain)
+ *   - Specific WeCcelerate stats David is forbidden to make up
+ *   - Outcome-promise verbs in Hebrew ("נביא לך", "נצליח", "תקבל אישור")
+ * Returns a score of 0 means hard-rejection — the gap is reopened
+ * regardless of fact-check / SEO scores.
+ */
+interface PolicyLintResult {
+  passed: boolean;
+  violations: string[];
+}
+
+function lintPolicy(a: ArticlePayload): PolicyLintResult {
+  const violations: string[] = [];
+  const text = `${a.titleHe}\n${a.metaDescription}\n${a.contentHe}`;
+
+  // Hard-banned URL — the broken Leumit subdomain.
+  if (/leumit\.weccelerate\.co\.il/i.test(text)) {
+    violations.push('Linked to broken leumit.weccelerate.co.il');
+  }
+
+  // Banned WeCcelerate-specific number patterns (the most common invented stats).
+  const bannedNumberPatterns: Array<{ re: RegExp; label: string }> = [
+    { re: /\b\$?\s?150\s?(M|מיליון|מיל)/i, label: 'claims $150M raised' },
+    { re: /\b40\+?\s*(חברות|ventures|portfolio)/i, label: 'claims 40+ companies' },
+    { re: /\b95%\s*(הצלחה|success|אישור)/i, label: 'claims 95% success rate' },
+    { re: /\b8\.?7\s?(M|מיליון).*?(ביקור|visits|clinical)/i, label: 'claims 8.7M clinical visits' },
+    { re: /\b720,?000.*?(תיק|מטופל|patient|record)/i, label: 'claims 720,000 patient records' },
+    { re: /\b200\+?\s*(משקיע|investor)/i, label: 'claims 200+ investors' },
+    { re: /\bהמאיץ\s+הראשון|המוביל\s+ב.*ישראל|הגדול\s+ביותר/i, label: 'unverified leadership claim' },
+  ];
+  for (const p of bannedNumberPatterns) {
+    if (p.re.test(text)) violations.push(p.label);
+  }
+
+  // Banned outcome promises.
+  const bannedPromises: Array<{ re: RegExp; label: string }> = [
+    { re: /\bנביא\s+לך\s+(משקיע|לקוח|אקזיט|אישור)/i, label: 'promise: "we will bring you ..."' },
+    { re: /\bנגייס\s+לך/i, label: 'promise: "we will raise for you"' },
+    { re: /\bתקבל\s+(אישור|פטנט|FDA|CE)\s+(ב|תוך)/i, label: 'promise: guaranteed approval in timeframe' },
+    { re: /\bמובטח[ת]?\b/, label: 'word "guaranteed"' },
+    { re: /\b100%\s+(הצלחה|מובטח|מצליח)/i, label: 'claims 100% success' },
+  ];
+  for (const p of bannedPromises) {
+    if (p.re.test(text)) violations.push(p.label);
+  }
+
+  return { passed: violations.length === 0, violations };
 }
 
 // =============================================================================

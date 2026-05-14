@@ -427,16 +427,15 @@ WeCcelerate's official social profiles. Brand-name handles on Twitter/X, GitHub,
 ## Dedicated Landing Pages and Sub-brands
 
 ### Leumit × WeCcelerate MedTech Track
-- URL: https://leumit.weccelerate.co.il
+- URL: https://weccelerate.co.il/services/medtech-leumit
 - Audience: MedTech and digital health entrepreneurs
-- Key value propositions: 720,000+ patient records, 8.7 million annual anonymized clinical visits, advisory board with former FDA senior advisors, six structured tracks (Clinical Advisory, Business & Finance, Investor Preparation, Marketing Strategy, Medical Data Access, FDA & CE Guidance)
-- Primary CTA: free medical-business consultation call
+- What entrepreneurs gain: structured access to clinical advisory through the Leumit partnership, regulatory pathway support, introductions to medical and business experts
+- Primary CTA: free initial consultation call
 
 ### WeCcelerate Business (Corporate Venture Building)
 - URL: https://biz.weccelerate.co.il
 - Audience: mid-sized to large enterprises seeking to build ventures without spinning up internal teams
 - Workflow: Feasibility Analysis → Business Model Design → MVP Development → Spin-off Launch
-- Track record: 40+ ventures built, USD 150M+ raised by portfolio companies
 - Pricing: equity partnership, success fee, or retainer
 - IP policy: full IP ownership remains with the client in corporate engagements
 - Primary CTA: strategic 45-minute partner call

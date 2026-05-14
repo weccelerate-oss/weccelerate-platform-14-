@@ -78,7 +78,7 @@ function buildPillarSchema() {
           '@type': 'MedicalOrganization',
           '@id': `${SITE_CONFIG.url}/leumit/#organization`,
           name: 'WeCcelerate × Leumit MedTech Track',
-          url: 'https://leumit.weccelerate.co.il',
+          url: 'https://weccelerate.co.il/services/medtech-leumit',
         },
       },
       {
@@ -275,10 +275,10 @@ export default function MedTechGuidePillar() {
               דף ייעודי לתוכנית — ששת המסלולים, האיש הקבוע מ-FDA, וטופס פנייה מהיר.
             </p>
             <a
-              href="https://leumit.weccelerate.co.il"
+              href="https://weccelerate.co.il/services/medtech-leumit"
               className="inline-block rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700"
             >
-              leumit.weccelerate.co.il →
+              עוד על מסלול MedTech של לאומית →
             </a>
           </section>
 
