@@ -105,7 +105,7 @@ const medtechServices: Service[] = [
  {
  question: 'כמה זמן לוקח לקבל אישור רגולטורי?',
  questionEn: 'How long does regulatory approval take?',
- answer: 'תהליך אישור CE אורך בממוצע בלוחות זמנים תלויי-מסלול מהגשת התיק המלא. אנו מסייעים בהכנת התיק בצורה מקיפה שמפחיתה את הסיכוי לבקשות הבהרה ומקצרת את הזמן לאישור. לפרויקטים מורכבים יותר, התהליך יכול להימשך בלוחות זמנים תלויי-מסלול.',
+ answer: 'תהליך אישור CE אורך זמן שתלוי בסיווג המכשיר ובמורכבות התיק. אנו מסייעים בהכנת התיק בצורה מקיפה שמפחיתה את הסיכוי לבקשות הבהרה ומקצרת את הזמן לאישור. לפרויקטים מורכבים יותר התהליך מתארך בהתאם.',
  },
  {
  question: 'האם אתם עוזרים גם עם אישור CE באירופה?',
@@ -121,10 +121,6 @@ const medtechServices: Service[] = [
  cta: {
  text: 'קבלו ייעוץ רגולטורי',
  href: '/contact?service=regulatory',
- },
- stats: {
- value: '95%',
- label: 'אחוז הצלחה באישורים',
  },
  },
  {
@@ -146,7 +142,7 @@ const medtechServices: Service[] = [
  {
  question: 'איך מתבצע תהליך קבלת חוות דעת רפואית?',
  questionEn: 'How does the medical opinion process work?',
- answer: 'אנו מחברים את היזם לרופאים מומחים בתחום הרלוונטי מתוך רשת לאומית. הרופאים בוחנים את המיזם מבחינה קלינית ומספקים חוות דעת מקצועית על הרלוונטיות, הפוטנציאל והאתגרים. התהליך אורך בממוצע בלוחות זמנים מותאמים.',
+ answer: 'אנו מחברים את היזם לרופאים מומחים בתחום הרלוונטי מתוך רשת לאומית. הרופאים בוחנים את המיזם מבחינה קלינית ומספקים חוות דעת מקצועית על הרלוונטיות, הפוטנציאל והאתגרים. הלוחות זמנים נקבעים פר-מיזם בהתאם לסקופ.',
  },
  {
  question: 'מה כוללת סקירת שוק בתחום ה-MedTech?',
@@ -162,10 +158,6 @@ const medtechServices: Service[] = [
  cta: {
  text: 'קבלו ייעוץ מוקדם',
  href: '/contact?service=early-stage',
- },
- stats: {
- value: '2000+',
- label: 'רופאים מומחים',
  },
  },
  {
@@ -204,10 +196,6 @@ const medtechServices: Service[] = [
  text: 'בקשו גישה לדאטה',
  href: '/contact?service=data',
  },
- stats: {
- value: '10M+',
- label: 'רשומות רפואיות',
- },
  },
  {
  id: 'compliance',
@@ -239,10 +227,6 @@ const medtechServices: Service[] = [
  cta: {
  text: 'בדקו עמידה בתקנים',
  href: '/contact?service=compliance',
- },
- stats: {
- value: '100%',
- label: 'עמידה בתקנים',
  },
  },
 ];
@@ -317,8 +301,7 @@ function generatePageSchema() {
  description: 'שירותי ייעוץ רגולטורי, ניסויים קליניים ואימות דאטה לסטארטאפים רפואיים',
  inLanguage: 'he',
  },
- // All Services
-...medtechServices.map(generateServiceSchema),
+ // All Services...medtechServices.map(generateServiceSchema),
  // FAQ Schema
  generateFAQSchema(medtechServices),
  ],

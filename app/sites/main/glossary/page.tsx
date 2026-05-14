@@ -516,8 +516,7 @@ function buildGlossarySchema() {
  alternateName: t.english,
  description: t.definition,
  termCode: t.id,
- inDefinedTermSet: { '@id': `${SITE_CONFIG.url}/glossary#termset` },
-...(t.guideSlug && {
+ inDefinedTermSet: { '@id': `${SITE_CONFIG.url}/glossary#termset` },...(t.guideSlug && {
  url: `${SITE_CONFIG.url}/guides/${t.guideSlug}`,
  }),
  })),

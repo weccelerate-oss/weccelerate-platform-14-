@@ -136,8 +136,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does it cost to develop an app?',
  },
  answer: {
- he: 'MVP בסיסי למובייל: היקף תלוי (בלוחות זמנים מותאמים). פלטפורמת ווב מלאה: היקף תלוי (בלוחות זמנים תלויי-מסלול). SaaS מורכב עם AI — היקף נקבע לפי המוצר. העלות תלויה במורכבות, בגודל הצוות ובניסיון של המפתחים.',
- en: 'Basic mobile MVP: 50,000–150,000 ILS (approximately USD 13,500–,500), in adjusted timelines. Full web platform: 120,000–400,000 ILS, over a flexible duration. Complex SaaS with AI: 250,000 ILS+. Cost depends on complexity, team size, and developer seniority.',
+ he: 'העלות והלוחות הזמנים נקבעים אישית לפי המוצר — MVP בסיסי למובייל, פלטפורמת ווב, או SaaS מורכב עם AI הם פרויקטים שונים מאוד מבחינת מורכבות, גודל צוות וניסיון מפתחים. נשמח לתת הצעת מחיר בפגישת היכרות חינם.',
+ en: 'MVP cost depends on platform, backend complexity, and team seniority. We scope each project individually — basic mobile MVPs, web SaaS platforms, and AI-integrated apps each carry very different price points and timelines. Schedule a free intro call to scope your project.',
  },
  },
  {
@@ -232,8 +232,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does a professional pitch deck cost?',
  },
  answer: {
- he: 'pitch deck מקצועי עם עיצוב, מודל פיננסי ותרגול — 15,000–,היקף ולוחות זמנים שנקבעים אישית. כולל גם pitch practice וסימולציות מול פרסונות משקיעים.',
- en: 'A professional pitch deck with design, financial modeling, and practice: 15,000–,000 ILS, delivered over in adjusted timelines. Includes pitch practice and simulations with investor personas.',
+ he: 'Pitch Deck מקצועי כולל עיצוב, מודל פיננסי, תרגול וסימולציות מול פרסונות משקיעים. ההיקף ולוחות הזמנים נקבעים אישית בהתאם לסטארטאפ. נשמח לתאם פגישת היכרות חינם.',
+ en: 'A professional pitch deck includes design, financial modeling, practice, and investor-persona simulations. Scope and timeline are tailored per startup. Schedule a free intro call to align on what you need.',
  },
  },
 

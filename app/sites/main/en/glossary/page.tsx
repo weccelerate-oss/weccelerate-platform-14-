@@ -515,8 +515,7 @@ function buildGlossarySchema() {
  alternateName: t.hebrew,
  description: t.definition,
  termCode: t.id,
- inDefinedTermSet: { '@id': `${SITE_CONFIG.url}/en/glossary#termset` },
-...(t.guideHebrewSlug && {
+ inDefinedTermSet: { '@id': `${SITE_CONFIG.url}/en/glossary#termset` },...(t.guideHebrewSlug && {
  url:
  getEnSlugFromHebrew(t.guideHebrewSlug)
  ? `${SITE_CONFIG.url}/en/guides/${getEnSlugFromHebrew(t.guideHebrewSlug)}`

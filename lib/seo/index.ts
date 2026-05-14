@@ -384,11 +384,11 @@ export interface ConstructMetadataParams {
 /**
  * Get a random Hebrew brand variation for SEO diversity
  */
-function getHebrewBrandVariation(): string {
+function getHebrewBrandVariation: string {
  const variations = BRAND.hebrew.variations;
  // Use a deterministic selection based on current date to ensure consistency
  // but still rotate through variations
- const index = new Date().getDate() % variations.length;
+ const index = new Date.getDate % variations.length;
  return variations[index];
 }
 
@@ -419,15 +419,7 @@ export function constructMetadata({
  const metaDescription = description || SITE_CONFIG.defaultDescription;
  
  // Compile all keywords (deduplicated) — semantic core first
- const allKeywords = [
- ...SEMANTIC_CORE,
- ...BRAND.english.variations,
- ...BRAND.hebrew.variations,
- ...KEYWORDS.userIntent.hebrew,
- ...KEYWORDS.userIntent.english,
- ...KEYWORDS.industry.hebrew,
- ...KEYWORDS.industry.english,
- ...keywords,
+ const allKeywords = [...SEMANTIC_CORE,...BRAND.english.variations,...BRAND.hebrew.variations,...KEYWORDS.userIntent.hebrew,...KEYWORDS.userIntent.english,...KEYWORDS.industry.hebrew,...KEYWORDS.industry.english,...keywords,
  ];
  const uniqueKeywords = [...new Set(allKeywords)];
  
@@ -480,9 +472,7 @@ export function constructMetadata({
  width: 1200,
  height: 630,
  alt: `WeCcelerate - ${title}`,
- }],
- ...(publishedTime && { publishedTime }),
- ...(modifiedTime && { modifiedTime }),
+ }],...(publishedTime && { publishedTime }),...(modifiedTime && { modifiedTime }),
  },
  
  twitter: {
@@ -497,8 +487,7 @@ export function constructMetadata({
  verification: {
  google: process.env.GOOGLE_SITE_VERIFICATION,
  yandex: process.env.YANDEX_VERIFICATION,
- other: {
- ...(process.env.BING_VERIFICATION ? { 'msvalidate.01': process.env.BING_VERIFICATION } : {}),
+ other: {...(process.env.BING_VERIFICATION ? { 'msvalidate.01': process.env.BING_VERIFICATION } : {}),
  },
  },
  

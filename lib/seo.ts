@@ -657,8 +657,8 @@ export const FAQ_ITEMS = [
  en: 'How much does it cost to develop an app?',
  },
  answer: {
- he: 'עלות פיתוח אפליקציה תלויה במורכבות ובפיצ\'רים. MVP בסיסי יכול לעלות היקף תלוי, אפליקציה מלאה היקף תלוי, ופרויקטים מורכבים יותר. ב-WeCcelerate אנו מציעים הערכת עלויות חינמית ומסלולי תשלום גמישים.',
- en: 'App development costs depend on complexity and features. A basic MVP can cost $10,000-15,000, a full app $15,000-,000, and complex projects more. At WeCcelerate we offer free cost estimates and flexible payment plans.',
+ he: 'עלות פיתוח אפליקציה תלויה במורכבות, בפיצ\'רים ובפלטפורמה. כל פרויקט מתומחר אישית לפי ההיקף — MVP בסיסי, אפליקציה מלאה, ו-SaaS מורכב הם פרויקטים שונים מאוד. ב-WeCcelerate אנו מציעים הערכת עלויות חינם ומסלולי תשלום גמישים.',
+ en: 'App development costs depend on complexity, platform, and features. We scope each project individually — basic MVPs, full apps, and complex SaaS each carry very different price points. At WeCcelerate we offer free cost estimates and flexible payment plans.',
  },
  },
  {
@@ -861,13 +861,7 @@ export function constructMetadata(options: MetadataOptions): Metadata {
 
  const fullDescription = description || SITE_CONFIG.defaultDescription;
 
- const allKeywords = [
- ...SEMANTIC_CORE,
- ...BRAND.english.variations,
- ...BRAND.hebrew.variations,
- ...KEYWORDS.primary.he,
- ...KEYWORDS.primary.en,
- ...keywords,
+ const allKeywords = [...SEMANTIC_CORE,...BRAND.english.variations,...BRAND.hebrew.variations,...KEYWORDS.primary.he,...KEYWORDS.primary.en,...keywords,
  ];
 
  const url = `${SITE_CONFIG.url}${path}`;
@@ -912,9 +906,7 @@ export function constructMetadata(options: MetadataOptions): Metadata {
  height: 630,
  alt: `${title} - WeCcelerate`,
  },
- ],
- ...(publishedTime && { publishedTime }),
- ...(modifiedTime && { modifiedTime }),
+ ],...(publishedTime && { publishedTime }),...(modifiedTime && { modifiedTime }),
  },
 
  twitter: {
@@ -978,7 +970,7 @@ export const viewport: Viewport = {
  */
 export function getRandomBrandVariation(language: 'english' | 'hebrew'): string {
  const variations = language === 'english' ? BRAND.english.variations : BRAND.hebrew.variations;
- return variations[Math.floor(Math.random() * variations.length)];
+ return variations[Math.floor(Math.random * variations.length)];
 }
 
 /**
@@ -1016,12 +1008,7 @@ export function generatePageDescription(
  */
 export function getAllKeywords(locale: 'en' | 'he' = 'en'): string[] {
  const languageKey = locale === 'en' ? 'english' : 'hebrew';
- return [
- ...KEYWORDS.tech[languageKey],
- ...KEYWORDS.startup[languageKey],
- ...KEYWORDS.ai[languageKey],
- ...KEYWORDS.medtech[languageKey],
- ...KEYWORDS.industry[languageKey],
+ return [...KEYWORDS.tech[languageKey],...KEYWORDS.startup[languageKey],...KEYWORDS.ai[languageKey],...KEYWORDS.medtech[languageKey],...KEYWORDS.industry[languageKey],
  ];
 }
 
@@ -1030,9 +1017,7 @@ export function getAllKeywords(locale: 'en' | 'he' = 'en'): string[] {
  */
 export function getMedTechKeywords(locale: 'en' | 'he' = 'en'): string[] {
  const languageKey = locale === 'en' ? 'english' : 'hebrew';
- return [
- ...KEYWORDS.medtech[languageKey],
- ...KEYWORDS.regulatory[languageKey],
+ return [...KEYWORDS.medtech[languageKey],...KEYWORDS.regulatory[languageKey],
  ];
 }
 
