@@ -94,6 +94,46 @@ export interface BotAnalyticsData {
       error: string | null;
     }>;
   };
+  plan: {
+    weekly: Array<{
+      day: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+      label: string;
+      probeFocus: string[];
+      shouldWrite: boolean;
+      shouldImprove: boolean;
+      description: string;
+    }>;
+    today: {
+      day: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+      label: string;
+      probeFocus: string[];
+      shouldWrite: boolean;
+      shouldImprove: boolean;
+      description: string;
+    };
+    tomorrow: {
+      day: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+      label: string;
+      probeFocus: string[];
+      shouldWrite: boolean;
+      shouldImprove: boolean;
+      description: string;
+    };
+    probePoolSize: number;
+    openGapsCount: number;
+    openGapsTop5: Array<{
+      id: string;
+      query: string;
+      severity: number;
+      category: string | null;
+      ageDays: number;
+    }>;
+    recentGuidesCount: number;
+    recentGuides: Array<{ slug: string; titleHe: string; publishedAt: string | null }>;
+    conditions: Array<{ label: string; ok: boolean; detail: string }>;
+    qualityGates: Array<{ label: string; detail: string }>;
+    dbAvailable: boolean;
+  };
 }
 
 // =============================================================================
@@ -263,10 +303,11 @@ function HeroKpi({ data }: { data: BotAnalyticsData }) {
 // TABS
 // =============================================================================
 
-type Tab = 'overview' | 'geo' | 'referrals' | 'bots';
+type Tab = 'overview' | 'plan' | 'geo' | 'referrals' | 'bots';
 
 const TAB_ORDER: Array<{ id: Tab; label: string; icon: string }> = [
   { id: 'overview', label: 'סקירה', icon: '📊' },
+  { id: 'plan', label: 'התוכנית של דוד', icon: '📅' },
   { id: 'geo', label: 'GEO Probe', icon: '🤖' },
   { id: 'referrals', label: 'קליקים מ-LLMs', icon: '👤' },
   { id: 'bots', label: 'פעילות bots', icon: '📡' },
@@ -741,6 +782,283 @@ function ReferralsTab({
 }
 
 // =============================================================================
+// TAB: PLAN — David's weekly schedule + writing conditions
+// =============================================================================
+
+const WEEKDAY_HE: Record<BotAnalyticsData['plan']['today']['day'], string> = {
+  sunday: 'ראשון',
+  monday: 'שני',
+  tuesday: 'שלישי',
+  wednesday: 'רביעי',
+  thursday: 'חמישי',
+  friday: 'שישי',
+  saturday: 'שבת',
+};
+
+const PROBE_FOCUS_HE: Record<string, string> = {
+  'brand-en': 'ברנד EN',
+  'brand-he': 'ברנד HE',
+  'generic-en': 'גנרי EN',
+  'generic-he': 'גנרי HE',
+  service: 'שירותים',
+  medtech: 'MedTech',
+};
+
+function PlanTab({ plan }: { plan: BotAnalyticsData['plan'] }) {
+  const willWriteToday =
+    plan.today.shouldWrite &&
+    plan.conditions.every((c) => c.ok || c.label === 'נושאים שטרם כוסו זמינים');
+
+  return (
+    <div className="space-y-6">
+      {/* TODAY card */}
+      <section className={`rounded-xl border-2 p-5 ${
+        willWriteToday
+          ? 'border-emerald-300 bg-emerald-50/40'
+          : 'border-slate-300 bg-slate-50'
+      }`}>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-bold text-white">
+                היום · {WEEKDAY_HE[plan.today.day]}
+              </span>
+              <h2 className="text-xl font-bold text-slate-900">{plan.today.label}</h2>
+            </div>
+            <p className="mt-1.5 max-w-2xl text-sm text-slate-700">{plan.today.description}</p>
+          </div>
+          <div className="text-end">
+            <div className={`text-2xl font-bold ${willWriteToday ? 'text-emerald-700' : 'text-slate-500'}`}>
+              {willWriteToday ? '✍️ כותב' : '⏸ לא כותב'}
+            </div>
+            <div className="text-[11px] text-slate-500">היום</div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-lg bg-white/70 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Probe focus</div>
+            <div className="mt-1 flex flex-wrap gap-1">
+              {plan.today.probeFocus.length === 0 ? (
+                <span className="text-xs text-slate-400">קדנציה רגילה</span>
+              ) : (
+                plan.today.probeFocus.map((c) => (
+                  <span key={c} className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700">
+                    {PROBE_FOCUS_HE[c] ?? c}
+                  </span>
+                ))
+              )}
+            </div>
+          </div>
+          <div className="rounded-lg bg-white/70 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">כתיבה</div>
+            <div className={`mt-1 text-lg font-bold ${plan.today.shouldWrite ? 'text-emerald-700' : 'text-slate-400'}`}>
+              {plan.today.shouldWrite ? '✓ כן' : '— לא'}
+            </div>
+          </div>
+          <div className="rounded-lg bg-white/70 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Self-improve</div>
+            <div className={`mt-1 text-lg font-bold ${plan.today.shouldImprove ? 'text-emerald-700' : 'text-slate-400'}`}>
+              {plan.today.shouldImprove ? '✓ כן' : '— לא'}
+            </div>
+          </div>
+          <div className="rounded-lg bg-white/70 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Pool שאילתות</div>
+            <div className="mt-1 text-lg font-bold text-slate-900">{plan.probePoolSize}</div>
+            <div className="text-[10px] text-slate-500">בסך הכל ב-rotation</div>
+          </div>
+        </div>
+      </section>
+
+      {/* WRITING CONDITIONS — the gate-by-gate checklist */}
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <h3 className="mb-1 text-base font-semibold text-slate-900">תנאי לכתיבה של מאמר חדש</h3>
+        <p className="mb-4 text-xs text-slate-500">
+          דוד עובר את הרצף הזה לפני שמאמר עולה לאוויר. אם תנאי אחד לא מתקיים — הסטייג'
+          מדלג ולא מתבזבזות פעולות API.
+        </p>
+
+        <ol className="space-y-2">
+          {plan.conditions.map((c, i) => (
+            <li
+              key={c.label}
+              className={`flex items-start gap-3 rounded-lg border p-3 ${
+                c.ok
+                  ? 'border-emerald-200 bg-emerald-50/40'
+                  : 'border-slate-200 bg-slate-50'
+              }`}
+            >
+              <span className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                c.ok ? 'bg-emerald-500 text-white' : 'bg-slate-300 text-slate-700'
+              }`}>
+                {c.ok ? '✓' : i + 1}
+              </span>
+              <div className="flex-1">
+                <div className={`text-sm font-semibold ${c.ok ? 'text-emerald-900' : 'text-slate-700'}`}>
+                  {c.label}
+                </div>
+                <div className={`mt-0.5 text-xs ${c.ok ? 'text-emerald-700' : 'text-slate-600'}`}>
+                  {c.detail}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        {/* Quality gates — these always apply, displayed for transparency */}
+        <div className="mt-5">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            שערי איכות (אחרי הכתיבה — אם נכשל, המאמר לא מתפרסם)
+          </div>
+          <ul className="space-y-2">
+            {plan.qualityGates.map((g) => (
+              <li key={g.label} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/40 p-3">
+                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-200 text-xs font-bold text-amber-900">
+                  ⚖
+                </span>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-amber-900">{g.label}</div>
+                  <div className="mt-0.5 text-xs text-amber-800">{g.detail}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* QUEUE — what's next in line */}
+      {plan.openGapsTop5.length > 0 && (
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="mb-3 flex items-baseline justify-between">
+            <h3 className="text-base font-semibold text-slate-900">תור הכתיבה — top 5</h3>
+            <span className="text-xs text-slate-500">{plan.openGapsCount} פערים פתוחים בסה"כ</span>
+          </div>
+          <ol className="space-y-2">
+            {plan.openGapsTop5.map((g, i) => (
+              <li key={g.id} className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
+                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700">
+                  {i + 1}
+                </span>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-slate-900">{g.query}</div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                    <span className={`rounded-full px-2 py-0.5 font-semibold ${
+                      g.severity >= 90
+                        ? 'bg-red-100 text-red-700'
+                        : g.severity >= 60
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-slate-100 text-slate-700'
+                    }`}>
+                      severity {g.severity}
+                    </span>
+                    {g.category && <span>קטגוריה: {g.category}</span>}
+                    <span>זוהה לפני {g.ageDays} ימים</span>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* RECENTLY WRITTEN — David's memory */}
+      {plan.recentGuides.length > 0 && (
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 className="mb-1 text-base font-semibold text-slate-900">הזיכרון של דוד — מה כתב לאחרונה</h3>
+          <p className="mb-3 text-xs text-slate-500">
+            דוד לא יכתוב על נושאים שכבר כיסה ב-30 ימים אחרונים. {plan.recentGuidesCount} מאמרים בזיכרון.
+          </p>
+          <ul className="space-y-1.5">
+            {plan.recentGuides.map((g) => (
+              <li key={g.slug} className="flex items-center gap-3 text-sm">
+                <span className="text-slate-400" aria-hidden>📘</span>
+                <a
+                  href={`https://weccelerate.co.il/guides/${g.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 truncate text-slate-700 hover:text-slate-900 hover:underline"
+                >
+                  {g.titleHe}
+                </a>
+                <span className="text-[11px] text-slate-400">
+                  {g.publishedAt ? new Date(g.publishedAt).toLocaleDateString('he-IL') : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* WEEKLY SCHEDULE */}
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <h3 className="mb-3 text-base font-semibold text-slate-900">תוכנית שבועית של דוד</h3>
+        <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <table className="w-full text-right text-sm">
+            <thead className="bg-slate-50 text-xs text-slate-500">
+              <tr>
+                <th className="px-3 py-2 font-medium">יום</th>
+                <th className="px-3 py-2 font-medium">מיקוד</th>
+                <th className="px-3 py-2 font-medium">Probe</th>
+                <th className="px-3 py-2 font-medium text-center">✍️</th>
+                <th className="px-3 py-2 font-medium text-center">🔧</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plan.weekly.map((d) => {
+                const isToday = d.day === plan.today.day;
+                return (
+                  <tr
+                    key={d.day}
+                    className={`border-t border-slate-100 ${isToday ? 'bg-emerald-50/40 font-semibold' : ''}`}
+                  >
+                    <td className="px-3 py-2.5">
+                      <div className="text-sm text-slate-900">{WEEKDAY_HE[d.day]}</div>
+                      {isToday && <div className="text-[10px] text-emerald-700">היום</div>}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <div className="text-sm text-slate-800">{d.label.replace(/^.+ — /, '')}</div>
+                      <div className="text-[11px] font-normal text-slate-500">{d.description}</div>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex flex-wrap gap-1">
+                        {d.probeFocus.length === 0 ? (
+                          <span className="text-[11px] text-slate-400">—</span>
+                        ) : (
+                          d.probeFocus.map((c) => (
+                            <span key={c} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700">
+                              {PROBE_FOCUS_HE[c] ?? c}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      {d.shouldWrite ? <span className="text-emerald-600">✓</span> : <span className="text-slate-300">—</span>}
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      {d.shouldImprove ? <span className="text-emerald-600">✓</span> : <span className="text-slate-300">—</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* TOMORROW preview */}
+      <section className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
+        <div className="text-xs font-semibold uppercase tracking-wider text-amber-700">🔮 מחר</div>
+        <div className="mt-1 text-sm font-bold text-amber-900">
+          {WEEKDAY_HE[plan.tomorrow.day]} · {plan.tomorrow.label}
+        </div>
+        <p className="mt-1 text-xs text-amber-800">{plan.tomorrow.description}</p>
+      </section>
+    </div>
+  );
+}
+
+// =============================================================================
 // TAB: BOT ACTIVITY (crawls + recent table)
 // =============================================================================
 
@@ -1030,6 +1348,7 @@ export function BotAnalyticsDashboard({ data }: { data: BotAnalyticsData }) {
 
       {/* Tab content */}
       {tab === 'overview' && <OverviewTab data={data} />}
+      {tab === 'plan' && <PlanTab plan={data.plan} />}
       {tab === 'geo' && <GeoProbeTab probes={data.probes} />}
       {tab === 'referrals' && (
         <ReferralsTab referrals={data.referrals} liveRetrievalCrawls={data.geo.counts.liveRetrieval} />

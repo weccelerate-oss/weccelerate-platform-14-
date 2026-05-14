@@ -18,6 +18,8 @@ import {
   LIVE_RETRIEVAL_BOTS,
   geoStage,
 } from '@/lib/seo/bot-categories';
+import { WEEKLY_PLAN, planForToday, planForTomorrow, type Weekday } from '@/lib/agents/daily-plan';
+import { PROBE_QUERIES } from '@/lib/seo/geo-probes';
 import { BotAnalyticsDashboard, type BotAnalyticsData } from './dashboard';
 
 export const metadata: Metadata = {
@@ -286,6 +288,116 @@ async function getBotAnalytics(): Promise<BotAnalyticsData> {
         : null,
     },
     probes: await getGeoProbeData(thirtyDaysAgo),
+    plan: await getPlanData(),
+  };
+}
+
+// ----------------------------------------------------------------------------
+// PLAN DATA — what David is doing today, tomorrow, and the weekly schedule.
+// Plus the live conditions that decide whether a guide will be written.
+// ----------------------------------------------------------------------------
+async function getPlanData() {
+  const today = planForToday();
+  const tomorrow = planForTomorrow();
+
+  // What's in the writing queue right now (by priority).
+  let openGaps: Array<{ id: string; query: string; severity: number; category: string | null; detectedAt: Date }> = [];
+  let openGapsCount = 0;
+  let recentGuidesCount = 0;
+  let recentGuides: Array<{ slug: string; titleHe: string; publishedAt: Date | null }> = [];
+  let dbAvailable = true;
+
+  try {
+    const last30d = new Date(Date.now() - 30 * 86_400_000);
+    [openGapsCount, openGaps, recentGuidesCount, recentGuides] = await Promise.all([
+      prisma.contentGap.count({ where: { status: 'open' } }),
+      prisma.contentGap.findMany({
+        where: { status: 'open' },
+        orderBy: [{ severity: 'desc' }, { detectedAt: 'asc' }],
+        take: 5,
+        select: { id: true, query: true, severity: true, category: true, detectedAt: true },
+      }),
+      prisma.generatedGuide.count({
+        where: { status: 'published', publishedAt: { gte: last30d } },
+      }),
+      prisma.generatedGuide.findMany({
+        where: { status: 'published', publishedAt: { gte: last30d } },
+        orderBy: { publishedAt: 'desc' },
+        take: 5,
+        select: { slug: true, titleHe: true, publishedAt: true },
+      }),
+    ]);
+  } catch {
+    dbAvailable = false;
+  }
+
+  // Snapshot of the writing-condition checklist.
+  const conditions = [
+    {
+      label: 'ANTHROPIC_API_KEY מוגדר',
+      ok: Boolean(process.env.ANTHROPIC_API_KEY),
+      detail: process.env.ANTHROPIC_API_KEY
+        ? 'Claude זמין לכתיבה ולfact-check'
+        : 'בלי המפתח, פייפליין הכתיבה מושבת לחלוטין',
+    },
+    {
+      label: 'היום יום כתיבה',
+      ok: today.plan.shouldWrite,
+      detail: today.plan.shouldWrite
+        ? `${today.plan.label} — כתיבה מתוכננת`
+        : `${today.plan.label} — לא יום כתיבה. מאמר חדש לא יפורסם.`,
+    },
+    {
+      label: 'יש פערים פתוחים בתור',
+      ok: openGapsCount > 0,
+      detail: openGapsCount > 0
+        ? `${openGapsCount} פערים פתוחים — דוד יבחר את הגבוה ביותר ב-severity`
+        : 'אין פערים פתוחים. ה-Gap Analyzer יזהה כאלה אחרי probe הבא.',
+    },
+    {
+      label: 'נושאים שטרם כוסו זמינים',
+      ok: openGapsCount > recentGuidesCount, // rough heuristic
+      detail: recentGuidesCount > 0
+        ? `דוד דילג על ${recentGuidesCount} נושאים שכבר כוסו ב-30 ימים אחרונים`
+        : 'לא פורסמו מאמרים ב-30 ימים אחרונים — אין סיכון לכפילות',
+    },
+  ];
+
+  // The 3 quality gates — these run AFTER generation, so they're "always armed"
+  // (no live status), but worth surfacing so the operator knows the bar.
+  const qualityGates = [
+    {
+      label: 'Policy gate',
+      detail: 'אסור: לינק לleumit.weccelerate.co.il, מספרים מומצאים על WeCcelerate, מחירים, התחייבויות זמן, אקוויטי %, "המוביל"/"הראשון" בלי הוכחה',
+    },
+    { label: 'Fact-check ≥ 60', detail: 'Claude Sonnet בודק כל טענה מול sources חיצוניים' },
+    { label: 'SEO lint ≥ 60', detail: 'אורך כותרת, meta description, schema fields, internal linking' },
+  ];
+
+  return {
+    weekly: (Object.entries(WEEKLY_PLAN) as Array<[Weekday, typeof WEEKLY_PLAN[Weekday]]>).map(
+      ([day, plan]) => ({ day, ...plan }),
+    ),
+    today: { day: today.weekday, ...today.plan },
+    tomorrow: { day: tomorrow.weekday, ...tomorrow.plan },
+    probePoolSize: PROBE_QUERIES.length,
+    openGapsCount,
+    openGapsTop5: openGaps.map((g) => ({
+      id: g.id,
+      query: g.query,
+      severity: g.severity,
+      category: g.category,
+      ageDays: Math.floor((Date.now() - g.detectedAt.getTime()) / 86_400_000),
+    })),
+    recentGuidesCount,
+    recentGuides: recentGuides.map((g) => ({
+      slug: g.slug,
+      titleHe: g.titleHe,
+      publishedAt: g.publishedAt?.toISOString() ?? null,
+    })),
+    conditions,
+    qualityGates,
+    dbAvailable,
   };
 }
 
