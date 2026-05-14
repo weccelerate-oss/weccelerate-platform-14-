@@ -30,7 +30,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const isValid = await bcrypt.compare(credentials.password as string, user.password);
           if (!isValid) return null;
 
-          return { id: user.id, email: user.email, name: user.name, role: user.role };
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            mustChangePassword: user.mustChangePassword,
+          };
         } finally {
           await prisma.$disconnect();
           await pool.end();
@@ -41,17 +47,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
   pages: { signIn: '/login' },
 callbacks: {
-  jwt({ token, user }) {
+  jwt({ token, user, trigger, session }) {
     if (user) {
       token.id = user.id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       token.role = (user as any).role;
+      // Carry the must-change-password flag from authorize() into the JWT
+      // so the portal layout can read it without an extra DB hit.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      token.mustChangePassword = (user as any).mustChangePassword ?? false;
+    }
+    // Allow a client-side `update({ mustChangePassword: false })` to clear
+    // the flag mid-session after the user picks a new password.
+    if (trigger === 'update' && session?.mustChangePassword === false) {
+      token.mustChangePassword = false;
     }
     return token;
   },
   session({ session, token }) {
     if (session.user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (session.user as any).id = token.id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (session.user as any).role = token.role;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (session.user as any).mustChangePassword = token.mustChangePassword ?? false;
     }
     return session;
   },

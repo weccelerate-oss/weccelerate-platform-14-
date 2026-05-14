@@ -249,6 +249,24 @@ export function UsersTable({ users }: UsersTableProps) {
                         לא פעיל
                       </span>
                     )}
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {(user as any).provisionedSource && (
+                      <span
+                        title={`נוצר אוטומטית מ-${(user as any).provisionedSource}${(user as any).provisionedAt ? ` ב-${new Date((user as any).provisionedAt).toLocaleDateString('he-IL')}` : ''}`}
+                        className="px-2 py-0.5 text-xs font-medium rounded-full bg-violet-50 text-violet-700 border border-violet-200"
+                      >
+                        🤖 auto · {(user as any).provisionedSource}
+                      </span>
+                    )}
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {(user as any).mustChangePassword && (
+                      <span
+                        title="המשתמש עוד לא החליף את הסיסמה הזמנית"
+                        className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-700 border border-amber-200"
+                      >
+                        ⏳ ממתין להחלפת סיסמה
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-xs sm:text-sm text-slate-500">
                     <span className="flex items-center gap-1 truncate">

@@ -119,6 +119,18 @@ model User {
   activities    ActivityLog[]
   lessonProgress UserLessonProgress[]
 
+  // Onboarding / auto-provisioning
+  // True for accounts created via the onboarding webhook with a temp password.
+  // After first successful password change we flip this to false.
+  mustChangePassword Boolean  @default(false)
+  // Raw intake-form payload kept verbatim so the admin can see what the
+  // entrepreneur actually filled in. JSON shape varies by source form.
+  intakeFormData     Json?
+  // Marks accounts NOT created manually by an admin.
+  provisionedAt      DateTime?
+  // Where the account came from: 'google_form' | 'zapier' | 'admin' | 'manual'
+  provisionedSource  String?
+
   // Timestamps
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
