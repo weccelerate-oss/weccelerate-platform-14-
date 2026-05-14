@@ -46,71 +46,248 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
 }
 
 function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: string): string {
+  const logoUrl = `${PORTAL_URL}/images/weccelerate-gold.png`;
+  const escName = escapeHtml(name);
+  const escTo = escapeHtml(to);
+  const escPwd = escapeHtml(tempPassword);
+
   return `<!DOCTYPE html>
 <html dir="rtl" lang="he">
-<head><meta charset="utf-8" /></head>
-<body style="margin:0;padding:0;background:#f4f5f9;font-family:-apple-system,'Heebo','Segoe UI',Arial,sans-serif;direction:rtl;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f9;padding:40px 16px;">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="supported-color-schemes" content="dark light" />
+  <title>ברוך הבא ל-WeCcelerate</title>
+</head>
+<body style="margin:0;padding:0;background:#eef0f7;font-family:'Heebo','Segoe UI','Arial Hebrew',Arial,Helvetica,sans-serif;direction:rtl;-webkit-font-smoothing:antialiased;">
+
+<!-- preheader: shown in inbox preview, hidden in body -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+  הסיסמה הזמנית שלך לפורטל היזמים של WeCcelerate.
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#eef0f7;padding:32px 12px;">
   <tr><td align="center">
-    <table width="100%" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+
+    <!-- Outer card -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(7,11,30,0.08);">
+
+      <!-- ============================================================ -->
+      <!-- HERO — gold logo on dark navy, gold accent line bottom         -->
+      <!-- ============================================================ -->
       <tr>
-        <td style="background:linear-gradient(135deg,#070b1e,#0e1530);padding:32px 28px;color:#ffffff;">
-          <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#c8a951;font-weight:700;">פורטל היזמים · WeCcelerate</div>
-          <h1 style="margin:8px 0 0;font-size:22px;font-weight:700;">ברוך הבא, ${escapeHtml(name)}</h1>
+        <td align="center" style="background:#070b1e;background-image:linear-gradient(135deg,#070b1e 0%,#0e1736 55%,#0a1024 100%);padding:40px 32px 32px;">
+          <img src="${logoUrl}" alt="WeCcelerate" width="200" style="display:block;height:auto;max-width:200px;margin:0 auto 18px;" />
+          <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#c8a951;font-weight:700;">
+            פורטל היזמים
+          </div>
         </td>
       </tr>
       <tr>
-        <td style="padding:28px;color:#1e293b;line-height:1.7;font-size:15px;">
-          <p style="margin:0 0 16px;">קיבלנו את הטופס שלך — שמחים שהצטרפת.</p>
-          <p style="margin:0 0 20px;">פתחנו עבורך חשבון בפורטל היזמים של WeCcelerate. בפורטל תוכל לעקוב אחרי המיזם שלך, מסמכים, תוכן לימודי וכל מה שדיברנו עליו.</p>
+        <td style="height:3px;background:linear-gradient(90deg,#c8a951 0%,#e8d48b 50%,#c8a951 100%);line-height:0;font-size:0;">&nbsp;</td>
+      </tr>
 
-          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin:8px 0 24px;">
-            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;font-weight:600;margin-bottom:10px;">פרטי כניסה</div>
-            <div style="font-size:14px;color:#334155;margin-bottom:6px;">
-              <strong>דוא"ל:</strong> <span style="font-family:'SF Mono',Menlo,monospace;color:#1e293b;direction:ltr;display:inline-block;">${escapeHtml(to)}</span>
-            </div>
-            <div style="font-size:14px;color:#334155;">
-              <strong>סיסמה זמנית:</strong>
-              <span style="font-family:'SF Mono',Menlo,monospace;font-weight:700;color:#0f172a;background:#fff7d6;padding:3px 8px;border-radius:4px;direction:ltr;display:inline-block;margin-right:6px;">${escapeHtml(tempPassword)}</span>
-            </div>
-          </div>
-
-          <div style="text-align:center;margin:24px 0;">
-            <a href="${loginUrl}" style="display:inline-block;background:linear-gradient(135deg,#c8a951,#e8d48b);color:#070b1e;font-weight:700;padding:13px 32px;border-radius:10px;text-decoration:none;font-size:15px;">כניסה לפורטל →</a>
-          </div>
-
-          <p style="margin:24px 0 8px;font-size:13px;color:#475569;">
-            <strong>חשוב:</strong> בכניסה הראשונה תתבקש להחליף את הסיסמה הזמנית. הסיסמה החדשה חייבת לכלול לפחות 8 תווים, אות גדולה, מספר ותו מיוחד.
+      <!-- ============================================================ -->
+      <!-- GREETING                                                       -->
+      <!-- ============================================================ -->
+      <tr>
+        <td style="padding:36px 36px 8px;text-align:center;">
+          <h1 style="margin:0;font-size:26px;font-weight:700;color:#0f172a;line-height:1.3;">
+            ברוך הבא, <span style="color:#070b1e;">${escName}</span>
+          </h1>
+          <p style="margin:12px 0 0;font-size:15px;color:#475569;line-height:1.6;">
+            פתחנו עבורך חשבון בפורטל היזמים של WeCcelerate.
+            <br />
+            הנה פרטי הכניסה האישיים שלך.
           </p>
-          <p style="margin:8px 0 0;font-size:13px;color:#475569;">אם לא ביקשת לפתוח חשבון — אפשר פשוט להתעלם מהמייל הזה.</p>
         </td>
       </tr>
+
+      <!-- ============================================================ -->
+      <!-- CREDENTIALS CARD — dark, premium "key card" feel               -->
+      <!-- ============================================================ -->
       <tr>
-        <td style="background:#f8fafc;padding:20px 28px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;">
-          WeCcelerate Ltd. · תל אביב, ישראל · <a href="${PORTAL_URL}" style="color:#94a3b8;">weccelerate.co.il</a>
+        <td style="padding:24px 36px 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                 style="background:#070b1e;background-image:linear-gradient(135deg,#070b1e 0%,#0e1736 100%);border-radius:14px;overflow:hidden;">
+
+            <!-- top label strip -->
+            <tr>
+              <td style="padding:14px 22px 0;text-align:right;">
+                <div style="font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#c8a951;font-weight:700;">
+                  פרטי כניסה אישיים
+                </div>
+              </td>
+            </tr>
+
+            <!-- email row -->
+            <tr>
+              <td style="padding:14px 22px 6px;">
+                <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:4px;">דוא״ל</div>
+                <div dir="ltr" style="font-family:'SF Mono','Menlo','Consolas',monospace;font-size:15px;color:#ffffff;text-align:left;direction:ltr;word-break:break-all;">
+                  ${escTo}
+                </div>
+              </td>
+            </tr>
+
+            <!-- divider -->
+            <tr><td style="padding:4px 22px;"><div style="height:1px;background:rgba(200,169,81,0.18);font-size:0;line-height:0;">&nbsp;</div></td></tr>
+
+            <!-- password row -->
+            <tr>
+              <td style="padding:6px 22px 18px;">
+                <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:6px;">סיסמה זמנית</div>
+                <div dir="ltr" style="display:inline-block;font-family:'SF Mono','Menlo','Consolas',monospace;font-size:18px;font-weight:700;color:#070b1e;background:linear-gradient(135deg,#c8a951 0%,#e8d48b 100%);padding:8px 16px;border-radius:8px;letter-spacing:0.04em;direction:ltr;">
+                  ${escPwd}
+                </div>
+              </td>
+            </tr>
+
+          </table>
         </td>
       </tr>
+
+      <!-- ============================================================ -->
+      <!-- BIG CTA BUTTON                                                 -->
+      <!-- ============================================================ -->
+      <tr>
+        <td align="center" style="padding:20px 36px 8px;">
+          <!--[if mso]>
+          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${loginUrl}" style="height:52px;v-text-anchor:middle;width:240px;" arcsize="20%" stroke="f" fillcolor="#c8a951">
+            <w:anchorlock/>
+            <center style="color:#070b1e;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">כניסה לפורטל</center>
+          </v:roundrect>
+          <![endif]-->
+          <!--[if !mso]><!-- -->
+          <a href="${loginUrl}"
+             style="display:inline-block;background:linear-gradient(135deg,#c8a951 0%,#e8d48b 50%,#c8a951 100%);color:#070b1e !important;font-weight:700;padding:14px 36px;border-radius:10px;text-decoration:none;font-size:16px;box-shadow:0 6px 18px rgba(200,169,81,0.35);letter-spacing:0.02em;">
+            כניסה לפורטל ←
+          </a>
+          <!--<![endif]-->
+        </td>
+      </tr>
+
+      <!-- ============================================================ -->
+      <!-- IMPORTANT NOTE                                                 -->
+      <!-- ============================================================ -->
+      <tr>
+        <td style="padding:20px 36px 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                 style="background:#fff8e1;border-right:3px solid #c8a951;border-radius:6px;">
+            <tr>
+              <td style="padding:14px 18px;font-size:13px;color:#5b4a18;line-height:1.6;">
+                <strong style="color:#7a5c00;">בכניסה הראשונה</strong> תתבקש לבחור סיסמה קבועה. דרישות:
+                לפחות 8 תווים, אות גדולה, מספר ותו מיוחד.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- ============================================================ -->
+      <!-- WHAT YOU GET                                                   -->
+      <!-- ============================================================ -->
+      <tr>
+        <td style="padding:24px 36px 8px;">
+          <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#94a3b8;font-weight:700;margin-bottom:10px;">
+            מה מחכה לך בפורטל
+          </div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            ${benefitRow('🎯', 'מעקב אישי אחרי המיזם', 'ראש פרק, צוות, אבני דרך והתקדמות במקום אחד.')}
+            ${benefitRow('📁', 'מסמכים ותיקיית עבודה', 'גישה לחומרים המקצועיים שמלווים את התהליך שלך.')}
+            ${benefitRow('🎓', 'תוכן לימודי ייעודי', 'מדריכים פרקטיים שנכתבו ליזמים ישראלים.')}
+            ${benefitRow('💬', 'תקשורת עם הצוות', 'הודעות, עדכונים ופגישות — מסונכרן אחד-לאחד.')}
+          </table>
+        </td>
+      </tr>
+
+      <!-- ============================================================ -->
+      <!-- DISCLAIMER                                                     -->
+      <!-- ============================================================ -->
+      <tr>
+        <td style="padding:24px 36px 32px;">
+          <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.6;text-align:center;">
+            אם לא מילאת טופס הצטרפות — אפשר להתעלם מהמייל. החשבון יישאר רדום עד שתתחבר.
+          </p>
+        </td>
+      </tr>
+
+      <!-- ============================================================ -->
+      <!-- FOOTER                                                         -->
+      <!-- ============================================================ -->
+      <tr>
+        <td style="background:#070b1e;padding:24px 36px;text-align:center;">
+          <img src="${logoUrl}" alt="WeCcelerate" width="120" style="display:block;height:auto;max-width:120px;margin:0 auto 10px;opacity:0.9;" />
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.7;">
+            WeCcelerate Ltd. — Venture Builder ישראלי
+            <br />
+            תל אביב · ירושלים
+            <br />
+            <a href="${PORTAL_URL}" style="color:#c8a951;text-decoration:none;">weccelerate.co.il</a>
+          </div>
+        </td>
+      </tr>
+
     </table>
+
+    <!-- spacer -->
+    <div style="height:24px;line-height:0;font-size:0;">&nbsp;</div>
+
   </td></tr>
 </table>
+
 </body>
 </html>`;
 }
 
+/** Single bullet row inside the "what you get" section. */
+function benefitRow(icon: string, title: string, body: string): string {
+  return `<tr>
+    <td style="padding:8px 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td width="36" style="vertical-align:top;font-size:20px;text-align:center;padding-top:2px;">
+            ${icon}
+          </td>
+          <td style="vertical-align:top;padding-right:8px;">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;line-height:1.4;">${escapeHtml(title)}</div>
+            <div style="font-size:13px;color:#64748b;line-height:1.5;margin-top:2px;">${escapeHtml(body)}</div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>`;
+}
+
 function buildText({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: string): string {
-  return `שלום ${name},
+  return `WeCcelerate · פורטל היזמים
+========================================
 
-קיבלנו את הטופס שלך ופתחנו לך חשבון בפורטל היזמים של WeCcelerate.
+ברוך הבא, ${name}.
 
-פרטי כניסה:
-דוא"ל: ${to}
-סיסמה זמנית: ${tempPassword}
+פתחנו עבורך חשבון בפורטל היזמים של WeCcelerate.
 
-כניסה: ${loginUrl}
+— פרטי כניסה אישיים —
 
-חשוב: בכניסה הראשונה תתבקש להחליף סיסמה.
+דוא״ל:        ${to}
+סיסמה זמנית:  ${tempPassword}
 
-— צוות WeCcelerate`;
+כניסה לפורטל: ${loginUrl}
+
+חשוב — בכניסה הראשונה תתבקש לבחור סיסמה קבועה
+(לפחות 8 תווים, אות גדולה, מספר ותו מיוחד).
+
+מה מחכה לך בפורטל:
+  · מעקב אישי אחרי המיזם
+  · מסמכים ותיקיית עבודה
+  · תוכן לימודי ייעודי
+  · תקשורת עם הצוות
+
+אם לא מילאת טופס הצטרפות — אפשר להתעלם מהמייל.
+
+— צוות WeCcelerate
+${PORTAL_URL}`;
 }
 
 function escapeHtml(s: string): string {
