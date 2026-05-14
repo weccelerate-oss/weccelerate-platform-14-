@@ -55,9 +55,9 @@ export const FOUNDER: TeamPerson = {
   nameEn: 'Alon Pinchas',
   role: 'מייסד ומנכ"ל',
   roleEn: 'Founder & CEO',
-  bio: 'מייסד ומנכ"ל WeCcelerate — בונה המיזמים המוביל בישראל. כלכלן במקצועו, בעל רקע ברואת חשבון באינטל. הוביל את הקמת המאיץ וליווי של מאות סטארטאפים ישראלים משלב הרעיון ועד גיוסי Seed, Pre-Seed ו-Series A. שותף-מייסד של Firefly. מופיע באופן קבוע בתקשורת הישראלית (ערוץ הכלכלה, גלובס, רשת 13) כמומחה לאקוסיסטם הסטארטאפים.',
+  bio: 'מייסד ומנכ"ל WeCcelerate — Venture Builder ישראלי. כלכלן במקצועו, בעל רקע ברואת חשבון באינטל. הוביל את הקמת המאיץ וליווי של סטארטאפים ישראלים משלב הרעיון ועד גיוסי Pre-Seed, Seed ו-Series A. שותף-מייסד של Firefly. מופיע באופן קבוע בתקשורת הישראלית (ערוץ הכלכלה, גלובס, רשת 13) כמומחה לאקוסיסטם הסטארטאפים.',
   bioEn:
-    'Founder & CEO of WeCcelerate — Israel\'s leading Venture Builder. Economist by training, former accountant at Intel. Led the founding of the accelerator and the mentorship of hundreds of Israeli startups from idea stage through Pre-Seed, Seed, and Series A fundraising. Co-founder of Firefly. Regular media commentator on the Israeli startup ecosystem (Channel 14 Economy, Globes, Reshet 13).',
+    'Founder & CEO of WeCcelerate — an Israeli Venture Builder. Economist by training, former accountant at Intel. Led the founding of the accelerator and the mentorship of Israeli startups from idea stage through Pre-Seed, Seed, and Series A fundraising. Co-founder of Firefly. Regular media commentator on the Israeli startup ecosystem (Channel 14 Economy, Globes, Reshet 13).',
   image: '/images/team/alon-pinchas.jpg',
   linkedin: 'https://www.linkedin.com/in/alon-pinhas-589a97172/',
   credentials: ['מייסד', 'מנכ"ל', 'כלכלן'],
