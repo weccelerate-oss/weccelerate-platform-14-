@@ -52,6 +52,8 @@ const BodySchema = z.object({
   message: z.string().max(4000).optional().nullable(),
   source: z.string().max(40).optional(),
   raw: z.record(z.string(), z.unknown()).optional(),
+  /** If true, run the auth + spam filter but skip user creation and email. */
+  dryRun: z.boolean().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -99,35 +101,49 @@ export async function POST(req: NextRequest) {
 
   if (spam.decision === 'drop') {
     // Log to the same audit log as lead spam — keeps the dashboard simple.
-    try {
-      await prisma.activityLog.create({
-        data: {
-          action: 'onboarding.spam_blocked',
-          description: `Onboarding spam blocked (score ${spam.score}): ${data.email}`,
-          metadata: {
-            email: data.email,
-            name: data.name,
-            phone: data.phone || null,
-            company: data.company || null,
-            spamScore: spam.score,
-            spamCodes: spam.codes,
-            spamReasons: spam.reasons,
-            source: data.source ?? 'webhook',
+    // Skip the log entirely on dry-run so testing doesn't pollute the audit.
+    if (!data.dryRun) {
+      try {
+        await prisma.activityLog.create({
+          data: {
+            action: 'onboarding.spam_blocked',
+            description: `Onboarding spam blocked (score ${spam.score}): ${data.email}`,
+            metadata: {
+              email: data.email,
+              name: data.name,
+              phone: data.phone || null,
+              company: data.company || null,
+              spamScore: spam.score,
+              spamCodes: spam.codes,
+              spamReasons: spam.reasons,
+              source: data.source ?? 'webhook',
+            },
           },
-        },
-      });
-    } catch {
-      /* swallow */
+        });
+      } catch {
+        /* swallow */
+      }
     }
     // 422 so the integration shows "rejected" instead of retrying as if
     // it were a 500.
     return NextResponse.json(
-      { ok: false, error: 'Submission rejected', reason: 'spam_filter' },
+      { ok: false, error: 'Submission rejected', reason: 'spam_filter', spamScore: spam.score, spamCodes: spam.codes },
       { status: 422 },
     );
   }
 
-  // 4. Provision (idempotent on email).
+  // 4. Dry-run — connectivity check passed, exit before touching the DB.
+  if (data.dryRun) {
+    return NextResponse.json({
+      ok: true,
+      dryRun: true,
+      spamScore: spam.score,
+      spamDecision: spam.decision,
+      message: 'dry-run passed: auth ok, spam filter ok, would have provisioned',
+    });
+  }
+
+  // 5. Provision (idempotent on email).
   const result = await provisionEntrepreneur({
     name: data.name,
     email: data.email,

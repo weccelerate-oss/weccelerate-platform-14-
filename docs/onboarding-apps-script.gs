@@ -183,12 +183,16 @@ function testWebhook() {
     Logger.log('Set ONBOARDING_WEBHOOK_SECRET in Script Properties first.');
     return;
   }
+  // dryRun: true → the server validates auth + spam filter but DOES NOT
+  // create a user or send a welcome email. Lets you run this as many times
+  // as you like without polluting /admin/users.
   const payload = {
     name: 'בדיקת חיבור Apps Script',
-    email: 'apps-script-test+' + Date.now() + '@example.com',
+    email: 'qa-onboarding-' + Date.now() + '@weccelerate.co.il',
     phone: '+972501234567',
-    company: 'TestCo',
+    company: 'WeCcelerate QA',
     source: 'apps_script_test',
+    dryRun: true,
     raw: { _note: 'fired from testWebhook()' },
   };
   const res = UrlFetchApp.fetch(WEBHOOK_URL, {
