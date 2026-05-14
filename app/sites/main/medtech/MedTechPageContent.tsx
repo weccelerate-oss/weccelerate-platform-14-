@@ -49,54 +49,29 @@ export function MedTechPageContent() {
         aria-labelledby="leumit-heading"
       >
         <div className="container-corporate">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="text-sm font-semibold text-[#c8a951] uppercase tracking-wider">
-                {t('medtech.partnership.tag')}
-              </span>
-              <h2 id="leumit-heading" data-speakable className="heading-1 text-white mt-3 mb-6">
-                {t('medtech.partnership.title')}
-              </h2>
-              <p data-speakable className="body-large text-white/60 mb-6">
-                {t('medtech.partnership.text')}
-              </p>
-              <ul className="space-y-3">
-                {[
-                  t('medtech.partnership.item1'),
-                  t('medtech.partnership.item2'),
-                  t('medtech.partnership.item3'),
-                  t('medtech.partnership.item4'),
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-white/70">
-                    <Shield className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <aside className="bg-[#0d1321] p-8">
-              <h3 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-6">
-                {t('medtech.partnership.stats')}
-              </h3>
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <p className="text-3xl font-bold text-white">300+</p>
-                  <p className="text-sm text-white/60">{t('medtech.partnership.clinics')}</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-white">150</p>
-                  <p className="text-sm text-white/60">{t('medtech.partnership.pharmacies')}</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-white">2,000+</p>
-                  <p className="text-sm text-white/60">{t('medtech.partnership.doctors')}</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-white">90+</p>
-                  <p className="text-sm text-white/60">{t('medtech.partnership.years')}</p>
-                </div>
-              </div>
-            </aside>
+          <div className="max-w-3xl">
+            <span className="text-sm font-semibold text-[#c8a951] uppercase tracking-wider">
+              {t('medtech.partnership.tag')}
+            </span>
+            <h2 id="leumit-heading" data-speakable className="heading-1 text-white mt-3 mb-6">
+              {t('medtech.partnership.title')}
+            </h2>
+            <p data-speakable className="body-large text-white/60 mb-6">
+              {t('medtech.partnership.text')}
+            </p>
+            <ul className="space-y-3">
+              {[
+                t('medtech.partnership.item1'),
+                t('medtech.partnership.item2'),
+                t('medtech.partnership.item3'),
+                t('medtech.partnership.item4'),
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-3 text-white/70">
+                  <Shield className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>

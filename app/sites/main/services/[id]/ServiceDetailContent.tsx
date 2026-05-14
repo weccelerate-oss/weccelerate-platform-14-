@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Target, Box, Code2, HeartPulse, TrendingUp, Handshake, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Target, Box, Code2, HeartPulse, TrendingUp, Handshake } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import { servicesHe, servicesEn, type Service } from '@/lib/services-data';
 import ServiceFullSections from '@/components/services/ServiceFullSections';
@@ -39,9 +39,6 @@ export function ServiceDetailContent({ serviceId }: { serviceId: string }) {
 
   const Icon = iconMap[svc.id] || Target;
   const isPremium = svc.isPremium;
-
-  // Extract key highlights from sections for the capabilities strip
-  const highlights = svc.fullContent.sections.slice(0, 4).map((s) => s.title);
 
   return (
     <main id="main-content">
@@ -116,30 +113,6 @@ export function ServiceDetailContent({ serviceId }: { serviceId: string }) {
               {t('service.detail.talk')}
               <DirArrow className="w-5 h-5" />
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================= */}
-      {/* HIGHLIGHTS STRIP                                                  */}
-      {/* ================================================================= */}
-      <section className="relative py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-[#070b1e]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-        <div className="container-corporate relative z-10">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {highlights.map((label) => (
-              <div
-                key={label}
-                className="flex items-start gap-4 p-5 bg-white/[0.02] border border-white/[0.05] rounded-xl"
-              >
-                <div className="w-10 h-10 rounded-lg bg-[#c8a951]/10 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-5 h-5 text-[#c8a951]" />
-                </div>
-                <p className="font-semibold text-white text-sm leading-relaxed">{label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

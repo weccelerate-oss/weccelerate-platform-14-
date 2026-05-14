@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, Cpu, Shield, Zap, Award } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import CADPanel from './CADPanel';
 
@@ -96,38 +96,6 @@ export default function PhysicalProductContent() {
       {/* INTERACTIVE CAD PANEL                                             */}
       {/* ================================================================= */}
       <CADPanel />
-
-      {/* ================================================================= */}
-      {/* CAPABILITIES STRIP                                                */}
-      {/* ================================================================= */}
-      <section className="relative py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-[#070b1e]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-        <div className="container-corporate relative z-10">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              { icon: Cpu, label: t('service.physical.cap.3d'), desc: t('service.physical.cap.3d.desc') },
-              { icon: Shield, label: t('service.physical.cap.cert'), desc: t('service.physical.cap.cert.desc') },
-              { icon: Zap, label: t('service.physical.cap.time'), desc: t('service.physical.cap.time.desc') },
-              { icon: Award, label: t('service.physical.cap.products'), desc: t('service.physical.cap.products.desc') },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex items-start gap-4 p-5 bg-white/[0.02] border border-white/[0.05] rounded-xl"
-              >
-                <div className="w-10 h-10 rounded-lg bg-[#c8a951]/10 flex items-center justify-center shrink-0">
-                  <item.icon className="w-5 h-5 text-[#c8a951]" />
-                </div>
-                <div>
-                  <p className="font-semibold text-white text-sm mb-0.5">{item.label}</p>
-                  <p className="text-xs text-white/40">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ================================================================= */}
       {/* CTA SECTION                                                       */}
