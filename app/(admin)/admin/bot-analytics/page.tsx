@@ -388,13 +388,26 @@ export default async function BotAnalyticsPage() {
     error = e instanceof Error ? e.message : String(e);
   }
 
+  const updatedAt = data?.now
+    ? new Date(data.now).toLocaleString('he-IL', { dateStyle: 'medium', timeStyle: 'short' })
+    : null;
+
   return (
     <div className="p-6 md:p-10" dir="rtl">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">ביקורי AI Bots</h1>
-        <p className="mt-2 text-slate-600">
-          מדד GEO/AEO — כמה סורקי בינה מלאכותית מבקרים באתר, אילו דפים, ומגמות לאורך זמן.
-        </p>
+      <header className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">ביקורי AI Bots</h1>
+            <p className="mt-1 text-sm text-slate-600">
+              מדד GEO/AEO — סורקי AI שמבקרים באתר, ציטוטים בתשובות LLM, וקליקים אמיתיים.
+            </p>
+          </div>
+          {updatedAt && (
+            <div className="text-xs text-slate-500">
+              עודכן <time dateTime={data?.now ?? undefined}>{updatedAt}</time>
+            </div>
+          )}
+        </div>
       </header>
 
       {error ? (
