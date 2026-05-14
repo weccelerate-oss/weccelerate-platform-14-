@@ -8,8 +8,23 @@
 'use server';
 
 import { prisma } from '@/lib/db';
+import { headers } from 'next/headers';
 import { z } from 'zod';
 import { runSpamFilter, type SpamFilterResult } from '@/lib/leads/spam-filter';
+import { checkRateLimit, hashIp } from '@/lib/leads/rate-limit';
+
+/** Pull the source IP from request headers. Trusts x-forwarded-for from
+ * Vercel's edge, which is set automatically. */
+async function getSourceIp(): Promise<string | null> {
+  try {
+    const h = await headers();
+    const xff = h.get('x-forwarded-for');
+    if (xff) return xff.split(',')[0].trim();
+    return h.get('x-real-ip');
+  } catch {
+    return null;
+  }
+}
 
 // =============================================================================
 // VALIDATION SCHEMAS
@@ -109,6 +124,38 @@ async function routeLeadThroughFilter(opts: {
   };
 }): Promise<FormState> {
   const { leadData, envelope, meta } = opts;
+
+  // PHASE 2: capture source IP + check blocklist + rate-limit before scoring.
+  const ip = await getSourceIp();
+  const ipHash = ip ? hashIp(ip) : null;
+
+  const rate = await checkRateLimit({ email: leadData.email, ip });
+  if (!rate.allowed) {
+    // Log so the admin can see why nothing came through; return success
+    // silently so a misconfigured integration doesn't retry.
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: rate.reason.startsWith('blocklist') ? 'lead.blocklist_hit' : 'lead.rate_limited',
+          description: `${rate.reason}: ${leadData.email}`,
+          metadata: {
+            email: leadData.email,
+            name: leadData.name,
+            ipHash,
+            reason: rate.reason,
+            detail: rate.detail,
+            site: meta.site || 'main',
+            formType: meta.formType,
+            timestamp: new Date().toISOString(),
+          },
+        },
+      });
+    } catch {
+      /* swallow */
+    }
+    return { success: true, message: meta.userSuccessMessage };
+  }
+
   const filter: SpamFilterResult = runSpamFilter({
     name: leadData.name,
     email: leadData.email,
@@ -134,9 +181,11 @@ async function routeLeadThroughFilter(opts: {
             site: meta.site || 'main',
             formType: meta.formType,
             sourceUrl: meta.sourceUrl,
+            ipHash,
             spamScore: filter.score,
             spamCodes: filter.codes,
             spamReasons: filter.reasons,
+            status: 'spam',
             timestamp: new Date().toISOString(),
           },
         },
@@ -161,6 +210,7 @@ async function routeLeadThroughFilter(opts: {
             sourceUrl: meta.sourceUrl,
             formType: meta.formType,
             sourceLabel: getSourceLabel(meta.site),
+            ipHash,
             spamScore: filter.score,
             spamCodes: filter.codes,
             spamReasons: filter.reasons,
@@ -199,6 +249,7 @@ async function routeLeadThroughFilter(opts: {
           sourceLabel: getSourceLabel(meta.site),
           formType: meta.formType,
           sourceUrl: meta.sourceUrl,
+          ipHash,
           spamScore: filter.score,
           spamCodes: filter.codes,
           status: 'approved',

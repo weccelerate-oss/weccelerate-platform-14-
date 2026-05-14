@@ -912,3 +912,29 @@ model CompetitorMention {
   @@index([detectedAt])
   @@map("competitor_mentions")
 }
+
+// =============================================================================
+// SPAM BLOCKLIST — emails/IPs the admin has manually marked as spam
+// =============================================================================
+// Populated by /admin/leads when an operator clicks 'סמן כספאם' on a lead.
+// Any future submission matching an entry here is hard-blocked at the top
+// of routeLeadThroughFilter — never makes it through scoring.
+
+model SpamBlocklist {
+  id          String   @id @default(cuid())
+  // EXACTLY ONE of these is set per row.
+  email       String?  // lowercase
+  ipHash      String?  // sha256 of the source IP (privacy)
+  // Free-text reason the admin gave when marking.
+  reason      String?
+  // Who marked it.
+  addedByUserId String?
+  addedAt     DateTime @default(now())
+  // Auto-blocks expire; manual blocks don't.
+  expiresAt   DateTime?
+
+  @@unique([email])
+  @@unique([ipHash])
+  @@index([addedAt])
+  @@map("spam_blocklist")
+}

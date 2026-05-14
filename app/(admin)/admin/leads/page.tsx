@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Mail, Phone, Building2, Globe } from 'lucide-react';
+import { ArrowRight, Mail, Phone, Building2, Globe, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'לידים | מערכת ניהול WeCcelerate',
@@ -8,6 +8,13 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = 'force-dynamic';
+
+function scoreBadge(score: number | null): { label: string; cls: string } | null {
+  if (score === null || score === undefined) return null;
+  if (score >= 61) return { label: `🛑 ${score}`, cls: 'bg-red-100 text-red-700 border-red-200' };
+  if (score >= 31) return { label: `⚠️ ${score}`, cls: 'bg-amber-100 text-amber-700 border-amber-200' };
+  return { label: `✓ ${score}`, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+}
 
 const SITE_LABELS: Record<string, string> = {
   main: 'אתר ראשי',
@@ -34,6 +41,8 @@ interface Lead {
   site: string;
   page: string;
   action: string;
+  spamScore: number | null;
+  status: string | null;
 }
 
 async function getLeads(): Promise<Lead[]> {
@@ -62,6 +71,8 @@ async function getLeads(): Promise<Lead[]> {
         site: (meta.site as string) || 'main',
         page: (meta.page as string) || '/',
         action: log.action,
+        spamScore: typeof meta.spamScore === 'number' ? (meta.spamScore as number) : null,
+        status: (meta.status as string) || null,
       };
     });
   } catch (error) {
@@ -80,8 +91,17 @@ function formatDate(date: Date): string {
   }).format(date);
 }
 
+async function getReviewQueueCount(): Promise<number> {
+  try {
+    const { prisma } = await import('@/lib/db');
+    return await prisma.activityLog.count({ where: { action: 'lead.spam_review' } });
+  } catch {
+    return 0;
+  }
+}
+
 export default async function LeadsPage() {
-  const leads = await getLeads();
+  const [leads, reviewCount] = await Promise.all([getLeads(), getReviewQueueCount()]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -96,12 +116,30 @@ export default async function LeadsPage() {
               חזרה לדשבורד
             </Link>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            לידים מהאתר
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            כל פניות טפסי יצירת הקשר מכל תתי-האתרים ({leads.length})
-          </p>
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                לידים מהאתר
+              </h1>
+              <p className="text-sm text-slate-500 mt-1">
+                כל פניות טפסי יצירת הקשר מכל תתי-האתרים ({leads.length})
+              </p>
+            </div>
+            <Link
+              href="/admin/leads/spam-review"
+              className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                reviewCount > 0
+                  ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {reviewCount > 0 ? <ShieldAlert className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+              תור סקירת ספאם
+              {reviewCount > 0 && (
+                <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">{reviewCount}</span>
+              )}
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -122,7 +160,7 @@ export default async function LeadsPage() {
                     <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 uppercase">טלפון</th>
                     <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 uppercase">חברה</th>
                     <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 uppercase">מקור</th>
-                    <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 uppercase">דף</th>
+                    <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 uppercase">Score</th>
                     <th className="px-4 py-3 text-start text-xs font-medium text-slate-500 uppercase">תאריך</th>
                   </tr>
                 </thead>
@@ -165,8 +203,17 @@ export default async function LeadsPage() {
                             {siteLabel}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-500 font-mono text-xs">
-                          {lead.page}
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
+                          {(() => {
+                            const badge = scoreBadge(lead.spamScore);
+                            return badge ? (
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold border rounded-full ${badge.cls}`}>
+                                {badge.label}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-slate-400">—</span>
+                            );
+                          })()}
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">
                           {formatDate(lead.createdAt)}
