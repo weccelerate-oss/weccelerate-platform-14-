@@ -67,6 +67,20 @@ const FIELD_MAP = {
 
 function handleFormSubmit(e) {
   try {
+    // Guard against the operator clicking "Run" on this function from the
+    // script editor — that has no event payload and would just log nonsense.
+    // This function only makes sense when fired by the "On form submit"
+    // trigger.
+    if (!e || !e.response) {
+      Logger.log(
+        'handleFormSubmit was invoked without a form-submit event. ' +
+        'This usually means you clicked "Run" directly in the editor — ' +
+        'use testWebhook() for manual tests, or submit the live form to ' +
+        'fire the real trigger.'
+      );
+      return;
+    }
+
     const secret = PropertiesService.getScriptProperties().getProperty('ONBOARDING_WEBHOOK_SECRET');
     if (!secret) {
       Logger.log('ERROR: ONBOARDING_WEBHOOK_SECRET not set in Script Properties.');
