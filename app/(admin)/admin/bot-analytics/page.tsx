@@ -20,6 +20,7 @@ import {
 } from '@/lib/seo/bot-categories';
 import { WEEKLY_PLAN, planForToday, planForTomorrow, type Weekday } from '@/lib/agents/daily-plan';
 import { PROBE_QUERIES } from '@/lib/seo/geo-probes';
+import { buildForecast } from '@/lib/agents/forecast';
 import { BotAnalyticsDashboard, type BotAnalyticsData } from './dashboard';
 
 export const metadata: Metadata = {
@@ -302,20 +303,28 @@ async function getPlanData() {
 
   // What's in the writing queue right now (by priority).
   let openGaps: Array<{ id: string; query: string; severity: number; category: string | null; detectedAt: Date }> = [];
+  let openGapsAll: Array<{ id: string; query: string; severity: number; category: string | null }> = [];
   let openGapsCount = 0;
   let recentGuidesCount = 0;
   let recentGuides: Array<{ slug: string; titleHe: string; publishedAt: Date | null }> = [];
+  let recentQueries: string[] = [];
+  let lastAskedRows: Array<{ query: string; last_asked: Date | null }> = [];
   let dbAvailable = true;
 
   try {
     const last30d = new Date(Date.now() - 30 * 86_400_000);
-    [openGapsCount, openGaps, recentGuidesCount, recentGuides] = await Promise.all([
+    [openGapsCount, openGaps, openGapsAll, recentGuidesCount, recentGuides, recentQueries, lastAskedRows] = await Promise.all([
       prisma.contentGap.count({ where: { status: 'open' } }),
       prisma.contentGap.findMany({
         where: { status: 'open' },
         orderBy: [{ severity: 'desc' }, { detectedAt: 'asc' }],
         take: 5,
         select: { id: true, query: true, severity: true, category: true, detectedAt: true },
+      }),
+      prisma.contentGap.findMany({
+        where: { status: 'open' },
+        orderBy: [{ severity: 'desc' }, { detectedAt: 'asc' }],
+        select: { id: true, query: true, severity: true, category: true },
       }),
       prisma.generatedGuide.count({
         where: { status: 'published', publishedAt: { gte: last30d } },
@@ -326,6 +335,25 @@ async function getPlanData() {
         take: 5,
         select: { slug: true, titleHe: true, publishedAt: true },
       }),
+      // ContentGaps that produced a published guide in the last 30 days —
+      // these are the "queries already covered" set that the writer skips.
+      prisma.contentGap
+        .findMany({
+          where: {
+            status: 'published',
+            generatedGuide: { is: { publishedAt: { gte: last30d } } },
+          },
+          select: { query: true },
+        })
+        .then((rows) => rows.map((r) => r.query)),
+      // Latest probe timestamp per query (provider-collapsed). Used by the
+      // forecast to compute when each query is next due.
+      prisma.$queryRaw<Array<{ query: string; last_asked: Date | null }>>`
+        SELECT query, MAX(timestamp) AS last_asked
+        FROM geo_probes
+        WHERE error IS NULL
+        GROUP BY query
+      `,
     ]);
   } catch {
     dbAvailable = false;
@@ -374,6 +402,20 @@ async function getPlanData() {
     { label: 'SEO lint ≥ 60', detail: 'אורך כותרת, meta description, schema fields, internal linking' },
   ];
 
+  // Build the 14-day forecast.
+  const lastAskedByQuery = new Map<string, Date>();
+  for (const r of lastAskedRows) {
+    if (r.last_asked) lastAskedByQuery.set(r.query, r.last_asked);
+  }
+  const recentlyCoveredQueries = new Set<string>(
+    recentQueries.map((q) => q.trim().toLowerCase()),
+  );
+  const forecast = buildForecast({
+    lastAskedByQuery,
+    openGaps: openGapsAll,
+    recentlyCoveredQueries,
+  });
+
   return {
     weekly: (Object.entries(WEEKLY_PLAN) as Array<[Weekday, typeof WEEKLY_PLAN[Weekday]]>).map(
       ([day, plan]) => ({ day, ...plan }),
@@ -398,6 +440,25 @@ async function getPlanData() {
     conditions,
     qualityGates,
     dbAvailable,
+    forecast: {
+      days: forecast.days.map((d) => ({
+        ...d,
+        scheduledProbes: d.scheduledProbes.map((p) => ({
+          query: p.query,
+          category: p.category,
+          cadenceDays: p.cadenceDays,
+          lastAskedDays: p.lastAskedDays,
+        })),
+      })),
+      perQuerySchedule: forecast.perQuerySchedule.map((s) => ({
+        query: s.query,
+        category: s.category,
+        cadenceDays: s.cadenceDays,
+        lastAskedAt: s.lastAskedAt?.toISOString() ?? null,
+        nextDueAt: s.nextDueAt.toISOString(),
+        daysUntilNextAsk: s.daysUntilNextAsk,
+      })),
+    },
   };
 }
 

@@ -133,6 +133,32 @@ export interface BotAnalyticsData {
     conditions: Array<{ label: string; ok: boolean; detail: string }>;
     qualityGates: Array<{ label: string; detail: string }>;
     dbAvailable: boolean;
+    forecast: {
+      days: Array<{
+        date: string;
+        weekday: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+        label: string;
+        description: string;
+        shouldWrite: boolean;
+        shouldImprove: boolean;
+        scheduledProbes: Array<{
+          query: string;
+          category: string;
+          cadenceDays: number;
+          lastAskedDays: number | 'fresh';
+        }>;
+        plannedWrite: { query: string; severity: number; category: string | null } | null;
+        notes: string[];
+      }>;
+      perQuerySchedule: Array<{
+        query: string;
+        category: string;
+        cadenceDays: number;
+        lastAskedAt: string | null;
+        nextDueAt: string;
+        daysUntilNextAsk: number;
+      }>;
+    };
   };
 }
 
@@ -1054,7 +1080,192 @@ function PlanTab({ plan }: { plan: BotAnalyticsData['plan'] }) {
         </div>
         <p className="mt-1 text-xs text-amber-800">{plan.tomorrow.description}</p>
       </section>
+
+      {/* 14-DAY FORECAST */}
+      <ForecastSection forecast={plan.forecast} />
     </div>
+  );
+}
+
+function ForecastSection({ forecast }: { forecast: BotAnalyticsData['plan']['forecast'] }) {
+  const [expandedDay, setExpandedDay] = useState<string | null>(forecast.days[0]?.date ?? null);
+
+  return (
+    <>
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <div className="mb-1 flex items-baseline justify-between">
+          <h3 className="text-base font-semibold text-slate-900">תחזית 14 ימים — מה דוד יעשה</h3>
+          <span className="text-xs text-slate-500">לחץ על יום לפירוט מלא</span>
+        </div>
+        <p className="mb-4 text-xs text-slate-500">
+          התחזית דטרמיניסטית — מבוססת על תוכנית השבוע + cadence של כל שאילתה + תור פערים פתוח.
+          לחיצה על יום מציגה איזה probes ירוצו ומה ייכתב.
+        </p>
+
+        <div className="space-y-2">
+          {forecast.days.map((day, i) => {
+            const isExpanded = expandedDay === day.date;
+            const isToday = i === 0;
+            const dateLabel = new Date(day.date + 'T00:00:00').toLocaleDateString('he-IL', {
+              day: 'numeric',
+              month: 'short',
+            });
+
+            return (
+              <div
+                key={day.date}
+                className={`rounded-lg border ${
+                  isToday
+                    ? 'border-emerald-300 bg-emerald-50/40'
+                    : isExpanded
+                      ? 'border-slate-300 bg-slate-50/60'
+                      : 'border-slate-200 bg-white'
+                }`}
+              >
+                <button
+                  onClick={() => setExpandedDay(isExpanded ? null : day.date)}
+                  className="flex w-full items-center gap-3 p-3 text-start"
+                >
+                  <div className="flex w-16 flex-col items-center">
+                    <div className="text-[10px] font-medium uppercase text-slate-500">
+                      {WEEKDAY_HE[day.weekday]}
+                    </div>
+                    <div className={`text-sm font-bold ${isToday ? 'text-emerald-700' : 'text-slate-700'}`}>
+                      {dateLabel}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-900">{day.label}</div>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+                      <span>📡 {day.scheduledProbes.length} probes</span>
+                      {day.shouldWrite && day.plannedWrite && (
+                        <span className="text-emerald-700">✍️ {day.plannedWrite.query.slice(0, 50)}{day.plannedWrite.query.length > 50 ? '…' : ''}</span>
+                      )}
+                      {day.shouldWrite && !day.plannedWrite && <span className="text-slate-400">✍️ אין נושא</span>}
+                      {day.shouldImprove && <span className="text-blue-700">🔧 self-improve</span>}
+                      {!day.shouldWrite && !day.shouldImprove && <span className="text-slate-400">⏸ שקט</span>}
+                    </div>
+                  </div>
+
+                  <span className={`text-slate-400 transition ${isExpanded ? 'rotate-180' : ''}`} aria-hidden>
+                    ⌄
+                  </span>
+                </button>
+
+                {isExpanded && (
+                  <div className="border-t border-slate-200 p-3">
+                    <p className="text-xs text-slate-600">{day.description}</p>
+
+                    {day.notes.length > 0 && (
+                      <ul className="mt-2 space-y-1 text-[11px] text-slate-500">
+                        {day.notes.map((n, j) => (
+                          <li key={j}>· {n}</li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Probes for the day */}
+                    {day.scheduledProbes.length > 0 && (
+                      <div className="mt-3">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                          📡 שאילתות שיישאלו ({day.scheduledProbes.length})
+                        </div>
+                        <ul className="mt-1.5 space-y-1">
+                          {day.scheduledProbes.map((p, j) => (
+                            <li key={`${p.query}-${j}`} className="flex items-start gap-2 text-[11px]">
+                              <span className="rounded-full bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-600">
+                                {PROBE_FOCUS_HE[p.category] ?? p.category}
+                              </span>
+                              <span className="flex-1 text-slate-700">{p.query}</span>
+                              <span className="text-[10px] text-slate-400">
+                                {p.lastAskedDays === 'fresh' ? 'חדשה' : `אחרון: ${p.lastAskedDays}d`}
+                                {' · קדנציה '}
+                                {p.cadenceDays}d
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Planned write */}
+                    {day.plannedWrite && (
+                      <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-2.5">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                          ✍️ מאמר מתוכנן
+                        </div>
+                        <div className="mt-1 text-sm font-medium text-emerald-900">{day.plannedWrite.query}</div>
+                        <div className="mt-0.5 text-[11px] text-emerald-700">
+                          severity {day.plannedWrite.severity}
+                          {day.plannedWrite.category && ` · קטגוריה ${day.plannedWrite.category}`}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Per-query schedule — every query, when it's next due */}
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <div className="mb-1 flex items-baseline justify-between">
+          <h3 className="text-base font-semibold text-slate-900">לוח זמנים לכל שאילתה</h3>
+          <span className="text-xs text-slate-500">28 שאילתות בpool, ממוין לפי הקרוב ביותר</span>
+        </div>
+        <p className="mb-4 text-xs text-slate-500">
+          זו הוכחה שדוד לא חוזר על אותה שאלה. כל שאילתה נשאלת רק כשעברה הקדנציה שלה (7/14/21/28 יום).
+        </p>
+
+        <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <table className="w-full text-right text-xs">
+            <thead className="bg-slate-50 text-slate-500">
+              <tr>
+                <th className="px-3 py-2 font-medium">שאילתה</th>
+                <th className="px-3 py-2 font-medium">קטגוריה</th>
+                <th className="px-3 py-2 font-medium">קדנציה</th>
+                <th className="px-3 py-2 font-medium">נשאלה לאחרונה</th>
+                <th className="px-3 py-2 font-medium">תיבדק שוב</th>
+              </tr>
+            </thead>
+            <tbody>
+              {forecast.perQuerySchedule.map((s) => {
+                const isDueSoon = s.daysUntilNextAsk <= 1;
+                const lastAskedLabel = s.lastAskedAt
+                  ? new Date(s.lastAskedAt).toLocaleDateString('he-IL', { day: 'numeric', month: 'short' })
+                  : '— מעולם לא';
+                return (
+                  <tr key={s.query} className="border-t border-slate-100">
+                    <td className="px-3 py-2 text-slate-800">{s.query}</td>
+                    <td className="px-3 py-2">
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600">
+                        {PROBE_FOCUS_HE[s.category] ?? s.category}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 font-mono text-[10px] text-slate-500">
+                      כל {s.cadenceDays} ימים
+                    </td>
+                    <td className="px-3 py-2 text-slate-500">{lastAskedLabel}</td>
+                    <td className="px-3 py-2">
+                      {isDueSoon ? (
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-700">
+                          {s.daysUntilNextAsk === 0 ? 'היום' : 'מחר'}
+                        </span>
+                      ) : (
+                        <span className="text-slate-600">בעוד {s.daysUntilNextAsk} ימים</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>
   );
 }
 
