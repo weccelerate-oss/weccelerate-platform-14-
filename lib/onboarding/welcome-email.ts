@@ -46,7 +46,10 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
 }
 
 function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: string): string {
-  const logoUrl = `${PORTAL_URL}/images/weccelerate-gold.png`;
+  // Hardcoded canonical URL — never use PORTAL_URL here, because in some
+  // environments that resolves to a Vercel preview hostname that Gmail's
+  // image proxy can't reach. The production logo is stable at this URL.
+  const logoUrl = 'https://weccelerate.co.il/images/weccelerate-gold.png';
   const escName = escapeHtml(name);
   const escTo = escapeHtml(to);
   const escPwd = escapeHtml(tempPassword);
@@ -78,7 +81,9 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
       <!-- ============================================================ -->
       <tr>
         <td align="center" style="background:#070b1e;background-image:linear-gradient(135deg,#070b1e 0%,#0e1736 55%,#0a1024 100%);padding:40px 32px 32px;">
-          <img src="${logoUrl}" alt="WeCcelerate" width="200" style="display:block;height:auto;max-width:200px;margin:0 auto 18px;" />
+          <img src="${logoUrl}" alt="WeCcelerate" width="200" height="56"
+               style="display:block;height:auto;max-width:200px;width:200px;margin:0 auto 18px;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;"
+               border="0" />
           <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#c8a951;font-weight:700;">
             פורטל היזמים
           </div>
@@ -194,8 +199,6 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
             מה מחכה לך בפורטל
           </div>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            ${benefitRow('🎯', 'מעקב אישי אחרי המיזם', 'ראש פרק, צוות, אבני דרך והתקדמות במקום אחד.')}
-            ${benefitRow('📁', 'מסמכים ותיקיית עבודה', 'גישה לחומרים המקצועיים שמלווים את התהליך שלך.')}
             ${benefitRow('🎓', 'תוכן לימודי ייעודי', 'מדריכים פרקטיים שנכתבו ליזמים ישראלים.')}
             ${benefitRow('💬', 'תקשורת עם הצוות', 'הודעות, עדכונים ופגישות — מסונכרן אחד-לאחד.')}
           </table>
@@ -218,7 +221,9 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
       <!-- ============================================================ -->
       <tr>
         <td style="background:#070b1e;padding:24px 36px;text-align:center;">
-          <img src="${logoUrl}" alt="WeCcelerate" width="120" style="display:block;height:auto;max-width:120px;margin:0 auto 10px;opacity:0.9;" />
+          <img src="${logoUrl}" alt="WeCcelerate" width="120" height="34"
+               style="display:block;height:auto;max-width:120px;width:120px;margin:0 auto 10px;opacity:0.9;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;"
+               border="0" />
           <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.7;">
             WeCcelerate Ltd. — Venture Builder ישראלי
             <br />
@@ -279,8 +284,6 @@ function buildText({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
 (לפחות 8 תווים, אות גדולה, מספר ותו מיוחד).
 
 מה מחכה לך בפורטל:
-  · מעקב אישי אחרי המיזם
-  · מסמכים ותיקיית עבודה
   · תוכן לימודי ייעודי
   · תקשורת עם הצוות
 
