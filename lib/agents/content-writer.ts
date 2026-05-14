@@ -24,6 +24,7 @@ import {
   summarizeRecentGuidesForPrompt,
   type DailyContext,
 } from './daily-context';
+import { loadJournal, summarizeJournalForWriter, type JournalSummary } from './journal';
 
 const MODEL_RESEARCH = 'claude-sonnet-4-6';
 const MODEL_WRITE = 'claude-opus-4-7';
@@ -40,13 +41,14 @@ export interface WriteResult {
   slug?: string;
 }
 
-export async function writeNextGuide(opts?: { context?: DailyContext }): Promise<WriteResult> {
+export async function writeNextGuide(opts?: { context?: DailyContext; journal?: JournalSummary }): Promise<WriteResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     return { ok: false, reason: 'ANTHROPIC_API_KEY not set — agent disabled' };
   }
 
   const startedAt = Date.now();
   const ctx = opts?.context ?? (await loadDailyContext());
+  const journal = opts?.journal ?? (await loadJournal());
 
   // 1. Pick the highest-priority open gap that wasn't already covered in
   //    the last 30 days. We page through candidates in priority order so a
@@ -104,7 +106,7 @@ export async function writeNextGuide(opts?: { context?: DailyContext }): Promise
   try {
     const research = await runResearch(gap.query, gap.competitors);
     const outline = await runOutline(gap.query, research.summary, research.sources);
-    const article = await runWrite(gap.query, outline, research.sources, ctx);
+    const article = await runWrite(gap.query, outline, research.sources, ctx, journal);
     const internalLinks = pickInternalLinks(article.titleHe, article.contentHe);
     const factCheck = await runFactCheck(article.contentHe, research.sources);
     const seoLint = lintSeo(article);
@@ -308,8 +310,10 @@ async function runWrite(
   outline: string,
   sources: string[],
   ctx?: DailyContext,
+  journal?: JournalSummary,
 ): Promise<ArticlePayload> {
   const recentGuidesBlock = ctx ? `\n\n---\n\n${summarizeRecentGuidesForPrompt(ctx)}\n\nאל תכפול אותם — אם הנושא כבר כוסה, תכתוב מזווית שונה לחלוטין או תפרט אספקט שלא נכלל. אסור להשתמש באותו slug, ואסור לחזור על אותו H1.\n` : '';
+  const journalBlock = journal ? `\n\n---\n\n${summarizeJournalForWriter(journal)}\n` : '';
 
   const data = await callAnthropic({
     model: MODEL_WRITE,
@@ -322,7 +326,7 @@ async function runWrite(
 ---
 
 עובדות מאומתות על WeCcelerate (אלה המספרים היחידים שמותר לציין):
-${JSON.stringify(VERIFIED_FACTS, null, 2)}${recentGuidesBlock}
+${JSON.stringify(VERIFIED_FACTS, null, 2)}${recentGuidesBlock}${journalBlock}
 
 ---
 

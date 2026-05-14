@@ -159,6 +159,23 @@ export interface BotAnalyticsData {
         daysUntilNextAsk: number;
       }>;
     };
+    journal: {
+      windowDays: number;
+      wins: Array<{ kind: string; date: string; title: string; detail: string }>;
+      failures: Array<{ kind: string; date: string; title: string; detail: string; repeatCount: number }>;
+      insights: string[];
+    } | null;
+    latestReplan: {
+      date: string;
+      plan: {
+        theme: string;
+        invest: string[];
+        deprioritize: string[];
+        newQueries: string[];
+        warnings: string[];
+        rawMemo: string;
+      };
+    } | null;
   };
 }
 
@@ -896,6 +913,12 @@ function PlanTab({ plan }: { plan: BotAnalyticsData['plan'] }) {
         </div>
       </section>
 
+      {/* BIWEEKLY STRATEGIC PLAN — Claude-generated every 14 days */}
+      {plan.latestReplan && <BiweeklyPlanCard replan={plan.latestReplan} />}
+
+      {/* JOURNAL — wins + failures David remembers */}
+      {plan.journal && <JournalCard journal={plan.journal} />}
+
       {/* WRITING CONDITIONS — the gate-by-gate checklist */}
       <section className="rounded-xl border border-slate-200 bg-white p-5">
         <h3 className="mb-1 text-base font-semibold text-slate-900">תנאי לכתיבה של מאמר חדש</h3>
@@ -1084,6 +1107,190 @@ function PlanTab({ plan }: { plan: BotAnalyticsData['plan'] }) {
       {/* 14-DAY FORECAST */}
       <ForecastSection forecast={plan.forecast} />
     </div>
+  );
+}
+
+function BiweeklyPlanCard({ replan }: { replan: NonNullable<BotAnalyticsData['plan']['latestReplan']> }) {
+  const ageDays = Math.floor((Date.now() - new Date(replan.date).getTime()) / 86_400_000);
+  const isFresh = ageDays < 14;
+
+  return (
+    <section className="rounded-xl border-2 border-violet-200 bg-violet-50/40 p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-violet-200 px-2.5 py-0.5 text-xs font-bold text-violet-900">
+              📋 התוכנית של דוד לשבועיים הקרובים
+            </span>
+          </div>
+          <h2 className="mt-2 text-lg font-bold text-violet-900">{replan.plan.theme}</h2>
+        </div>
+        <div className="text-end">
+          <div className="text-[11px] font-medium text-violet-700">
+            הוכנה לפני {ageDays === 0 ? 'היום' : `${ageDays} ימים`}
+          </div>
+          <div className="text-[10px] text-violet-600">
+            {isFresh ? 'תקפה — דוד מתבסס עליה' : 'תוכנית הבאה תיווצר ב-cron הקרוב'}
+          </div>
+        </div>
+      </div>
+
+      {replan.plan.rawMemo && (
+        <p className="mt-3 rounded-lg bg-white/70 p-3 text-sm leading-relaxed text-violet-900">
+          {replan.plan.rawMemo}
+        </p>
+      )}
+
+      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+        {replan.plan.invest.length > 0 && (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+              ⬆️ להעמיק כאן (עבד)
+            </div>
+            <ul className="mt-2 space-y-1 text-sm text-emerald-900">
+              {replan.plan.invest.map((item, i) => (
+                <li key={i}>· {item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {replan.plan.deprioritize.length > 0 && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-amber-700">
+              ⬇️ להאט כאן (לא הוכיח את עצמו)
+            </div>
+            <ul className="mt-2 space-y-1 text-sm text-amber-900">
+              {replan.plan.deprioritize.map((item, i) => (
+                <li key={i}>· {item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {replan.plan.newQueries.length > 0 && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-blue-700">
+              💭 שאילתות חדשות מומלצות
+            </div>
+            <ul className="mt-2 space-y-1 text-sm text-blue-900">
+              {replan.plan.newQueries.map((item, i) => (
+                <li key={i}>· {item}</li>
+              ))}
+            </ul>
+            <p className="mt-2 text-[11px] text-blue-700">
+              דוד ממליץ — דורש הוספה ידנית ל-PROBE_QUERIES
+            </p>
+          </div>
+        )}
+        {replan.plan.warnings.length > 0 && (
+          <div className="rounded-lg border border-red-200 bg-red-50/60 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-red-700">
+              ⚠️ אזהרות
+            </div>
+            <ul className="mt-2 space-y-1 text-sm text-red-900">
+              {replan.plan.warnings.map((item, i) => (
+                <li key={i}>· {item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function JournalCard({ journal }: { journal: NonNullable<BotAnalyticsData['plan']['journal']> }) {
+  const hasContent = journal.wins.length > 0 || journal.failures.length > 0 || journal.insights.length > 0;
+  if (!hasContent) {
+    return (
+      <section className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+        <h3 className="text-base font-semibold text-slate-900">📓 הזיכרון של דוד</h3>
+        <p className="mt-1 text-xs text-slate-500">
+          עוד אין אירועים ב-{journal.windowDays} הימים האחרונים. הזיכרון יתמלא אחרי שדוד יתחיל לפרסם ולקבל ציטוטים.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <div className="mb-3">
+        <h3 className="text-base font-semibold text-slate-900">📓 הזיכרון של דוד — {journal.windowDays} ימים אחרונים</h3>
+        <p className="text-xs text-slate-500">
+          דוד מצרף את זה לכל prompt — מחקה את מה שהצליח, נמנע ממה שנכשל.
+        </p>
+      </div>
+
+      {journal.insights.length > 0 && (
+        <div className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50/60 p-3">
+          <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700">💡 תובנות אוטומטיות</div>
+          <ul className="mt-2 space-y-1 text-sm text-indigo-900">
+            {journal.insights.map((i, idx) => (
+              <li key={idx}>· {i}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-700">
+            ✅ מה הצליח ({journal.wins.length})
+          </div>
+          {journal.wins.length === 0 ? (
+            <p className="text-xs text-slate-400">עוד אין wins ברשומה.</p>
+          ) : (
+            <ul className="space-y-2">
+              {journal.wins.slice(0, 6).map((w, i) => (
+                <li key={i} className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3">
+                  <div className="text-sm font-semibold text-emerald-900">{w.title}</div>
+                  <div className="mt-0.5 text-xs text-emerald-700">{w.detail}</div>
+                  <div className="mt-1 text-[10px] text-emerald-600">
+                    {new Date(w.date).toLocaleDateString('he-IL')}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div>
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-red-700">
+            ❌ מה נכשל ({journal.failures.length})
+          </div>
+          {journal.failures.length === 0 ? (
+            <p className="text-xs text-slate-400">אין כישלונות ברשומה — מצוין.</p>
+          ) : (
+            <ul className="space-y-2">
+              {journal.failures.slice(0, 6).map((f, i) => (
+                <li
+                  key={i}
+                  className={`rounded-lg border p-3 ${
+                    f.repeatCount >= 2
+                      ? 'border-red-300 bg-red-50/60'
+                      : 'border-amber-200 bg-amber-50/40'
+                  }`}
+                >
+                  <div className={`text-sm font-semibold ${f.repeatCount >= 2 ? 'text-red-900' : 'text-amber-900'}`}>
+                    {f.title}
+                    {f.repeatCount > 1 && (
+                      <span className="ms-2 rounded-full bg-red-200 px-2 py-0.5 text-[10px] font-bold text-red-800">
+                        חזר {f.repeatCount}x
+                      </span>
+                    )}
+                  </div>
+                  <div className={`mt-0.5 text-xs ${f.repeatCount >= 2 ? 'text-red-700' : 'text-amber-700'}`}>
+                    {f.detail.length > 200 ? `${f.detail.slice(0, 200)}…` : f.detail}
+                  </div>
+                  <div className="mt-1 text-[10px] text-slate-500">
+                    {new Date(f.date).toLocaleDateString('he-IL')}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 

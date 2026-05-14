@@ -21,6 +21,9 @@ import { runSelfImprover } from '@/lib/agents/self-improver';
 import { loadDailyContext, type DailyContext } from '@/lib/agents/daily-context';
 import { planForToday, planForTomorrow } from '@/lib/agents/daily-plan';
 import { logDecision } from '@/lib/agents/decision-log';
+import { loadJournal } from '@/lib/agents/journal';
+import { writeDailyJournalEntry } from '@/lib/agents/journal';
+import { runBiweeklyReplan, shouldRunReplan } from '@/lib/agents/biweekly-replanner';
 import { prisma } from '@/lib/db';
 import { DAVID, DAVID_EMAIL_FROM, DAVID_EMAIL_TO } from '@/lib/agents/david';
 
@@ -46,6 +49,7 @@ export async function GET(req: NextRequest) {
   const today = planForToday();
   const tomorrow = planForTomorrow();
   const ctx = await loadDailyContext();
+  const journal = await loadJournal();
 
   // Log the morning briefing so the operator (and David tomorrow) can see
   // what context shaped today's decisions.
@@ -74,9 +78,10 @@ export async function GET(req: NextRequest) {
   results.push(await runStage('probe', () => runAllProbes()));
   // Stage 2: Analyze — always runs.
   results.push(await runStage('analyze', () => analyzeGaps()));
-  // Stage 3: Write — only on writing days.
+  // Stage 3: Write — only on writing days. Pass both context (recent guides
+  // dedupe) AND journal (avoid past mistakes / imitate past wins).
   if (today.plan.shouldWrite) {
-    results.push(await runStage('write', () => writeNextGuide({ context: ctx })));
+    results.push(await runStage('write', () => writeNextGuide({ context: ctx, journal })));
   } else {
     results.push({
       stage: 'write',
@@ -100,8 +105,28 @@ export async function GET(req: NextRequest) {
       skipReason: `${today.plan.label} — לא יום self-improvement.`,
     });
   }
-  // Stage 5: Report.
+  // Stage 5: Biweekly replan — runs only when last replan was >14d ago,
+  // otherwise no-op. Uses Claude Sonnet to draw conclusions from the
+  // 14-day journal and emit a structured strategic memo.
+  if (await shouldRunReplan()) {
+    results.push(await runStage('replan', () => runBiweeklyReplan()));
+  } else {
+    results.push({
+      stage: 'replan',
+      ok: true,
+      durationMs: 0,
+      detail: null,
+      skipped: true,
+      skipReason: 'תוכנית שבועיים אחרונה עדיין טרייה (פחות מ-14 ימים).',
+    });
+  }
+
+  // Stage 6: Report.
   results.push(await runStage('report', () => sendDailyReport(ctx, today, tomorrow, results)));
+
+  // Stage 7: Append today's entry to the journal — David's diary. Reads back
+  // tomorrow morning and informs every decision.
+  await writeDailyJournalEntry(results);
 
   return NextResponse.json({ ok: true, weekday: today.weekday, plan: today.plan.label, results });
 }

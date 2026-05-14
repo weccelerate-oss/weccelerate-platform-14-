@@ -21,6 +21,8 @@ import {
 import { WEEKLY_PLAN, planForToday, planForTomorrow, type Weekday } from '@/lib/agents/daily-plan';
 import { PROBE_QUERIES } from '@/lib/seo/geo-probes';
 import { buildForecast } from '@/lib/agents/forecast';
+import { loadJournal } from '@/lib/agents/journal';
+import { loadLatestReplan } from '@/lib/agents/biweekly-replanner';
 import { BotAnalyticsDashboard, type BotAnalyticsData } from './dashboard';
 
 export const metadata: Metadata = {
@@ -416,6 +418,17 @@ async function getPlanData() {
     recentlyCoveredQueries,
   });
 
+  // Journal + latest biweekly replan — only if DB is available.
+  let journal: Awaited<ReturnType<typeof loadJournal>> | null = null;
+  let latestReplan: Awaited<ReturnType<typeof loadLatestReplan>> = null;
+  if (dbAvailable) {
+    try {
+      [journal, latestReplan] = await Promise.all([loadJournal(), loadLatestReplan()]);
+    } catch {
+      /* swallow — show empty state */
+    }
+  }
+
   return {
     weekly: (Object.entries(WEEKLY_PLAN) as Array<[Weekday, typeof WEEKLY_PLAN[Weekday]]>).map(
       ([day, plan]) => ({ day, ...plan }),
@@ -459,6 +472,31 @@ async function getPlanData() {
         daysUntilNextAsk: s.daysUntilNextAsk,
       })),
     },
+    journal: journal
+      ? {
+          windowDays: journal.windowDays,
+          wins: journal.wins.map((w) => ({
+            kind: w.kind,
+            date: w.date.toISOString(),
+            title: w.title,
+            detail: w.detail,
+          })),
+          failures: journal.failures.map((f) => ({
+            kind: f.kind,
+            date: f.date.toISOString(),
+            title: f.title,
+            detail: f.detail,
+            repeatCount: f.repeatCount,
+          })),
+          insights: journal.insights,
+        }
+      : null,
+    latestReplan: latestReplan
+      ? {
+          date: latestReplan.date.toISOString(),
+          plan: latestReplan.plan,
+        }
+      : null,
   };
 }
 
