@@ -18,6 +18,12 @@ import { prisma } from '@/lib/db';
 import { GUIDES, type Guide } from '@/lib/seo/guides-catalog';
 import { logDecision } from './decision-log';
 import { DAVID_WRITING_RULES_HE, VERIFIED_FACTS } from './writing-rules';
+import {
+  loadDailyContext,
+  isQueryAlreadyCovered,
+  summarizeRecentGuidesForPrompt,
+  type DailyContext,
+} from './daily-context';
 
 const MODEL_RESEARCH = 'claude-sonnet-4-6';
 const MODEL_WRITE = 'claude-opus-4-7';
@@ -34,37 +40,59 @@ export interface WriteResult {
   slug?: string;
 }
 
-export async function writeNextGuide(): Promise<WriteResult> {
+export async function writeNextGuide(opts?: { context?: DailyContext }): Promise<WriteResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     return { ok: false, reason: 'ANTHROPIC_API_KEY not set — agent disabled' };
   }
 
   const startedAt = Date.now();
+  const ctx = opts?.context ?? (await loadDailyContext());
 
-  // 1. Pick the highest-priority open gap.
-  const gap = await prisma.contentGap.findFirst({
+  // 1. Pick the highest-priority open gap that wasn't already covered in
+  //    the last 30 days. We page through candidates in priority order so a
+  //    second-place gap can win when #1 was already addressed yesterday.
+  const candidates = await prisma.contentGap.findMany({
     where: { status: 'open' },
     orderBy: [{ severity: 'desc' }, { detectedAt: 'asc' }],
+    take: 10,
   });
+
+  let gap: typeof candidates[number] | null = null;
+  let skippedDuplicates = 0;
+  for (const candidate of candidates) {
+    if (isQueryAlreadyCovered(candidate.query, ctx)) {
+      skippedDuplicates += 1;
+      continue;
+    }
+    gap = candidate;
+    break;
+  }
+
   if (!gap) {
+    const reason = candidates.length === 0
+      ? 'אין ContentGap פתוח — כל השאילתות מצוטטות מספיק טוב או הסתיימו. ממתין ל-Gap Analyzer הבא.'
+      : `דילגתי על ${skippedDuplicates} פערים פתוחים כי כבר כתבתי עליהם ב-30 הימים האחרונים. אין נושא חדש לכתוב היום.`;
     await logDecision({
       agent: 'content-writer',
-      action: 'idle',
-      reasoning: 'אין ContentGap פתוח — כל השאילתות מצוטטות מספיק טוב או הסתיימו. ממתין ל-Gap Analyzer הבא.',
+      action: candidates.length === 0 ? 'idle' : 'idle-all-covered',
+      reasoning: reason,
+      payload: { openGaps: candidates.length, skippedDuplicates },
       success: true,
     });
-    return { ok: false, reason: 'No open ContentGap to address' };
+    return { ok: false, reason };
   }
 
   await logDecision({
     agent: 'content-writer',
     action: 'picked-gap',
     reasoning:
-      `בחרתי לכתוב על "${gap.query}" כי severity=${gap.severity} (הגבוה ביותר בתור). ` +
+      `בחרתי לכתוב על "${gap.query}" כי severity=${gap.severity}` +
+      (skippedDuplicates > 0 ? ` (דילגתי על ${skippedDuplicates} פערים שכבר כתבתי עליהם לאחרונה)` : '') +
+      `. ` +
       (gap.competitors.length > 0
         ? `המתחרים שכן מצוטטים בנושא: ${gap.competitors.slice(0, 3).join(', ')} — ננתח את הגישה שלהם ונבנה תוכן עמוק יותר.`
         : 'אף מתחרה לא מצוטט בעצמו → הזדמנות לתפוס מקום ראשון.'),
-    payload: { gapId: gap.id, query: gap.query, severity: gap.severity, competitors: gap.competitors },
+    payload: { gapId: gap.id, query: gap.query, severity: gap.severity, competitors: gap.competitors, skippedDuplicates },
   });
 
   // Mark in-progress so a parallel run doesn't pick the same gap.
@@ -76,7 +104,7 @@ export async function writeNextGuide(): Promise<WriteResult> {
   try {
     const research = await runResearch(gap.query, gap.competitors);
     const outline = await runOutline(gap.query, research.summary, research.sources);
-    const article = await runWrite(gap.query, outline, research.sources);
+    const article = await runWrite(gap.query, outline, research.sources, ctx);
     const internalLinks = pickInternalLinks(article.titleHe, article.contentHe);
     const factCheck = await runFactCheck(article.contentHe, research.sources);
     const seoLint = lintSeo(article);
@@ -275,7 +303,14 @@ interface ArticlePayload {
   contentEn?: string | null;
 }
 
-async function runWrite(query: string, outline: string, sources: string[]): Promise<ArticlePayload> {
+async function runWrite(
+  query: string,
+  outline: string,
+  sources: string[],
+  ctx?: DailyContext,
+): Promise<ArticlePayload> {
+  const recentGuidesBlock = ctx ? `\n\n---\n\n${summarizeRecentGuidesForPrompt(ctx)}\n\nאל תכפול אותם — אם הנושא כבר כוסה, תכתוב מזווית שונה לחלוטין או תפרט אספקט שלא נכלל. אסור להשתמש באותו slug, ואסור לחזור על אותו H1.\n` : '';
+
   const data = await callAnthropic({
     model: MODEL_WRITE,
     max_tokens: 8000,
@@ -287,7 +322,7 @@ async function runWrite(query: string, outline: string, sources: string[]): Prom
 ---
 
 עובדות מאומתות על WeCcelerate (אלה המספרים היחידים שמותר לציין):
-${JSON.stringify(VERIFIED_FACTS, null, 2)}
+${JSON.stringify(VERIFIED_FACTS, null, 2)}${recentGuidesBlock}
 
 ---
 

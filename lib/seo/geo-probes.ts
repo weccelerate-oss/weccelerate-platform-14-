@@ -21,22 +21,57 @@ import { prisma } from '@/lib/db';
 export interface ProbeQuery {
   query: string;
   category: 'brand-en' | 'brand-he' | 'generic-en' | 'generic-he' | 'service' | 'medtech';
+  /**
+   * How often this query should be asked, in days. The runner only re-asks
+   * a (provider, query) pair after this many days have passed since the last
+   * successful run. Brand queries refresh weekly (LLM training cadence is
+   * rough); long-tail discovery queries refresh every 2-4 weeks since a
+   * single new article rarely shifts them faster than that.
+   */
+  cadenceDays: number;
 }
 
+/**
+ * Strategic query pool. Each query is asked on rotation, NOT daily — so
+ * the API budget covers ~5x more topics without burning extra calls. The
+ * runner picks queries whose `cadenceDays` window has elapsed.
+ */
 export const PROBE_QUERIES: ProbeQuery[] = [
-  // Direct brand awareness — what does the LLM know about us?
-  { query: 'What is WeCcelerate? Provide a short overview with sources.', category: 'brand-en' },
-  { query: 'מה זה WeCcelerate? תן תיאור קצר עם מקורות.', category: 'brand-he' },
+  // ---------- BRAND (weekly) ----------
+  { query: 'What is WeCcelerate? Provide a short overview with sources.', category: 'brand-en', cadenceDays: 7 },
+  { query: 'מה זה WeCcelerate? תן תיאור קצר עם מקורות.', category: 'brand-he', cadenceDays: 7 },
+  { query: 'Who founded WeCcelerate and when?', category: 'brand-en', cadenceDays: 14 },
+  { query: 'מי הקים את WeCcelerate ובאיזו שנה?', category: 'brand-he', cadenceDays: 14 },
+  { query: 'WeCcelerate vs other Israeli accelerators — what makes it different?', category: 'brand-en', cadenceDays: 14 },
 
-  // Generic discoverability — does WeCcelerate get mentioned naturally?
-  { query: 'What are the leading venture builders in Israel? List 5 with sources.', category: 'generic-en' },
-  { query: 'Best MedTech accelerators in Israel — give me a ranked list with citations.', category: 'generic-en' },
-  { query: 'מהם מאיצי הסטארטאפים המובילים בישראל? תן רשימה עם קישורים.', category: 'generic-he' },
-  { query: 'המאיצים הטובים ביותר ל-MedTech בישראל. תן רשימה ממוקדת.', category: 'generic-he' },
+  // ---------- GENERIC DISCOVERABILITY (bi-weekly) ----------
+  { query: 'What are the leading venture builders in Israel? List 5 with sources.', category: 'generic-en', cadenceDays: 14 },
+  { query: 'Best MedTech accelerators in Israel — give me a ranked list with citations.', category: 'generic-en', cadenceDays: 14 },
+  { query: 'מהם מאיצי הסטארטאפים המובילים בישראל? תן רשימה עם קישורים.', category: 'generic-he', cadenceDays: 14 },
+  { query: 'המאיצים הטובים ביותר ל-MedTech בישראל. תן רשימה ממוקדת.', category: 'generic-he', cadenceDays: 14 },
+  { query: 'Top startup studios for healthtech in Israel 2026', category: 'generic-en', cadenceDays: 21 },
+  { query: 'Which Israeli accelerators specialize in early-stage MedTech?', category: 'generic-en', cadenceDays: 21 },
+  { query: 'Best venture studios for non-technical founders in Israel', category: 'generic-en', cadenceDays: 21 },
+  { query: 'מי בונה סטארטאפים מאפס בישראל (Venture Builder)?', category: 'generic-he', cadenceDays: 21 },
+  { query: 'איפה כדאי ליזם רפואי להתחיל את המסע בישראל?', category: 'generic-he', cadenceDays: 21 },
 
-  // Service-led queries
-  { query: 'Where can a founder get help building a MedTech startup in Israel?', category: 'service' },
-  { query: 'מי מציע ליווי לסטארטאפ רפואי בישראל עם גישה לדאטה רפואית?', category: 'medtech' },
+  // ---------- SERVICE-LED (every 3 weeks) ----------
+  { query: 'Where can a founder get help building a MedTech startup in Israel?', category: 'service', cadenceDays: 21 },
+  { query: 'How do I get access to anonymized clinical data for an Israeli health startup?', category: 'service', cadenceDays: 21 },
+  { query: 'CTO-as-a-service options for Israeli startups', category: 'service', cadenceDays: 21 },
+  { query: 'מי מציע CTO-as-a-Service לסטארטאפים בישראל?', category: 'service', cadenceDays: 21 },
+  { query: 'איך מתחילים סטארטאפ ללא מייסד טכני בישראל?', category: 'service', cadenceDays: 21 },
+  { query: 'איפה מקבלים ליווי כולל לבניית MVP בישראל?', category: 'service', cadenceDays: 21 },
+
+  // ---------- MEDTECH DEEP (bi-weekly — most strategic) ----------
+  { query: 'מי מציע ליווי לסטארטאפ רפואי בישראל עם גישה לדאטה רפואית?', category: 'medtech', cadenceDays: 14 },
+  { query: 'How does an Israeli MedTech startup get into a Leumit clinical pilot?', category: 'medtech', cadenceDays: 14 },
+  { query: 'Best path for FDA 510(k) clearance for an Israeli digital-health device', category: 'medtech', cadenceDays: 21 },
+  { query: 'איך עוברים את ועדת הלסינקי בישראל — מי עוזר?', category: 'medtech', cadenceDays: 21 },
+  { query: 'מי השותפים של לאומית שירותי בריאות בעולם המאיצים?', category: 'medtech', cadenceDays: 21 },
+  { query: 'Israeli partners for Digital Therapeutics startups', category: 'medtech', cadenceDays: 21 },
+  { query: 'How do MedTech startups in Israel access HMO patient data?', category: 'medtech', cadenceDays: 28 },
+  { query: 'מסלול MedTech של לאומית — מה זה ולמי זה מתאים?', category: 'medtech', cadenceDays: 14 },
 ];
 
 // =============================================================================
@@ -269,16 +304,76 @@ export interface ProbeRunSummary {
   failed: number;
   cited: number;
   mentioned: number;
+  skippedNotDue: number;          // queries postponed because last asked < cadenceDays ago
+  scheduled: number;              // queries actually attempted today
   byProvider: Record<string, { ok: number; cited: number; mentioned: number }>;
 }
 
-export async function runAllProbes(): Promise<ProbeRunSummary> {
+/**
+ * Decide which (provider, query) pairs are due today based on each query's
+ * cadenceDays. A pair is due if it was last asked successfully more than
+ * cadenceDays ago — or never asked at all. Hard cap of `maxQueries` keeps
+ * us under Vercel's 60s function budget.
+ */
+async function selectDueQueries(
+  providers: Provider[],
+  maxQueries: number,
+): Promise<Array<{ provider: Provider; query: ProbeQuery; lastAskedAt: Date | null }>> {
+  // Fetch the latest successful timestamp per (provider, query). Errors
+  // don't count — a failed run shouldn't postpone the next attempt.
+  const lastAskedRows = await prisma.$queryRaw<
+    Array<{ provider: string; query: string; last_asked: Date | null }>
+  >`
+    SELECT provider, query, MAX(timestamp) AS last_asked
+    FROM geo_probes
+    WHERE error IS NULL
+    GROUP BY provider, query
+  `;
+  const lastAskedMap = new Map<string, Date>();
+  for (const row of lastAskedRows) {
+    if (row.last_asked) lastAskedMap.set(`${row.provider}|${row.query}`, row.last_asked);
+  }
+
+  const now = Date.now();
+  const candidates: Array<{ provider: Provider; query: ProbeQuery; lastAskedAt: Date | null; dueScore: number }> = [];
+
+  for (const provider of providers) {
+    for (const query of PROBE_QUERIES) {
+      const lastAskedAt = lastAskedMap.get(`${provider.name}|${query.query}`) ?? null;
+      const ageDays = lastAskedAt
+        ? (now - lastAskedAt.getTime()) / 86_400_000
+        : Number.POSITIVE_INFINITY; // never asked → most overdue
+      if (ageDays >= query.cadenceDays) {
+        // dueScore = how overdue it is (higher = more urgent). Prevents the
+        // same subset from always winning when many queries become due
+        // simultaneously.
+        const dueScore = ageDays === Number.POSITIVE_INFINITY ? 9999 : ageDays - query.cadenceDays;
+        candidates.push({ provider, query, lastAskedAt, dueScore });
+      }
+    }
+  }
+
+  candidates.sort((a, b) => b.dueScore - a.dueScore);
+  return candidates.slice(0, maxQueries).map(({ provider, query, lastAskedAt }) => ({
+    provider,
+    query,
+    lastAskedAt,
+  }));
+}
+
+export async function runAllProbes(opts?: { maxQueries?: number }): Promise<ProbeRunSummary> {
+  // Vercel Hobby caps the function at 60s. With ~10s per call running in
+  // parallel, ~24 calls is the safe ceiling. Pro plan can raise this.
+  const MAX_QUERIES = opts?.maxQueries ?? 24;
+
   const summary: ProbeRunSummary = {
     total: 0,
     succeeded: 0,
     failed: 0,
     cited: 0,
     mentioned: 0,
+    skippedNotDue: 0,
+    scheduled: 0,
     byProvider: {},
   };
 
@@ -292,17 +387,22 @@ export async function runAllProbes(): Promise<ProbeRunSummary> {
     summary.byProvider[provider.name] = { ok: 0, cited: 0, mentioned: 0 };
   }
 
-  // Parallelize: each provider × each query is one independent call. Build
-  // the full task list and run all of them concurrently. With 8 queries × 3
-  // providers = 24 calls, this fits within Vercel's 60s function budget
-  // because the slowest single call is ~10s and they all run in parallel.
-  // Each provider's API rate-limits are well above 24 RPM so we don't need
-  // to throttle.
+  // Cadence-aware selection: only run pairs that are actually due today.
+  const due = await selectDueQueries(activeProviders, MAX_QUERIES);
+  const totalPairs = activeProviders.length * PROBE_QUERIES.length;
+  summary.scheduled = due.length;
+  summary.skippedNotDue = totalPairs - due.length;
+
+  if (due.length === 0) {
+    // Nothing's due — David already covered all queries within their
+    // cadence windows. This is the *desired* state on quiet days.
+    return summary;
+  }
+
+  // Parallelize: each (provider, query) is one independent call.
   const tasks: Promise<void>[] = [];
-  for (const provider of activeProviders) {
-    for (const { query, category } of PROBE_QUERIES) {
-      tasks.push(runOneProbe(provider, query, category, summary));
-    }
+  for (const { provider, query } of due) {
+    tasks.push(runOneProbe(provider, query.query, query.category, summary));
   }
   await Promise.allSettled(tasks);
 
