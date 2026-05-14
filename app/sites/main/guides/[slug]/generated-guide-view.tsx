@@ -124,41 +124,52 @@ export function renderGeneratedGuide(g: GeneratedGuide) {
         />
       ))}
 
-      <article className="min-h-screen bg-white" id="main-content">
-        <div className="mx-auto max-w-3xl px-4 py-12 md:py-16" dir="rtl">
-          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-500">
-            <Link href="/" className="hover:text-slate-900">בית</Link>
-            <span className="mx-2">›</span>
-            <Link href="/guides" className="hover:text-slate-900">מדריכים</Link>
-            <span className="mx-2">›</span>
-            <span aria-current="page" className="text-slate-900">{g.titleHe}</span>
-          </nav>
+      <article
+        className="min-h-screen bg-[#070b1e] text-white font-heebo"
+        id="main-content"
+        dir="rtl"
+      >
+        <header className="relative overflow-hidden border-b border-white/5 pt-28 pb-12 md:pt-36 md:pb-16">
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(200,169,81,0.10) 0%, transparent 70%)',
+            }}
+          />
+          <div className="container mx-auto px-4 relative z-10 max-w-3xl">
+            <nav aria-label="Breadcrumb" className="mb-6 text-sm text-white/40">
+              <Link href="/" className="hover:text-white/80 transition-colors">בית</Link>
+              <span className="mx-2">›</span>
+              <Link href="/guides" className="hover:text-white/80 transition-colors">מדריכים</Link>
+              <span className="mx-2">›</span>
+              <span aria-current="page" className="text-white/80">{g.titleHe}</span>
+            </nav>
 
-          <header className="mb-8">
-            <div className="mb-3 flex items-center gap-3 text-xs text-slate-500">
-              <span className="rounded-full bg-violet-50 px-3 py-1 font-medium text-violet-700">
+            <div className="mb-3 flex items-center gap-3 text-xs text-white/40">
+              <span className="rounded-full border border-[#c8a951]/30 bg-[#c8a951]/10 px-3 py-1 font-semibold text-[#e8d48b] uppercase tracking-wider">
                 {g.category}
               </span>
               {g.wordCount && <span>{Math.ceil(g.wordCount / 220)} דק׳ קריאה</span>}
               <span>·</span>
               <time dateTime={date.slice(0, 10)}>פורסם {date.slice(0, 10)}</time>
             </div>
-            <h1 className="mb-5 text-3xl font-bold leading-tight text-slate-900 md:text-4xl">
+            <h1 className="mb-6 text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.15] tracking-tight">
               {g.titleHe}
             </h1>
-            <div className="rounded-xl border border-violet-200 bg-violet-50 p-5">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-violet-700">
+            <div className="rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.08] via-transparent to-[#c8a951]/[0.04] p-5">
+              <div className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-[#c8a951]">
                 תקציר
               </div>
-              <p data-speakable className="text-lg leading-relaxed text-slate-900">
+              <p data-speakable className="text-lg leading-relaxed text-white">
                 {g.metaDescription}
               </p>
             </div>
-          </header>
-
-          <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-a:text-blue-700">
-            {blocks}
           </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-10 md:py-14 max-w-3xl">
+          <div className="space-y-1 text-white/75 leading-relaxed">{blocks}</div>
         </div>
       </article>
     </>
@@ -197,7 +208,7 @@ function parseMarkdown(md: string): React.ReactNode[] {
   const flushList = () => {
     if (listBuffer.length > 0) {
       out.push(
-        <ul key={`l${out.length}`} className="my-4 list-disc space-y-1.5 pr-6">
+        <ul key={`l${out.length}`} className="my-4 list-disc space-y-1.5 pr-6 marker:text-[#c8a951]">
           {listBuffer.map((item, i) => (
             <li key={i}>{renderInline(item)}</li>
           ))}
@@ -210,7 +221,7 @@ function parseMarkdown(md: string): React.ReactNode[] {
   const flushParagraph = () => {
     if (buffer.length > 0) {
       out.push(
-        <p key={`p${out.length}`} className="my-4 leading-relaxed text-slate-700">
+        <p key={`p${out.length}`} className="my-4 leading-relaxed text-white/75">
           {renderInline(buffer.join(' '))}
         </p>,
       );
@@ -224,12 +235,12 @@ function parseMarkdown(md: string): React.ReactNode[] {
     if (line.startsWith('# ')) { flushParagraph(); flushList(); continue; /* h1 already in header */ }
     if (line.startsWith('## ')) {
       flushParagraph(); flushList();
-      out.push(<h2 key={`h${out.length}`} className="mt-10 mb-4 text-2xl font-bold text-slate-900">{line.slice(3)}</h2>);
+      out.push(<h2 key={`h${out.length}`} className="mt-10 mb-4 text-2xl md:text-3xl font-bold tracking-tight text-white">{line.slice(3)}</h2>);
       continue;
     }
     if (line.startsWith('### ')) {
       flushParagraph(); flushList();
-      out.push(<h3 key={`h${out.length}`} className="mt-6 mb-3 text-xl font-semibold text-slate-900">{line.slice(4)}</h3>);
+      out.push(<h3 key={`h${out.length}`} className="mt-6 mb-3 text-xl font-semibold text-[#e8d48b]">{line.slice(4)}</h3>);
       continue;
     }
     if (/^\s*[-*]\s+/.test(line)) {
@@ -260,7 +271,7 @@ function renderInline(text: string): React.ReactNode {
   while ((m = re.exec(text)) !== null) {
     if (m.index > lastIndex) parts.push(text.slice(lastIndex, m.index));
     if (m[1]) {
-      parts.push(<a key={key++} href={m[3]} className="text-blue-700 hover:underline">{m[2]}</a>);
+      parts.push(<a key={key++} href={m[3]} className="text-[#e8d48b] hover:text-[#c8a951] hover:underline">{m[2]}</a>);
     } else if (m[4]) {
       parts.push(<strong key={key++} className="font-semibold">{m[5]}</strong>);
     }

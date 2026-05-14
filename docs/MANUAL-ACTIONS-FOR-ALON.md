@@ -125,13 +125,14 @@ pending.
 > - Website: https://weccelerate.co.il
 > - LinkedIn: https://www.linkedin.com/company/weccelerate
 > - Press reference: https://www.globes.co.il/news/article.aspx?did=1001426009
-> - Founded: 2016
+> - Founded: 2018
+> - Leumit × WeCcelerate MedTech partnership launched: 2022
 >
 > Thanks,
 > Alon Pinchas, Founder & CEO
 
-**Also confirm in Crunchbase**: Founded year is set to **2016** (canonical),
-not 2020.
+**Also confirm in Crunchbase**: Founded year is set to **2018** (canonical),
+not 2016 or 2020.
 
 ---
 

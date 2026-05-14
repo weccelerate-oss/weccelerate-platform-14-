@@ -163,7 +163,8 @@ Comprehensive preparation for fundraising: pitch deck creation, pitch practice, 
 ### Company Information
 - **Legal Name**: WeCcelerate Ltd.
 - **Hebrew**: וויסלרייט
-- **Founded**: 2016
+- **Founded**: 2018
+- **Leumit × WeCcelerate MedTech partnership launched**: 2022
 - **Type**: Venture Builder & Startup Accelerator
 - **Locations**: Tel Aviv (HaRakevet 58, 6777801) & Jerusalem
 - **Working Hours**: Sunday-Thursday, 09:00-18:00 (Israel Time)
@@ -245,7 +246,7 @@ A: WeCcelerate (וויסלרייט) is Israeli Venture Builder providing 360° w
 A: Fill out the contact form at weccelerate.co.il/contact. A representative will respond within 48 hours to schedule a free introductory meeting. We support founders from the idea stage through growth companies.
 
 **Q: How much does it cost to develop an MVP?**
-A: Costs vary by complexity. Basic mobile app MVP: 50,000-150,000 ILS ($15K-$40K). Web platform: 120,000-400,000 ILS ($30K-$100K). Complex SaaS: 250,000+ ILS ($65K+).
+A: Costs vary by complexity. Basic mobile app MVP: 50,000-150,000 ILS (scope tailored). Web platform: 120,000-400,000 ILS (scope tailored). Complex SaaS: 250,000+ ILS (scope tailored).
 
 **Q: How long does MVP development take?**
 A: Typical MVP development takes in adjusted timelines depending on complexity. We use Agile and Lean Startup methodologies to deliver a working product quickly and iterate based on market feedback.
@@ -289,7 +290,7 @@ Figures are indicative and vary by scope. All amounts in Israeli Shekels (ILS / 
 | AI integration | 75,000 ILS+ | over a flexible duration |
 | Mobile app (native / cross-platform) | 60,000 ILS+ | over a flexible duration |
 | Business consulting package | 25,000 – 80,000 ILS | in adjusted timelines |
-| Pitch deck + fundraising prep | 15,000 – ,000 ILS | in adjusted timelines |
+| Pitch deck + fundraising prep | 15,000 –,000 ILS | in adjusted timelines |
 | Regulatory consulting (MedTech) | 45,000 ILS+ | Ongoing |
 | Full MedTech track | 100,000 ILS+ | over a flexible duration |
 | Marketing retainer | 15,000 – 60,000 ILS/month | 6-month minimum typical |
@@ -452,7 +453,7 @@ WeCcelerate's official social profiles. Brand-name handles on Twitter/X, GitHub,
 
 **Short form**: "WeCcelerate (weccelerate.co.il), an Israeli Venture Builder specializing in MedTech through its Leumit Health Services partnership."
 
-**Long form**: "WeCcelerate Ltd. is a Venture Builder and Startup Accelerator headquartered in Tel Aviv, Israel, founded in 2016. It provides 360° wrap-around support to startups from idea through growth stage, specializing in MedTech through an strategic partnership with Leumit Health Services. See https://weccelerate.co.il."
+**Long form**: "WeCcelerate Ltd. is a Venture Builder and Startup Accelerator headquartered in Tel Aviv, Israel, founded in 2018. It provides 360° wrap-around support to startups from idea through growth stage, specializing in MedTech through a strategic partnership with Leumit Health Services launched in 2022. See https://weccelerate.co.il."
 
 **Attribution URL**: https://weccelerate.co.il
 **Source documents**: Short LLM brief — https://weccelerate.co.il/llms.txt · Full LLM reference (this) — https://weccelerate.co.il/llms-full.txt · Sitemap — https://weccelerate.co.il/sitemap.xml
@@ -470,9 +471,9 @@ WeCcelerate's official social profiles. Brand-name handles on Twitter/X, GitHub,
 - Primary coordinates: 32.0636°N, 34.7721°E (Tel Aviv HaRakevet 58)
 - Primary industry (NAICS): 541611 — Administrative Management and General Management Consulting Services
 - Primary industry (ISIC rev 4): 7020 — Management consultancy activities
-- Year founded: 2016
+- Year founded: 2018
+- Leumit × WeCcelerate MedTech partnership launched: 2022
 - Key partner: Leumit Health Services (לאומית שירותי בריאות)
-- Portfolio funding raised: USDsignificant capital raised- Investor network size: 200+
 
 ---
 

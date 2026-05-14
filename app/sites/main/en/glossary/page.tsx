@@ -52,7 +52,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Startup',
  hebrew: 'סטארטאפ',
  definition:
- 'A sub-category of venture — specifically one aiming for exponential growth and a $100M+ exit. Characterized by high burn rate, search for product-market fit, and venture-capital funding.',
+ 'A sub-category of venture — specifically one aiming for exponential growth and a scope tailored exit. Characterized by high burn rate, search for product-market fit, and venture-capital funding.',
  guideHebrewSlug: 'mah-ze-startup',
  category: 'core',
  },
@@ -114,7 +114,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'MVP — Minimum Viable Product',
  hebrew: 'MVP / מוצר מינימלי',
  definition:
- 'The simplest version of a product that can test the core value hypothesis with real users. The goal: not a finished product, but a working artifact you can show to users and investors. Built in in adjusted timelines, $14-40K budget for a typical Israeli startup.',
+ 'The simplest version of a product that can test the core value hypothesis with real users. The goal: not a finished product, but a working artifact you can show to users and investors. Built in in adjusted timelines, scope tailoredK budget for a typical Israeli startup.',
  guideHebrewSlug: 'eich-bonim-mvp',
  category: 'product',
  },
@@ -132,7 +132,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'CTO as a Service',
  hebrew: 'CTO חלקי',
  definition:
- 'Model where a startup without a technical co-founder hires a fractional CTO for 10-20 hours per week. The CTO makes architecture decisions, hires the first team, and represents the technical side to investors. Cost: $4-9K/month.',
+ 'Model where a startup without a technical co-founder hires a fractional CTO for 10-20 hours per week. The CTO makes architecture decisions, hires the first team, and represents the technical side to investors. Cost: scope tailoredK/month.',
  guideHebrewSlug: 'cto-as-a-service',
  category: 'product',
  },
@@ -151,7 +151,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Seed Round',
  hebrew: 'סיד / Seed',
  definition:
- 'First substantial fundraising round. In Israel 2026: $500K-$2M raised, pre-money valuation $5-12M. Required after MVP and initial traction. Comes after Pre-Seed (FFF + Angels) and before Series A.',
+ 'First substantial fundraising round. In Israel 2026: scope tailored raised, pre-money valuation scope tailored. Required after MVP and initial traction. Comes after Pre-Seed (FFF + Angels) and before Series A.',
  guideHebrewSlug: 'eich-mgayisim-mashkim',
  category: 'funding',
  },
@@ -160,7 +160,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Series A',
  hebrew: 'סבב A / Series A',
  definition:
- 'Second fundraising round, after Product-Market Fit is proven. In Israel 2026: $5-15M, pre-money valuation $20-50M. Requires $500K-$2M ARR, 30%+ D30 retention, and a team of 8-15. Lasts over a flexible duration end-to-end.',
+ 'Second fundraising round, after Product-Market Fit is proven. In Israel 2026: scope tailored, pre-money valuation scope tailored. Requires scope tailored ARR, 30%+ D30 retention, and a team of 8-15. Lasts over a flexible duration end-to-end.',
  guideHebrewSlug: 'giyus-series-a',
  category: 'funding',
  },
@@ -222,7 +222,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Exit',
  hebrew: 'אקזיט',
  definition:
- 'Sale of the company (M&A) or initial public offering (IPO). In Israel, M&A — depends on sector and stage. Mega-exit: $1B+. Average time from Seed to exit: 7-12 years. we work with startups across all stages.',
+ 'Sale of the company (M&A) or initial public offering (IPO). In Israel, M&A — depends on sector and stage. Mega-exit: scope tailoredB+. Average time from Seed to exit: 7-12 years. we work with startups across all stages.',
  guideHebrewSlug: 'exit-startup',
  category: 'funding',
  },
@@ -242,7 +242,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'TAM — Total Addressable Market',
  hebrew: 'שוק יעד כולל',
  definition:
- 'The total global potential market for a product. Meaning: if 100% of the market buys, how much revenue does it generate. Investors require TAM of $100M+ to consider investing.',
+ 'The total global potential market for a product. Meaning: if 100% of the market buys, how much revenue does it generate. Investors require TAM of scope tailored to consider investing.',
  category: 'metrics',
  },
  {
@@ -318,7 +318,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Delaware Flip',
  hebrew: 'Delaware Flip',
  definition:
- 'Process of forming a US holding company (Delaware C-Corp) that owns the Israeli company. Often required before Series A if investors are American. Cost: $20-40K in legal fees. Best deferred until truly needed.',
+ 'Process of forming a US holding company (Delaware C-Corp) that owns the Israeli company. Often required before Series A if investors are American. Cost: scope tailoredK in legal fees. Best deferred until truly needed.',
  guideHebrewSlug: 'delaware-flip',
  category: 'legal',
  },
@@ -346,7 +346,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'FDA 510(k) Premarket Notification',
  hebrew: 'FDA 510(k)',
  definition:
- 'The most common FDA pathway for medical devices. Requires demonstrating "substantial equivalence" to an existing predicate device. Review: over a flexible duration. Preparation: over a flexible duration. Cost: $135K-$700K including testing and regulatory consulting.',
+ 'The most common FDA pathway for medical devices. Requires demonstrating "substantial equivalence" to an existing predicate device. Review: over a flexible duration. Preparation: over a flexible duration. Cost: scope tailored including testing and regulatory consulting.',
  guideHebrewSlug: 'fda-510k-madrich',
  category: 'medtech',
  },
@@ -363,7 +363,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'ISO 13485',
  hebrew: 'ISO 13485',
  definition:
- 'International quality management standard specific to medical devices. Required for CE marking, preferred for FDA. Requires a complete QMS (Quality Management System). Setup: over a flexible duration, cost: $27-80K.',
+ 'International quality management standard specific to medical devices. Required for CE marking, preferred for FDA. Requires a complete QMS (Quality Management System). Setup: over a flexible duration, cost: scope tailoredK.',
  category: 'medtech',
  },
  {
@@ -371,7 +371,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'MedTech',
  hebrew: 'מיזם רפואי',
  definition:
- 'The medical technology field — devices, software, or products for clinical use. Requires regulation (FDA, CE, Israeli MOH), long development period (3-5 years), and significant capital ($135K-$700K for FDA). Israel leads globally per capita.',
+ 'The medical technology field — devices, software, or products for clinical use. Requires regulation (FDA, CE, Israeli MOH), long development period (3-5 years), and significant capital (scope tailored for FDA). Israel leads globally per capita.',
  guideHebrewSlug: 'mizam-refui',
  category: 'medtech',
  },
@@ -416,7 +416,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Angel Investor',
  hebrew: 'אנג\'ל',
  definition:
- 'A wealthy private investor who invests their own money in early-stage startups — usually Pre-Seed or Seed. Average investment: $25-500K. Israel has hundreds of active angels, many of them entrepreneurs who have made an exit.',
+ 'A wealthy private investor who invests their own money in early-stage startups — usually Pre-Seed or Seed. Average investment: scope tailoredK. Israel has hundreds of active angels, many of them entrepreneurs who have made an exit.',
  category: 'people',
  },
  {
@@ -424,7 +424,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'VC — Venture Capital',
  hebrew: 'הון סיכון',
  definition:
- 'Professional funds investing in startups for equity. Israel has 100+ active funds. Examples: TLV Partners, Pitango, Vertex, JVP, Ibex. Rounds: Seed ($500K-$2M), Series A ($5-15M), Series B ($20-50M).',
+ 'Professional funds investing in startups for equity. Israel has 100+ active funds. Examples: TLV Partners, Pitango, Vertex, JVP, Ibex. Rounds: Seed (scope tailored), Series A (scope tailored), Series B (scope tailored).',
  category: 'people',
  },
  {
@@ -516,7 +516,7 @@ function buildGlossarySchema() {
  description: t.definition,
  termCode: t.id,
  inDefinedTermSet: { '@id': `${SITE_CONFIG.url}/en/glossary#termset` },
- ...(t.guideHebrewSlug && {
+...(t.guideHebrewSlug && {
  url:
  getEnSlugFromHebrew(t.guideHebrewSlug)
  ? `${SITE_CONFIG.url}/en/guides/${getEnSlugFromHebrew(t.guideHebrewSlug)}`

@@ -17,5 +17,6 @@ Policy: https://weccelerate.co.il/privacy
 # Operational details (helpful to reputation systems)
 # Domain: weccelerate.co.il
 # Legal entity: WeCcelerate Ltd. (Israel)
-# Founded: 2016
+# Founded: 2018
+# Leumit × WeCcelerate MedTech partnership launched: 2022
 # Website hosted on Vercel; production traffic only.

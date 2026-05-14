@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { constructMetadata, SITE_CONFIG } from '@/lib/seo';
 import {
@@ -14,15 +15,9 @@ import { prisma } from '@/lib/db';
 import { renderGeneratedGuide } from './generated-guide-view';
 
 export const revalidate = 86400;
-// Allow slugs that aren't in the static catalog — agent-generated guides
-// (GeneratedGuide table) are rendered through a fallback path.
 export const dynamicParams = true;
 
 type Params = { slug: string };
-
-// =============================================================================
-// STATIC PARAMS + METADATA
-// =============================================================================
 
 export function generateStaticParams() {
   return GUIDES.map((g) => ({ slug: g.slug }));
@@ -43,7 +38,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const guide = getGuideBySlug(slug);
 
   if (!guide) {
-    // Fallback: agent-generated guide.
     const gen = await findGeneratedGuide(slug);
     if (gen && gen.status === 'published') {
       return constructMetadata({
@@ -76,8 +70,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     image: `${SITE_CONFIG.url}/og?slug=${encodeURIComponent(guide.slug)}&locale=he`,
   });
 
-  // If this guide has an English translation, point hreflang at it.
-  // Otherwise fall back to constructMetadata's default languages map.
   const enSlug = getEnSlugFromHebrew(guide.slug);
   if (!enSlug) return base;
 
@@ -98,10 +90,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     },
   };
 }
-
-// =============================================================================
-// JSON-LD BUILDERS
-// =============================================================================
 
 function buildArticleSchema(guide: Guide) {
   const url = `${SITE_CONFIG.url}/guides/${guide.slug}`;
@@ -131,14 +119,8 @@ function buildArticleSchema(guide: Guide) {
     ),
     timeRequired: `PT${guide.readingTimeMinutes}M`,
     image: { '@type': 'ImageObject', url: `${SITE_CONFIG.url}/logo.png`, width: 512, height: 512 },
-    speakable: {
-      '@type': 'SpeakableSpecification',
-      cssSelector: ['[data-speakable]'],
-    },
-    about: {
-      '@type': 'Thing',
-      name: guide.targetKeyword,
-    },
+    speakable: { '@type': 'SpeakableSpecification', cssSelector: ['[data-speakable]'] },
+    about: { '@type': 'Thing', name: guide.targetKeyword },
   };
 }
 
@@ -201,16 +183,11 @@ function buildBreadcrumbSchema(guide: Guide) {
   };
 }
 
-// =============================================================================
-// PAGE
-// =============================================================================
-
 export default async function GuideDetailPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const guide = getGuideBySlug(slug);
 
   if (!guide) {
-    // Fallback: agent-generated guide stored in DB.
     const gen = await findGeneratedGuide(slug);
     if (gen && gen.status === 'published') {
       return renderGeneratedGuide(gen);
@@ -240,127 +217,142 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
         />
       ))}
 
-      <article className="min-h-screen bg-white" id="main-content">
-        <div className="mx-auto max-w-3xl px-4 py-12 md:py-16" dir="rtl">
-          {/* Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-500">
-            <Link href="/" className="hover:text-slate-900">בית</Link>
-            <span className="mx-2">›</span>
-            <Link href="/guides" className="hover:text-slate-900">מדריכים</Link>
-            <span className="mx-2">›</span>
-            <span aria-current="page" className="text-slate-900">{guide.targetKeyword}</span>
-          </nav>
+      <article
+        className="min-h-screen bg-[#070b1e] text-white font-heebo"
+        id="main-content"
+        dir="rtl"
+      >
+        {/* Hero band */}
+        <header className="relative overflow-hidden border-b border-white/5 pt-28 pb-12 md:pt-36 md:pb-16">
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(200,169,81,0.10) 0%, transparent 70%)',
+            }}
+          />
+          <div className="container mx-auto px-4 relative z-10 max-w-3xl">
+            <nav aria-label="Breadcrumb" className="mb-6 text-sm text-white/40">
+              <Link href="/" className="hover:text-white/80 transition-colors">בית</Link>
+              <span className="mx-2">›</span>
+              <Link href="/guides" className="hover:text-white/80 transition-colors">מדריכים</Link>
+              <span className="mx-2">›</span>
+              <span aria-current="page" className="text-white/80">{guide.targetKeyword}</span>
+            </nav>
 
-          {/* English sibling — only shown for the 5 translated guides */}
-          {enSlug && (
-            <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm">
-              <span className="text-slate-600">קוראים בעברית</span>
-              <Link
-                href={`/en/guides/${enSlug}`}
-                hrefLang="en"
-                className="font-medium text-blue-700 hover:underline"
-                aria-label="Read this guide in English"
-              >
-                Read in English →
-              </Link>
-            </div>
-          )}
+            {enSlug && (
+              <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
+                <span className="text-white/55">קוראים בעברית</span>
+                <Link
+                  href={`/en/guides/${enSlug}`}
+                  hrefLang="en"
+                  className="font-semibold text-[#e8d48b] hover:text-[#c8a951] transition-colors"
+                  aria-label="Read this guide in English"
+                >
+                  Read in English →
+                </Link>
+              </div>
+            )}
 
-          {/* Header */}
-          <header className="mb-8">
-            <div className="mb-3 flex items-center gap-3 text-xs text-slate-500">
-              <span className="rounded-full bg-blue-50 px-3 py-1 font-medium text-blue-700">
+            <div className="mb-3 flex items-center gap-3 text-xs text-white/40">
+              <span className="rounded-full border border-[#c8a951]/30 bg-[#c8a951]/10 px-3 py-1 font-semibold text-[#e8d48b] uppercase tracking-wider">
                 {category.he}
               </span>
               <span>{guide.readingTimeMinutes} דק׳ קריאה</span>
               <span>·</span>
               <time dateTime={guide.lastUpdated}>עודכן {guide.lastUpdated}</time>
             </div>
-            <h1 className="mb-5 text-3xl font-bold leading-tight text-slate-900 md:text-4xl">
+            <h1 className="mb-6 text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.15] tracking-tight">
               {guide.h1}
             </h1>
 
-            {/* Speakable answer box — what Google AI / Alexa read aloud */}
-            <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
+            {/* Speakable answer */}
+            <div className="rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.08] via-transparent to-[#c8a951]/[0.04] p-5">
+              <div className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-[#c8a951]">
                 תשובה מהירה
               </div>
-              <p data-speakable className="text-lg leading-relaxed text-slate-900">
+              <p data-speakable className="text-lg leading-relaxed text-white">
                 {guide.speakableAnswer}
               </p>
             </div>
-          </header>
+          </div>
+        </header>
 
+        <div className="container mx-auto px-4 py-10 md:py-14 max-w-3xl">
           {/* Table of contents */}
           <nav
             aria-label="תוכן עניינים"
-            className="mb-10 rounded-xl border border-slate-200 bg-slate-50 p-5"
+            className="mb-10 rounded-2xl border border-white/8 bg-white/[0.02] p-5"
           >
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#c8a951]">
               תוכן עניינים
             </h2>
-            <ol className="list-decimal space-y-1.5 pr-5 text-slate-700">
+            <ol className="list-decimal space-y-1.5 pr-5 text-white/70">
               {guide.sections.map((s, i) => (
                 <li key={i}>
-                  <a href={`#section-${i + 1}`} className="hover:text-blue-700 hover:underline">
+                  <a href={`#section-${i + 1}`} className="hover:text-[#e8d48b] transition-colors">
                     {s.heading}
                   </a>
                 </li>
               ))}
               {guide.howToSteps && (
                 <li>
-                  <a href="#howto" className="hover:text-blue-700 hover:underline">
+                  <a href="#howto" className="hover:text-[#e8d48b] transition-colors">
                     שלבים מעשיים
                   </a>
                 </li>
               )}
               <li>
-                <a href="#faq" className="hover:text-blue-700 hover:underline">
+                <a href="#faq" className="hover:text-[#e8d48b] transition-colors">
                   שאלות נפוצות
                 </a>
               </li>
             </ol>
           </nav>
 
-          {/* Body sections */}
-          <div className="prose prose-slate max-w-none">
+          {/* Body */}
+          <div className="space-y-12">
             {guide.sections.map((section, i) => (
-              <section key={i} id={`section-${i + 1}`} className="mb-10 scroll-mt-24">
-                <h2 className="mb-4 text-2xl font-bold text-slate-900">{section.heading}</h2>
-                {section.paragraphs.map((p, j) => (
-                  <p key={j} className="mb-4 leading-relaxed text-slate-700">
-                    {p}
-                  </p>
-                ))}
-                {section.list && (
-                  <ul className="mb-4 list-disc space-y-2 pr-6 text-slate-700">
-                    {section.list.map((item, j) => (
-                      <li key={j} className="leading-relaxed">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+              <section key={i} id={`section-${i + 1}`} className="scroll-mt-24">
+                <h2 className="mb-4 text-2xl md:text-3xl font-bold tracking-tight">{section.heading}</h2>
+                <div className="space-y-4 text-white/75 leading-relaxed">
+                  {section.paragraphs.map((p, j) => (
+                    <p key={j}>{p}</p>
+                  ))}
+                  {section.list && (
+                    <ul className="list-disc space-y-2 pr-6 marker:text-[#c8a951]">
+                      {section.list.map((item, j) => (
+                        <li key={j}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </section>
             ))}
           </div>
 
           {/* HowTo steps */}
           {guide.howToSteps && (
-            <section id="howto" className="mb-12 scroll-mt-24 rounded-2xl border border-slate-200 p-6">
-              <h2 className="mb-6 text-2xl font-bold text-slate-900">שלבים מעשיים</h2>
+            <section
+              id="howto"
+              className="mt-14 scroll-mt-24 rounded-2xl border border-white/8 bg-white/[0.02] p-7"
+            >
+              <p className="text-[#c8a951] text-xs font-bold uppercase tracking-[0.22em] mb-3">
+                Step by step
+              </p>
+              <h2 className="mb-6 text-2xl md:text-3xl font-bold tracking-tight">שלבים מעשיים</h2>
               <ol className="space-y-5">
                 {guide.howToSteps.map((step, i) => (
                   <li key={i} className="flex gap-4">
                     <div
                       aria-hidden="true"
-                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold text-white"
+                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#c8a951] to-[#e8d48b] font-bold text-[#070b1e] shadow-lg shadow-[#c8a951]/20"
                     >
                       {i + 1}
                     </div>
                     <div className="flex-1">
-                      <h3 className="mb-1 text-lg font-semibold text-slate-900">{step.name}</h3>
-                      <p className="text-slate-700">{step.text}</p>
+                      <h3 className="mb-1 text-lg font-semibold text-white">{step.name}</h3>
+                      <p className="text-white/65 leading-relaxed">{step.text}</p>
                     </div>
                   </li>
                 ))}
@@ -369,67 +361,82 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
           )}
 
           {/* FAQ */}
-          <section id="faq" className="mb-12 scroll-mt-24">
-            <h2 className="mb-6 text-2xl font-bold text-slate-900">שאלות נפוצות</h2>
+          <section id="faq" className="mt-14 scroll-mt-24">
+            <p className="text-[#c8a951] text-xs font-bold uppercase tracking-[0.22em] mb-3">
+              FAQ
+            </p>
+            <h2 className="mb-6 text-2xl md:text-3xl font-bold tracking-tight">שאלות נפוצות</h2>
             <div className="space-y-3">
               {guide.faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group rounded-xl border border-slate-200 bg-white p-5 open:border-blue-400 open:shadow-sm"
+                  className="group rounded-2xl border border-white/8 bg-white/[0.02] p-5 open:border-[#c8a951]/30 open:bg-[#c8a951]/[0.04] transition-colors"
                 >
-                  <summary className="flex cursor-pointer items-start justify-between gap-3 text-lg font-semibold text-slate-900 [&::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer items-start justify-between gap-3 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden">
                     <span>{faq.q}</span>
                     <span
                       aria-hidden="true"
-                      className="flex-shrink-0 text-slate-400 transition group-open:rotate-180"
+                      className="flex-shrink-0 text-[#c8a951] transition group-open:rotate-180"
                     >
                       ⌄
                     </span>
                   </summary>
-                  <div className="mt-3 leading-relaxed text-slate-700">{faq.a}</div>
+                  <div className="mt-3 leading-relaxed text-white/70">{faq.a}</div>
                 </details>
               ))}
             </div>
           </section>
 
-          {/* CTA to service */}
-          <section className="mb-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white">
-            <h2 className="mb-3 text-2xl font-bold">{guide.ctaLabel}</h2>
-            <p className="mb-5 opacity-90">
-              צוות WeCcelerate ליווה סטארטאפים בפורטפוליו.
-              שיחת הכרות ראשונה ללא עלות.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/contact"
-                className="rounded-lg bg-white px-6 py-3 font-semibold text-slate-900 transition hover:bg-slate-100"
-              >
-                דברו איתנו
-              </Link>
-              <Link
-                href={guide.ctaServicePath}
-                className="rounded-lg border border-white/40 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
-              >
-                עוד על השירות
-              </Link>
+          {/* CTA */}
+          <section className="mt-14 relative overflow-hidden rounded-2xl border border-[#c8a951]/30 bg-gradient-to-br from-[#c8a951]/[0.10] via-transparent to-[#c8a951]/[0.04] p-8">
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(ellipse at center, rgba(200,169,81,0.10) 0%, transparent 70%)',
+              }}
+            />
+            <div className="relative z-10">
+              <h2 className="mb-3 text-2xl md:text-3xl font-bold">{guide.ctaLabel}</h2>
+              <p className="mb-6 text-white/70 leading-relaxed">
+                צוות WeCcelerate ליווה סטארטאפים בפורטפוליו. שיחת הכרות ראשונה ללא עלות.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] px-6 py-3 font-bold rounded-xl shadow-lg shadow-[#c8a951]/20 hover:shadow-xl hover:shadow-[#c8a951]/30 transition-all"
+                >
+                  דברו איתנו
+                  <ArrowLeft className="w-4 h-4" />
+                </Link>
+                <Link
+                  href={guide.ctaServicePath}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3 font-semibold text-white hover:border-white/40 hover:bg-white/[0.04] transition-all"
+                >
+                  עוד על השירות
+                </Link>
+              </div>
             </div>
           </section>
 
           {/* Related guides */}
           {relatedGuides.length > 0 && (
-            <section>
-              <h2 className="mb-5 text-2xl font-bold text-slate-900">מדריכים קשורים</h2>
+            <section className="mt-14">
+              <p className="text-[#c8a951] text-xs font-bold uppercase tracking-[0.22em] mb-3">
+                Related reads
+              </p>
+              <h2 className="mb-5 text-2xl md:text-3xl font-bold tracking-tight">מדריכים קשורים</h2>
               <div className="grid gap-4 md:grid-cols-2">
                 {relatedGuides.map((g) => (
                   <Link
                     key={g.slug}
                     href={`/guides/${g.slug}`}
-                    className="group rounded-xl border border-slate-200 p-4 transition hover:border-blue-400 hover:shadow-sm"
+                    className="group rounded-2xl border border-white/8 bg-white/[0.02] p-5 hover:border-[#c8a951]/30 hover:bg-[#c8a951]/[0.04] transition-all"
                   >
-                    <div className="mb-1 text-xs text-slate-500">
+                    <div className="mb-1 text-xs text-[#c8a951] uppercase tracking-wider font-semibold">
                       {GUIDE_CATEGORIES[g.category].he}
                     </div>
-                    <div className="font-semibold text-slate-900 group-hover:text-blue-700">
+                    <div className="font-semibold text-white group-hover:text-[#e8d48b] transition-colors">
                       {g.h1}
                     </div>
                   </Link>

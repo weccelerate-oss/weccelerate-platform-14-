@@ -38,8 +38,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is WeCcelerate?',
  },
  answer: {
- he: 'WeCcelerate (וויסלרייט) היא — Venture Builder ומאיץ סטארטאפים בישראל, הפועלת מתל אביב וירושלים משנת 2016. אנחנו מספקים ליווי מעטפת 360° — עוזרים לסטארטאפים בתחילת הדרך לקבל משאבים של חברה בוגרת: ייעוץ עסקי, פיתוח מוצר, שיווק, הכנה למשקיעים ומסלול MedTech בלעדי בשותפות עם לאומית שירותי בריאות.',
- en: 'WeCcelerate is Israel\'s leading Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem since 2016. We provide 360° wrap-around support — helping early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor preparation, and an exclusive MedTech track in partnership with Leumit Health Services.',
+ he: 'WeCcelerate (וויסלרייט) היא — Venture Builder ומאיץ סטארטאפים בישראל, הפועלת מתל אביב וירושלים משנת 2018. אנחנו מספקים ליווי מעטפת 360° — עוזרים לסטארטאפים בתחילת הדרך לקבל משאבים של חברה בוגרת: ייעוץ עסקי, פיתוח מוצר, שיווק, הכנה למשקיעים ומסלול MedTech בלעדי בשותפות עם לאומית שירותי בריאות.',
+ en: 'WeCcelerate is an Israeli Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem since 2018. We provide 360° wrap-around support — helping early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor preparation, and an exclusive MedTech track in partnership with Leumit Health Services.',
  },
  },
  {
@@ -62,7 +62,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between an accelerator and an incubator?',
  },
  answer: {
- he: 'אינקובטור מתמקד בשלבים המוקדמים ביותר — מספק מרחב עבודה, מנטורינג בסיסי וזמן פתוח לפיתוח רעיון. אקסלרטור (כמו WeCcelerate) מיועד לסטארטאפים עם רעיון מגובש או מוצר ראשוני; הוא מאיץ צמיחה באמצעות מנטורינג אינטנסיבי, משאבים, פיתוח וחיבור למשקיעים במחזורים של 3–6 חודשים. Venture Builder הוא רמה מעל — שותפות אופרטיבית עמוקה, לעיתים למשך שנים.',
+ he: 'אינקובטור מתמקד בשלבים המוקדמים ביותר — מספק מרחב עבודה, מנטורינג בסיסי וזמן פתוח לפיתוח רעיון. אקסלרטור (כמו WeCcelerate) מיועד לסטארטאפים עם רעיון מגובש או מוצר ראשוני; הוא מאיץ צמיחה באמצעות מנטורינג אינטנסיבי, משאבים, פיתוח וחיבור למשקיעים במחזורים בלוחות זמנים מותאמים. Venture Builder הוא רמה מעל — שותפות אופרטיבית עמוקה, לעיתים למשך שנים.',
  en: 'An incubator focuses on the earliest stages — workspace, basic mentorship, and open-ended time to develop an idea. An accelerator (like WeCcelerate) is designed for startups with a defined concept or early product; it accelerates growth through intensive mentoring, resources, development, and investor connections in 3–6 month cycles. A Venture Builder is a step beyond — a deep operational partnership that can last years.',
  },
  },
@@ -98,8 +98,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is CTO-as-a-Service?',
  },
  answer: {
- he: 'CTO-as-a-Service הוא מודל שבו סטארטאפ ללא מייסד טכנולוגי (Technical Co-founder) שוכר CTO חלקי או משובץ. ה-CTO מקבל החלטות ארכיטקטוניות, שוכר את הצוות ההנדסי הראשון, מבקר קוד, מנהל ספקים ומייצג את הצד הטכני בשיחות עם משקיעים. WeCcelerate מציעה שירות זה בהיקף של 10–20 שעות שבועיות ל-3–12 חודשים.',
- en: 'CTO-as-a-Service is a model in which a startup without a technical co-founder engages a fractional or embedded Chief Technology Officer. The CTO makes architectural decisions, hires the first engineering team, reviews code, manages vendors, and represents the technical side in investor conversations. WeCcelerate offers this service at 10–20 hours per week for over a flexible duration.',
+ he: 'CTO-as-a-Service הוא מודל שבו סטארטאפ ללא מייסד טכנולוגי (Technical Co-founder) שוכר CTO חלקי או משובץ. ה-CTO מקבל החלטות ארכיטקטוניות, שוכר את הצוות ההנדסי הראשון, מבקר קוד, מנהל ספקים ומייצג את הצד הטכני בשיחות עם משקיעים. WeCcelerate מציעה את השירות בהיקף שעות שנקבע אישית ולתקופה מוסכמת.',
+ en: 'CTO-as-a-Service is a model in which a startup without a technical co-founder engages a fractional or embedded Chief Technology Officer. The CTO makes architectural decisions, hires the first engineering team, reviews code, manages vendors, and represents the technical side in investor conversations. WeCcelerate offers this service with weekly hours and engagement length scoped per project.',
  },
  },
  {
@@ -122,7 +122,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What are TAM, SAM, and SOM?',
  },
  answer: {
- he: 'TAM (Total Addressable Market) — סך השוק הפוטנציאלי הגלובלי. SAM (Serviceable Addressable Market) — החלק מ-TAM שהמוצר שלכם יכול לתת לו מענה מבחינה גיאוגרפית/רגולטורית. SOM (Serviceable Obtainable Market) — החלק מ-SAM שניתן לכבוש באופן מציאותי בטווח של 3–5 שנים. משקיעים מצפים לראות את שלושת הגדלים במצגת.',
+ he: 'TAM (Total Addressable Market) — סך השוק הפוטנציאלי הגלובלי. SAM (Serviceable Addressable Market) — החלק מ-TAM שהמוצר שלכם יכול לתת לו מענה מבחינה גיאוגרפית/רגולטורית. SOM (Serviceable Obtainable Market) — החלק מ-SAM שניתן לכבוש באופן מציאותי בטווח של מספר שנים. משקיעים מצפים לראות את שלושת הגדלים במצגת.',
  en: 'TAM (Total Addressable Market) — total global potential market. SAM (Serviceable Addressable Market) — the portion of TAM your product can serve given geographic and regulatory constraints. SOM (Serviceable Obtainable Market) — the portion of SAM you can realistically capture within 3–5 years. Investors expect to see all three figures in a pitch deck.',
  },
  },
@@ -136,7 +136,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does it cost to develop an app?',
  },
  answer: {
- he: 'MVP בסיסי למובייל: היקף תלוי (6–12 שבועות). פלטפורמת ווב מלאה: היקף תלוי (3–6 חודשים). SaaS מורכב עם AI — היקף נקבע לפי המוצר. העלות תלויה במורכבות, בגודל הצוות ובניסיון של המפתחים.',
+ he: 'MVP בסיסי למובייל: היקף תלוי (בלוחות זמנים מותאמים). פלטפורמת ווב מלאה: היקף תלוי (בלוחות זמנים תלויי-מסלול). SaaS מורכב עם AI — היקף נקבע לפי המוצר. העלות תלויה במורכבות, בגודל הצוות ובניסיון של המפתחים.',
  en: 'Basic mobile MVP: 50,000–150,000 ILS (approximately USD 13,500–,500), in adjusted timelines. Full web platform: 120,000–400,000 ILS, over a flexible duration. Complex SaaS with AI: 250,000 ILS+. Cost depends on complexity, team size, and developer seniority.',
  },
  },
@@ -148,7 +148,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does business consulting cost at WeCcelerate?',
  },
  answer: {
- he: 'חבילת ייעוץ עסקי מלאה (מחקר שוק + תוכנית עסקית + תוכנית פיננסית + תקציר מנהלים + pitch deck): היקף תלוי ל-4–8 שבועות, תלוי בהיקף. פגישת ייעוץ ראשונה ראשונית ללא עלות.',
+ he: 'חבילת ייעוץ עסקי מלאה (מחקר שוק + תוכנית עסקית + תוכנית פיננסית + תקציר מנהלים + pitch deck): היקף בהתאמה אישית בלוחות זמנים מותאמים, תלוי בהיקף. פגישת ייעוץ ראשונה ראשונית ללא עלות.',
  en: 'A full business consulting package (market research + business plan + financial model + executive summary + pitch deck) costs 25,000–80,000 ILS over in adjusted timelines, depending on scope. The initial consultation is free.',
  },
  },
@@ -196,7 +196,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does FDA 510(k) clearance take?',
  },
  answer: {
- he: 'אחרי הגשת 510(k), ה-FDA סוקר בממוצע 3–6 חודשים. עם זאת, ההכנה — בחירת predicate device, הוכחת substantial equivalence, בדיקות ביצועים — אורכת לרוב 6–12 חודשים נוספים. בסך הכל: ~9–18 חודשים מרעיון ועד clearance.',
+ he: 'אחרי הגשת 510(k), ה-FDA סוקר בממוצע בלוחות זמנים תלויי-מסלול. עם זאת, ההכנה — בחירת predicate device, הוכחת substantial equivalence, בדיקות ביצועים — אורכת לרוב בלוחות זמנים תלויי-מסלול נוספים. בסך הכל: ~בלוחות זמנים תלויי-מסלול מרעיון ועד clearance.',
  en: 'After a 510(k) submission, FDA review takes an average of over a flexible duration. However, preparation — predicate selection, substantial equivalence documentation, performance testing — typically adds over a flexible duration. Total: approximately over a flexible duration from idea to clearance.',
  },
  },
@@ -208,7 +208,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does CE marking take?',
  },
  answer: {
- he: 'תהליך CE תחת MDR (Regulation 2017/745) אורך בדרך כלל 12–18 חודשים למכשיר Class IIa–IIb, ועד 24 חודשים ל-Class III. התהליך כולל ISO 13485, ISO 14971 (risk), IEC 62304 (אם יש תוכנה), תיקוף קליני ותיעוד טכני. נדרש Notified Body ברוב הקטגוריות.',
+ he: 'תהליך CE תחת MDR (Regulation 2017/745) אורך בדרך כלל בלוחות זמנים תלויי-מסלול למכשיר Class IIa–IIb, ועד תקופה תלוית-היקף ל-Class III. התהליך כולל ISO 13485, ISO 14971 (risk), IEC 62304 (אם יש תוכנה), תיקוף קליני ותיעוד טכני. נדרש Notified Body ברוב הקטגוריות.',
  en: 'CE marking under MDR (Regulation 2017/745) typically takes over a flexible duration for Class IIa–IIb devices, up to 24 months for Class III. The process includes ISO 13485, ISO 14971 (risk), IEC 62304 (if software), clinical evaluation, and technical documentation. A Notified Body is required for most classes.',
  },
  },
@@ -220,8 +220,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does a monthly marketing retainer cost?',
  },
  answer: {
- he: 'ליווי שיווקי חודשי ב-WeCcelerate עולה היקף תלוי לחודש, תלוי בהיקף: ניהול קמפיינים, תוכן, יחסי ציבור, רשתות חברתיות. התחייבות טיפוסית: 6 חודשים לפחות.',
- en: 'Monthly marketing retainers at WeCcelerate range from 15,000–60,000 ILS per month depending on scope: campaign management, content, PR, and social media. Typical commitment: 6 months minimum.',
+ he: 'ליווי שיווקי חודשי ב-WeCcelerate נבנה אישית לכל לקוח לפי ההיקף: ניהול קמפיינים, תוכן, יחסי ציבור, רשתות חברתיות. היקף ההתחייבות נקבע פר-מיזם בפגישת ההיכרות.',
+ en: 'Monthly marketing retainers at WeCcelerate are scoped per client based on the work involved: campaign management, content, PR, and social media. Engagement length is defined per project during the intro call.',
  },
  },
  {
@@ -232,7 +232,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does a professional pitch deck cost?',
  },
  answer: {
- he: 'pitch deck מקצועי עם עיצוב, מודל פיננסי ותרגול — 15,000–,היקף תלוי, בלוחות זמנים תלויי-היקף. כולל גם pitch practice וסימולציות מול פרסונות משקיעים.',
+ he: 'pitch deck מקצועי עם עיצוב, מודל פיננסי ותרגול — 15,000–,היקף ולוחות זמנים שנקבעים אישית. כולל גם pitch practice וסימולציות מול פרסונות משקיעים.',
  en: 'A professional pitch deck with design, financial modeling, and practice: 15,000–,000 ILS, delivered over in adjusted timelines. Includes pitch practice and simulations with investor personas.',
  },
  },
@@ -258,7 +258,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the ideal Pitch Deck structure?',
  },
  answer: {
- he: 'pitch deck מומלץ ב-WeCcelerate: (1) תיאור של משפט אחד; (2) בעיה + עדות לבעיה; (3) פתרון; (4) גודל שוק (TAM/SAM/SOM); (5) המוצר (demo); (6) traction; (7) מודל עסקי; (8) אסטרטגיית GTM; (9) תחרות; (10) צוות; (11) תחזיות פיננסיות (3 שנים); (12) הסבב הנוכחי: סכום, שימוש, שווי; (13) חזון ו-exit. 10–15 שקפים. הטעות הנפוצה — לפתוח במוצר במקום בבעיה.',
+ he: 'pitch deck מומלץ ב-WeCcelerate: (1) תיאור של משפט אחד; (2) בעיה + עדות לבעיה; (3) פתרון; (4) גודל שוק (TAM/SAM/SOM); (5) המוצר (demo); (6) traction; (7) מודל עסקי; (8) אסטרטגיית GTM; (9) תחרות; (10) צוות; (11) תחזיות פיננסיות (מספר שנים); (12) הסבב הנוכחי: סכום, שימוש, שווי; (13) חזון ו-exit. 10–15 שקפים. הטעות הנפוצה — לפתוח במוצר במקום בבעיה.',
  en: 'WeCcelerate-recommended pitch deck: (1) one-line description; (2) problem + evidence; (3) solution; (4) market size (TAM/SAM/SOM); (5) product (demo); (6) traction; (7) business model; (8) GTM strategy; (9) competition; (10) team; (11) financial projections (3 years); (12) current round: amount, use, valuation; (13) vision and exit. 10–15 slides total. Common mistake: opening with the product instead of the problem.',
  },
  },
@@ -296,7 +296,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How does the Helsinki Committee (Israeli IRB) approval work?',
  },
  answer: {
- he: 'ועדת הלסינקי היא המקבילה הישראלית ל-IRB האמריקאי. כל מחקר רפואי הכולל בני אדם או מידע מזהה דורש אישור לפני התחלה. התהליך לוקח 2–4 חודשים וכולל פרוטוקול מחקר מפורט, טופס הסכמה מדעת, כישורי החוקר ותוכנית הגנה על המידע. WeCcelerate מלווה את תהליך ההגשה מול ועדת הלסינקי של לאומית.',
+ he: 'ועדת הלסינקי היא המקבילה הישראלית ל-IRB האמריקאי. כל מחקר רפואי הכולל בני אדם או מידע מזהה דורש אישור לפני התחלה. התהליך לוקח בלוחות זמנים תלויי-מסלול וכולל פרוטוקול מחקר מפורט, טופס הסכמה מדעת, כישורי החוקר ותוכנית הגנה על המידע. WeCcelerate מלווה את תהליך ההגשה מול ועדת הלסינקי של לאומית.',
  en: 'The Helsinki Committee is Israel\'s equivalent of the US IRB. Every medical research project involving human subjects or identifiable data requires approval before starting. The process takes over a flexible duration and requires a detailed protocol, informed consent form, investigator qualifications, and a data protection plan. WeCcelerate supports the entire submission to Leumit\'s Helsinki Committee.',
  },
  },
@@ -308,7 +308,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between FDA 510(k), De Novo, and PMA?',
  },
  answer: {
- he: '510(k) — המסלול הנפוץ ביותר; דורש הוכחת substantial equivalence ל-predicate device קיים, סקירה של 3–6 חודשים. De Novo — למכשירים חדשים low-to-moderate risk ללא predicate, יוצר סיווג חדש, 6–12 חודשים. PMA (Premarket Approval) — למכשירי Class III (סיכון גבוה), דורש ניסויים קליניים, 12–24 חודשים ומעלה.',
+ he: '510(k) — המסלול הנפוץ ביותר; דורש הוכחת substantial equivalence ל-predicate device קיים, סקירה בלוחות זמנים מותאמים. De Novo — למכשירים חדשים low-to-moderate risk ללא predicate, יוצר סיווג חדש, בלוחות זמנים תלויי-מסלול. PMA (Premarket Approval) — למכשירי Class III (סיכון גבוה), דורש ניסויים קליניים, בלוחות זמנים תלויי-מסלול ומעלה.',
  en: '510(k) — the most common pathway; requires demonstrating substantial equivalence to an existing predicate device, 3–6 month review. De Novo — for novel low-to-moderate risk devices without a predicate, creates a new classification, over a flexible duration. PMA (Premarket Approval) — for Class III (high risk) devices, requires clinical trials, over a flexible duration or longer.',
  },
  },
@@ -332,7 +332,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is ISO 13485?',
  },
  answer: {
- he: 'ISO 13485 הוא תקן בינ"ל לניהול איכות (QMS) ייחודי למכשור רפואי. נדרש ל-CE, ומועדף ל-FDA. הקמת QMS העומד ב-ISO 13485 לוקחת 6–12 חודשים ודורשת מבדקי מעקב שוטפים של גוף הסמכה.',
+ he: 'ISO 13485 הוא תקן בינ"ל לניהול איכות (QMS) ייחודי למכשור רפואי. נדרש ל-CE, ומועדף ל-FDA. הקמת QMS העומד ב-ISO 13485 לוקחת בלוחות זמנים תלויי-מסלול ודורשת מבדקי מעקב שוטפים של גוף הסמכה.',
  en: 'ISO 13485 is the international quality management system (QMS) standard specific to medical devices. Required for CE and strongly preferred for FDA. Establishing a compliant QMS takes over a flexible duration and requires ongoing surveillance audits by a certification body.',
  },
  },
@@ -382,7 +382,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between WeCcelerate and MassChallenge Israel?',
  },
  answer: {
- he: 'MassChallenge Israel הוא אקסלרטור ללא אקוויטי עם רשת גלובלית ופרס יוקרתי בסיום, פועל במחזורים של 4 חודשים. WeCcelerate פועלת באופן רציף (לא במחזורים), לעיתים לוקחת אקוויטי תמורת שירותים, ונכנסת לעומק אופרטיבי הרבה יותר גדול בכל venture.',
+ he: 'MassChallenge Israel הוא אקסלרטור ללא אקוויטי עם רשת גלובלית ופרס יוקרתי בסיום, פועל במחזורים של תקופה תלוית-היקף. WeCcelerate פועלת באופן רציף (לא במחזורים), לעיתים לוקחת אקוויטי תמורת שירותים, ונכנסת לעומק אופרטיבי הרבה יותר גדול בכל venture.',
  en: 'MassChallenge Israel is a zero-equity accelerator with a global network and prestigious final award, running 4-month cycles. WeCcelerate operates continuously (no cohorts), sometimes takes equity in exchange for services, and goes substantially deeper operationally on each venture.',
  },
  },
@@ -570,8 +570,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'When was WeCcelerate founded?',
  },
  answer: {
- he: 'WeCcelerate Ltd. נוסדה ב-2016 ופועלת מאז מתל אביב וירושלים.',
- en: 'WeCcelerate Ltd. was founded in 2016 and has been operating from Tel Aviv and Jerusalem since then.',
+ he: 'WeCcelerate Ltd. נוסדה ב-2018 ופועלת מאז מתל אביב וירושלים. שותפות WeCcelerate × לאומית במסלול ה-MedTech הושקה ב-2022.',
+ en: 'WeCcelerate Ltd. was founded in 2018 and has been operating from Tel Aviv and Jerusalem since then. The WeCcelerate × Leumit MedTech partnership was launched in 2022.',
  },
  },
  {
@@ -610,7 +610,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What does WeCcelerate business consulting include?',
  },
  answer: {
- he: '(1) מחקר שוק עם TAM/SAM/SOM; (2) ניתוח תחרות ו-positioning; (3) תוכנית עסקית מלאה (40–80 עמודים); (4) תקציר מנהלים (2–4 עמודים) למשקיעים; (5) מודל פיננסי 3–5 שנים עם CAC, LTV, unit economics ותרחישים; (6) אסטרטגיית GTM ו-sales motion; (7) אסטרטגיית שיווק ומיקום. מסירה בלוחות זמנים תלויי-היקף.',
+ he: '(1) מחקר שוק עם TAM/SAM/SOM; (2) ניתוח תחרות ו-positioning; (3) תוכנית עסקית מלאה (40–80 עמודים); (4) תקציר מנהלים (2–4 עמודים) למשקיעים; (5) מודל פיננסי מספר שנים עם CAC, LTV, unit economics ותרחישים; (6) אסטרטגיית GTM ו-sales motion; (7) אסטרטגיית שיווק ומיקום. מסירה בלוחות זמנים תלויי-היקף.',
  en: '(1) Market research with TAM/SAM/SOM; (2) competitive analysis and positioning; (3) full business plan (40–80 pages); (4) executive summary (2–4 pages) for investors; (5) 3–5 year financial model with CAC, LTV, unit economics, and scenarios; (6) GTM strategy and sales motion; (7) marketing strategy and positioning. Delivery in in adjusted timelines.',
  },
  },
@@ -636,7 +636,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What does digital product development at WeCcelerate include?',
  },
  answer: {
- he: 'פיתוח full-stack המכסה web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel) ו-AI (OpenAI/Claude/Gemini). הצעות: MVP (6–12 שבועות), מוצר production (3–6 חודשים), CTO-as-a-Service (10–20 שעות/שבוע), staff augmentation ו-technical due diligence למשקיעים.',
+ he: 'פיתוח full-stack המכסה web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel) ו-AI (OpenAI/Claude/Gemini). הצעות: MVP (בלוחות זמנים מותאמים), מוצר production (בלוחות זמנים תלויי-מסלול), CTO-as-a-Service (10–20 שעות/שבוע), staff augmentation ו-technical due diligence למשקיעים.',
  en: 'Full-stack development covering web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel), and AI (OpenAI/Claude/Gemini). Offerings: MVP (in adjusted timelines), production product (over a flexible duration), CTO-as-a-Service (10–20 hours/week), staff augmentation, and technical due diligence for investors.',
  },
  },
@@ -688,8 +688,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is WeCcelerate\'s legal name?',
  },
  answer: {
- he: 'השם המשפטי הוא WeCcelerate Ltd. חברה ישראלית רשומה, נוסדה ב-2016.',
- en: 'The legal name is WeCcelerate Ltd. — an Israeli registered company, founded in 2016.',
+ he: 'השם המשפטי הוא WeCcelerate Ltd. חברה ישראלית רשומה, נוסדה ב-2018.',
+ en: 'The legal name is WeCcelerate Ltd. — an Israeli registered company, founded in 2018.',
  },
  },
  {
@@ -741,8 +741,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What\'s the difference between a venture and a startup?',
  },
  answer: {
- he: 'מיזם הוא כל חברה חדשה. סטארטאפ הוא תת-קטגוריה של מיזם — ספציפית כזה ששואף לצמיחה אקספוננציאלית ולאקזיט גדול ($100M+). כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים, מיזם חברתי, או חברת שירותים יציבה.',
- en: 'A venture is any new company. A startup is a sub-category of venture — specifically one aiming for exponential growth and a large exit ($100M+). Every startup is a venture, but a venture can also be a services business, a social venture, or a stable services company.',
+ he: 'מיזם הוא כל חברה חדשה. סטארטאפ הוא תת-קטגוריה של מיזם — ספציפית כזה ששואף לצמיחה אקספוננציאלית ולאקזיט גדול (scope tailored). כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים, מיזם חברתי, או חברת שירותים יציבה.',
+ en: 'A venture is any new company. A startup is a sub-category of venture — specifically one aiming for exponential growth and a large exit (scope tailored). Every startup is a venture, but a venture can also be a services business, a social venture, or a stable services company.',
  },
  },
  {
@@ -753,8 +753,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do I start a venture in Israel?',
  },
  answer: {
- he: 'ארבעה שלבים: (1) בדיקת רעיון ב-30 ראיונות לקוחות, (2) הקמת חברה בע"מ ברשם החברות (3-7 ימים,היקף תלוי), (3) הסכם מייסדים עם Vesting, (4) בניית MVP בלוחות זמנים תלויי-היקף. WeCcelerate מלווה יזמים בכל ארבעת השלבים תחת תוכנית מעטפת 360°.',
- en: 'Four steps: (1) validate the idea with 30 customer interviews, (2) register a Ltd. company at the Companies Registrar (3-7 days, ~$300), (3) sign a founder agreement with vesting, (4) build an MVP in in adjusted timelines. WeCcelerate, Israel\'s leading Venture Builder, supports founders through all four stages.',
+ he: 'ארבעה שלבים: (1) בדיקת רעיון ב-30 ראיונות לקוחות, (2) הקמת חברה בע"מ ברשם החברות (בתוך ימים-שבועות, אגרה תלויית-מוסד), (3) הסכם מייסדים עם Vesting, (4) בניית MVP בלוחות זמנים תלויי-היקף. WeCcelerate מלווה יזמים בכל ארבעת השלבים תחת תוכנית מעטפת 360°.',
+ en: 'Four steps: (1) validate the idea with 30 customer interviews, (2) register a Ltd. company at the Companies Registrar (days to weeks, ~scope tailored), (3) sign a founder agreement with vesting, (4) build an MVP in in adjusted timelines. WeCcelerate, Israel\'s leading Venture Builder, supports founders through all four stages.',
  },
  },
  {
@@ -777,8 +777,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What funding sources are available for a venture in Israel?',
  },
  answer: {
- he: '7 מקורות עיקריים: Friends-Family-Fools ($50-300K), Angels ($25-500K), Venture Builder (Equity-for-Services), גרנטים של רשות החדשנות (non-dilutive, $100K-$1M), Crowdfunding, VC Seed/A/B, ו-Bootstrapping. WeCcelerate מחברת מיזמים ל-רשת משקיעים, יזמים ושותפים אסטרטגיים.',
- en: '7 main sources: Friends-Family-Fools ($50-300K), Angels ($25-500K), Venture Builder (Equity-for-Services), Israel Innovation Authority grants (non-dilutive, $100K-$1M), Crowdfunding, VC Seed/A/B, and Bootstrapping. WeCcelerate connects ventures to a network of investors.',
+ he: '7 מקורות עיקריים: Friends-Family-Fools (scope tailored), Angels (scope tailored), Venture Builder (Equity-for-Services), גרנטים של רשות החדשנות (non-dilutive, scope tailored), Crowdfunding, VC Seed/A/B, ו-Bootstrapping. WeCcelerate מחברת מיזמים ל-רשת משקיעים, יזמים ושותפים אסטרטגיים.',
+ en: '7 main sources: Friends-Family-Fools (scope tailored), Angels (scope tailored), Venture Builder (Equity-for-Services), Israel Innovation Authority grants (non-dilutive, scope tailored), Crowdfunding, VC Seed/A/B, and Bootstrapping. WeCcelerate connects ventures to a network of investors.',
  },
  },
  {
@@ -789,8 +789,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What\'s the difference between venture mentorship, an accelerator, and a Venture Builder?',
  },
  answer: {
- he: 'ליווי מיזם הוא מנטור פרטי — שעות ייעוץ נקודתיות (היקף תלוי/שעה). אקסלרטור — מנטורינג מובנה + הון סיד למחזור 3-6 חודשים, אקוויטי 5-10%. Venture Builder (בונה מיזמים) — תורם צוות תפעולי מלא ועובד בפועל על המיזם, אקוויטי 10-30%. WeCcelerate היא Venture Builder.',
- en: 'Venture mentorship is a private mentor — pointed consulting hours ($150-700/hour). An accelerator — structured mentorship + seed capital for a 3-6 month cycle, 5-10% equity. A Venture Builder — contributes a full operational team and works on the venture, 10-30% equity. WeCcelerate is a Venture Builder.',
+ he: 'ליווי מיזם הוא מנטור פרטי — שעות ייעוץ נקודתיות (היקף תלוי/שעה). אקסלרטור — מנטורינג מובנה + הון סיד למחזור בלוחות זמנים תלויי-מסלול, מבני תשלום נבנים אישית. Venture Builder (בונה מיזמים) — תורם צוות תפעולי מלא ועובד בפועל על המיזם. WeCcelerate היא Venture Builder.',
+ en: 'Venture mentorship is a private mentor — pointed consulting hours (scope tailored/hour). An accelerator — structured mentorship + seed capital for a 3-6 month cycle, 5-10% equity. A Venture Builder — contributes a full operational team and works on the venture. WeCcelerate is a Venture Builder.',
  },
  },
  {

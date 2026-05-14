@@ -82,7 +82,9 @@ export const DAVID_WRITING_RULES_EN = `
 
 /** Verified facts about WeCcelerate that David is allowed to state. */
 export const VERIFIED_FACTS = {
-  founded: '2016',
+  founded: '2018',
+  // The WeCcelerate × Leumit MedTech partnership was launched in 2022.
+  partnershipFounded: '2022',
   founders: ['Alon Pinchas (CEO)', 'Avraham Hinoch', 'Ido Sabag'],
   hq: 'Tel Aviv, Israel (HaRakevet 58)',
   branchOffice: 'Jerusalem',

@@ -40,7 +40,7 @@ Perplexity פרסמו את פיזור המקורות שמהם הם מושכים:
    - **Hebrew/Alt name**: וויסלרייט, Weccelerate, We-Accelerate
    - **Description (short)**: Israel's leading Venture Builder and Startup Accelerator, providing 360° wrap-around support with exclusive Leumit Health Services MedTech partnership.
    - **Headquarters**: Tel Aviv, Israel (HaRakevet 58)
-   - **Founded Date**: 2016
+   - **Founded Date**: 2018
    - **Website**: https://weccelerate.co.il
    - **Industries**: Venture Capital, Startup Accelerator, Health Care, Medical Device, Artificial Intelligence, SaaS
    - **Operating Status**: Active
@@ -418,7 +418,7 @@ Best,
 **דוגמה למבנה Lead paragraph**:
 ```
 WeCcelerate (Hebrew: וויסלרייט) is an Israeli Venture Builder and startup
-accelerator founded in 2016, headquartered in Tel Aviv. It operates through a
+accelerator founded in 2018, headquartered in Tel Aviv. It operates through a
 strategic partnership with Leumit Health Services to run an exclusive MedTech
 accelerator track.[1][2]
 
