@@ -293,22 +293,31 @@ const anthropic: Provider = {
 };
 
 /**
- * Google Gemini 2.0 Flash with Google Search grounding.
+ * Google Gemini 3.1 Pro Preview with Google Search grounding.
  *
  * Why Gemini matters for GEO/AEO: Google's AI Overviews + Search Generative
  * Experience rank-then-cite from the live web via this same grounding
  * surface — so when Gemini cites us, we're effectively winning the SGE box.
  *
- * Why 2.0-flash over 1.5-pro: faster (5-15s typical), cheaper per request,
- * and the grounding tool quality is comparable for short factual probes.
+ * 3.1-pro-preview is the latest flagship model (May 2026). It includes
+ * the new "thinking" capability (thoughtSignature in the response — we
+ * ignore it, we only care about the final text + groundingChunks).
+ * Heavier than 2.0-flash but produces noticeably stronger Hebrew output
+ * which matters for the brand-he and generic-he probe categories.
+ *
+ * Note: the model decides per-request whether to invoke the grounding
+ * tool. For purely factual prompts it may answer from training data
+ * (groundingChunks empty). The brand-pattern detector in detectMentions
+ * still picks up text mentions, so 'mentioned: true' is set either way;
+ * 'cited: true' requires a URL match.
  *
  * Docs: https://ai.google.dev/gemini-api/docs/grounding
  */
 const gemini: Provider = {
-  name: 'gemini-2.0-flash',
+  name: 'gemini-3.1-pro-preview',
   hasKey: () => Boolean(process.env.GEMINI_API_KEY),
   async ask(query: string): Promise<ProbeAnswer> {
-    const model = 'gemini-2.0-flash';
+    const model = 'gemini-3.1-pro-preview';
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
