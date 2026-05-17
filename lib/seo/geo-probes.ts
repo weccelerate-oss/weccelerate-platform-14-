@@ -292,7 +292,67 @@ const anthropic: Provider = {
   },
 };
 
-const PROVIDERS: Provider[] = [perplexity, openai, anthropic];
+/**
+ * Google Gemini 2.0 Flash with Google Search grounding.
+ *
+ * Why Gemini matters for GEO/AEO: Google's AI Overviews + Search Generative
+ * Experience rank-then-cite from the live web via this same grounding
+ * surface — so when Gemini cites us, we're effectively winning the SGE box.
+ *
+ * Why 2.0-flash over 1.5-pro: faster (5-15s typical), cheaper per request,
+ * and the grounding tool quality is comparable for short factual probes.
+ *
+ * Docs: https://ai.google.dev/gemini-api/docs/grounding
+ */
+const gemini: Provider = {
+  name: 'gemini-2.0-flash',
+  hasKey: () => Boolean(process.env.GEMINI_API_KEY),
+  async ask(query: string): Promise<ProbeAnswer> {
+    const model = 'gemini-2.0-flash';
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: query }] }],
+          // google_search is the grounding tool — Gemini hits the live web
+          // and returns groundingMetadata with the URLs it consulted.
+          tools: [{ google_search: {} }],
+          generationConfig: { maxOutputTokens: 800, temperature: 0.2 },
+        }),
+        signal: AbortSignal.timeout(45_000),
+      },
+    );
+    if (!res.ok) {
+      throw new Error(`Gemini ${res.status}: ${await res.text()}`);
+    }
+    type GeminiResponse = {
+      candidates?: Array<{
+        content?: { parts?: Array<{ text?: string }> };
+        groundingMetadata?: {
+          groundingChunks?: Array<{ web?: { uri?: string } }>;
+          // Some responses use webSearchQueries / searchEntryPoint instead;
+          // the chunks array is the canonical citation list.
+        };
+      }>;
+    };
+    const data = (await res.json()) as GeminiResponse;
+    const cand = data.candidates?.[0];
+    const text = (cand?.content?.parts ?? [])
+      .map((p) => p.text ?? '')
+      .filter(Boolean)
+      .join('\n');
+    const fromGrounding = (cand?.groundingMetadata?.groundingChunks ?? [])
+      .map((c) => c.web?.uri)
+      .filter((u): u is string => typeof u === 'string');
+    const fromText = Array.from(text.matchAll(/\bhttps?:\/\/[^\s)\]]+/gi)).map((m) => m[0]);
+    const citedUrls = Array.from(new Set([...fromGrounding, ...fromText]));
+    return { response: text, citedUrls };
+  },
+};
+
+const PROVIDERS: Provider[] = [perplexity, openai, anthropic, gemini];
 
 // =============================================================================
 // RUNNER
