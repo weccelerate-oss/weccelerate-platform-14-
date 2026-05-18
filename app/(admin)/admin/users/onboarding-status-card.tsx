@@ -211,55 +211,58 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
         </div>
       )}
 
-      {/* Setup guide — collapsed by default */}
+      {/* "How do I test this?" — most admins land here right after a test
+          run and wonder why nothing appears. Spell it out. */}
       <details className="border-t border-slate-100 group">
         <summary className="cursor-pointer px-4 sm:px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 select-none">
-          🛠️ איך לחבר את ה-Google Form ל-webhook?
+          🧪 איך בודקים שהחיבור עובד?
         </summary>
-        <div className="px-4 sm:px-5 pb-4 text-sm text-slate-700 space-y-2 leading-relaxed">
-          <p>
-            Google Forms לא קוראים ל-webhook לבד. צריך להוסיף Apps Script שיריץ
-            על כל סליחת טופס.
-          </p>
-          <ol className="list-decimal pr-5 space-y-1">
-            <li>בעורך הטופס: <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">⋮ → Script editor</code></li>
-            <li>הדבק את הקוד הבא (החלף את <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">SECRET_HERE</code>):</li>
-          </ol>
-          <pre className="bg-slate-900 text-slate-100 text-[11px] sm:text-xs p-3 rounded-lg overflow-x-auto leading-relaxed" dir="ltr">{`function onFormSubmit(e) {
-  var items = e.response.getItemResponses();
-  var payload = { name: '', email: '', phone: '', company: '', message: '' };
-  items.forEach(function(it) {
-    var q = it.getItem().getTitle().toLowerCase();
-    var v = it.getResponse();
-    if (q.indexOf('שם') > -1) payload.name = v;
-    else if (q.indexOf('מייל') > -1 || q.indexOf('email') > -1) payload.email = v;
-    else if (q.indexOf('טלפון') > -1) payload.phone = v;
-    else if (q.indexOf('חברה') > -1) payload.company = v;
-    else payload.message = (payload.message ? payload.message + '\\n' : '') + q + ': ' + v;
-  });
-  payload.source = 'google_form';
-  UrlFetchApp.fetch('https://weccelerate.co.il/api/onboarding/entrepreneur', {
-    method: 'post',
-    contentType: 'application/json',
-    headers: { 'x-onboarding-secret': 'SECRET_HERE' },
-    payload: JSON.stringify(payload),
-    muteHttpExceptions: true,
-  });
-}`}</pre>
-          <ol className="list-decimal pr-5 space-y-1" start={3}>
-            <li>שמור, ובחר <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">Triggers → Add Trigger → onFormSubmit → On form submit</code></li>
-            <li>שלח טופס לדוגמה ובדוק את הסטטוס כאן.</li>
-          </ol>
-          <p className="text-xs text-slate-500 pt-1">
-            ה-secret מצוי ב-Vercel תחת <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">ONBOARDING_WEBHOOK_SECRET</code>.
-          </p>
-          <p className="text-xs text-slate-500 pt-2 leading-relaxed">
-            💡 גרסה מורחבת של ה-script (עם retry, התראת מייל למנהל, ופונקציות
-            <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded mx-1">verifySetup()</code>
-            ו-
-            <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded mx-1">testDryRun()</code>
-            ) זמינה. בקש מהמפתח את הקוד המלא.
-          </p>
+        <div className="px-4 sm:px-5 pb-4 text-sm text-slate-700 space-y-3 leading-relaxed">
+          <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2">
+            <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono self-start whitespace-nowrap" dir="ltr">verifySetup()</code>
+            <div>
+              <p className="text-slate-900">בודק שה-secret קיים ושה-API נגיש.</p>
+              <p className="text-xs text-slate-500">
+                לא יוצר כלום ולא משאיר עקבות. תוצאה צפויה: <code className="text-[10px] bg-slate-100 px-1 rounded">✅ Setup OK</code> בלוג של Apps Script.
+              </p>
+            </div>
+
+            <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono self-start whitespace-nowrap" dir="ltr">testDryRun()</code>
+            <div>
+              <p className="text-slate-900">מריץ את כל הצינור (auth + ספאם + ולידציה) <strong>בלי</strong> ליצור משתמש.</p>
+              <p className="text-xs text-slate-500">
+                ⚠️ <strong>לא מופיע בלוח הזה</strong> בכוונה — dry-run לא כותב ל-Activity Log. תוצאה צפויה: <code className="text-[10px] bg-slate-100 px-1 rounded">200 dryRun:true would have provisioned</code>.
+              </p>
+            </div>
+
+            <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono self-start whitespace-nowrap" dir="ltr">testWebhook()</code>
+            <div>
+              <p className="text-slate-900">בדיקה אמיתית — <strong>יוצר משתמש</strong> ומפעיל את מייל קבלת הפנים.</p>
+              <p className="text-xs text-slate-500">
+                המונה &ldquo;יזמים נוצרו&rdquo; יזוז ב-+1, ויופיע משתמש חדש בטבלה למטה. אחר כך אפשר למחוק אותו.
+              </p>
+            </div>
+
+            <span className="text-xl self-start">📋</span>
+            <div>
+              <p className="text-slate-900">מילוי טופס Google אמיתי על-ידי יועץ.</p>
+              <p className="text-xs text-slate-500">
+                זאת הזרימה האמיתית. הטריגר <code className="text-[10px] bg-slate-100 px-1 rounded" dir="ltr">handleFormSubmit · On form submit</code> חייב להיות מחובר ב-Apps Script (Triggers).
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mt-3">
+            <p className="text-xs text-slate-600 leading-relaxed">
+              <strong>ה-Apps Script המעודכן</strong> כולל את שלוש הפונקציות הנ&quot;ל +
+              retry על 5xx + התראת מייל למנהל. הקובץ נמסר בעבר;
+              אם השתנה — בקש את הגרסה הנוכחית מהמפתח.
+            </p>
+            <p className="text-xs text-slate-500 mt-2">
+              ה-secret מצוי ב-Vercel תחת <code className="text-[10px] bg-slate-100 px-1 py-0.5 rounded font-mono">ONBOARDING_WEBHOOK_SECRET</code>,
+              ובאותו שם ב-Apps Script → Project Settings → Script properties.
+            </p>
+          </div>
         </div>
       </details>
     </section>
