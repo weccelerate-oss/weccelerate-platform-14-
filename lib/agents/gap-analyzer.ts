@@ -49,7 +49,7 @@ export async function analyzeGaps(): Promise<AnalyzeSummary> {
       SELECT query, category, cited, error,
              SUBSTRING(url FROM '^(?:https?://)?([^/]+)') AS host
       FROM geo_probes,
-           UNNEST(cited_urls) AS url
+           UNNEST("citedUrls") AS url
       WHERE timestamp >= ${since}
         AND error IS NULL
     ) AS expanded

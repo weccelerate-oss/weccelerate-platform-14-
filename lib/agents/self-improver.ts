@@ -85,7 +85,7 @@ export async function runSelfImprover(): Promise<ImproveSummary> {
       SELECT timestamp,
              SUBSTRING(url FROM '^(?:https?://)?([^/]+)') AS competitor_host
       FROM geo_probes,
-           UNNEST(cited_urls) AS url
+           UNNEST("citedUrls") AS url
       WHERE error IS NULL
         AND timestamp >= ${prior}
     )
