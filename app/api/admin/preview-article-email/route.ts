@@ -22,9 +22,13 @@ import { sendArticlePublishedEmail } from '@/lib/agents/article-published-email'
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Demo MUST use a slug that actually resolves to a real page (either a
+// static catalog entry or a generated guide in the DB), otherwise the
+// preview email links to a 404. eich-lehakim-startup-refui is a stable
+// MedTech entry from lib/seo/guides-catalog.ts.
 const DEMO_GUIDE = {
-  titleHe: 'איך להקים סטארטאפ MedTech בישראל — המדריך המלא 2026',
-  slug: 'eich-lehakim-startup-medtech',
+  titleHe: 'איך להקים סטארטאפ רפואי בישראל — המדריך המלא 2026',
+  slug: 'eich-lehakim-startup-refui',
   category: 'medtech',
   sourceQuery: 'איך עוברים את ועדת הלסינקי בישראל — מי עוזר?',
   bodyExcerpt:
