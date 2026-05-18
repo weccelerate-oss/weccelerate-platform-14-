@@ -9,7 +9,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import {
   BookOpen,
   ChevronDown,
@@ -139,6 +139,15 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Briefcase: <Briefcase className="w-6 h-6" />,
   Rocket: <Rocket className="w-6 h-6" />,
   Clock: <Clock className="w-6 h-6" />,
+};
+
+/** Hex equivalents of the Tailwind colours, used by SVG strokes which
+ * can't read Tailwind class names. Keep in sync with COLOR_MAP. */
+const COLOR_HEX: Record<string, string> = {
+  blue: '#60a5fa',
+  emerald: '#34d399',
+  violet: '#a78bfa',
+  amber: '#fbbf24',
 };
 
 const COLOR_MAP: Record<string, { bg: string; text: string; border: string; light: string; progress: string; ring: string; gradient: string }> = {
@@ -472,20 +481,40 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
           <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/40 to-[#070b1e]" />
         </div>
 
-        {/* Soft gradient orbs — purely decorative, blurred behind content */}
+        {/* Slow drifting orbs — premium ambient motion. Each orb circles its
+            origin on its own period so they never sync up and feel mechanical. */}
         <motion.div
           aria-hidden
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.5, scale: 1 }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
-          className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-[#c8a951]/20 blur-3xl pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.55, x: [0, 30, -10, 0], y: [0, -20, 20, 0] }}
+          transition={{
+            opacity: { duration: 1.2, ease: 'easeOut' },
+            x: { duration: 18, repeat: Infinity, ease: 'easeInOut' },
+            y: { duration: 22, repeat: Infinity, ease: 'easeInOut' },
+          }}
+          className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-[#c8a951]/25 blur-3xl pointer-events-none"
         />
         <motion.div
           aria-hidden
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.4, scale: 1 }}
-          transition={{ duration: 1.2, delay: 0.2, ease: 'easeOut' }}
-          className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-blue-500/15 blur-3xl pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.45, x: [0, -25, 15, 0], y: [0, 20, -15, 0] }}
+          transition={{
+            opacity: { duration: 1.2, delay: 0.2, ease: 'easeOut' },
+            x: { duration: 24, repeat: Infinity, ease: 'easeInOut' },
+            y: { duration: 19, repeat: Infinity, ease: 'easeInOut' },
+          }}
+          className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"
+        />
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.3, x: [0, 15, -10, 0], y: [0, -15, 10, 0] }}
+          transition={{
+            opacity: { duration: 1.4, delay: 0.4, ease: 'easeOut' },
+            x: { duration: 28, repeat: Infinity, ease: 'easeInOut' },
+            y: { duration: 25, repeat: Infinity, ease: 'easeInOut' },
+          }}
+          className="absolute top-1/3 left-1/4 w-56 h-56 rounded-full bg-violet-500/15 blur-3xl pointer-events-none"
         />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-7 sm:py-10 relative z-10">
@@ -523,6 +552,7 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
               icon={<Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               label="שיעורים שהושלמו"
               value={String(completedCount)}
+              numericValue={completedCount}
               accent="emerald"
             />
             <StatChip
@@ -535,6 +565,7 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
               icon={<Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               label="השבוע"
               value={String(engagementStats.thisWeek)}
+              numericValue={engagementStats.thisWeek}
               accent="amber"
             />
           </div>
@@ -571,6 +602,9 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
           )}
         </div>
       )}
+
+      {/* Quick-jump category nav — sticky-ish at the top of the courses block */}
+      <CategoryQuickJump categories={COURSES_DATA} progressMap={progressMap} />
 
       {/* Course Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-5">
@@ -625,15 +659,39 @@ const STAT_ACCENTS: Record<string, { ring: string; text: string; iconBg: string 
   amber: { ring: 'ring-amber-400/20', text: 'text-amber-300', iconBg: 'bg-amber-500/15' },
 };
 
+/**
+ * Counts up from 0 to `value` once per mount. For numeric stats, gives the
+ * hero a moment of life when the page lands instead of feeling like a static
+ * snapshot. For string stats (formatted watch time) we fall back to the raw
+ * text — no animation, but consistent typography.
+ */
+function AnimatedNumber({ value, suffix = '' }: { value: number; suffix?: string }) {
+  const mv = useMotionValue(0);
+  const rounded = useTransform(mv, (v) => Math.round(v).toString());
+  useEffect(() => {
+    const controls = animate(mv, value, { duration: 1.1, ease: [0.16, 1, 0.3, 1] });
+    return () => controls.stop();
+  }, [value, mv]);
+  return (
+    <span className="tabular-nums">
+      <motion.span>{rounded}</motion.span>
+      {suffix}
+    </span>
+  );
+}
+
 function StatChip({
   icon,
   label,
   value,
+  numericValue,
   accent,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  /** When provided, animates from 0 → numericValue on mount. */
+  numericValue?: number;
   accent: 'emerald' | 'blue' | 'amber';
 }) {
   const a = STAT_ACCENTS[accent];
@@ -650,7 +708,7 @@ function StatChip({
       </div>
       <div className="min-w-0">
         <p className={cn('text-sm sm:text-base font-bold leading-none truncate', a.text)}>
-          {value}
+          {numericValue !== undefined ? <AnimatedNumber value={numericValue} /> : value}
         </p>
         <p className="text-[10px] sm:text-xs text-white/50 mt-0.5 truncate">{label}</p>
       </div>
@@ -722,67 +780,124 @@ function ContinueCard({
   onResume: () => void;
 }) {
   const colors = COLOR_MAP[entry.category.color] || COLOR_MAP.blue;
-  const thumb = `https://i.ytimg.com/vi/${entry.lesson.youtubeId}/hqdefault.jpg`;
+  const thumbHigh = `https://i.ytimg.com/vi/${entry.lesson.youtubeId}/maxresdefault.jpg`;
+  const thumbFallback = `https://i.ytimg.com/vi/${entry.lesson.youtubeId}/hqdefault.jpg`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -8 }}
+      initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={cn(
-        'relative overflow-hidden rounded-2xl border border-white/[0.08]',
-        'bg-gradient-to-br from-white/[0.05] to-white/[0.02]',
-        'shadow-[0_8px_32px_rgba(0,0,0,0.4)]',
-      )}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="relative overflow-hidden rounded-3xl border border-white/[0.08] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]"
     >
-      {/* Color accent wash from the lesson's category */}
-      <div className={cn('absolute inset-0 bg-gradient-to-l opacity-60 pointer-events-none', colors.gradient)} />
+      {/* Cinematic background: blurred lesson thumbnail + heavy gradient */}
+      <div className="absolute inset-0">
+        <img
+          src={thumbHigh}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = thumbFallback;
+          }}
+          alt=""
+          className="w-full h-full object-cover scale-110 blur-md opacity-60"
+        />
+        {/* Dark wash so text is always readable */}
+        <div className="absolute inset-0 bg-gradient-to-l from-[#0a0f24] via-[#0a0f24]/85 to-[#0a0f24]/40" />
+        <div className={cn('absolute inset-0 bg-gradient-to-tr opacity-50', colors.gradient)} />
+      </div>
 
-      <div className="relative flex flex-col sm:flex-row gap-4 sm:gap-5 p-4 sm:p-5">
-        {/* Thumbnail with play overlay */}
+      {/* Subtle gold corner shimmer */}
+      <motion.div
+        aria-hidden
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-[#c8a951]/20 blur-3xl pointer-events-none"
+      />
+
+      <div className="relative flex flex-col sm:flex-row-reverse gap-5 sm:gap-7 p-5 sm:p-7 min-h-[200px] sm:min-h-[260px]">
+        {/* Sharp foreground thumbnail */}
         <button
           onClick={onResume}
-          className="group relative flex-shrink-0 w-full sm:w-48 aspect-video rounded-xl overflow-hidden bg-black/40 ring-1 ring-white/10 hover:ring-white/30 transition"
+          className="group relative flex-shrink-0 w-full sm:w-72 aspect-video rounded-2xl overflow-hidden bg-black/40 ring-1 ring-white/15 hover:ring-white/40 shadow-2xl transition-all hover:scale-[1.02]"
           aria-label={`המשך לצפות: ${entry.lesson.title}`}
         >
           <img
-            src={thumb}
+            src={thumbHigh}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = thumbFallback;
+            }}
             alt=""
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          {/* Pulsing play ring */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="grid place-items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white text-[#070b1e] shadow-lg group-hover:scale-110 transition-transform">
-              <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ms-0.5" />
-            </span>
+            <motion.span
+              initial={{ scale: 0.95, opacity: 0.85 }}
+              animate={{ scale: [0.95, 1.05, 0.95], opacity: [0.85, 1, 0.85] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              className="grid place-items-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white text-[#070b1e] shadow-2xl"
+            >
+              <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current ms-1" />
+            </motion.span>
           </div>
         </button>
 
         {/* Text + CTA */}
-        <div className="flex-1 min-w-0 flex flex-col">
-          <div className="flex items-center gap-2 text-xs font-medium text-[#c8a951] uppercase tracking-wider mb-1.5">
-            <RotateCcw className="w-3.5 h-3.5" />
-            המשך מהמקום שעצרת
-          </div>
-          <h3 className="text-base sm:text-lg font-bold text-white leading-snug line-clamp-2">
-            {entry.lesson.title}
-          </h3>
-          <p className="text-xs sm:text-sm text-white/50 mt-1 line-clamp-1">
-            {entry.category.name} · {entry.subcategory.name}
-          </p>
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <motion.div
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full bg-[#c8a951]/15 border border-[#c8a951]/30 mb-3"
+          >
+            <RotateCcw className="w-3 h-3 text-[#e8d48b]" />
+            <span className="text-[11px] font-semibold text-[#e8d48b] uppercase tracking-wider">
+              המשך מהמקום שעצרת
+            </span>
+          </motion.div>
 
-          <div className="mt-4 flex items-center justify-end">
+          <motion.h2
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.5 }}
+            className="text-2xl sm:text-3xl font-bold text-white leading-tight line-clamp-2"
+          >
+            {entry.lesson.title}
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.24, duration: 0.5 }}
+            className="text-sm text-white/60 mt-2 line-clamp-2"
+          >
+            {entry.lesson.description}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="mt-4 sm:mt-5 flex flex-wrap items-center gap-3"
+          >
             <button
               onClick={onResume}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shadow-md transition',
-                'bg-gradient-to-l from-[#e8d48b] to-[#c8a951] text-[#070b1e] hover:brightness-105 active:scale-[0.98]',
+                'flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-bold transition-all',
+                'bg-gradient-to-l from-[#e8d48b] to-[#c8a951] text-[#070b1e]',
+                'shadow-[0_8px_24px_rgba(200,169,81,0.35)]',
+                'hover:brightness-110 hover:shadow-[0_8px_28px_rgba(200,169,81,0.5)] hover:-translate-y-0.5',
+                'active:translate-y-0',
               )}
             >
-              <Play className="w-4 h-4 fill-current" />
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
               המשך לצפות
             </button>
-          </div>
+            <span className="text-xs text-white/40 truncate">
+              {entry.category.name} · {entry.subcategory.name}
+            </span>
+          </motion.div>
         </div>
       </div>
     </motion.div>
@@ -845,6 +960,125 @@ function RecentlyWatchedStrip({
 }
 
 // =============================================================================
+// CATEGORY QUICK-JUMP NAV — horizontal pills that smooth-scroll to anchors
+// =============================================================================
+
+function CategoryQuickJump({
+  categories,
+  progressMap,
+}: {
+  categories: CategoryData[];
+  progressMap: Map<string, LessonProgress>;
+}) {
+  const handleJump = (slug: string) => {
+    const el = document.getElementById(`category-${slug}`);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+      <div className="flex items-center gap-2 mb-2.5 px-1">
+        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">
+          ניווט מהיר
+        </span>
+        <div className="flex-1 h-px bg-gradient-to-l from-white/10 to-transparent" />
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+        {categories.map((cat, i) => {
+          const colors = COLOR_MAP[cat.color] || COLOR_MAP.blue;
+          const lessons = cat.subcategories.flatMap((s) => s.lessons);
+          const completed = lessons.filter((l) => isEffectivelyDone(progressMap.get(l.slug))).length;
+          const total = lessons.length;
+          const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+          return (
+            <motion.button
+              key={cat.slug}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.04 * i, duration: 0.4 }}
+              onClick={() => handleJump(cat.slug)}
+              className={cn(
+                'group flex-shrink-0 flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-xl',
+                'bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.15]',
+                'transition-all',
+              )}
+            >
+              <div className={cn('p-1.5 rounded-lg text-white shadow-md', colors.bg)}>
+                {ICON_MAP[cat.icon] ?? <BookOpen className="w-4 h-4" />}
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-semibold text-white/90 leading-tight whitespace-nowrap">
+                  {cat.name}
+                </p>
+                <p className="text-[10px] text-white/40 leading-tight mt-0.5 tabular-nums">
+                  {completed}/{total} · {percent}%
+                </p>
+              </div>
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// CIRCULAR PROGRESS RING — wraps a category icon with an animated arc
+// =============================================================================
+
+function CircularProgress({
+  percent,
+  size = 64,
+  stroke = 3,
+  color = '#c8a951',
+  className,
+}: {
+  percent: number;
+  size?: number;
+  stroke?: number;
+  color?: string;
+  className?: string;
+}) {
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const safe = Math.max(0, Math.min(100, percent));
+  const offset = circumference * (1 - safe / 100);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className={cn('-rotate-90', className)}
+      aria-hidden
+    >
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="rgba(255,255,255,0.08)"
+        strokeWidth={stroke}
+      />
+      <motion.circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        initial={{ strokeDashoffset: circumference }}
+        animate={{ strokeDashoffset: offset }}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+      />
+    </svg>
+  );
+}
+
+// =============================================================================
 // CATEGORY CARD
 // =============================================================================
 
@@ -878,6 +1112,7 @@ function CategoryCard({
 
   return (
     <motion.div
+      id={`category-${category.slug}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
@@ -885,7 +1120,7 @@ function CategoryCard({
       className={cn(
         'bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden',
         'shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300',
-        'hover:border-white/[0.16] hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)]',
+        'hover:border-white/[0.16] hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)] scroll-mt-20',
       )}
     >
       <button
@@ -898,25 +1133,47 @@ function CategoryCard({
             <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#0d1321]/80" />
           </div>
         )}
-        <div className={cn('p-3 rounded-xl text-white relative z-10', colors.bg)}>
-          {ICON_MAP[category.icon] || <BookOpen className="w-6 h-6" />}
+        {/* Icon framed by an animated circular progress ring + soft glow halo */}
+        <div className="relative z-10 flex-shrink-0 grid place-items-center w-16 h-16 sm:w-[68px] sm:h-[68px]">
+          <CircularProgress
+            percent={categoryPercent}
+            size={68}
+            stroke={3}
+            color={COLOR_HEX[category.color] ?? '#c8a951'}
+            className="absolute inset-0 hidden sm:block"
+          />
+          <CircularProgress
+            percent={categoryPercent}
+            size={64}
+            stroke={3}
+            color={COLOR_HEX[category.color] ?? '#c8a951'}
+            className="absolute inset-0 sm:hidden"
+          />
+          <div className={cn('absolute inset-2 rounded-full blur-md opacity-50', colors.light)} aria-hidden />
+          <div className={cn('relative p-2.5 rounded-xl text-white shadow-lg', colors.bg)}>
+            {ICON_MAP[category.icon] || <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />}
+          </div>
         </div>
+
         <div className="flex-1 min-w-0 relative z-10">
-          <h2 className="text-lg sm:text-xl font-bold text-white">{category.name}</h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-lg sm:text-xl font-bold text-white">{category.name}</h2>
+            {categoryPercent === 100 && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                ✓ הושלם
+              </span>
+            )}
+          </div>
           <p className="text-sm text-white/50 mt-0.5 line-clamp-1">{category.description}</p>
+          <div className="mt-1.5 flex items-center gap-2 text-xs text-white/40">
+            <span className="font-medium tabular-nums">
+              {categoryCompleted}/{categoryTotal} שיעורים
+            </span>
+            <span className="text-white/20">·</span>
+            <span className="tabular-nums">{categoryPercent}%</span>
+          </div>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0 relative z-10">
-          <div className="hidden sm:flex items-center gap-2">
-            <div className="w-20 h-2 bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className={cn('h-full rounded-full transition-all duration-500', colors.progress)}
-                style={{ width: `${categoryPercent}%` }}
-              />
-            </div>
-            <span className="text-xs font-medium text-white/40 whitespace-nowrap">
-              {categoryCompleted}/{categoryTotal}
-            </span>
-          </div>
           <ChevronDown
             className={cn(
               'w-5 h-5 text-white/40 transition-transform duration-300',
