@@ -1,8 +1,9 @@
 /**
  * Learning Center Content
  *
- * Interactive course browser with YouTube lessons, progress tracking,
- * and expandable category/subcategory navigation.
+ * Interactive course browser with YouTube lessons, completion tracking,
+ * and a "remember where I paused" resume system powered by the YouTube
+ * IFrame API + the UserLessonProgress table.
  */
 
 'use client';
@@ -12,7 +13,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
   ChevronDown,
-  ChevronLeft,
   CheckCircle2,
   Circle,
   Clock,
@@ -24,6 +24,8 @@ import {
   Trophy,
   Sparkles,
   X,
+  History,
+  RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { COURSES_DATA, getTotalLessons } from '@/lib/courses-data';
@@ -33,13 +35,66 @@ import type { CategoryData, SubcategoryData, LessonData } from '@/lib/courses-da
 // TYPES
 // =============================================================================
 
+export interface LessonProgress {
+  slug: string;
+  completed: boolean;
+  positionSec: number;
+  durationSec: number | null;
+  lastWatchedAt: string | null;
+}
+
 interface LearningContentProps {
   user: { id: string; name: string };
-  initialCompletedSlugs: string[];
+  initialProgress: LessonProgress[];
+}
+
+// Cross-cutting "is this in progress" check — used in multiple places.
+// A lesson is "in progress" iff: not completed AND we've recorded a real
+// position (>= MIN_RESUME_SEC). Anything shorter is autoplay noise.
+const MIN_RESUME_SEC = 5;
+const COMPLETE_RATIO = 0.92;
+
+function isInProgress(p: LessonProgress | undefined): p is LessonProgress {
+  return Boolean(p && !p.completed && p.positionSec >= MIN_RESUME_SEC);
+}
+
+function progressPercent(p: LessonProgress | undefined): number {
+  if (!p) return 0;
+  if (p.completed) return 100;
+  if (!p.durationSec || p.durationSec <= 0) return 0;
+  return Math.min(100, Math.round((p.positionSec / p.durationSec) * 100));
+}
+
+function formatTime(totalSec: number): string {
+  if (!Number.isFinite(totalSec) || totalSec < 0) return '0:00';
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = Math.floor(totalSec % 60);
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+// Flat index of every lesson with its category for the resume card.
+type LessonIndex = {
+  lesson: LessonData;
+  category: CategoryData;
+  subcategory: SubcategoryData;
+};
+
+function buildLessonIndex(): Map<string, LessonIndex> {
+  const map = new Map<string, LessonIndex>();
+  for (const category of COURSES_DATA) {
+    for (const subcategory of category.subcategories) {
+      for (const lesson of subcategory.lessons) {
+        map.set(lesson.slug, { lesson, category, subcategory });
+      }
+    }
+  }
+  return map;
 }
 
 // =============================================================================
-// ICON MAP
+// ICON / COLOR MAPS
 // =============================================================================
 
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -49,34 +104,42 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Clock: <Clock className="w-6 h-6" />,
 };
 
-const COLOR_MAP: Record<string, { bg: string; text: string; border: string; light: string; progress: string }> = {
+const COLOR_MAP: Record<string, { bg: string; text: string; border: string; light: string; progress: string; ring: string; gradient: string }> = {
   blue: {
     bg: 'bg-blue-500',
-    text: 'text-blue-600',
+    text: 'text-blue-400',
     border: 'border-blue-200',
-    light: 'bg-blue-50',
+    light: 'bg-blue-500/10',
     progress: 'bg-blue-500',
+    ring: 'stroke-blue-400',
+    gradient: 'from-blue-500/20 via-blue-500/5 to-transparent',
   },
   emerald: {
     bg: 'bg-emerald-500',
-    text: 'text-emerald-600',
+    text: 'text-emerald-400',
     border: 'border-emerald-200',
-    light: 'bg-emerald-50',
+    light: 'bg-emerald-500/10',
     progress: 'bg-emerald-500',
+    ring: 'stroke-emerald-400',
+    gradient: 'from-emerald-500/20 via-emerald-500/5 to-transparent',
   },
   violet: {
     bg: 'bg-violet-500',
-    text: 'text-violet-600',
+    text: 'text-violet-400',
     border: 'border-violet-200',
-    light: 'bg-violet-50',
+    light: 'bg-violet-500/10',
     progress: 'bg-violet-500',
+    ring: 'stroke-violet-400',
+    gradient: 'from-violet-500/20 via-violet-500/5 to-transparent',
   },
   amber: {
     bg: 'bg-amber-500',
-    text: 'text-amber-600',
+    text: 'text-amber-400',
     border: 'border-amber-200',
-    light: 'bg-amber-50',
+    light: 'bg-amber-500/10',
     progress: 'bg-amber-500',
+    ring: 'stroke-amber-400',
+    gradient: 'from-amber-500/20 via-amber-500/5 to-transparent',
   },
 };
 
@@ -84,22 +147,66 @@ const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ligh
 // MAIN COMPONENT
 // =============================================================================
 
-export function LearningContent({ user, initialCompletedSlugs }: LearningContentProps) {
-  const [completedSlugs, setCompletedSlugs] = useState<Set<string>>(
-    new Set(initialCompletedSlugs)
+export function LearningContent({ user: _user, initialProgress }: LearningContentProps) {
+  // The single source of truth for "what does the user know / where did
+  // they stop." Keyed by slug for O(1) lookup from any render path.
+  const [progressMap, setProgressMap] = useState<Map<string, LessonProgress>>(
+    () => new Map(initialProgress.map((p) => [p.slug, p])),
   );
+
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(COURSES_DATA.map((c) => c.slug))
+    new Set(COURSES_DATA.map((c) => c.slug)),
   );
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
   const [activeLesson, setActiveLesson] = useState<LessonData | null>(null);
   const [activeCategoryColor, setActiveCategoryColor] = useState<string>('blue');
 
   const totalLessons = useMemo(() => getTotalLessons(), []);
-  const completedCount = completedSlugs.size;
-  const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+  const lessonIndex = useMemo(() => buildLessonIndex(), []);
 
-  // Toggle category expand
+  const completedCount = useMemo(
+    () => Array.from(progressMap.values()).filter((p) => p.completed).length,
+    [progressMap],
+  );
+  const overallPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+
+  // The "continue watching" pick: the most-recently-touched in-progress lesson.
+  // Falls back to nothing if everything is done or untouched.
+  const continueLesson = useMemo<LessonIndex | null>(() => {
+    const candidates = Array.from(progressMap.values())
+      .filter(isInProgress)
+      .sort((a, b) => {
+        const aT = a.lastWatchedAt ? new Date(a.lastWatchedAt).getTime() : 0;
+        const bT = b.lastWatchedAt ? new Date(b.lastWatchedAt).getTime() : 0;
+        return bT - aT;
+      });
+    for (const c of candidates) {
+      const entry = lessonIndex.get(c.slug);
+      if (entry) return entry;
+    }
+    return null;
+  }, [progressMap, lessonIndex]);
+
+  // A short "recently watched" strip — last 4 touched lessons, excluding the
+  // one already shown in the continue card. Helps users jump back to anything
+  // they touched, not just the literal last thing.
+  const recentLessons = useMemo<Array<{ entry: LessonIndex; progress: LessonProgress }>>(() => {
+    return Array.from(progressMap.values())
+      .filter((p) => p.lastWatchedAt)
+      .sort((a, b) => {
+        const aT = a.lastWatchedAt ? new Date(a.lastWatchedAt).getTime() : 0;
+        const bT = b.lastWatchedAt ? new Date(b.lastWatchedAt).getTime() : 0;
+        return bT - aT;
+      })
+      .filter((p) => !continueLesson || p.slug !== continueLesson.lesson.slug)
+      .map((p) => {
+        const entry = lessonIndex.get(p.slug);
+        return entry ? { entry, progress: p } : null;
+      })
+      .filter((x): x is { entry: LessonIndex; progress: LessonProgress } => Boolean(x))
+      .slice(0, 4);
+  }, [progressMap, lessonIndex, continueLesson]);
+
   const toggleCategory = useCallback((slug: string) => {
     setExpandedCategories((prev) => {
       const next = new Set(prev);
@@ -109,7 +216,6 @@ export function LearningContent({ user, initialCompletedSlugs }: LearningContent
     });
   }, []);
 
-  // Toggle subcategory expand
   const toggleSubcategory = useCallback((slug: string) => {
     setExpandedSubcategories((prev) => {
       const next = new Set(prev);
@@ -119,45 +225,90 @@ export function LearningContent({ user, initialCompletedSlugs }: LearningContent
     });
   }, []);
 
-  // Toggle lesson completion
-  const toggleLesson = useCallback(
-    async (lessonSlug: string) => {
-      const isCompleted = completedSlugs.has(lessonSlug);
-      const newCompleted = !isCompleted;
-
-      // Optimistic update
-      setCompletedSlugs((prev) => {
-        const next = new Set(prev);
-        if (newCompleted) next.add(lessonSlug);
-        else next.delete(lessonSlug);
-        return next;
+  // Patch progress for a single lesson locally + send to the server. Used by:
+  //   - manual checkbox toggle (sends `completed`)
+  //   - in-video position saves (sends `positionSec` + `durationSec`)
+  //   - auto-complete from the modal (sends both)
+  const patchProgress = useCallback(
+    async (
+      slug: string,
+      patch: { completed?: boolean; positionSec?: number; durationSec?: number },
+    ) => {
+      const previous = progressMap.get(slug);
+      const next: LessonProgress = {
+        slug,
+        completed: patch.completed ?? previous?.completed ?? false,
+        positionSec: patch.positionSec ?? previous?.positionSec ?? 0,
+        durationSec: patch.durationSec ?? previous?.durationSec ?? null,
+        lastWatchedAt: new Date().toISOString(),
+      };
+      // If the user un-completes manually, also wipe the cursor so the row
+      // doesn't claim "in progress 100%" right after.
+      if (patch.completed === false && patch.positionSec === undefined) {
+        next.positionSec = 0;
+      }
+      setProgressMap((prev) => {
+        const m = new Map(prev);
+        m.set(slug, next);
+        return m;
       });
 
-      // Persist to API
       try {
         await fetch('/api/portal/lessons/progress', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lessonSlug, completed: newCompleted }),
+          body: JSON.stringify({
+            lessonSlug: slug,
+            ...patch,
+          }),
+          keepalive: true, // ensures saves survive a tab close on the way out
         });
       } catch {
-        // Revert on error
-        setCompletedSlugs((prev) => {
-          const next = new Set(prev);
-          if (isCompleted) next.add(lessonSlug);
-          else next.delete(lessonSlug);
-          return next;
+        // Revert on hard failure so the UI doesn't lie.
+        setProgressMap((prev) => {
+          const m = new Map(prev);
+          if (previous) m.set(slug, previous);
+          else m.delete(slug);
+          return m;
         });
       }
     },
-    [completedSlugs]
+    [progressMap],
   );
 
-  // Open lesson video
+  const toggleLessonComplete = useCallback(
+    (slug: string) => {
+      const current = progressMap.get(slug);
+      const newCompleted = !current?.completed;
+      void patchProgress(slug, { completed: newCompleted });
+    },
+    [progressMap, patchProgress],
+  );
+
   const openLesson = useCallback((lesson: LessonData, color: string) => {
     setActiveLesson(lesson);
     setActiveCategoryColor(color);
   }, []);
+
+  const closeLesson = useCallback(() => setActiveLesson(null), []);
+
+  // When the modal asks to expand the parent category so the user can see
+  // context after closing (nice touch, not required).
+  const ensureLessonVisible = useCallback(
+    (slug: string) => {
+      const entry = lessonIndex.get(slug);
+      if (!entry) return;
+      setExpandedCategories((prev) => new Set(prev).add(entry.category.slug));
+      setExpandedSubcategories((prev) => new Set(prev).add(entry.subcategory.slug));
+    },
+    [lessonIndex],
+  );
+
+  const openContinueLesson = useCallback(() => {
+    if (!continueLesson) return;
+    ensureLessonVisible(continueLesson.lesson.slug);
+    openLesson(continueLesson.lesson, continueLesson.category.color);
+  }, [continueLesson, openLesson, ensureLessonVisible]);
 
   return (
     <div>
@@ -180,14 +331,38 @@ export function LearningContent({ user, initialCompletedSlugs }: LearningContent
             </div>
           </div>
 
-          {/* Overall Progress */}
           <OverallProgress
             completedCount={completedCount}
             totalLessons={totalLessons}
-            progressPercent={progressPercent}
+            progressPercent={overallPercent}
           />
         </div>
       </div>
+
+      {/* Continue watching + recently watched */}
+      {(continueLesson || recentLessons.length > 0) && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-5 sm:pt-6 space-y-4">
+          {continueLesson && (
+            <ContinueCard
+              entry={continueLesson}
+              progress={progressMap.get(continueLesson.lesson.slug)!}
+              onResume={openContinueLesson}
+            />
+          )}
+          {recentLessons.length > 0 && (
+            <RecentlyWatchedStrip
+              items={recentLessons}
+              onOpen={(slug) => {
+                const entry = lessonIndex.get(slug);
+                if (entry) {
+                  ensureLessonVisible(slug);
+                  openLesson(entry.lesson, entry.category.color);
+                }
+              }}
+            />
+          )}
+        </div>
+      )}
 
       {/* Course Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-5">
@@ -198,10 +373,10 @@ export function LearningContent({ user, initialCompletedSlugs }: LearningContent
             index={catIdx}
             isExpanded={expandedCategories.has(category.slug)}
             expandedSubcategories={expandedSubcategories}
-            completedSlugs={completedSlugs}
+            progressMap={progressMap}
             onToggleCategory={toggleCategory}
             onToggleSubcategory={toggleSubcategory}
-            onToggleLesson={toggleLesson}
+            onToggleLesson={toggleLessonComplete}
             onOpenLesson={openLesson}
           />
         ))}
@@ -213,9 +388,15 @@ export function LearningContent({ user, initialCompletedSlugs }: LearningContent
           <VideoModal
             lesson={activeLesson}
             color={activeCategoryColor}
-            isCompleted={completedSlugs.has(activeLesson.slug)}
-            onToggleComplete={() => toggleLesson(activeLesson.slug)}
-            onClose={() => setActiveLesson(null)}
+            progress={progressMap.get(activeLesson.slug)}
+            onToggleComplete={() => toggleLessonComplete(activeLesson.slug)}
+            onSavePosition={(positionSec, durationSec) =>
+              patchProgress(activeLesson.slug, { positionSec, durationSec })
+            }
+            onAutoComplete={(positionSec, durationSec) =>
+              patchProgress(activeLesson.slug, { completed: true, positionSec, durationSec })
+            }
+            onClose={closeLesson}
           />
         )}
       </AnimatePresence>
@@ -275,6 +456,186 @@ function OverallProgress({
 }
 
 // =============================================================================
+// CONTINUE WATCHING — hero card with thumbnail + resume button
+// =============================================================================
+
+function ContinueCard({
+  entry,
+  progress,
+  onResume,
+}: {
+  entry: LessonIndex;
+  progress: LessonProgress;
+  onResume: () => void;
+}) {
+  const colors = COLOR_MAP[entry.category.color] || COLOR_MAP.blue;
+  const percent = progressPercent(progress);
+  const thumb = `https://i.ytimg.com/vi/${entry.lesson.youtubeId}/hqdefault.jpg`;
+  const remainingSec =
+    progress.durationSec && progress.durationSec > 0
+      ? Math.max(0, progress.durationSec - progress.positionSec)
+      : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={cn(
+        'relative overflow-hidden rounded-2xl border border-white/[0.08]',
+        'bg-gradient-to-br from-white/[0.05] to-white/[0.02]',
+        'shadow-[0_8px_32px_rgba(0,0,0,0.4)]',
+      )}
+    >
+      {/* Color accent wash from the lesson's category */}
+      <div className={cn('absolute inset-0 bg-gradient-to-l opacity-60 pointer-events-none', colors.gradient)} />
+
+      <div className="relative flex flex-col sm:flex-row gap-4 sm:gap-5 p-4 sm:p-5">
+        {/* Thumbnail with play overlay */}
+        <button
+          onClick={onResume}
+          className="group relative flex-shrink-0 w-full sm:w-48 aspect-video rounded-xl overflow-hidden bg-black/40 ring-1 ring-white/10 hover:ring-white/30 transition"
+          aria-label={`המשך לצפות: ${entry.lesson.title}`}
+        >
+          <img
+            src={thumb}
+            alt=""
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="grid place-items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white text-[#070b1e] shadow-lg group-hover:scale-110 transition-transform">
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ms-0.5" />
+            </span>
+          </div>
+          {/* Thumbnail-bottom progress bar */}
+          <div className="absolute bottom-0 inset-x-0 h-1 bg-black/40">
+            <div
+              className={cn('h-full transition-all', colors.progress)}
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+        </button>
+
+        {/* Text + CTA */}
+        <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex items-center gap-2 text-xs font-medium text-[#c8a951] uppercase tracking-wider mb-1.5">
+            <RotateCcw className="w-3.5 h-3.5" />
+            המשך מהמקום שעצרת
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-white leading-snug line-clamp-2">
+            {entry.lesson.title}
+          </h3>
+          <p className="text-xs sm:text-sm text-white/50 mt-1 line-clamp-1">
+            {entry.category.name} · {entry.subcategory.name}
+          </p>
+
+          <div className="mt-3 flex items-center gap-3">
+            <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+              <motion.div
+                className={cn('h-full rounded-full', colors.progress)}
+                initial={{ width: 0 }}
+                animate={{ width: `${percent}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+              />
+            </div>
+            <span className="text-xs font-medium text-white/60 tabular-nums whitespace-nowrap">
+              {progress.durationSec
+                ? `${formatTime(progress.positionSec)} / ${formatTime(progress.durationSec)}`
+                : formatTime(progress.positionSec)}
+            </span>
+          </div>
+
+          <div className="mt-3 sm:mt-4 flex items-center justify-between gap-3">
+            <span className="text-xs text-white/40">
+              {remainingSec !== null
+                ? `נשארו ${formatTime(remainingSec)}`
+                : `צפית עד ${formatTime(progress.positionSec)}`}
+            </span>
+            <button
+              onClick={onResume}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shadow-md transition',
+                'bg-gradient-to-l from-[#e8d48b] to-[#c8a951] text-[#070b1e] hover:brightness-105 active:scale-[0.98]',
+              )}
+            >
+              <Play className="w-4 h-4 fill-current" />
+              המשך לצפות
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// =============================================================================
+// RECENTLY WATCHED STRIP
+// =============================================================================
+
+function RecentlyWatchedStrip({
+  items,
+  onOpen,
+}: {
+  items: Array<{ entry: LessonIndex; progress: LessonProgress }>;
+  onOpen: (slug: string) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2 px-1">
+        <History className="w-4 h-4 text-white/40" />
+        <span className="text-xs font-medium text-white/50 uppercase tracking-wider">
+          צפית לאחרונה
+        </span>
+      </div>
+      {/* Horizontal scroll on mobile, wraps on desktop */}
+      <div className="flex gap-2 overflow-x-auto sm:flex-wrap pb-1 -mx-1 px-1 scrollbar-hide">
+        {items.map(({ entry, progress }) => {
+          const percent = progressPercent(progress);
+          const colors = COLOR_MAP[entry.category.color] || COLOR_MAP.blue;
+          return (
+            <button
+              key={entry.lesson.slug}
+              onClick={() => onOpen(entry.lesson.slug)}
+              className={cn(
+                'group flex-shrink-0 flex items-center gap-2 max-w-[240px] sm:max-w-none',
+                'px-3 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] transition',
+              )}
+            >
+              <div className="relative flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-black/40">
+                <img
+                  src={`https://i.ytimg.com/vi/${entry.lesson.youtubeId}/default.jpg`}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+                  <Play className="w-3.5 h-3.5 text-white fill-current" />
+                </div>
+                <div className="absolute bottom-0 inset-x-0 h-0.5 bg-black/40">
+                  <div className={cn('h-full', colors.progress)} style={{ width: `${percent}%` }} />
+                </div>
+              </div>
+              <div className="min-w-0 text-right">
+                <p className="text-xs font-medium text-white/80 truncate max-w-[150px] sm:max-w-[200px]">
+                  {entry.lesson.title}
+                </p>
+                <p className="text-[10px] text-white/40 tabular-nums">
+                  {progress.completed ? (
+                    <span className="text-emerald-400">הושלם</span>
+                  ) : (
+                    `${percent}%`
+                  )}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
 // CATEGORY CARD
 // =============================================================================
 
@@ -283,7 +644,7 @@ function CategoryCard({
   index,
   isExpanded,
   expandedSubcategories,
-  completedSlugs,
+  progressMap,
   onToggleCategory,
   onToggleSubcategory,
   onToggleLesson,
@@ -293,7 +654,7 @@ function CategoryCard({
   index: number;
   isExpanded: boolean;
   expandedSubcategories: Set<string>;
-  completedSlugs: Set<string>;
+  progressMap: Map<string, LessonProgress>;
   onToggleCategory: (slug: string) => void;
   onToggleSubcategory: (slug: string) => void;
   onToggleLesson: (slug: string) => void;
@@ -301,9 +662,8 @@ function CategoryCard({
 }) {
   const colors = COLOR_MAP[category.color] || COLOR_MAP.blue;
 
-  // Count completed lessons in this category
   const categoryLessons = category.subcategories.flatMap((s) => s.lessons);
-  const categoryCompleted = categoryLessons.filter((l) => completedSlugs.has(l.slug)).length;
+  const categoryCompleted = categoryLessons.filter((l) => progressMap.get(l.slug)?.completed).length;
   const categoryTotal = categoryLessons.length;
   const categoryPercent = categoryTotal > 0 ? Math.round((categoryCompleted / categoryTotal) * 100) : 0;
 
@@ -314,12 +674,10 @@ function CategoryCard({
       transition={{ delay: index * 0.1 }}
       className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
     >
-      {/* Category Header */}
       <button
         onClick={() => onToggleCategory(category.slug)}
         className="w-full flex items-center gap-4 p-5 sm:p-6 hover:bg-white/[0.02] transition-colors text-right relative overflow-hidden"
       >
-        {/* Category background image */}
         {category.image && (
           <div className="absolute inset-0 pointer-events-none">
             <img src={category.image} alt="" className="w-full h-full object-cover opacity-[0.06]" />
@@ -334,7 +692,6 @@ function CategoryCard({
           <p className="text-sm text-white/50 mt-0.5 line-clamp-1">{category.description}</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0 relative z-10">
-          {/* Mini progress */}
           <div className="hidden sm:flex items-center gap-2">
             <div className="w-20 h-2 bg-white/[0.06] rounded-full overflow-hidden">
               <div
@@ -349,13 +706,12 @@ function CategoryCard({
           <ChevronDown
             className={cn(
               'w-5 h-5 text-white/40 transition-transform duration-300',
-              isExpanded && 'rotate-180'
+              isExpanded && 'rotate-180',
             )}
           />
         </div>
       </button>
 
-      {/* Subcategories */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -372,7 +728,7 @@ function CategoryCard({
                   subcategory={sub}
                   color={category.color}
                   isExpanded={expandedSubcategories.has(sub.slug)}
-                  completedSlugs={completedSlugs}
+                  progressMap={progressMap}
                   onToggle={onToggleSubcategory}
                   onToggleLesson={onToggleLesson}
                   onOpenLesson={(lesson) => onOpenLesson(lesson, category.color)}
@@ -394,7 +750,7 @@ function SubcategorySection({
   subcategory,
   color,
   isExpanded,
-  completedSlugs,
+  progressMap,
   onToggle,
   onToggleLesson,
   onOpenLesson,
@@ -402,19 +758,18 @@ function SubcategorySection({
   subcategory: SubcategoryData;
   color: string;
   isExpanded: boolean;
-  completedSlugs: Set<string>;
+  progressMap: Map<string, LessonProgress>;
   onToggle: (slug: string) => void;
   onToggleLesson: (slug: string) => void;
   onOpenLesson: (lesson: LessonData) => void;
 }) {
-  const colors = COLOR_MAP[color] || COLOR_MAP.blue;
-  const completedCount = subcategory.lessons.filter((l) => completedSlugs.has(l.slug)).length;
+  const completedCount = subcategory.lessons.filter((l) => progressMap.get(l.slug)?.completed).length;
+  const inProgressCount = subcategory.lessons.filter((l) => isInProgress(progressMap.get(l.slug))).length;
   const totalCount = subcategory.lessons.length;
   const allDone = completedCount === totalCount && totalCount > 0;
 
   return (
     <div className={cn('rounded-xl border transition-colors', isExpanded ? 'border-white/[0.12]' : 'border-white/[0.04]')}>
-      {/* Subcategory Header */}
       <button
         onClick={() => onToggle(subcategory.slug)}
         className="w-full flex items-center gap-3 p-4 hover:bg-white/[0.02] transition-colors text-right rounded-xl"
@@ -425,6 +780,11 @@ function SubcategorySection({
             {allDone && (
               <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
             )}
+            {!allDone && inProgressCount > 0 && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#c8a951]/15 text-[#e8d48b] border border-[#c8a951]/20">
+                {inProgressCount} פעיל{inProgressCount === 1 ? '' : 'ים'}
+              </span>
+            )}
           </div>
           <span className="text-xs text-white/40">{totalCount} שיעורים</span>
         </div>
@@ -434,7 +794,7 @@ function SubcategorySection({
               'text-xs font-medium px-2 py-0.5 rounded-full',
               allDone
                 ? 'bg-emerald-500/10 text-emerald-400'
-                : 'bg-white/[0.06] text-white/60'
+                : 'bg-white/[0.06] text-white/60',
             )}
           >
             {completedCount}/{totalCount}
@@ -442,13 +802,12 @@ function SubcategorySection({
           <ChevronDown
             className={cn(
               'w-4 h-4 text-white/40 transition-transform duration-200',
-              isExpanded && 'rotate-180'
+              isExpanded && 'rotate-180',
             )}
           />
         </div>
       </button>
 
-      {/* Lessons List */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -458,7 +817,6 @@ function SubcategorySection({
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            {/* Subcategory description */}
             <div className="px-4 pb-3">
               <p className="text-sm text-white/50 leading-relaxed">{subcategory.description}</p>
             </div>
@@ -469,7 +827,7 @@ function SubcategorySection({
                   lesson={lesson}
                   index={idx}
                   color={color}
-                  isCompleted={completedSlugs.has(lesson.slug)}
+                  progress={progressMap.get(lesson.slug)}
                   onToggleComplete={() => onToggleLesson(lesson.slug)}
                   onOpen={() => onOpenLesson(lesson)}
                 />
@@ -483,6 +841,37 @@ function SubcategorySection({
 }
 
 // =============================================================================
+// PROGRESS RING — partial-fill circle icon for in-progress lessons
+// =============================================================================
+
+function ProgressRing({
+  percent,
+  className,
+}: {
+  percent: number;
+  className?: string;
+}) {
+  const radius = 8;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - Math.min(100, Math.max(0, percent)) / 100);
+  return (
+    <svg viewBox="0 0 20 20" className={cn('w-5 h-5 -rotate-90', className)}>
+      <circle cx="10" cy="10" r={radius} className="fill-none stroke-white/15" strokeWidth="2" />
+      <circle
+        cx="10"
+        cy="10"
+        r={radius}
+        className="fill-none transition-[stroke-dashoffset] duration-500"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={dashOffset}
+      />
+    </svg>
+  );
+}
+
+// =============================================================================
 // LESSON ROW
 // =============================================================================
 
@@ -490,18 +879,21 @@ function LessonRow({
   lesson,
   index,
   color,
-  isCompleted,
+  progress,
   onToggleComplete,
   onOpen,
 }: {
   lesson: LessonData;
   index: number;
   color: string;
-  isCompleted: boolean;
+  progress: LessonProgress | undefined;
   onToggleComplete: () => void;
   onOpen: () => void;
 }) {
   const colors = COLOR_MAP[color] || COLOR_MAP.blue;
+  const isCompleted = Boolean(progress?.completed);
+  const inProgress = isInProgress(progress);
+  const percent = progressPercent(progress);
 
   return (
     <motion.div
@@ -511,43 +903,69 @@ function LessonRow({
       className={cn(
         'group flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer',
         'hover:bg-white/[0.03]',
-        isCompleted && 'bg-white/[0.02]'
+        isCompleted && 'bg-white/[0.02]',
+        inProgress && 'bg-white/[0.025] ring-1 ring-[#c8a951]/10',
       )}
       onClick={onOpen}
     >
-      {/* Completion checkbox */}
+      {/* Completion / progress indicator */}
       <button
         onClick={(e) => {
           e.stopPropagation();
           onToggleComplete();
         }}
         className="flex-shrink-0 transition-transform hover:scale-110"
+        aria-label={isCompleted ? 'בטל סימון כהושלם' : 'סמן כהושלם'}
       >
         {isCompleted ? (
           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+        ) : inProgress ? (
+          <ProgressRing percent={percent} className={colors.ring} />
         ) : (
           <Circle className="w-5 h-5 text-white/20 group-hover:text-white/40" />
         )}
       </button>
 
-      {/* Lesson info */}
+      {/* Lesson info + optional thin progress bar */}
       <div className="flex-1 min-w-0">
-        <span
-          className={cn(
-            'text-sm font-medium transition-colors',
-            isCompleted ? 'text-white/30 line-through' : 'text-white/80'
+        <div className="flex items-center gap-2 min-w-0">
+          <span
+            className={cn(
+              'text-sm font-medium transition-colors truncate',
+              isCompleted ? 'text-white/30 line-through' : 'text-white/80',
+            )}
+          >
+            {lesson.title}
+          </span>
+          {inProgress && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#c8a951]/15 text-[#e8d48b] border border-[#c8a951]/20 flex-shrink-0">
+              ממשיך
+            </span>
           )}
-        >
-          {lesson.title}
-        </span>
+        </div>
+        {inProgress && (
+          <div className="mt-1.5 flex items-center gap-2">
+            <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+              <div
+                className={cn('h-full rounded-full transition-all duration-500', colors.progress)}
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            <span className="text-[10px] text-white/40 tabular-nums whitespace-nowrap">
+              {progress?.durationSec
+                ? `${formatTime(progress.positionSec)} / ${formatTime(progress.durationSec)}`
+                : formatTime(progress?.positionSec ?? 0)}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Play button */}
       <div
         className={cn(
           'flex-shrink-0 p-1.5 rounded-lg transition-all',
-          'opacity-0 group-hover:opacity-100',
-          colors.light
+          inProgress ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+          colors.light,
         )}
       >
         <Play className={cn('w-4 h-4', colors.text)} />
@@ -557,33 +975,228 @@ function LessonRow({
 }
 
 // =============================================================================
-// VIDEO MODAL
+// VIDEO MODAL — YouTube IFrame API integration for resume + auto-save
 // =============================================================================
+
+// Minimal YT IFrame API typings — just what we actually call.
+type YTPlayer = {
+  destroy: () => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getPlayerState: () => number;
+  playVideo: () => void;
+  pauseVideo: () => void;
+  seekTo: (sec: number, allowSeekAhead: boolean) => void;
+};
+type YTPlayerEvent = { target: YTPlayer; data?: number };
+declare global {
+  interface Window {
+    YT?: {
+      Player: new (
+        el: string | HTMLElement,
+        opts: {
+          videoId: string;
+          playerVars?: Record<string, unknown>;
+          events?: {
+            onReady?: (e: YTPlayerEvent) => void;
+            onStateChange?: (e: YTPlayerEvent) => void;
+          };
+        },
+      ) => YTPlayer;
+      PlayerState: { PLAYING: number; PAUSED: number; ENDED: number };
+    };
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
+// Load the IFrame API exactly once across the app session.
+let ytApiPromise: Promise<void> | null = null;
+function loadYouTubeApi(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (window.YT?.Player) return Promise.resolve();
+  if (ytApiPromise) return ytApiPromise;
+
+  ytApiPromise = new Promise<void>((resolve) => {
+    const existing = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      existing?.();
+      resolve();
+    };
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  });
+  return ytApiPromise;
+}
+
+const SAVE_INTERVAL_MS = 10_000; // throttle in-flight saves while playing
 
 function VideoModal({
   lesson,
   color,
-  isCompleted,
+  progress,
   onToggleComplete,
+  onSavePosition,
+  onAutoComplete,
   onClose,
 }: {
   lesson: LessonData;
   color: string;
-  isCompleted: boolean;
+  progress: LessonProgress | undefined;
   onToggleComplete: () => void;
+  onSavePosition: (positionSec: number, durationSec: number) => void;
+  onAutoComplete: (positionSec: number, durationSec: number) => void;
   onClose: () => void;
 }) {
   const colors = COLOR_MAP[color] || COLOR_MAP.blue;
-  const modalRef = useRef<HTMLDivElement>(null);
+  const isCompleted = Boolean(progress?.completed);
+  const resumeFrom = !isCompleted && (progress?.positionSec ?? 0) >= MIN_RESUME_SEC ? progress!.positionSec : 0;
 
-  // Close on Escape
+  const playerHostRef = useRef<HTMLDivElement | null>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
+  const lastSavedRef = useRef<{ position: number; at: number }>({ position: 0, at: 0 });
+  const autoCompletedRef = useRef<boolean>(false);
+  const tickHandleRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [showResumeToast, setShowResumeToast] = useState<number>(resumeFrom);
+
+  // Build a stable internal id for the player host element.
+  const hostId = useMemo(
+    () => `yt-host-${lesson.slug}-${Math.random().toString(36).slice(2, 8)}`,
+    [lesson.slug],
+  );
+
+  // Save the latest position. Used by the tick interval, pause handler,
+  // and unmount cleanup. Pulls live state from the player so we never
+  // save stale numbers.
+  const saveNow = useCallback(
+    (opts?: { force?: boolean }) => {
+      const player = playerRef.current;
+      if (!player) return;
+      let position = 0;
+      let duration = 0;
+      try {
+        position = Math.floor(player.getCurrentTime());
+        duration = Math.floor(player.getDuration());
+      } catch {
+        return;
+      }
+      if (!Number.isFinite(position) || !Number.isFinite(duration)) return;
+      if (duration <= 0) return;
+
+      // Skip if nothing meaningful changed since the last save (avoid
+      // spam on rapid pause/play).
+      const last = lastSavedRef.current;
+      const now = Date.now();
+      if (!opts?.force && Math.abs(position - last.position) < 3 && now - last.at < 4000) {
+        return;
+      }
+      lastSavedRef.current = { position, at: now };
+
+      // Auto-complete near the end — fire once.
+      if (!autoCompletedRef.current && position / duration >= COMPLETE_RATIO) {
+        autoCompletedRef.current = true;
+        onAutoComplete(position, duration);
+        return;
+      }
+
+      onSavePosition(position, duration);
+    },
+    [onSavePosition, onAutoComplete],
+  );
+
+  // Hide resume toast after a few seconds.
+  useEffect(() => {
+    if (showResumeToast <= 0) return;
+    const t = setTimeout(() => setShowResumeToast(0), 3500);
+    return () => clearTimeout(t);
+  }, [showResumeToast]);
+
+  // Mount the YT player when the modal opens; tear down on close.
+  useEffect(() => {
+    let disposed = false;
+
+    void loadYouTubeApi().then(() => {
+      if (disposed || !playerHostRef.current || !window.YT?.Player) return;
+
+      autoCompletedRef.current = false;
+      lastSavedRef.current = { position: resumeFrom, at: 0 };
+
+      playerRef.current = new window.YT.Player(playerHostRef.current, {
+        videoId: lesson.youtubeId,
+        playerVars: {
+          rel: 0,
+          modestbranding: 1,
+          start: resumeFrom > 0 ? resumeFrom : undefined,
+          playsinline: 1,
+        },
+        events: {
+          onReady: (e) => {
+            // Defensive: some browsers ignore `start` param — seek manually.
+            if (resumeFrom > 0) {
+              try {
+                e.target.seekTo(resumeFrom, true);
+              } catch {
+                /* swallow */
+              }
+            }
+          },
+          onStateChange: (e) => {
+            const state = e.data;
+            const YT = window.YT;
+            if (!YT) return;
+            if (state === YT.PlayerState.PLAYING) {
+              // Start ticking — save every SAVE_INTERVAL_MS.
+              if (tickHandleRef.current) clearInterval(tickHandleRef.current);
+              tickHandleRef.current = setInterval(() => saveNow(), SAVE_INTERVAL_MS);
+            } else if (state === YT.PlayerState.PAUSED) {
+              if (tickHandleRef.current) {
+                clearInterval(tickHandleRef.current);
+                tickHandleRef.current = null;
+              }
+              saveNow({ force: true });
+            } else if (state === YT.PlayerState.ENDED) {
+              if (tickHandleRef.current) {
+                clearInterval(tickHandleRef.current);
+                tickHandleRef.current = null;
+              }
+              // Force one final save → triggers auto-complete branch.
+              saveNow({ force: true });
+            }
+          },
+        },
+      });
+    });
+
+    return () => {
+      disposed = true;
+      if (tickHandleRef.current) {
+        clearInterval(tickHandleRef.current);
+        tickHandleRef.current = null;
+      }
+      // Final save before tear-down so closing the modal mid-video persists.
+      saveNow({ force: true });
+      try {
+        playerRef.current?.destroy();
+      } catch {
+        /* swallow */
+      }
+      playerRef.current = null;
+    };
+    // We intentionally re-mount the player only when the lesson changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson.youtubeId]);
+
+  // Close on Escape; also save on the way out (in addition to unmount).
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        saveNow({ force: true });
+        onClose();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, saveNow]);
 
   return (
     <motion.div
@@ -592,11 +1205,13 @@ function VideoModal({
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) {
+          saveNow({ force: true });
+          onClose();
+        }
       }}
     >
       <motion.div
-        ref={modalRef}
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -605,17 +1220,32 @@ function VideoModal({
       >
         {/* Video Player */}
         <div className="relative aspect-video bg-black">
-          <iframe
-            src={`https://www.youtube.com/embed/${lesson.youtubeId}?rel=0&modestbranding=1`}
-            title={lesson.title}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          {/* IFrame API replaces this div in place */}
+          <div ref={playerHostRef} id={hostId} className="w-full h-full" />
+
+          {/* Resume toast */}
+          <AnimatePresence>
+            {showResumeToast > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-3 right-3 px-3 py-1.5 bg-[#c8a951] text-[#070b1e] rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1.5 pointer-events-none"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                ממשיך מ-{formatTime(showResumeToast)}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Close button */}
           <button
-            onClick={onClose}
-            className="absolute top-3 left-3 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors"
+            onClick={() => {
+              saveNow({ force: true });
+              onClose();
+            }}
+            className="absolute top-3 left-3 p-2 bg-black/60 hover:bg-black/80 rounded-full text-white transition-colors z-10"
+            aria-label="סגור"
           >
             <X className="w-5 h-5" />
           </button>
@@ -631,7 +1261,7 @@ function VideoModal({
                 'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all flex-shrink-0',
                 isCompleted
                   ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15 border border-emerald-500/20'
-                  : 'bg-[#c8a951]/10 text-[#c8a951] hover:bg-[#c8a951]/15 border border-[#c8a951]/20'
+                  : 'bg-[#c8a951]/10 text-[#c8a951] hover:bg-[#c8a951]/15 border border-[#c8a951]/20',
               )}
             >
               {isCompleted ? (
@@ -647,6 +1277,25 @@ function VideoModal({
               )}
             </button>
           </div>
+
+          {/* Inline progress strip — shows the user we're tracking */}
+          {progress && (progress.positionSec >= MIN_RESUME_SEC || progress.completed) && (
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div
+                  className={cn('h-full rounded-full transition-all duration-500', colors.progress)}
+                  style={{ width: `${progressPercent(progress)}%` }}
+                />
+              </div>
+              <span className="text-xs text-white/50 tabular-nums whitespace-nowrap">
+                {progress.completed
+                  ? 'הושלם'
+                  : progress.durationSec
+                    ? `${formatTime(progress.positionSec)} / ${formatTime(progress.durationSec)}`
+                    : formatTime(progress.positionSec)}
+              </span>
+            </div>
+          )}
 
           <p className="text-white/60 leading-relaxed text-sm sm:text-base">
             {lesson.description}

@@ -46,14 +46,14 @@ async function getAnalyticsData() {
       }),
       prisma.$queryRaw<Array<{ day: Date; action: string; count: bigint }>>`
         SELECT date_trunc('day', "createdAt") AS day, "action", COUNT(*)::bigint AS count
-        FROM "ActivityLog"
+        FROM "activity_logs"
         WHERE "action" = ANY(${TRACKED_ACTIONS}::text[])
           AND "createdAt" >= ${thirtyDaysAgo}
         GROUP BY day, "action"
       `,
       prisma.$queryRaw<Array<{ month: Date; action: string; count: bigint }>>`
         SELECT date_trunc('month', "createdAt") AS month, "action", COUNT(*)::bigint AS count
-        FROM "ActivityLog"
+        FROM "activity_logs"
         WHERE "action" = ANY(${TRACKED_ACTIONS}::text[])
           AND "createdAt" >= ${new Date(now.getFullYear(), now.getMonth() - 11, 1)}
         GROUP BY month, "action"
@@ -185,7 +185,7 @@ async function getAnalyticsData() {
     const [allActionsRaw, totalRows, sampleRows] = await Promise.all([
       prisma.$queryRaw<Array<{ action: string; count: bigint; latest: Date }>>`
         SELECT "action", COUNT(*)::bigint AS count, MAX("createdAt") AS latest
-        FROM "ActivityLog"
+        FROM "activity_logs"
         GROUP BY "action"
         ORDER BY count DESC
       `,

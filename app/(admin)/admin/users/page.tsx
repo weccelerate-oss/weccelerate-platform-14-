@@ -45,11 +45,18 @@ async function getUsers() {
 export default async function UsersManagementPage() {
   const users = await getUsers();
 
+  const entrepreneurs = users.filter((u: { role?: string | null }) => u.role === 'ENTREPRENEUR');
   const stats = {
     total: users.length,
     active: users.filter((u: { isActive?: boolean | null }) => u.isActive).length,
-    entrepreneurs: users.filter((u: { role?: string | null }) => u.role === 'ENTREPRENEUR').length,
+    entrepreneurs: entrepreneurs.length,
     mentors: users.filter((u: { role?: string | null }) => u.role === 'MENTOR').length,
+    entrepreneursLoggedIn: entrepreneurs.filter(
+      (u: { lastLoginAt?: Date | null }) => u.lastLoginAt,
+    ).length,
+    entrepreneursPending: entrepreneurs.filter(
+      (u: { lastLoginAt?: Date | null }) => !u.lastLoginAt,
+    ).length,
   };
 
   return (
@@ -64,7 +71,7 @@ export default async function UsersManagementPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         <div className="bg-white rounded-xl p-4 border border-slate-200">
           <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
           <p className="text-sm text-slate-500">סה״כ משתמשים</p>
@@ -80,6 +87,26 @@ export default async function UsersManagementPage() {
         <div className="bg-white rounded-xl p-4 border border-slate-200">
           <p className="text-2xl font-bold text-purple-600">{stats.mentors}</p>
           <p className="text-sm text-slate-500">מנטורים</p>
+        </div>
+      </div>
+
+      {/* Entrepreneur onboarding funnel — quick proof that the portal works for them */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="bg-emerald-50/60 rounded-xl p-4 border border-emerald-200">
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-emerald-700">{stats.entrepreneursLoggedIn}</p>
+            <p className="text-sm text-emerald-700/70">/ {stats.entrepreneurs}</p>
+          </div>
+          <p className="text-sm text-emerald-800 mt-1">יזמים שכבר נכנסו לפורטל</p>
+          <p className="text-xs text-emerald-700/60 mt-0.5">לפי תאריך התחברות אחרון</p>
+        </div>
+        <div className="bg-amber-50/60 rounded-xl p-4 border border-amber-200">
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-amber-700">{stats.entrepreneursPending}</p>
+            <p className="text-sm text-amber-700/70">/ {stats.entrepreneurs}</p>
+          </div>
+          <p className="text-sm text-amber-800 mt-1">יזמים שטרם נכנסו לפורטל</p>
+          <p className="text-xs text-amber-700/60 mt-0.5">קיבלו גישה, לא התחברו עדיין</p>
         </div>
       </div>
 

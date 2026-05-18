@@ -635,12 +635,20 @@ model UserLessonProgress {
   completed     Boolean      @default(false)
   completedAt   DateTime?
 
+  // Resume memory: where the user paused, how long the video is, and when
+  // they last touched it. Powers the "המשך מהמקום שעצרת" card and the
+  // partial progress bar on each lesson row.
+  positionSec   Int          @default(0)
+  durationSec   Int?
+  lastWatchedAt DateTime?
+
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
   @@unique([userId, lessonId])
   @@index([userId])
   @@index([lessonId])
+  @@index([userId, lastWatchedAt])
   @@map("user_lesson_progress")
 }
 

@@ -61,6 +61,7 @@ export function UsersTable({ users }: UsersTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [loginFilter, setLoginFilter] = useState<'all' | 'logged-in' | 'never'>('all');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showTempPassword, setShowTempPassword] = useState<{ id: string; password: string } | null>(null);
 
@@ -78,7 +79,12 @@ export function UsersTable({ users }: UsersTableProps) {
       (statusFilter === 'active' && user.isActive) ||
       (statusFilter === 'inactive' && !user.isActive);
 
-    return matchesSearch && matchesRole && matchesStatus;
+    const matchesLogin =
+      loginFilter === 'all' ||
+      (loginFilter === 'logged-in' && user.lastLoginAt) ||
+      (loginFilter === 'never' && !user.lastLoginAt);
+
+    return matchesSearch && matchesRole && matchesStatus && matchesLogin;
   });
 
   const handleToggleActive = (user: UserWithProjects) => {
@@ -176,6 +182,16 @@ export function UsersTable({ users }: UsersTableProps) {
             <option value="active">פעילים</option>
             <option value="inactive">לא פעילים</option>
           </select>
+
+          <select
+            value={loginFilter}
+            onChange={(e) => setLoginFilter(e.target.value as 'all' | 'logged-in' | 'never')}
+            className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-royal-500/20"
+          >
+            <option value="all">כניסה לפורטל: הכול</option>
+            <option value="logged-in">נכנסו לפורטל</option>
+            <option value="never">טרם נכנסו לפורטל</option>
+          </select>
         </div>
       </div>
 
@@ -266,6 +282,23 @@ export function UsersTable({ users }: UsersTableProps) {
                       >
                         ⏳ ממתין להחלפת סיסמה
                       </span>
+                    )}
+                    {user.role === 'ENTREPRENEUR' && (
+                      user.lastLoginAt ? (
+                        <span
+                          title={`התחבר לאחרונה: ${new Date(user.lastLoginAt).toLocaleString('he-IL')}`}
+                          className="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        >
+                          ✅ נכנס לפורטל
+                        </span>
+                      ) : (
+                        <span
+                          title="היזם קיבל גישה אך עוד לא התחבר לפורטל"
+                          className="px-2 py-0.5 text-xs font-medium rounded-full bg-rose-50 text-rose-700 border border-rose-200"
+                        >
+                          ⏳ טרם נכנס לפורטל
+                        </span>
+                      )
                     )}
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-xs sm:text-sm text-slate-500">
