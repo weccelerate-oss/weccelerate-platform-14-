@@ -64,8 +64,19 @@ function isEffectivelyComplete(positionSec: number, durationSec: number | null):
   return positionSec / durationSec >= COMPLETE_RATIO;
 }
 
+// Treat a lesson as "effectively done" if the completed flag is set OR
+// the cursor has crossed the completion threshold. The second condition
+// is a UI safety-net: if any persistence path drops the flag (server
+// downtime, race condition, schema migration), the visual still reflects
+// reality based on how far the user got.
+function isEffectivelyDone(p: LessonProgress | undefined): boolean {
+  if (!p) return false;
+  if (p.completed) return true;
+  return isEffectivelyComplete(p.positionSec, p.durationSec);
+}
+
 function isInProgress(p: LessonProgress | undefined): p is LessonProgress {
-  return Boolean(p && !p.completed && p.positionSec >= MIN_RESUME_SEC);
+  return Boolean(p && !isEffectivelyDone(p) && p.positionSec >= MIN_RESUME_SEC);
 }
 
 function progressPercent(p: LessonProgress | undefined): number {
@@ -210,7 +221,7 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
   );
 
   const completedCount = useMemo(
-    () => Array.from(progressMap.values()).filter((p) => p.completed).length,
+    () => Array.from(progressMap.values()).filter((p) => isEffectivelyDone(p)).length,
     [progressMap],
   );
   const overallPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
@@ -725,7 +736,7 @@ function CategoryCard({
   const colors = COLOR_MAP[category.color] || COLOR_MAP.blue;
 
   const categoryLessons = category.subcategories.flatMap((s) => s.lessons);
-  const categoryCompleted = categoryLessons.filter((l) => progressMap.get(l.slug)?.completed).length;
+  const categoryCompleted = categoryLessons.filter((l) => isEffectivelyDone(progressMap.get(l.slug))).length;
   const categoryTotal = categoryLessons.length;
   const categoryPercent = categoryTotal > 0 ? Math.round((categoryCompleted / categoryTotal) * 100) : 0;
 
@@ -825,7 +836,7 @@ function SubcategorySection({
   onToggleLesson: (slug: string) => void;
   onOpenLesson: (lesson: LessonData) => void;
 }) {
-  const completedCount = subcategory.lessons.filter((l) => progressMap.get(l.slug)?.completed).length;
+  const completedCount = subcategory.lessons.filter((l) => isEffectivelyDone(progressMap.get(l.slug))).length;
   const inProgressCount = subcategory.lessons.filter((l) => isInProgress(progressMap.get(l.slug))).length;
   const totalCount = subcategory.lessons.length;
   const allDone = completedCount === totalCount && totalCount > 0;
@@ -953,7 +964,10 @@ function LessonRow({
   onOpen: () => void;
 }) {
   const colors = COLOR_MAP[color] || COLOR_MAP.blue;
-  const isCompleted = Boolean(progress?.completed);
+  // Use effective completion (flag OR position past threshold). If a
+  // sync glitch left the row at completed:false but position is at the
+  // end, the row still reflects "done" — matches what the modal showed.
+  const isCompleted = isEffectivelyDone(progress);
   const inProgress = isInProgress(progress);
 
   return (
@@ -1101,7 +1115,7 @@ function VideoModal({
   onClose: () => void;
 }) {
   const colors = COLOR_MAP[color] || COLOR_MAP.blue;
-  const isCompleted = Boolean(progress?.completed);
+  const isCompleted = isEffectivelyDone(progress);
   const resumeFrom = !isCompleted && (progress?.positionSec ?? 0) >= MIN_RESUME_SEC ? progress!.positionSec : 0;
 
   const playerHostRef = useRef<HTMLDivElement | null>(null);
@@ -1391,40 +1405,44 @@ function VideoModal({
         <div className="p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
             <h3 className="text-xl font-bold text-white">{lesson.title}</h3>
+            {isCompleted ? (
+              // Static pill — completion is a state, not an action. The
+              // older toggle button made it too easy to unmark by reflex,
+              // which is exactly what the user hit. Unmarking now lives
+              // in a small secondary link below.
+              <div
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex-shrink-0"
+                role="status"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                הושלם
+              </div>
+            ) : (
+              <button
+                onClick={onToggleComplete}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all flex-shrink-0 bg-[#c8a951]/10 text-[#c8a951] hover:bg-[#c8a951]/15 border border-[#c8a951]/20"
+                title="סמן את השיעור כהושלם"
+              >
+                <Circle className="w-4 h-4" />
+                סמן כהושלם
+              </button>
+            )}
+          </div>
+
+          {/* Secondary unmark action — only reachable when completed, and
+              only after explicit confirmation. Keeps the main pill safe. */}
+          {isCompleted && (
             <button
               onClick={() => {
-                // When already done, treat the click as an un-mark request
-                // and confirm — the button used to silently flip back to
-                // "not completed" on a stray click, which surprised users.
-                if (
-                  isCompleted &&
-                  !window.confirm('השיעור מסומן כהושלם. לסמן אותו כלא הושלם?')
-                ) {
-                  return;
+                if (window.confirm('לסמן את השיעור כלא הושלם?')) {
+                  onToggleComplete();
                 }
-                onToggleComplete();
               }}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all flex-shrink-0',
-                isCompleted
-                  ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15 border border-emerald-500/20'
-                  : 'bg-[#c8a951]/10 text-[#c8a951] hover:bg-[#c8a951]/15 border border-[#c8a951]/20',
-              )}
-              title={isCompleted ? 'השיעור הושלם — לחץ לבטל את הסימון' : 'סמן את השיעור כהושלם'}
+              className="mb-4 text-xs text-white/40 hover:text-white/70 underline-offset-2 hover:underline transition"
             >
-              {isCompleted ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  הושלם
-                </>
-              ) : (
-                <>
-                  <Circle className="w-4 h-4" />
-                  סמן כהושלם
-                </>
-              )}
+              סמן כלא הושלם
             </button>
-          </div>
+          )}
 
           <p className="text-white/60 leading-relaxed text-sm sm:text-base">
             {lesson.description}
