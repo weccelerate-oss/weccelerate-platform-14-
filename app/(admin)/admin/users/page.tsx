@@ -46,16 +46,20 @@ export default async function UsersManagementPage() {
   const users = await getUsers();
 
   const entrepreneurs = users.filter((u: { role?: string | null }) => u.role === 'ENTREPRENEUR');
+  // "Awaiting first login" = was given a temp password (mustChangePassword)
+  // and has never logged in. This is the cohort the admin asked for: people
+  // who received credentials by email but didn't click through yet.
+  type UserMeta = { lastLoginAt?: Date | null; mustChangePassword?: boolean | null };
   const stats = {
     total: users.length,
     active: users.filter((u: { isActive?: boolean | null }) => u.isActive).length,
     entrepreneurs: entrepreneurs.length,
     mentors: users.filter((u: { role?: string | null }) => u.role === 'MENTOR').length,
     entrepreneursLoggedIn: entrepreneurs.filter(
-      (u: { lastLoginAt?: Date | null }) => u.lastLoginAt,
+      (u: UserMeta) => u.lastLoginAt,
     ).length,
-    entrepreneursPending: entrepreneurs.filter(
-      (u: { lastLoginAt?: Date | null }) => !u.lastLoginAt,
+    entrepreneursAwaitingLogin: entrepreneurs.filter(
+      (u: UserMeta) => u.mustChangePassword && !u.lastLoginAt,
     ).length,
   };
 
@@ -102,11 +106,11 @@ export default async function UsersManagementPage() {
         </div>
         <div className="bg-amber-50/60 rounded-xl p-4 border border-amber-200">
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-amber-700">{stats.entrepreneursPending}</p>
+            <p className="text-2xl font-bold text-amber-700">{stats.entrepreneursAwaitingLogin}</p>
             <p className="text-sm text-amber-700/70">/ {stats.entrepreneurs}</p>
           </div>
-          <p className="text-sm text-amber-800 mt-1">יזמים שטרם נכנסו לפורטל</p>
-          <p className="text-xs text-amber-700/60 mt-0.5">קיבלו גישה, לא התחברו עדיין</p>
+          <p className="text-sm text-amber-800 mt-1">קיבלו מייל וטרם נכנסו</p>
+          <p className="text-xs text-amber-700/60 mt-0.5">סיסמה זמנית פעילה, אין התחברות ראשונית</p>
         </div>
       </div>
 

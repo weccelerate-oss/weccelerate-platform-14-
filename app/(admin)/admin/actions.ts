@@ -419,7 +419,10 @@ export async function createUserAction(data: CreateUserFormData) {
     const tempPassword = generateTempPassword();
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
 
-    // Create user
+    // Create user. mustChangePassword=true means "still using the temp
+    // password" — flipped to false after the first portal login + change.
+    // This is the signal the admin's funnel uses for "got credentials,
+    // hasn't used them yet."
     const user = await prisma.user.create({
       data: {
         email: data.email.toLowerCase(),
@@ -430,6 +433,7 @@ export async function createUserAction(data: CreateUserFormData) {
         position: data.position,
         role: data.role,
         isActive: true,
+        mustChangePassword: true,
       },
     });
 
@@ -446,9 +450,39 @@ export async function createUserAction(data: CreateUserFormData) {
       },
     });
 
-    revalidatePath('/admin/users');
+    // Send welcome email if requested. Failure doesn't block creation —
+    // the admin still sees the temp password on-screen as a fallback.
+    let emailSent = false;
+    let emailError: string | undefined;
+    if (data.sendWelcomeEmail) {
+      try {
+        const { sendWelcomeEmail } = await import('@/lib/onboarding/welcome-email');
+        const result = await sendWelcomeEmail({
+          to: user.email,
+          name: user.name,
+          tempPassword,
+        });
+        emailSent = result.ok;
+        if (!result.ok) emailError = result.error;
+      } catch (err) {
+        emailError = err instanceof Error ? err.message : String(err);
+      }
 
-    // TODO: Send welcome email with temp password if sendWelcomeEmail is true
+      // Audit the email outcome so the admin can see who actually received
+      // credentials in their inbox vs. who needs a manual resend.
+      await prisma.activityLog.create({
+        data: {
+          action: emailSent ? 'user.welcome_email_sent' : 'user.welcome_email_failed',
+          description: emailSent
+            ? `Welcome email sent to ${user.email}`
+            : `Welcome email failed for ${user.email}: ${emailError}`,
+          userId: user.id,
+          metadata: { email: user.email, error: emailError ?? null },
+        },
+      }).catch(() => {});
+    }
+
+    revalidatePath('/admin/users');
 
     return {
       success: true,
@@ -458,6 +492,8 @@ export async function createUserAction(data: CreateUserFormData) {
         name: user.name,
       },
       tempPassword, // Return for display (one-time)
+      emailSent,
+      emailError,
     };
   } catch (error) {
     console.error('[Admin] Error creating user:', error);
@@ -531,9 +567,14 @@ export async function resetUserPasswordAction(id: string) {
     const tempPassword = generateTempPassword();
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
 
+    // Reissuing a temp password resets the "must change on next login" flag
+    // so the funnel correctly tracks the new wait period.
     await prisma.user.update({
       where: { id },
-      data: { password: hashedPassword },
+      data: {
+        password: hashedPassword,
+        mustChangePassword: true,
+      },
     });
 
     // TODO: Send email with new password

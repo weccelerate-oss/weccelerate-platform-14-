@@ -61,7 +61,7 @@ export function UsersTable({ users }: UsersTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [loginFilter, setLoginFilter] = useState<'all' | 'logged-in' | 'never'>('all');
+  const [loginFilter, setLoginFilter] = useState<'all' | 'logged-in' | 'awaiting' | 'never'>('all');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showTempPassword, setShowTempPassword] = useState<{ id: string; password: string } | null>(null);
 
@@ -79,9 +79,12 @@ export function UsersTable({ users }: UsersTableProps) {
       (statusFilter === 'active' && user.isActive) ||
       (statusFilter === 'inactive' && !user.isActive);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mcp = Boolean((user as any).mustChangePassword);
     const matchesLogin =
       loginFilter === 'all' ||
       (loginFilter === 'logged-in' && user.lastLoginAt) ||
+      (loginFilter === 'awaiting' && mcp && !user.lastLoginAt) ||
       (loginFilter === 'never' && !user.lastLoginAt);
 
     return matchesSearch && matchesRole && matchesStatus && matchesLogin;
@@ -185,11 +188,12 @@ export function UsersTable({ users }: UsersTableProps) {
 
           <select
             value={loginFilter}
-            onChange={(e) => setLoginFilter(e.target.value as 'all' | 'logged-in' | 'never')}
+            onChange={(e) => setLoginFilter(e.target.value as 'all' | 'logged-in' | 'awaiting' | 'never')}
             className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-royal-500/20"
           >
             <option value="all">כניסה לפורטל: הכול</option>
             <option value="logged-in">נכנסו לפורטל</option>
+            <option value="awaiting">קיבלו מייל וטרם נכנסו</option>
             <option value="never">טרם נכנסו לפורטל</option>
           </select>
         </div>
@@ -274,32 +278,50 @@ export function UsersTable({ users }: UsersTableProps) {
                         🤖 auto · {(user as any).provisionedSource}
                       </span>
                     )}
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(user as any).mustChangePassword && (
-                      <span
-                        title="המשתמש עוד לא החליף את הסיסמה הזמנית"
-                        className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-700 border border-amber-200"
-                      >
-                        ⏳ ממתין להחלפת סיסמה
-                      </span>
-                    )}
-                    {user.role === 'ENTREPRENEUR' && (
-                      user.lastLoginAt ? (
+                    {user.role === 'ENTREPRENEUR' && (() => {
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
+                      const mcp = Boolean((user as any).mustChangePassword);
+                      const provisionedAt = (user as any).provisionedAt as Date | null | undefined;
+                      /* eslint-enable @typescript-eslint/no-explicit-any */
+                      if (user.lastLoginAt) {
+                        return (
+                          <span
+                            title={`התחבר לאחרונה: ${new Date(user.lastLoginAt).toLocaleString('he-IL')}`}
+                            className="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          >
+                            ✅ נכנס לפורטל
+                          </span>
+                        );
+                      }
+                      if (mcp) {
+                        // The cohort the admin actually cares about: temp
+                        // password is live, user hasn't bitten yet. Add a
+                        // "days waiting" tooltip so chasing is prioritised.
+                        const sent = provisionedAt
+                          ? new Date(provisionedAt)
+                          : new Date(user.createdAt);
+                        const days = Math.max(
+                          0,
+                          Math.floor((Date.now() - sent.getTime()) / 86_400_000),
+                        );
+                        return (
+                          <span
+                            title={`קיבל סיסמה זמנית ב-${sent.toLocaleDateString('he-IL')} · ${days} ימים ללא כניסה`}
+                            className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-800 border border-amber-200"
+                          >
+                            📩 קיבל מייל · ממתין לכניסה{days > 0 ? ` · ${days} ימים` : ''}
+                          </span>
+                        );
+                      }
+                      return (
                         <span
-                          title={`התחבר לאחרונה: ${new Date(user.lastLoginAt).toLocaleString('he-IL')}`}
-                          className="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          title="לא הונפקה סיסמה זמנית — לחץ 'אפס סיסמה' כדי לשלוח קישור"
+                          className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600 border border-slate-200"
                         >
-                          ✅ נכנס לפורטל
+                          ⏳ טרם הוגדרה כניסה
                         </span>
-                      ) : (
-                        <span
-                          title="היזם קיבל גישה אך עוד לא התחבר לפורטל"
-                          className="px-2 py-0.5 text-xs font-medium rounded-full bg-rose-50 text-rose-700 border border-rose-200"
-                        >
-                          ⏳ טרם נכנס לפורטל
-                        </span>
-                      )
-                    )}
+                      );
+                    })()}
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-xs sm:text-sm text-slate-500">
                     <span className="flex items-center gap-1 truncate">
