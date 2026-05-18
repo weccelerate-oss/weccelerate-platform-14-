@@ -34,6 +34,7 @@ export interface WelcomeEmailStatus {
   at: string | null;
   source: string | null;
   error: string | null;
+  confirmed: boolean;
 }
 
 interface UserWithProjects extends User {
@@ -304,24 +305,32 @@ export function UsersTable({ users }: UsersTableProps) {
                         );
                       }
                       if (email?.status === 'sent') {
-                        // The cohort the admin cares most about: Resend
-                        // accepted the welcome message and the user hasn't
-                        // logged in yet. Tooltip carries the exact send time
-                        // and source (webhook/admin/google_form/etc.).
+                        // The cohort the admin cares most about: the welcome
+                        // message went out (confirmed by Resend log, or
+                        // inferred from provisioning metadata for users that
+                        // pre-date the logger). Tooltip carries the exact
+                        // send time, source, and confidence level.
                         const sentAt = email.at ? new Date(email.at) : null;
                         const days = sentAt
                           ? Math.max(0, Math.floor((Date.now() - sentAt.getTime()) / 86_400_000))
                           : null;
+                        const confidenceNote = email.confirmed
+                          ? ''
+                          : ' (היסטורי, לפי תאריך יצירת המשתמש)';
+                        const tooltipBase = sentAt
+                          ? `נשלח מייל ב-${sentAt.toLocaleString('he-IL')}${email.source ? ` (${email.source})` : ''}${days !== null ? ` · ${days} ימים ללא כניסה` : ''}`
+                          : 'מייל קבלת פנים נשלח';
                         return (
                           <span
-                            title={
-                              sentAt
-                                ? `נשלח מייל ב-${sentAt.toLocaleString('he-IL')}${email.source ? ` (${email.source})` : ''}${days !== null ? ` · ${days} ימים ללא כניסה` : ''}`
-                                : 'מייל קבלת פנים נשלח'
-                            }
-                            className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-800 border border-amber-200"
+                            title={tooltipBase + confidenceNote}
+                            className={cn(
+                              'px-2 py-0.5 text-xs font-medium rounded-full border',
+                              email.confirmed
+                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                : 'bg-amber-50/60 text-amber-700/80 border-amber-200 border-dashed',
+                            )}
                           >
-                            📩 מייל נשלח · ממתין לכניסה{days && days > 0 ? ` · ${days} ימים` : ''}
+                            📩 מייל נשלח{!email.confirmed && '*'} · ממתין לכניסה{days && days > 0 ? ` · ${days} ימים` : ''}
                           </span>
                         );
                       }

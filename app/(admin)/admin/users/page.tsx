@@ -23,6 +23,12 @@ export interface WelcomeEmailStatus {
   at: string | null;
   source: string | null;
   error: string | null;
+  // True when status came from a real ActivityLog row. False when we
+  // inferred it from provisionedSource/provisionedAt because the user
+  // pre-dates the success-logging code (so we know the auto-provision
+  // flow *ran* — and that flow always tries to send — but no explicit
+  // success or failure was recorded).
+  confirmed: boolean;
 }
 
 async function getUsers() {
@@ -71,6 +77,7 @@ async function getUsers() {
           at: log.createdAt.toISOString(),
           source: typeof meta.source === 'string' ? meta.source : null,
           error: typeof meta.error === 'string' ? meta.error : null,
+          confirmed: true,
         });
       }
     } catch (error) {
@@ -78,10 +85,41 @@ async function getUsers() {
       emailStatus = new Map();
     }
 
-    return users.map((u: { id: string }) => ({
-      ...u,
-      welcomeEmail: emailStatus.get(u.id) ?? { status: 'none' as const, at: null, source: null, error: null },
-    }));
+    // Fallback inference for users created before the success-logging code
+    // existed: if they were auto-provisioned (provisionedSource set) the
+    // legacy webhook flow always tried to send. Treat that as a "probably
+    // sent" with `confirmed: false` so the UI can mark it as inferred.
+    type UserWithProvision = {
+      id: string;
+      provisionedSource?: string | null;
+      provisionedAt?: Date | null;
+    };
+    return users.map((u: UserWithProvision) => {
+      const logged = emailStatus.get(u.id);
+      if (logged) return { ...u, welcomeEmail: logged };
+      if (u.provisionedSource && u.provisionedAt) {
+        return {
+          ...u,
+          welcomeEmail: {
+            status: 'sent' as const,
+            at: u.provisionedAt.toISOString(),
+            source: u.provisionedSource,
+            error: null,
+            confirmed: false,
+          },
+        };
+      }
+      return {
+        ...u,
+        welcomeEmail: {
+          status: 'none' as const,
+          at: null,
+          source: null,
+          error: null,
+          confirmed: true,
+        },
+      };
+    });
   } catch (error) {
     console.error('[Admin] Error fetching users:', error);
     return [];
