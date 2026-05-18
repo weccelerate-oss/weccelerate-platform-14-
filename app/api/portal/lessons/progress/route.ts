@@ -17,6 +17,79 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { COURSES_DATA } from '@/lib/courses-data';
+import type { CategoryData, SubcategoryData, LessonData } from '@/lib/courses-data';
+
+/**
+ * Find a lesson in the static catalog by slug, returning the full chain
+ * (category → subcategory → lesson) so we can seed all three at once.
+ */
+function findLessonInCatalog(slug: string): {
+  category: CategoryData;
+  subcategory: SubcategoryData;
+  lesson: LessonData;
+} | null {
+  for (const category of COURSES_DATA) {
+    for (const subcategory of category.subcategories) {
+      for (const lesson of subcategory.lessons) {
+        if (lesson.slug === slug) return { category, subcategory, lesson };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Make sure the lesson row exists in the DB so we can attach
+ * UserLessonProgress to it. Walks the chain (category → subcategory →
+ * lesson) and upserts each level. Idempotent — safe to call on every
+ * progress write, but we only call it on the cold path (lesson missing).
+ */
+async function ensureLessonSeeded(slug: string): Promise<string | null> {
+  const entry = findLessonInCatalog(slug);
+  if (!entry) return null;
+
+  const category = await prisma.courseCategory.upsert({
+    where: { slug: entry.category.slug },
+    update: {},
+    create: {
+      name: entry.category.name,
+      slug: entry.category.slug,
+      description: entry.category.description,
+      icon: entry.category.icon,
+      color: entry.category.color,
+    },
+    select: { id: true },
+  });
+
+  const subcategory = await prisma.courseSubcategory.upsert({
+    where: { slug: entry.subcategory.slug },
+    update: {},
+    create: {
+      name: entry.subcategory.name,
+      slug: entry.subcategory.slug,
+      description: entry.subcategory.description,
+      categoryId: category.id,
+    },
+    select: { id: true },
+  });
+
+  const lesson = await prisma.courseLesson.upsert({
+    where: { slug: entry.lesson.slug },
+    update: {},
+    create: {
+      title: entry.lesson.title,
+      slug: entry.lesson.slug,
+      description: entry.lesson.description,
+      youtubeUrl: entry.lesson.youtubeUrl,
+      youtubeId: entry.lesson.youtubeId,
+      subcategoryId: subcategory.id,
+    },
+    select: { id: true },
+  });
+
+  return lesson.id;
+}
 
 export type LessonProgressEntry = {
   slug: string;
@@ -62,20 +135,31 @@ export async function POST(req: NextRequest) {
 
     const userId = session.user.id;
 
-    const lesson = await prisma.courseLesson.findUnique({
+    let lesson = await prisma.courseLesson.findUnique({
       where: { slug: lessonSlug },
       select: { id: true },
     }).catch(() => null);
 
-    // Lesson isn't seeded yet — return optimistic OK so the UI keeps state
-    // client-side. The next time the seed runs, real persistence kicks in.
-    //
-    // CRITICAL: do NOT echo back `completed` here. If we did, a follow-up
-    // position-only save (no `completed` flag) would echo `completed: false`,
-    // which the client would then sync back, silently un-marking a lesson
-    // the user already finished. By omitting `completed`/`positionSec` from
-    // the response, the client's sync guard (`typeof data.completed === 'boolean'`)
-    // short-circuits and the local state is preserved.
+    // Lesson isn't seeded yet — seed it on demand from the static catalog.
+    // This is how progress survives a page refresh: without an actual
+    // CourseLesson row we can't create a UserLessonProgress row, so nothing
+    // would persist. Auto-seeding here means the very first time anyone
+    // touches a lesson the chain (category → subcategory → lesson) gets
+    // created, and every subsequent write goes through the normal upsert.
+    if (!lesson) {
+      try {
+        const seededId = await ensureLessonSeeded(lessonSlug);
+        if (seededId) {
+          lesson = { id: seededId };
+        }
+      } catch (err) {
+        console.error('[lessons/progress] auto-seed failed:', err);
+      }
+    }
+
+    // If even the catalog doesn't know this slug, fall back to optimistic
+    // — but omit `completed` so the client's monotone-up sync doesn't get
+    // downgraded by a phantom `completed: false`.
     if (!lesson) {
       return NextResponse.json({
         success: true,
