@@ -281,60 +281,6 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
         </details>
       )}
 
-      {/* "How do I test this?" — most admins land here right after a test
-          run and wonder why nothing appears. Spell it out. */}
-      <details className="border-t border-slate-100 group">
-        <summary className="cursor-pointer px-4 sm:px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 select-none">
-          🧪 איך בודקים שהחיבור עובד?
-        </summary>
-        <div className="px-4 sm:px-5 pb-4 text-sm text-slate-700 space-y-3 leading-relaxed">
-          <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2">
-            <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono self-start whitespace-nowrap" dir="ltr">verifySetup()</code>
-            <div>
-              <p className="text-slate-900">בודק שה-secret קיים ושה-API נגיש.</p>
-              <p className="text-xs text-slate-500">
-                לא יוצר כלום ולא משאיר עקבות. תוצאה צפויה: <code className="text-[10px] bg-slate-100 px-1 rounded">✅ Setup OK</code> בלוג של Apps Script.
-              </p>
-            </div>
-
-            <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono self-start whitespace-nowrap" dir="ltr">testDryRun()</code>
-            <div>
-              <p className="text-slate-900">מריץ את כל הצינור (auth + ספאם + ולידציה) <strong>בלי</strong> ליצור משתמש.</p>
-              <p className="text-xs text-slate-500">
-                ⚠️ <strong>לא מופיע בלוח הזה</strong> בכוונה — dry-run לא כותב ל-Activity Log. תוצאה צפויה: <code className="text-[10px] bg-slate-100 px-1 rounded">200 dryRun:true would have provisioned</code>.
-              </p>
-            </div>
-
-            <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono self-start whitespace-nowrap" dir="ltr">testWebhook()</code>
-            <div>
-              <p className="text-slate-900">בדיקה אמיתית — <strong>יוצר משתמש</strong> ומפעיל את מייל קבלת הפנים.</p>
-              <p className="text-xs text-slate-500">
-                המונה &ldquo;יזמים נוצרו&rdquo; יזוז ב-+1, ויופיע משתמש חדש בטבלה למטה. אחר כך אפשר למחוק אותו.
-              </p>
-            </div>
-
-            <span className="text-xl self-start">📋</span>
-            <div>
-              <p className="text-slate-900">מילוי טופס Google אמיתי על-ידי יועץ.</p>
-              <p className="text-xs text-slate-500">
-                זאת הזרימה האמיתית. הטריגר <code className="text-[10px] bg-slate-100 px-1 rounded" dir="ltr">handleFormSubmit · On form submit</code> חייב להיות מחובר ב-Apps Script (Triggers).
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mt-3">
-            <p className="text-xs text-slate-600 leading-relaxed">
-              <strong>ה-Apps Script המעודכן</strong> כולל את שלוש הפונקציות הנ&quot;ל +
-              retry על 5xx + התראת מייל למנהל. הקובץ נמסר בעבר;
-              אם השתנה — בקש את הגרסה הנוכחית מהמפתח.
-            </p>
-            <p className="text-xs text-slate-500 mt-2">
-              ה-secret מצוי ב-Vercel תחת <code className="text-[10px] bg-slate-100 px-1 py-0.5 rounded font-mono">ONBOARDING_WEBHOOK_SECRET</code>,
-              ובאותו שם ב-Apps Script → Project Settings → Script properties.
-            </p>
-          </div>
-        </div>
-      </details>
     </section>
   );
 }

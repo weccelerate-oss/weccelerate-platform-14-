@@ -133,75 +133,7 @@ export default async function GeoPlanPage() {
       </header>
 
       {/* ============================================================== */}
-      {/* 1. SETUP CHECKLIST                                              */}
-      {/* ============================================================== */}
-      <section className="mb-10 rounded-xl border-2 border-slate-300 bg-slate-50 p-6">
-        <h2 className="mb-4 text-xl font-bold text-slate-900">📋 Checklist התקנה — מה צריך להגדיר ב-Vercel</h2>
-        <p className="mb-5 text-sm text-slate-700">
-          המערכת רצה אוטומטית רק כשכל אלה מוגדרים. כל אחד שחסר → הצעד הזה מדלג בשקט (לא נופל).
-        </p>
-
-        <div className="space-y-3">
-          {[
-            {
-              key: 'ANTHROPIC_API_KEY',
-              what: 'הליבה — כותב מאמרים, עושה research, fact-check, ו-Probe על Claude',
-              where: 'https://console.anthropic.com/settings/keys',
-              required: true,
-            },
-            {
-              key: 'OPENAI_API_KEY',
-              what: 'אופציונלי — מודד אם ChatGPT מצטט אותך (Probe נוסף)',
-              where: 'https://platform.openai.com/api-keys',
-              required: false,
-            },
-            {
-              key: 'PERPLEXITY_API_KEY',
-              what: 'אופציונלי — מודד אם Perplexity מצטט אותך',
-              where: 'https://www.perplexity.ai/settings/api',
-              required: false,
-            },
-            {
-              key: 'CRON_SECRET',
-              what: 'מאמת ש-Vercel cron הוא זה שקרא ל-endpoints — לא תוקף חיצוני',
-              where: 'Vercel קובעת אוטומטית כש-cron מוגדר ב-vercel.json',
-              required: true,
-            },
-            {
-              key: 'ADMIN_TOKEN',
-              what: 'מאמת בקשות manual ל-/api/admin/*  — לבדיקות ידניות',
-              where: 'הרץ openssl rand -hex 32 והדבק ב-Vercel Settings → Environment Variables',
-              required: true,
-            },
-            {
-              key: 'RESEND_API_KEY',
-              what: 'מיילי alert על milestones (כבר קיים)',
-              where: 'https://resend.com/api-keys',
-              required: false,
-            },
-          ].map((item) => (
-            <div key={item.key} className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-white p-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <code className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs">{item.key}</code>
-                  {item.required ? <Pill kind="warn">חובה</Pill> : <Pill kind="ok">אופציונלי</Pill>}
-                </div>
-                <div className="mt-1 text-sm text-slate-700">{item.what}</div>
-                <div className="mt-0.5 text-xs text-slate-500">{item.where}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-          <strong>פעולה חד-פעמית בטרמינל מקומי:</strong>{' '}
-          <code className="rounded bg-blue-100 px-2 py-0.5 font-mono text-xs">npm run db:push</code>{' '}
-          — יוצר את 3 הטבלאות החדשות ב-Supabase (geo_probes, content_gaps, generated_guides).
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 2. LIVE HEALTH                                                  */}
+      {/* LIVE HEALTH                                                     */}
       {/* ============================================================== */}
       <section className="mb-10 rounded-xl border-2 border-slate-300 bg-white p-6">
         <h2 className="mb-4 text-xl font-bold text-slate-900">🩺 בריאות המערכת — חי</h2>
@@ -304,35 +236,7 @@ export default async function GeoPlanPage() {
       </section>
 
       {/* ============================================================== */}
-      {/* 4. MANUAL TRIGGERS                                              */}
-      {/* ============================================================== */}
-      <section className="mb-10 rounded-xl border-2 border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-xl font-bold text-slate-900">⚡ הפעלות ידניות — לבדיקות</h2>
-        <p className="mb-4 text-sm text-slate-600">
-          אם רוצה לבדוק את הפיפליין מיד בלי לחכות ל-cron, הרץ ב-PowerShell:
-        </p>
-
-        <div className="space-y-3 text-xs">
-          <CodeBlock
-            label="הרץ Probe מיידית"
-            command={`curl -X POST https://weccelerate.co.il/api/admin/geo-probe/run \\
-  -H "x-admin-token: $env:ADMIN_TOKEN"`}
-          />
-          <CodeBlock
-            label="הרץ writer agent מיידית (analyze + write)"
-            command={`curl -X POST https://weccelerate.co.il/api/admin/content-publish/run \\
-  -H "x-admin-token: $env:ADMIN_TOKEN"`}
-          />
-          <CodeBlock
-            label="בדוק שהמערכת פעילה"
-            command={`curl https://weccelerate.co.il/api/admin/geo-probe/run \\
-  -H "x-admin-token: $env:ADMIN_TOKEN"`}
-          />
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 5. WHAT'S BUILT vs ROADMAP                                      */}
+      {/* WHAT'S BUILT vs ROADMAP                                         */}
       {/* ============================================================== */}
       <section className="mb-10 rounded-xl border-2 border-slate-200 bg-white p-6">
         <h2 className="mb-4 text-xl font-bold text-slate-900">🗺️ Roadmap — מה נבנה ומה הבא</h2>
@@ -468,13 +372,3 @@ function HealthCard({
   );
 }
 
-function CodeBlock({ label, command }: { label: string; command: string }) {
-  return (
-    <div>
-      <div className="mb-1 text-xs font-medium text-slate-600">{label}</div>
-      <pre className="overflow-x-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100">
-        <code>{command}</code>
-      </pre>
-    </div>
-  );
-}
