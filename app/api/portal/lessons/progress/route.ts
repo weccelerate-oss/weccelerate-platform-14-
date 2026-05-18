@@ -28,9 +28,13 @@ export type LessonProgressEntry = {
 };
 
 // A lesson is "in progress" when the user has watched some of it but
-// not enough to count as done. We treat ≥92% as effectively complete
-// so the cursor doesn't keep showing "0:05 left" forever.
+// not enough to count as done. Two ways to qualify as "done":
+//   - within 1.5s of the end (catches users who watched almost everything
+//     even on long videos where 92% would still be minutes away)
+//   - OR past 92% of the runtime (catches users who scrubbed past credits)
+// Either condition trips the auto-complete branch.
 const COMPLETE_RATIO = 0.92;
+const COMPLETE_REMAINING_SEC = 1.5;
 const MIN_RESUME_SEC = 5; // ignore micro-positions (autoplay flicker)
 
 export async function POST(req: NextRequest) {
@@ -109,7 +113,8 @@ export async function POST(req: NextRequest) {
       effectiveCompleted === undefined &&
       safePosition !== null &&
       safeDuration !== null &&
-      safePosition / safeDuration >= COMPLETE_RATIO
+      (safeDuration - safePosition <= COMPLETE_REMAINING_SEC ||
+        safePosition / safeDuration >= COMPLETE_RATIO)
     ) {
       effectiveCompleted = true;
     }

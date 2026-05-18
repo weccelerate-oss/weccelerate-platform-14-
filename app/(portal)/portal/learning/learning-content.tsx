@@ -54,6 +54,15 @@ interface LearningContentProps {
 // position (>= MIN_RESUME_SEC). Anything shorter is autoplay noise.
 const MIN_RESUME_SEC = 5;
 const COMPLETE_RATIO = 0.92;
+const COMPLETE_REMAINING_SEC = 1.5; // ≤ 1.5s left → already "done"
+
+// Shared rule: a position counts as "finished" if it's within 1.5 seconds
+// of the end OR past 92% of the runtime. Mirrors the server.
+function isEffectivelyComplete(positionSec: number, durationSec: number | null): boolean {
+  if (!durationSec || durationSec <= 0) return false;
+  if (durationSec - positionSec <= COMPLETE_REMAINING_SEC) return true;
+  return positionSec / durationSec >= COMPLETE_RATIO;
+}
 
 function isInProgress(p: LessonProgress | undefined): p is LessonProgress {
   return Boolean(p && !p.completed && p.positionSec >= MIN_RESUME_SEC);
@@ -172,11 +181,7 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
     () => {
       const m = new Map<string, LessonProgress>();
       for (const p of initialProgress) {
-        const pastThreshold =
-          !p.completed &&
-          p.durationSec !== null &&
-          p.durationSec > 0 &&
-          p.positionSec / p.durationSec >= COMPLETE_RATIO;
+        const pastThreshold = !p.completed && isEffectivelyComplete(p.positionSec, p.durationSec);
         m.set(p.slug, pastThreshold ? { ...p, completed: true } : p);
       }
       return m;
@@ -292,10 +297,7 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
       // threshold — no waiting for the API round-trip.
       if (
         patch.completed === undefined &&
-        typeof next.positionSec === 'number' &&
-        typeof next.durationSec === 'number' &&
-        next.durationSec > 0 &&
-        next.positionSec / next.durationSec >= COMPLETE_RATIO
+        isEffectivelyComplete(next.positionSec, next.durationSec)
       ) {
         next.completed = true;
       }
@@ -1141,7 +1143,7 @@ function VideoModal({
       lastSavedRef.current = { position, at: now };
 
       // Auto-complete near the end — fire once.
-      if (!autoCompletedRef.current && position / duration >= COMPLETE_RATIO) {
+      if (!autoCompletedRef.current && isEffectivelyComplete(position, duration)) {
         autoCompletedRef.current = true;
         onAutoComplete(position, duration);
         return;
