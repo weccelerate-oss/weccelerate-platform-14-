@@ -52,6 +52,15 @@ export interface OnboardingActivity {
     codes: string[];
   } | null;
   daysSinceLastEvent: number | null;
+  /** Chronological feed of the most recent webhook events (up to 12). Lets
+   *  the admin see exactly what happened in the last 24 hours without
+   *  digging through the users table. */
+  recentEvents: Array<{
+    at: string;
+    action: string;
+    email: string | null;
+    name: string | null;
+  }>;
 }
 
 const ONBOARDING_ACTIONS = [
@@ -155,7 +164,21 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
       ? Math.floor((Date.now() - lastEvent.createdAt.getTime()) / 86_400_000)
       : null;
 
-    return { counts, lastSuccess, lastFailure, lastSpamBlock, daysSinceLastEvent };
+    // Slice the top 12 most recent events (rows is already createdAt desc)
+    // for the chronological feed.
+    const recentEvents = rows.slice(0, 12).map(
+      (row: { action: string; createdAt: Date; metadata: unknown }) => {
+        const meta = (row.metadata as Record<string, unknown> | null) ?? {};
+        return {
+          at: row.createdAt.toISOString(),
+          action: row.action,
+          email: typeof meta.email === 'string' ? meta.email : null,
+          name: typeof meta.name === 'string' ? meta.name : null,
+        };
+      },
+    );
+
+    return { counts, lastSuccess, lastFailure, lastSpamBlock, daysSinceLastEvent, recentEvents };
   } catch (error) {
     console.error('[Admin] Onboarding activity lookup failed:', error);
     return {
@@ -164,6 +187,7 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
       lastFailure: null,
       lastSpamBlock: null,
       daysSinceLastEvent: null,
+      recentEvents: [],
     };
   }
 }

@@ -27,8 +27,17 @@ const ACTION_LABELS: Record<string, string> = {
   'user.welcome_email_failed': 'משלוח מייל קבלת פנים נכשל',
 };
 
+const EVENT_STYLE: Record<string, { icon: string; label: string; color: string }> = {
+  'user.provisioned': { icon: '✅', label: 'יזם נוצר', color: 'text-emerald-700' },
+  'user.welcome_email_sent': { icon: '📩', label: 'מייל נשלח', color: 'text-blue-700' },
+  'user.welcome_email_failed': { icon: '⚠️', label: 'משלוח מייל נכשל', color: 'text-rose-700' },
+  'onboarding.spam_blocked': { icon: '🛡️', label: 'נחסם כספאם', color: 'text-amber-700' },
+  'onboarding.unauthorized': { icon: '🔒', label: 'נדחה (אימות)', color: 'text-rose-700' },
+  'onboarding.validation_failed': { icon: '❌', label: 'שגיאת שדות', color: 'text-rose-700' },
+};
+
 export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
-  const { counts, lastSuccess, lastFailure, lastSpamBlock, daysSinceLastEvent } = data;
+  const { counts, lastSuccess, lastFailure, lastSpamBlock, daysSinceLastEvent, recentEvents } = data;
   const totalHits =
     counts.provisioned +
     counts.spamBlocked +
@@ -209,6 +218,50 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
             <strong> לא ייחסם</strong>.
           </p>
         </div>
+      )}
+
+      {/* Chronological event feed — quick way to see "what happened this
+          morning" without scanning the users table or filtering logs. */}
+      {recentEvents.length > 0 && (
+        <details className="border-t border-slate-100 group" open>
+          <summary className="cursor-pointer px-4 sm:px-5 py-3 text-sm text-slate-700 font-medium hover:bg-slate-50 select-none flex items-center justify-between">
+            <span>📋 פעילות אחרונה ({recentEvents.length} אירועים)</span>
+            <span className="text-xs text-slate-400 font-normal">לחץ להסתיר</span>
+          </summary>
+          <div className="divide-y divide-slate-100">
+            {recentEvents.map((ev, i) => {
+              const style = EVENT_STYLE[ev.action] ?? {
+                icon: '•',
+                label: ev.action,
+                color: 'text-slate-700',
+              };
+              return (
+                <div
+                  key={`${ev.at}-${i}`}
+                  className="px-4 sm:px-5 py-2.5 flex items-center gap-3 hover:bg-slate-50"
+                >
+                  <span className="text-lg leading-none flex-shrink-0">{style.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium ${style.color}`}>{style.label}</p>
+                    {(ev.name || ev.email) && (
+                      <p className="text-xs text-slate-500 truncate">
+                        {ev.name && <span className="font-medium text-slate-700">{ev.name}</span>}
+                        {ev.name && ev.email && ' · '}
+                        {ev.email && <span className="font-mono text-[11px]">{ev.email}</span>}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-xs text-slate-400 whitespace-nowrap tabular-nums flex-shrink-0">
+                    {formatRelative(ev.at)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="px-4 sm:px-5 py-2 text-[11px] text-slate-400 border-t border-slate-100 bg-slate-50/50">
+            💡 מציג את 12 האירועים האחרונים. בדיקות עם <code className="bg-slate-200/60 px-1 py-0.5 rounded text-[10px]">dryRun</code> לא מופיעות כאן בכוונה.
+          </p>
+        </details>
       )}
 
       {/* "How do I test this?" — most admins land here right after a test
