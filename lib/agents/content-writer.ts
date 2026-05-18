@@ -25,6 +25,8 @@ import {
   type DailyContext,
 } from './daily-context';
 import { loadJournal, summarizeJournalForWriter, type JournalSummary } from './journal';
+import { generateLinkedInPost } from './linkedin-post-generator';
+import { sendArticlePublishedEmail } from './article-published-email';
 
 const MODEL_RESEARCH = 'claude-sonnet-4-6';
 const MODEL_WRITE = 'claude-opus-4-7';
@@ -188,6 +190,20 @@ export async function writeNextGuide(opts?: { context?: DailyContext; journal?: 
 
     // Push to IndexNow so Bing picks it up immediately. Best-effort.
     pingIndexNow(`https://weccelerate.co.il/guides/${slug}`).catch(() => {});
+
+    // Notify Katrin: generate a LinkedIn post draft and email it with the
+    // article link. Fire-and-forget — a failed notification does NOT block
+    // the publish flow, since the guide is already live in the DB.
+    notifyKatrinAboutArticle({
+      titleHe: article.titleHe,
+      slug,
+      bodyExcerpt: article.contentHe,
+      sourceQuery: gap.query,
+      category: gap.category,
+      wordCount: countWords(article.contentHe),
+    }).catch((e) => {
+      console.error('[notifyKatrinAboutArticle] failed:', e);
+    });
 
     await logDecision({
       agent: 'content-writer',
@@ -617,4 +633,71 @@ async function pingIndexNow(url: string): Promise<void> {
   } catch {
     /* non-fatal — Bing will eventually crawl on its own */
   }
+}
+
+/**
+ * Side-effect helper: generate a LinkedIn post draft + email it to Katrin.
+ * Called fire-and-forget AFTER prisma.generatedGuide.create succeeds, so
+ * any failure here is purely cosmetic — the guide is already live.
+ */
+async function notifyKatrinAboutArticle(opts: {
+  titleHe: string;
+  slug: string;
+  bodyExcerpt: string;
+  sourceQuery?: string | null;
+  category?: string | null;
+  wordCount: number;
+}): Promise<void> {
+  const articleUrl = `https://weccelerate.co.il/guides/${opts.slug}`;
+
+  // Strip markdown noise from the excerpt so Claude works from clean Hebrew.
+  const cleanExcerpt = opts.bodyExcerpt
+    .replace(/^#+\s.*$/gm, '')          // headings
+    .replace(/\*\*([^*]+)\*\*/g, '$1')  // bold
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links → anchor text
+    .replace(/\n{2,}/g, '\n')
+    .trim()
+    .slice(0, 1500);
+
+  const postResult = await generateLinkedInPost({
+    titleHe: opts.titleHe,
+    url: articleUrl,
+    bodyExcerpt: cleanExcerpt,
+    sourceQuery: opts.sourceQuery ?? null,
+    category: opts.category ?? null,
+  });
+
+  if (!postResult.ok || !postResult.post) {
+    await logDecision({
+      agent: 'content-writer',
+      action: 'linkedin-post-failed',
+      reasoning: `כשל בניסוח פוסט LinkedIn ל-"${opts.titleHe}": ${postResult.error ?? 'unknown'}`,
+      payload: { slug: opts.slug, error: postResult.error },
+      success: false,
+    });
+    return;
+  }
+
+  const emailResult = await sendArticlePublishedEmail({
+    titleHe: opts.titleHe,
+    slug: opts.slug,
+    linkedInPost: postResult.post,
+    imagePrompt: postResult.imagePrompt ?? null,
+    shouldIncludeLogo: postResult.shouldIncludeLogo ?? false,
+    imageStyle: postResult.imageStyle ?? null,
+    imageRationale: postResult.imageRationale ?? null,
+    topicHint: opts.sourceQuery ?? null,
+    category: opts.category ?? null,
+    wordCount: opts.wordCount,
+  });
+
+  await logDecision({
+    agent: 'content-writer',
+    action: emailResult.ok ? 'notified-katrin' : 'notify-katrin-failed',
+    reasoning: emailResult.ok
+      ? `שלחתי ל-${emailResult.recipient} מייל עם הקישור ל-"${opts.titleHe}" + פוסט מוכן ל-LinkedIn.`
+      : `כשל בשליחת מייל ל-${emailResult.recipient}: ${emailResult.error ?? 'unknown'}`,
+    payload: { slug: opts.slug, recipient: emailResult.recipient, error: emailResult.error },
+    success: emailResult.ok,
+  });
 }
