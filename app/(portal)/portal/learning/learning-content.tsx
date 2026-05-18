@@ -366,6 +366,7 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
       });
 
       try {
+        console.log('[learning] saving', slug, patch);
         const res = await fetch('/api/portal/lessons/progress', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -375,41 +376,71 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
           }),
           keepalive: true, // ensures saves survive a tab close on the way out
         });
+
+        // Surface 5xx loudly — used to be silent and that's exactly how
+        // "progress doesn't survive refresh" went undiagnosed.
+        if (!res.ok) {
+          const errorPayload = (await res.json().catch(() => null)) as
+            | { error?: string; detail?: string; hint?: string }
+            | null;
+          console.error(
+            '[learning] save failed',
+            res.status,
+            errorPayload?.detail || errorPayload?.error,
+          );
+          if (errorPayload?.hint) {
+            console.warn('[learning] hint:', errorPayload.hint);
+            // Show the admin once — every other render of the page might
+            // repeat this. Just enough to make a stale schema visible.
+            if (typeof window !== 'undefined' && !window.__learningSchemaHintShown) {
+              window.__learningSchemaHintShown = true;
+              alert(
+                'שגיאת שמירה בהתקדמות:\n\n' +
+                  (errorPayload.detail ?? '') +
+                  '\n\n' +
+                  errorPayload.hint,
+              );
+            }
+          }
+          return;
+        }
+
         // Reconcile with the server's view: it may have auto-completed
         // based on its own threshold. But never downgrade `completed: true`
         // to false unless the caller asked for it explicitly — otherwise a
         // racing position-only save could silently un-mark a finished lesson.
-        if (res.ok) {
-          const data = (await res.json().catch(() => null)) as
-            | {
-                success?: boolean;
-                completed?: boolean;
-                positionSec?: number;
-                durationSec?: number | null;
-                lastWatchedAt?: string | null;
-              }
-            | null;
-          if (data?.success && typeof data.completed === 'boolean') {
-            const serverSaysCompleted = data.completed;
-            const explicitUnmark = patch.completed === false;
-            setProgressMap((prev) => {
-              const m = new Map(prev);
-              const current = m.get(slug);
-              const finalCompleted = explicitUnmark
-                ? serverSaysCompleted
-                : current?.completed || serverSaysCompleted; // monotone up
-              m.set(slug, {
-                slug,
-                completed: finalCompleted,
-                positionSec: data.positionSec ?? next.positionSec,
-                durationSec: data.durationSec ?? next.durationSec,
-                lastWatchedAt: data.lastWatchedAt ?? next.lastWatchedAt,
-              });
-              return m;
+        const data = (await res.json().catch(() => null)) as
+          | {
+              success?: boolean;
+              completed?: boolean;
+              positionSec?: number;
+              durationSec?: number | null;
+              lastWatchedAt?: string | null;
+              source?: string;
+            }
+          | null;
+        console.log('[learning] saved', slug, data);
+        if (data?.success && typeof data.completed === 'boolean') {
+          const serverSaysCompleted = data.completed;
+          const explicitUnmark = patch.completed === false;
+          setProgressMap((prev) => {
+            const m = new Map(prev);
+            const current = m.get(slug);
+            const finalCompleted = explicitUnmark
+              ? serverSaysCompleted
+              : current?.completed || serverSaysCompleted; // monotone up
+            m.set(slug, {
+              slug,
+              completed: finalCompleted,
+              positionSec: data.positionSec ?? next.positionSec,
+              durationSec: data.durationSec ?? next.durationSec,
+              lastWatchedAt: data.lastWatchedAt ?? next.lastWatchedAt,
             });
-          }
+            return m;
+          });
         }
-      } catch {
+      } catch (err) {
+        console.error('[learning] save threw', err);
         // Revert on hard failure so the UI doesn't lie.
         setProgressMap((prev) => {
           const m = new Map(prev);
@@ -1477,6 +1508,8 @@ type YTPlayer = {
 type YTPlayerEvent = { target: YTPlayer; data?: number };
 declare global {
   interface Window {
+    /** One-shot flag so the schema-stale alert only fires once per session. */
+    __learningSchemaHintShown?: boolean;
     YT?: {
       Player: new (
         el: string | HTMLElement,

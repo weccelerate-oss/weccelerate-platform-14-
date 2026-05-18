@@ -245,9 +245,22 @@ export async function POST(req: NextRequest) {
       completedAt: saved.completedAt?.toISOString() ?? null,
     });
   } catch (error) {
-    console.error('[API] Error updating lesson progress:', error);
+    // Detailed error surfacing — the symptoms of a stale DB schema (missing
+    // positionSec/durationSec/lastWatchedAt columns) are silent in
+    // production because the outer catch used to swallow the message. Now
+    // we echo back the actual error and a hint for the most common cause so
+    // the client can show a useful toast and the admin can fix it from logs.
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[lessons/progress] upsert failed:', message);
+    const looksLikeSchemaIssue = /positionSec|durationSec|lastWatchedAt|column.*does not exist|Unknown arg/i.test(message);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        detail: message.slice(0, 600),
+        hint: looksLikeSchemaIssue
+          ? 'הסכמה של ה-DB ככל הנראה לא עודכנה. הרץ: `npx prisma db push --config prisma/prisma.config.ts --skip-generate` ואז re-deploy ב-Vercel.'
+          : undefined,
+      },
       { status: 500 },
     );
   }
@@ -294,8 +307,14 @@ export async function GET() {
 
     return NextResponse.json({ entries, completedSlugs });
   } catch (error) {
-    console.error('[API] Error fetching lesson progress:', error);
-    return NextResponse.json({ entries: [], completedSlugs: [] });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[lessons/progress] fetch failed:', message);
+    return NextResponse.json({
+      entries: [],
+      completedSlugs: [],
+      error: 'fetch failed',
+      detail: message.slice(0, 600),
+    });
   }
 }
 
