@@ -37,7 +37,7 @@ const EVENT_STYLE: Record<string, { icon: string; label: string; color: string }
 };
 
 export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
-  const { counts, lastSuccess, lastFailure, lastSpamBlock, daysSinceLastEvent, recentEvents } = data;
+  const { counts, lastSuccess, lastFailure, spamBlocks, daysSinceLastEvent, recentEvents } = data;
   const totalHits =
     counts.provisioned +
     counts.spamBlocked +
@@ -159,65 +159,82 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
         </div>
       )}
 
-      {/* Last spam block — shows EXACTLY why the filter said no, so the
-          admin can tell a real spam from a misclassified legit submission. */}
-      {lastSpamBlock && (
-        <div className="px-4 sm:px-5 py-3 border-t border-slate-100 bg-amber-50/40">
-          <div className="flex items-baseline gap-2 mb-1.5">
-            <p className="text-xs font-medium text-amber-900">
-              🛡️ פנייה אחרונה שנחסמה כספאם
-            </p>
-            <p className="text-xs text-amber-700/70">
-              {formatRelative(lastSpamBlock.at)}
-            </p>
+      {/* ALL spam blocks — full list so the admin can scan every rejection
+          and rescue false positives by adding the user manually. */}
+      {spamBlocks.length > 0 && (
+        <details className="border-t border-slate-100 group bg-amber-50/40" open>
+          <summary className="cursor-pointer px-4 sm:px-5 py-3 text-sm font-medium text-amber-900 hover:bg-amber-50 select-none flex items-center justify-between">
+            <span>🛡️ פניות שנחסמו כספאם ({spamBlocks.length})</span>
+            <span className="text-xs text-amber-700/70 font-normal">לחץ להסתיר</span>
+          </summary>
+          <div className="divide-y divide-amber-100">
+            {spamBlocks.map((block, i) => (
+              <div key={`${block.at}-${i}`} className="px-4 sm:px-5 py-3">
+                {/* Top row: identity + time + score */}
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1.5">
+                  <span className="text-sm font-semibold text-slate-900">
+                    {block.name || '(ללא שם)'}
+                  </span>
+                  {block.email && (
+                    <span className="font-mono text-xs text-slate-600">{block.email}</span>
+                  )}
+                  <span className="text-xs text-slate-400 ms-auto">
+                    {formatRelative(block.at)}
+                  </span>
+                  {block.score !== null && (
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                        block.score >= 80
+                          ? 'bg-rose-100 text-rose-700'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}
+                      title="ציון חשד (0-100). מעל 50 נחסם."
+                    >
+                      ציון {block.score}
+                    </span>
+                  )}
+                </div>
+
+                {/* Optional secondary identity row */}
+                {(block.phone || block.company || block.source) && (
+                  <p className="text-[11px] text-slate-500 mb-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
+                    {block.phone && <span>📞 {block.phone}</span>}
+                    {block.company && <span>🏢 {block.company}</span>}
+                    {block.source && <span className="font-mono">· {block.source}</span>}
+                  </p>
+                )}
+
+                {/* Reasons */}
+                {block.reasons.length > 0 && (
+                  <ul className="space-y-0.5 mb-1">
+                    {block.reasons.map((reason, j) => (
+                      <li
+                        key={j}
+                        className="text-xs text-slate-700 flex items-start gap-1.5"
+                      >
+                        <span className="text-amber-600 mt-0.5 flex-shrink-0">•</span>
+                        <span>{reason}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Codes */}
+                {block.codes.length > 0 && (
+                  <p className="text-[10px] text-slate-400 font-mono">
+                    codes: {block.codes.join(', ')}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-900 mb-2">
-            {lastSpamBlock.name && (
-              <p>
-                <span className="text-slate-500 text-xs">שם:</span>{' '}
-                <span className="font-medium">{lastSpamBlock.name}</span>
-              </p>
-            )}
-            {lastSpamBlock.email && (
-              <p>
-                <span className="text-slate-500 text-xs">אימייל:</span>{' '}
-                <span className="font-mono text-xs">{lastSpamBlock.email}</span>
-              </p>
-            )}
-            {lastSpamBlock.score !== null && (
-              <p>
-                <span className="text-slate-500 text-xs">ציון חשד:</span>{' '}
-                <span className="font-bold text-amber-700">{lastSpamBlock.score}</span>
-              </p>
-            )}
-          </div>
-          {lastSpamBlock.reasons.length > 0 && (
-            <div className="mb-1">
-              <p className="text-xs text-slate-500 mb-1">סיבות:</p>
-              <ul className="space-y-0.5">
-                {lastSpamBlock.reasons.map((reason, i) => (
-                  <li key={i} className="text-xs text-slate-700 flex items-start gap-1.5">
-                    <span className="text-amber-600 mt-0.5">•</span>
-                    <span>{reason}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {lastSpamBlock.codes.length > 0 && (
-            <p className="text-[10px] text-slate-400 mt-2 font-mono">
-              codes: {lastSpamBlock.codes.join(', ')}
-            </p>
-          )}
-          <p className="text-xs text-amber-800/80 mt-2.5 leading-relaxed">
-            💡 <strong>אם זאת היתה פנייה אמיתית של יזם</strong> — אפשר להוסיף את היזם ידנית
-            דרך &ldquo;הוסף משתמש&rdquo; למעלה. הספאם פילטר נועד לחסום בוטים ומיילים זמניים
-            (למשל <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">@example.com</code>),
-            אז אימייל אמיתי של יזם (<code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">@gmail.com</code>,
-            <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">@startup.co.il</code> וכו׳)
-            <strong> לא ייחסם</strong>.
+          <p className="px-4 sm:px-5 py-2.5 text-[11px] text-amber-800/80 border-t border-amber-100 bg-amber-50/60 leading-relaxed">
+            💡 <strong>אם פנייה היתה אמיתית</strong> — לחץ &ldquo;הוסף משתמש&rdquo; למעלה והקלד את הפרטים ידנית.
+            הספאם פילטר חוסם <code className="bg-amber-100 px-1 py-0.5 rounded text-[10px]">@example.com</code>,
+            מיילים זמניים, ומחרוזות עם &ldquo;test&rdquo;. אימיילים אמיתיים
+            (<code className="bg-amber-100 px-1 py-0.5 rounded text-[10px]">@gmail.com</code> וכו׳) לא ייחסמו.
           </p>
-        </div>
+        </details>
       )}
 
       {/* Chronological event feed — quick way to see "what happened this

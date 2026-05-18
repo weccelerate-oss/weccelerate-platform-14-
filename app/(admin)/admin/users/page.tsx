@@ -32,6 +32,18 @@ export interface WelcomeEmailStatus {
   confirmed: boolean;
 }
 
+export interface SpamBlockEntry {
+  at: string;
+  email: string | null;
+  name: string | null;
+  phone: string | null;
+  company: string | null;
+  score: number | null;
+  reasons: string[];
+  codes: string[];
+  source: string | null;
+}
+
 export interface OnboardingActivity {
   counts: {
     provisioned: number;
@@ -43,14 +55,10 @@ export interface OnboardingActivity {
   };
   lastSuccess: { at: string; email: string | null; source: string | null } | null;
   lastFailure: { at: string; action: string; detail: string | null } | null;
-  lastSpamBlock: {
-    at: string;
-    email: string | null;
-    name: string | null;
-    score: number | null;
-    reasons: string[];
-    codes: string[];
-  } | null;
+  /** ALL spam blocks in the 30-day window, newest first. Lets the admin
+   *  review what got rejected and decide whether anything was a false
+   *  positive worth recovering by adding the user manually. */
+  spamBlocks: SpamBlockEntry[];
   daysSinceLastEvent: number | null;
   /** Chronological feed of the most recent webhook events (up to 12). Lets
    *  the admin see exactly what happened in the last 24 hours without
@@ -101,7 +109,7 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
     };
     let lastSuccess: OnboardingActivity['lastSuccess'] = null;
     let lastFailure: OnboardingActivity['lastFailure'] = null;
-    let lastSpamBlock: OnboardingActivity['lastSpamBlock'] = null;
+    const spamBlocks: SpamBlockEntry[] = [];
     for (const row of rows) {
       const meta = (row.metadata as Record<string, unknown> | null) ?? {};
       switch (row.action) {
@@ -117,20 +125,21 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
           break;
         case 'onboarding.spam_blocked':
           counts.spamBlocked++;
-          if (!lastSpamBlock) {
-            lastSpamBlock = {
-              at: row.createdAt.toISOString(),
-              email: typeof meta.email === 'string' ? meta.email : null,
-              name: typeof meta.name === 'string' ? meta.name : null,
-              score: typeof meta.spamScore === 'number' ? meta.spamScore : null,
-              reasons: Array.isArray(meta.spamReasons)
-                ? (meta.spamReasons as unknown[]).map(String)
-                : [],
-              codes: Array.isArray(meta.spamCodes)
-                ? (meta.spamCodes as unknown[]).map(String)
-                : [],
-            };
-          }
+          spamBlocks.push({
+            at: row.createdAt.toISOString(),
+            email: typeof meta.email === 'string' ? meta.email : null,
+            name: typeof meta.name === 'string' ? meta.name : null,
+            phone: typeof meta.phone === 'string' ? meta.phone : null,
+            company: typeof meta.company === 'string' ? meta.company : null,
+            score: typeof meta.spamScore === 'number' ? meta.spamScore : null,
+            reasons: Array.isArray(meta.spamReasons)
+              ? (meta.spamReasons as unknown[]).map(String)
+              : [],
+            codes: Array.isArray(meta.spamCodes)
+              ? (meta.spamCodes as unknown[]).map(String)
+              : [],
+            source: typeof meta.source === 'string' ? meta.source : null,
+          });
           break;
         case 'onboarding.unauthorized':
           counts.unauthorized++;
@@ -178,14 +187,14 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
       },
     );
 
-    return { counts, lastSuccess, lastFailure, lastSpamBlock, daysSinceLastEvent, recentEvents };
+    return { counts, lastSuccess, lastFailure, spamBlocks, daysSinceLastEvent, recentEvents };
   } catch (error) {
     console.error('[Admin] Onboarding activity lookup failed:', error);
     return {
       counts: { provisioned: 0, spamBlocked: 0, unauthorized: 0, validationFailed: 0, emailSent: 0, emailFailed: 0 },
       lastSuccess: null,
       lastFailure: null,
-      lastSpamBlock: null,
+      spamBlocks: [],
       daysSinceLastEvent: null,
       recentEvents: [],
     };
