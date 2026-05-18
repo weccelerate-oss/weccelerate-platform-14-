@@ -201,8 +201,12 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
             </p>
           )}
           <p className="text-xs text-amber-800/80 mt-2.5 leading-relaxed">
-            💡 אם זאת היתה פנייה אמיתית — אפשר להוסיף את היזם ידנית דרך &ldquo;הוסף משתמש&rdquo;
-            למעלה. הספאם פילטר נועד לחסום בוטים ומיילים זמניים.
+            💡 <strong>אם זאת היתה פנייה אמיתית של יזם</strong> — אפשר להוסיף את היזם ידנית
+            דרך &ldquo;הוסף משתמש&rdquo; למעלה. הספאם פילטר נועד לחסום בוטים ומיילים זמניים
+            (למשל <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">@example.com</code>),
+            אז אימייל אמיתי של יזם (<code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">@gmail.com</code>,
+            <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">@startup.co.il</code> וכו׳)
+            <strong> לא ייחסם</strong>.
           </p>
         </div>
       )}
