@@ -29,9 +29,17 @@ import { cn } from '@/lib/utils';
 import { toggleUserActiveAction, resetUserPasswordAction, deleteUserAction } from '../actions';
 import type { User, Project, UserRole } from '@prisma/client';
 
+export interface WelcomeEmailStatus {
+  status: 'sent' | 'failed' | 'none';
+  at: string | null;
+  source: string | null;
+  error: string | null;
+}
+
 interface UserWithProjects extends User {
   projects: Pick<Project, 'id' | 'name' | 'status'>[];
   _count: { projects: number };
+  welcomeEmail?: WelcomeEmailStatus;
 }
 
 interface UsersTableProps {
@@ -61,7 +69,9 @@ export function UsersTable({ users }: UsersTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [loginFilter, setLoginFilter] = useState<'all' | 'logged-in' | 'awaiting' | 'never'>('all');
+  const [loginFilter, setLoginFilter] = useState<
+    'all' | 'logged-in' | 'email-sent-pending' | 'email-failed' | 'no-email' | 'never'
+  >('all');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showTempPassword, setShowTempPassword] = useState<{ id: string; password: string } | null>(null);
 
@@ -79,12 +89,13 @@ export function UsersTable({ users }: UsersTableProps) {
       (statusFilter === 'active' && user.isActive) ||
       (statusFilter === 'inactive' && !user.isActive);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mcp = Boolean((user as any).mustChangePassword);
+    const emailStatus = user.welcomeEmail?.status ?? 'none';
     const matchesLogin =
       loginFilter === 'all' ||
       (loginFilter === 'logged-in' && user.lastLoginAt) ||
-      (loginFilter === 'awaiting' && mcp && !user.lastLoginAt) ||
+      (loginFilter === 'email-sent-pending' && emailStatus === 'sent' && !user.lastLoginAt) ||
+      (loginFilter === 'email-failed' && emailStatus === 'failed') ||
+      (loginFilter === 'no-email' && emailStatus === 'none' && !user.lastLoginAt) ||
       (loginFilter === 'never' && !user.lastLoginAt);
 
     return matchesSearch && matchesRole && matchesStatus && matchesLogin;
@@ -188,12 +199,14 @@ export function UsersTable({ users }: UsersTableProps) {
 
           <select
             value={loginFilter}
-            onChange={(e) => setLoginFilter(e.target.value as 'all' | 'logged-in' | 'awaiting' | 'never')}
+            onChange={(e) => setLoginFilter(e.target.value as typeof loginFilter)}
             className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-royal-500/20"
           >
-            <option value="all">כניסה לפורטל: הכול</option>
+            <option value="all">מצב כניסה: הכול</option>
             <option value="logged-in">נכנסו לפורטל</option>
-            <option value="awaiting">קיבלו מייל וטרם נכנסו</option>
+            <option value="email-sent-pending">קיבלו מייל וטרם נכנסו</option>
+            <option value="email-failed">המייל נכשל</option>
+            <option value="no-email">לא נשלח מייל</option>
             <option value="never">טרם נכנסו לפורטל</option>
           </select>
         </div>
@@ -279,10 +292,7 @@ export function UsersTable({ users }: UsersTableProps) {
                       </span>
                     )}
                     {user.role === 'ENTREPRENEUR' && (() => {
-                      /* eslint-disable @typescript-eslint/no-explicit-any */
-                      const mcp = Boolean((user as any).mustChangePassword);
-                      const provisionedAt = (user as any).provisionedAt as Date | null | undefined;
-                      /* eslint-enable @typescript-eslint/no-explicit-any */
+                      const email = user.welcomeEmail;
                       if (user.lastLoginAt) {
                         return (
                           <span
@@ -293,32 +303,44 @@ export function UsersTable({ users }: UsersTableProps) {
                           </span>
                         );
                       }
-                      if (mcp) {
-                        // The cohort the admin actually cares about: temp
-                        // password is live, user hasn't bitten yet. Add a
-                        // "days waiting" tooltip so chasing is prioritised.
-                        const sent = provisionedAt
-                          ? new Date(provisionedAt)
-                          : new Date(user.createdAt);
-                        const days = Math.max(
-                          0,
-                          Math.floor((Date.now() - sent.getTime()) / 86_400_000),
-                        );
+                      if (email?.status === 'sent') {
+                        // The cohort the admin cares most about: Resend
+                        // accepted the welcome message and the user hasn't
+                        // logged in yet. Tooltip carries the exact send time
+                        // and source (webhook/admin/google_form/etc.).
+                        const sentAt = email.at ? new Date(email.at) : null;
+                        const days = sentAt
+                          ? Math.max(0, Math.floor((Date.now() - sentAt.getTime()) / 86_400_000))
+                          : null;
                         return (
                           <span
-                            title={`קיבל סיסמה זמנית ב-${sent.toLocaleDateString('he-IL')} · ${days} ימים ללא כניסה`}
+                            title={
+                              sentAt
+                                ? `נשלח מייל ב-${sentAt.toLocaleString('he-IL')}${email.source ? ` (${email.source})` : ''}${days !== null ? ` · ${days} ימים ללא כניסה` : ''}`
+                                : 'מייל קבלת פנים נשלח'
+                            }
                             className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-800 border border-amber-200"
                           >
-                            📩 קיבל מייל · ממתין לכניסה{days > 0 ? ` · ${days} ימים` : ''}
+                            📩 מייל נשלח · ממתין לכניסה{days && days > 0 ? ` · ${days} ימים` : ''}
+                          </span>
+                        );
+                      }
+                      if (email?.status === 'failed') {
+                        return (
+                          <span
+                            title={`משלוח המייל נכשל${email.error ? `: ${email.error}` : ''} — לחץ 'אפס סיסמה' כדי לנסות שוב`}
+                            className="px-2 py-0.5 text-xs font-medium rounded-full bg-rose-50 text-rose-700 border border-rose-200"
+                          >
+                            ⚠️ המייל נכשל
                           </span>
                         );
                       }
                       return (
                         <span
-                          title="לא הונפקה סיסמה זמנית — לחץ 'אפס סיסמה' כדי לשלוח קישור"
+                          title="לא נשלח מייל קבלת פנים — שחזור סיסמה ידני נחוץ"
                           className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600 border border-slate-200"
                         >
-                          ⏳ טרם הוגדרה כניסה
+                          ⏳ לא נשלח מייל
                         </span>
                       );
                     })()}

@@ -125,20 +125,27 @@ export async function provisionEntrepreneur(input: ProvisionInput): Promise<Prov
     tempPassword,
   });
 
-  if (!emailResult.ok) {
-    // Log the email failure so the admin can resend manually.
-    try {
-      await prisma.activityLog.create({
-        data: {
-          action: 'user.welcome_email_failed',
-          description: `Welcome email failed for ${email}: ${emailResult.error}`,
-          userId,
-          metadata: { email, error: emailResult.error, timestamp: new Date().toISOString() },
+  // Audit the email outcome either way — the admin needs to see who
+  // actually received credentials in their inbox vs. who needs a
+  // manual resend.
+  try {
+    await prisma.activityLog.create({
+      data: {
+        action: emailResult.ok ? 'user.welcome_email_sent' : 'user.welcome_email_failed',
+        description: emailResult.ok
+          ? `Welcome email sent to ${email} (source: ${input.source ?? 'webhook'})`
+          : `Welcome email failed for ${email}: ${emailResult.error}`,
+        userId,
+        metadata: {
+          email,
+          source: input.source ?? 'webhook',
+          error: emailResult.ok ? null : emailResult.error,
+          timestamp: new Date().toISOString(),
         },
-      });
-    } catch {
-      /* swallow */
-    }
+      },
+    });
+  } catch {
+    /* swallow — audit failure shouldn't block onboarding */
   }
 
   return {

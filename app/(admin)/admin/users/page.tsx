@@ -1,6 +1,6 @@
 /**
  * User Management Page
- * 
+ *
  * List and manage entrepreneurs and other users.
  */
 
@@ -15,6 +15,15 @@ export const metadata: Metadata = {
   title: 'ניהול משתמשים | Admin',
   description: 'ניהול יזמים ומשתמשים',
 };
+
+export interface WelcomeEmailStatus {
+  // 'sent' = Resend accepted it; 'failed' = Resend rejected/threw;
+  // 'none' = no welcome attempt logged for this user.
+  status: 'sent' | 'failed' | 'none';
+  at: string | null;
+  source: string | null;
+  error: string | null;
+}
 
 async function getUsers() {
   try {
@@ -35,7 +44,44 @@ async function getUsers() {
         },
       },
     });
-    return users;
+
+    // Join in the latest welcome-email outcome per user. One query, then
+    // collapse to the most-recent row per userId — keeps the page fast even
+    // as the audit log grows.
+    let emailStatus: Map<string, WelcomeEmailStatus> = new Map();
+    try {
+      const logs = await prisma.activityLog.findMany({
+        where: {
+          action: { in: ['user.welcome_email_sent', 'user.welcome_email_failed'] },
+          userId: { in: users.map((u: { id: string }) => u.id) },
+        },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          userId: true,
+          action: true,
+          createdAt: true,
+          metadata: true,
+        },
+      });
+      for (const log of logs) {
+        if (!log.userId || emailStatus.has(log.userId)) continue; // first hit = latest
+        const meta = (log.metadata as Record<string, unknown> | null) ?? {};
+        emailStatus.set(log.userId, {
+          status: log.action === 'user.welcome_email_sent' ? 'sent' : 'failed',
+          at: log.createdAt.toISOString(),
+          source: typeof meta.source === 'string' ? meta.source : null,
+          error: typeof meta.error === 'string' ? meta.error : null,
+        });
+      }
+    } catch (error) {
+      console.error('[Admin] Welcome-email status lookup failed:', error);
+      emailStatus = new Map();
+    }
+
+    return users.map((u: { id: string }) => ({
+      ...u,
+      welcomeEmail: emailStatus.get(u.id) ?? { status: 'none' as const, at: null, source: null, error: null },
+    }));
   } catch (error) {
     console.error('[Admin] Error fetching users:', error);
     return [];
@@ -49,7 +95,11 @@ export default async function UsersManagementPage() {
   // "Awaiting first login" = was given a temp password (mustChangePassword)
   // and has never logged in. This is the cohort the admin asked for: people
   // who received credentials by email but didn't click through yet.
-  type UserMeta = { lastLoginAt?: Date | null; mustChangePassword?: boolean | null };
+  type UserMeta = {
+    lastLoginAt?: Date | null;
+    mustChangePassword?: boolean | null;
+    welcomeEmail?: WelcomeEmailStatus;
+  };
   const stats = {
     total: users.length,
     active: users.filter((u: { isActive?: boolean | null }) => u.isActive).length,
@@ -58,8 +108,14 @@ export default async function UsersManagementPage() {
     entrepreneursLoggedIn: entrepreneurs.filter(
       (u: UserMeta) => u.lastLoginAt,
     ).length,
-    entrepreneursAwaitingLogin: entrepreneurs.filter(
-      (u: UserMeta) => u.mustChangePassword && !u.lastLoginAt,
+    entrepreneursEmailSent: entrepreneurs.filter(
+      (u: UserMeta) => u.welcomeEmail?.status === 'sent',
+    ).length,
+    entrepreneursEmailSentPending: entrepreneurs.filter(
+      (u: UserMeta) => u.welcomeEmail?.status === 'sent' && !u.lastLoginAt,
+    ).length,
+    entrepreneursEmailFailed: entrepreneurs.filter(
+      (u: UserMeta) => u.welcomeEmail?.status === 'failed',
     ).length,
   };
 
@@ -94,8 +150,16 @@ export default async function UsersManagementPage() {
         </div>
       </div>
 
-      {/* Entrepreneur onboarding funnel — quick proof that the portal works for them */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      {/* Entrepreneur onboarding funnel: email delivered → first login */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="bg-blue-50/60 rounded-xl p-4 border border-blue-200">
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-blue-700">{stats.entrepreneursEmailSent}</p>
+            <p className="text-sm text-blue-700/70">/ {stats.entrepreneurs}</p>
+          </div>
+          <p className="text-sm text-blue-800 mt-1">קיבלו מייל קבלת פנים</p>
+          <p className="text-xs text-blue-700/60 mt-0.5">לפי לוג Resend (סופק / לא סופק)</p>
+        </div>
         <div className="bg-emerald-50/60 rounded-xl p-4 border border-emerald-200">
           <div className="flex items-baseline gap-2">
             <p className="text-2xl font-bold text-emerald-700">{stats.entrepreneursLoggedIn}</p>
@@ -106,11 +170,15 @@ export default async function UsersManagementPage() {
         </div>
         <div className="bg-amber-50/60 rounded-xl p-4 border border-amber-200">
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-amber-700">{stats.entrepreneursAwaitingLogin}</p>
-            <p className="text-sm text-amber-700/70">/ {stats.entrepreneurs}</p>
+            <p className="text-2xl font-bold text-amber-700">{stats.entrepreneursEmailSentPending}</p>
+            <p className="text-sm text-amber-700/70">/ {stats.entrepreneursEmailSent || '—'}</p>
           </div>
           <p className="text-sm text-amber-800 mt-1">קיבלו מייל וטרם נכנסו</p>
-          <p className="text-xs text-amber-700/60 mt-0.5">סיסמה זמנית פעילה, אין התחברות ראשונית</p>
+          <p className="text-xs text-amber-700/60 mt-0.5">
+            {stats.entrepreneursEmailFailed > 0
+              ? `+ ${stats.entrepreneursEmailFailed} נכשלו במשלוח`
+              : 'דורש פולואפ'}
+          </p>
         </div>
       </div>
 
