@@ -43,6 +43,14 @@ export interface OnboardingActivity {
   };
   lastSuccess: { at: string; email: string | null; source: string | null } | null;
   lastFailure: { at: string; action: string; detail: string | null } | null;
+  lastSpamBlock: {
+    at: string;
+    email: string | null;
+    name: string | null;
+    score: number | null;
+    reasons: string[];
+    codes: string[];
+  } | null;
   daysSinceLastEvent: number | null;
 }
 
@@ -84,12 +92,13 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
     };
     let lastSuccess: OnboardingActivity['lastSuccess'] = null;
     let lastFailure: OnboardingActivity['lastFailure'] = null;
+    let lastSpamBlock: OnboardingActivity['lastSpamBlock'] = null;
     for (const row of rows) {
+      const meta = (row.metadata as Record<string, unknown> | null) ?? {};
       switch (row.action) {
         case 'user.provisioned':
           counts.provisioned++;
           if (!lastSuccess) {
-            const meta = (row.metadata as Record<string, unknown> | null) ?? {};
             lastSuccess = {
               at: row.createdAt.toISOString(),
               email: typeof meta.email === 'string' ? meta.email : null,
@@ -99,6 +108,20 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
           break;
         case 'onboarding.spam_blocked':
           counts.spamBlocked++;
+          if (!lastSpamBlock) {
+            lastSpamBlock = {
+              at: row.createdAt.toISOString(),
+              email: typeof meta.email === 'string' ? meta.email : null,
+              name: typeof meta.name === 'string' ? meta.name : null,
+              score: typeof meta.spamScore === 'number' ? meta.spamScore : null,
+              reasons: Array.isArray(meta.spamReasons)
+                ? (meta.spamReasons as unknown[]).map(String)
+                : [],
+              codes: Array.isArray(meta.spamCodes)
+                ? (meta.spamCodes as unknown[]).map(String)
+                : [],
+            };
+          }
           break;
         case 'onboarding.unauthorized':
           counts.unauthorized++;
@@ -132,13 +155,14 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
       ? Math.floor((Date.now() - lastEvent.createdAt.getTime()) / 86_400_000)
       : null;
 
-    return { counts, lastSuccess, lastFailure, daysSinceLastEvent };
+    return { counts, lastSuccess, lastFailure, lastSpamBlock, daysSinceLastEvent };
   } catch (error) {
     console.error('[Admin] Onboarding activity lookup failed:', error);
     return {
       counts: { provisioned: 0, spamBlocked: 0, unauthorized: 0, validationFailed: 0, emailSent: 0, emailFailed: 0 },
       lastSuccess: null,
       lastFailure: null,
+      lastSpamBlock: null,
       daysSinceLastEvent: null,
     };
   }

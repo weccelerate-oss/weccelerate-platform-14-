@@ -28,7 +28,7 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
-  const { counts, lastSuccess, lastFailure, daysSinceLastEvent } = data;
+  const { counts, lastSuccess, lastFailure, lastSpamBlock, daysSinceLastEvent } = data;
   const totalHits =
     counts.provisioned +
     counts.spamBlocked +
@@ -36,13 +36,20 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
     counts.validationFailed;
   const noActivity = totalHits === 0;
   const onlyFailures = totalHits > 0 && counts.provisioned === 0;
+  const onlySpamBlocks =
+    counts.provisioned === 0 &&
+    counts.spamBlocked > 0 &&
+    counts.unauthorized === 0 &&
+    counts.validationFailed === 0;
 
   // Pick the most informative state for the header banner.
-  const state: 'healthy' | 'warning' | 'broken' = noActivity
+  const state: 'healthy' | 'warning' | 'spam-only' | 'broken' = noActivity
     ? 'broken'
-    : onlyFailures
-      ? 'warning'
-      : 'healthy';
+    : onlySpamBlocks
+      ? 'spam-only'
+      : onlyFailures
+        ? 'warning'
+        : 'healthy';
 
   const banner = {
     healthy: {
@@ -52,6 +59,14 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
       body: lastSuccess
         ? `יזם אחרון נוצר ${formatRelative(lastSuccess.at)} (${lastSuccess.email ?? 'ללא אימייל'})`
         : 'הוובהוק מקבל פניות',
+    },
+    'spam-only': {
+      bg: 'bg-amber-50 border-amber-200',
+      icon: '🛡️',
+      title: 'החיבור עובד — כל הפניות נחסמו כספאם',
+      body:
+        'ה-Apps Script מצליח לקרוא לוובהוק (סימן טוב), אבל מסנן הספאם דחה את התוכן. ' +
+        'בדוק את הסיבות מטה — אם זאת היתה פנייה אמיתית, אפשר להוסיף את היזם ידנית או להרגיע את הסינון.',
     },
     warning: {
       bg: 'bg-amber-50 border-amber-200',
@@ -135,6 +150,63 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
         </div>
       )}
 
+      {/* Last spam block — shows EXACTLY why the filter said no, so the
+          admin can tell a real spam from a misclassified legit submission. */}
+      {lastSpamBlock && (
+        <div className="px-4 sm:px-5 py-3 border-t border-slate-100 bg-amber-50/40">
+          <div className="flex items-baseline gap-2 mb-1.5">
+            <p className="text-xs font-medium text-amber-900">
+              🛡️ פנייה אחרונה שנחסמה כספאם
+            </p>
+            <p className="text-xs text-amber-700/70">
+              {formatRelative(lastSpamBlock.at)}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-900 mb-2">
+            {lastSpamBlock.name && (
+              <p>
+                <span className="text-slate-500 text-xs">שם:</span>{' '}
+                <span className="font-medium">{lastSpamBlock.name}</span>
+              </p>
+            )}
+            {lastSpamBlock.email && (
+              <p>
+                <span className="text-slate-500 text-xs">אימייל:</span>{' '}
+                <span className="font-mono text-xs">{lastSpamBlock.email}</span>
+              </p>
+            )}
+            {lastSpamBlock.score !== null && (
+              <p>
+                <span className="text-slate-500 text-xs">ציון חשד:</span>{' '}
+                <span className="font-bold text-amber-700">{lastSpamBlock.score}</span>
+              </p>
+            )}
+          </div>
+          {lastSpamBlock.reasons.length > 0 && (
+            <div className="mb-1">
+              <p className="text-xs text-slate-500 mb-1">סיבות:</p>
+              <ul className="space-y-0.5">
+                {lastSpamBlock.reasons.map((reason, i) => (
+                  <li key={i} className="text-xs text-slate-700 flex items-start gap-1.5">
+                    <span className="text-amber-600 mt-0.5">•</span>
+                    <span>{reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {lastSpamBlock.codes.length > 0 && (
+            <p className="text-[10px] text-slate-400 mt-2 font-mono">
+              codes: {lastSpamBlock.codes.join(', ')}
+            </p>
+          )}
+          <p className="text-xs text-amber-800/80 mt-2.5 leading-relaxed">
+            💡 אם זאת היתה פנייה אמיתית — אפשר להוסיף את היזם ידנית דרך &ldquo;הוסף משתמש&rdquo;
+            למעלה. הספאם פילטר נועד לחסום בוטים ומיילים זמניים.
+          </p>
+        </div>
+      )}
+
       {/* Setup guide — collapsed by default */}
       <details className="border-t border-slate-100 group">
         <summary className="cursor-pointer px-4 sm:px-5 py-3 text-sm text-slate-600 hover:bg-slate-50 select-none">
@@ -176,6 +248,13 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
           </ol>
           <p className="text-xs text-slate-500 pt-1">
             ה-secret מצוי ב-Vercel תחת <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">ONBOARDING_WEBHOOK_SECRET</code>.
+          </p>
+          <p className="text-xs text-slate-500 pt-2 leading-relaxed">
+            💡 גרסה מורחבת של ה-script (עם retry, התראת מייל למנהל, ופונקציות
+            <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded mx-1">verifySetup()</code>
+            ו-
+            <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded mx-1">testDryRun()</code>
+            ) זמינה. בקש מהמפתח את הקוד המלא.
           </p>
         </div>
       </details>
