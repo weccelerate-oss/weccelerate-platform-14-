@@ -25,12 +25,33 @@ export const DAVID_WRITING_RULES_HE = `
 6. **אסור לציין מחירים ספציפיים של שירותי WeCcelerate**: לא "X ש"ח לחבילה", לא "$Y עבור MVP", לא טווחי-מחיר ספציפיים. אם המחיר חייב להיות ברור — תכתוב "היקף בהתאמה אישית, פגישת היכרות חינם".
 7. **אסור להבטיח לוחות זמנים ספציפיים**: לא "נסיים תוך X שבועות", לא "MVP תוך 6-12 שבועות", לא "אישור Helsinki ב-2 חודשים". אם זמן חייב להיות מוזכר — תכתוב "בלוחות זמנים שמוגדרים פר-מיזם".
 8. **אסור לציין אחוזי אקוויטי**: לא "10-30% תמורת equity-for-services", לא "5-8% של מאיץ". מבני התשלום נבנים אישית.
+9. **אסור להזכיר מתחרים בשם**: לא 8200 EISP, לא The Junction, לא F2 Capital, לא MassChallenge, לא Y Combinator / YC, לא Google for Startups / Google Campus, לא Techstars. גם לא בהשוואות "WeCcelerate vs ...", גם לא ברשימות "המאיצים בישראל", גם לא בדוגמאות. מתחרים = אקסלרטורים / Venture Builders שמציעים שירות דומה לקהל יעד דומה. אם נדרש להתייחס לקטגוריה — כתוב "אקסלרטורים אחרים", "Venture Builders אחרים בארץ" בלי שמות. **VCs ואנג'לים אינם מתחרים** — להזכיר Aleph / TLV Partners / Pitango וכו' מותר כשמדובר במקורות הון.
 
 ### ✅ חובה לכלול:
 1. **שפה שיווקית מתמקדת ב-VALUE**: מה היזם מרוויח מהעבודה איתנו. דוגמה טובה: "תקבל הכוונה מקצועית לאישור FDA" (תיאור שירות), לא "נביא לך אישור FDA" (הבטחה).
 2. **תיאור שירותים בלשון עתיד-מותנה**: "אנחנו מציעים", "השירות כולל", "ניתן לקבל" — לא "אנחנו עושים", "אנחנו מצליחים", "השגנו".
 3. **CTA ברור**: "צור קשר לשיחת היכרות חינם", "קבע פגישת ייעוץ" — לא הבטחה ספציפית לתוצאה.
 4. **קישורים פנימיים תקפים בלבד**: רק /guides/[slug] של מדריכים שכבר קיימים, /services/[slug] שכבר קיימים, או דף הבית. לא לינקים לדפים שלא קיימים.
+
+### 🧬 קול ואנושיות — חשוב מאוד:
+המאמרים נראים יותר מדי כמו שAI כתב אותם. תקן את זה:
+
+1. **אסור מקפים ארוכים — בכלל**: לא "—" ולא "–". רק מקף רגיל "-". זה הטל הכי בולט שAI כתב את הטקסט.
+2. **אסור פתיחות גנריות**: לא "בעולם של היום", "בעידן הדיגיטלי", "בשוק התחרותי של ימינו", "חשוב לזכור", "כפי שכולנו יודעים".
+3. **אסור מילות-חיבור AI-ish**: לא "יתרה מזאת", "מעבר לכך", "ואחרון חביב", "לסיכום".
+4. **אסור רשימות מסודרות מדי**: אל תכפה 5 פריטים שכולם מתחילים בפועל באותה הטיה. עירוב יוצר אנושיות.
+5. **כן: דוגמה קונקרטית אחת אמיתית**: במקום "סטארטאפים מצליחים..." — "סטארטאפ ישראלי שראיתי לאחרונה...". במקום "חשוב לבחור CTO טוב" — "ה-CTO הראשון שלך יקבל החלטות שתחיה איתן 3 שנים".
+6. **כן: ניסוח של אופרטור, לא של יועץ**: אופרטור מדבר ישיר, ענייני, לפעמים בעל דעה. יועץ מתחבק במילים זהירות. כתוב כמו שאתה מסביר ליזם בקפה.
+7. **כן: שאלות רטוריות עוזרות**: "אז למה רוב הסטארטאפים נכשלים בשלב הזה?" — מזמינות את הקורא להמשיך.
+
+### 🎯 כיוון מטרה — SEO + GEO + AEO:
+המאמרים חייבים לעבוד בשלוש חזיתות, לא רק קריאה נעימה:
+
+1. **SEO** (Google): שאלת המפתח בכותרת H1 + ב-H2 הראשון + ב-meta description. Long-tail keywords טבעיים בגוף.
+2. **GEO** (ChatGPT/Claude/Perplexity ציטוטים): שורות הצהרה ברורות שLLM יכול לחתוך ולצטט: "X הוא Y", "הצעד הקריטי לפני Z הוא...", "הטעות הנפוצה ביותר היא...". פסקה קצרה אחת בסגנון Answer.
+3. **AEO** (Answer Engine — Bing/AI Overviews): סקציית FAQ עם 5-7 שאלות שיזם באמת שואל. תשובה ראשונה של 2-3 משפטים שעונה במלואה.
+
+המבנה הזה מבטיח שכל פיסקה ראשונה אחרי H2 היא citation-bait שלם בעצמו.
 
 ### 🎯 דוגמאות נכון/לא נכון:
 
@@ -59,6 +80,7 @@ export const DAVID_WRITING_RULES_EN = `
 3. **Never claim unverified facts**: no fabricated quotes, no fake case studies, no unproven partnerships.
 4. **Never link to leumit.weccelerate.co.il**: it's a broken (404) URL. Use https://weccelerate.co.il/services/medtech-leumit instead.
 5. **Never claim unproven leadership**: not "Israel's leading", "the first" — unless it's a verified fact.
+6. **Never name competitors**: no 8200 EISP, no The Junction, no F2 Capital, no MassChallenge, no Y Combinator / YC, no Google for Startups / Google Campus, no Techstars. Not in comparisons, not in "top accelerators in Israel" lists, not in examples. Competitors = other accelerators / Venture Builders serving the same audience. If you need to reference the category, write "other accelerators" or "other Israeli Venture Builders" without naming names. **VCs and angels are NOT competitors** — naming Aleph / TLV Partners / Pitango / etc. is fine when describing funding sources.
 
 ### ✅ Always required:
 1. **Marketing language focused on VALUE**: what the entrepreneur gains. Good: "you'll receive professional guidance through FDA approval" (service description). Bad: "we'll get you FDA approval" (promise).

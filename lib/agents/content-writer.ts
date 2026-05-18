@@ -27,6 +27,7 @@ import {
 import { loadJournal, summarizeJournalForWriter, type JournalSummary } from './journal';
 import { generateLinkedInPost } from './linkedin-post-generator';
 import { sendArticlePublishedEmail } from './article-published-email';
+import { findCompetitorMentions } from '@/lib/seo/competitor-list';
 
 const MODEL_RESEARCH = 'claude-sonnet-4-6';
 const MODEL_WRITE = 'claude-opus-4-7';
@@ -108,7 +109,11 @@ export async function writeNextGuide(opts?: { context?: DailyContext; journal?: 
   try {
     const research = await runResearch(gap.query, gap.competitors);
     const outline = await runOutline(gap.query, research.summary, research.sources);
-    const article = await runWrite(gap.query, outline, research.sources, ctx, journal);
+    const rawArticle = await runWrite(gap.query, outline, research.sources, ctx, journal);
+    // Belt-and-suspenders sanitization — Claude sometimes slips em-dashes
+    // through despite the system prompt. Strip them before linting so we
+    // don't reject an otherwise-good article on a cosmetic issue.
+    const article = sanitizeArticleBody(rawArticle);
     const internalLinks = pickInternalLinks(article.titleHe, article.contentHe);
     const factCheck = await runFactCheck(article.contentHe, research.sources);
     const seoLint = lintSeo(article);
@@ -515,6 +520,22 @@ function lintPolicy(a: ArticlePayload): PolicyLintResult {
     if (p.re.test(text)) violations.push(p.label);
   }
 
+  // Banned competitor mentions — we don't name competing accelerators /
+  // Venture Builders on our own properties. See lib/seo/competitor-list.ts
+  // for the authoritative list (covers 8200 EISP, The Junction, MassChallenge,
+  // Y Combinator, Google for Startups, etc.).
+  const competitorHits = findCompetitorMentions(text);
+  if (competitorHits.length > 0) {
+    violations.push(`mentions competitors: ${competitorHits.join(', ')}`);
+  }
+
+  // Banned em-dashes / en-dashes — the most reliable AI-tell in Hebrew prose.
+  // We sanitize on the way in too (see sanitizeBody below) but this is the
+  // belt: any article that still has them shouldn't be published.
+  if (/[—–]/.test(text)) {
+    violations.push('contains em-dash or en-dash (AI tell)');
+  }
+
   return { passed: violations.length === 0, violations };
 }
 
@@ -633,6 +654,24 @@ async function pingIndexNow(url: string): Promise<void> {
   } catch {
     /* non-fatal — Bing will eventually crawl on its own */
   }
+}
+
+/**
+ * Replace em/en dashes with plain hyphens throughout the article. Em-dashes
+ * are the single most reliable AI-tell in Hebrew prose, and the model
+ * sometimes uses them despite the system-prompt forbidding them. This is
+ * the pure-text safety net.
+ */
+function sanitizeArticleBody(a: ArticlePayload): ArticlePayload {
+  const fix = (s: string | null | undefined): string =>
+    typeof s === 'string' ? s.replace(/[—–]/g, '-') : '';
+  return {
+    titleHe: fix(a.titleHe),
+    titleEn: a.titleEn ? fix(a.titleEn) : null,
+    metaDescription: fix(a.metaDescription),
+    contentHe: fix(a.contentHe),
+    contentEn: a.contentEn ? fix(a.contentEn) : null,
+  };
 }
 
 /**

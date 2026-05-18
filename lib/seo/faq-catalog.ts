@@ -1,5 +1,5 @@
 /**
- * Extended FAQ Catalog — 50+ questions organized by intent.
+ * Extended FAQ Catalog - 50+ questions organized by intent.
  *
  * Intent categories:
  * - definitional: "what is X", "difference between X and Y"
@@ -38,8 +38,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is WeCcelerate?',
  },
  answer: {
- he: 'WeCcelerate (וויסלרייט) היא — Venture Builder ומאיץ סטארטאפים בישראל, הפועלת מתל אביב וירושלים משנת 2018. אנחנו מספקים ליווי מעטפת 360° — עוזרים לסטארטאפים בתחילת הדרך לקבל משאבים של חברה בוגרת: ייעוץ עסקי, פיתוח מוצר, שיווק, הכנה למשקיעים ומסלול MedTech בלעדי בשותפות עם לאומית שירותי בריאות.',
- en: 'WeCcelerate is an Israeli Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem since 2018. We provide 360° wrap-around support — helping early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor preparation, and an exclusive MedTech track in partnership with Leumit Health Services.',
+ he: 'WeCcelerate (וויסלרייט) היא - Venture Builder ומאיץ סטארטאפים בישראל, הפועלת מתל אביב וירושלים משנת 2018. אנחנו מספקים ליווי מעטפת 360° - עוזרים לסטארטאפים בתחילת הדרך לקבל משאבים של חברה בוגרת: ייעוץ עסקי, פיתוח מוצר, שיווק, הכנה למשקיעים ומסלול MedTech בלעדי בשותפות עם לאומית שירותי בריאות.',
+ en: 'WeCcelerate is an Israeli Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem since 2018. We provide 360° wrap-around support - helping early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor preparation, and an exclusive MedTech track in partnership with Leumit Health Services.',
  },
  },
  {
@@ -50,8 +50,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is a Venture Builder?',
  },
  answer: {
- he: 'Venture Builder (או "startup studio") הוא ארגון שיוצר, מפתח ומרחיב מספר סטארטאפים במקביל באמצעות אספקת הבסיס התפעולי — פיתוח, מוצר, שיווק, משפט וכספים. שונה מאקסלרטור שמספק מנטורינג והון סיד בלבד: Venture Builder משמש כשותף-מייסד פעיל ותורם את הצוות עצמו.',
- en: 'A Venture Builder (also known as a "startup studio" or "company builder") is an organization that creates, develops, and scales multiple startups in parallel by supplying the operational backbone — engineering, product, marketing, legal, finance. Unlike an accelerator, which provides only mentorship and seed capital, a Venture Builder acts as an active co-founder by contributing the team itself.',
+ he: 'Venture Builder (או "startup studio") הוא ארגון שיוצר, מפתח ומרחיב מספר סטארטאפים במקביל באמצעות אספקת הבסיס התפעולי - פיתוח, מוצר, שיווק, משפט וכספים. שונה מאקסלרטור שמספק מנטורינג והון סיד בלבד: Venture Builder משמש כשותף-מייסד פעיל ותורם את הצוות עצמו.',
+ en: 'A Venture Builder (also known as a "startup studio" or "company builder") is an organization that creates, develops, and scales multiple startups in parallel by supplying the operational backbone - engineering, product, marketing, legal, finance. Unlike an accelerator, which provides only mentorship and seed capital, a Venture Builder acts as an active co-founder by contributing the team itself.',
  },
  },
  {
@@ -62,8 +62,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between an accelerator and an incubator?',
  },
  answer: {
- he: 'אינקובטור מתמקד בשלבים המוקדמים ביותר — מספק מרחב עבודה, מנטורינג בסיסי וזמן פתוח לפיתוח רעיון. אקסלרטור (כמו WeCcelerate) מיועד לסטארטאפים עם רעיון מגובש או מוצר ראשוני; הוא מאיץ צמיחה באמצעות מנטורינג אינטנסיבי, משאבים, פיתוח וחיבור למשקיעים במחזורים בלוחות זמנים מותאמים. Venture Builder הוא רמה מעל — שותפות אופרטיבית עמוקה, לעיתים למשך שנים.',
- en: 'An incubator focuses on the earliest stages — workspace, basic mentorship, and open-ended time to develop an idea. An accelerator (like WeCcelerate) is designed for startups with a defined concept or early product; it accelerates growth through intensive mentoring, resources, development, and investor connections in 3–6 month cycles. A Venture Builder is a step beyond — a deep operational partnership that can last years.',
+ he: 'אינקובטור מתמקד בשלבים המוקדמים ביותר - מספק מרחב עבודה, מנטורינג בסיסי וזמן פתוח לפיתוח רעיון. אקסלרטור (כמו WeCcelerate) מיועד לסטארטאפים עם רעיון מגובש או מוצר ראשוני; הוא מאיץ צמיחה באמצעות מנטורינג אינטנסיבי, משאבים, פיתוח וחיבור למשקיעים במחזורים בלוחות זמנים מותאמים. Venture Builder הוא רמה מעל - שותפות אופרטיבית עמוקה, לעיתים למשך שנים.',
+ en: 'An incubator focuses on the earliest stages - workspace, basic mentorship, and open-ended time to develop an idea. An accelerator (like WeCcelerate) is designed for startups with a defined concept or early product; it accelerates growth through intensive mentoring, resources, development, and investor connections in 3-6 month cycles. A Venture Builder is a step beyond - a deep operational partnership that can last years.',
  },
  },
  {
@@ -86,8 +86,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is Product-Market Fit (PMF)?',
  },
  answer: {
- he: 'Product-Market Fit (PMF) הוא השלב שבו סטארטאפ הוכיח ששוק מסוים רוצה את המוצר מספיק כדי לשלם עליו, להשתמש בו ולהמליץ עליו. זו נקודת מפנה קריטית לפני גיוס Series A — ללא PMF, גיוס הון נוסף בדרך כלל לא משתלם.',
- en: 'Product-Market Fit (PMF) is the stage at which a startup has demonstrated that a market wants its product enough to pay for it, use it, and recommend it. It is a critical inflection point before a Series A raise — without PMF, further fundraising is usually unwarranted.',
+ he: 'Product-Market Fit (PMF) הוא השלב שבו סטארטאפ הוכיח ששוק מסוים רוצה את המוצר מספיק כדי לשלם עליו, להשתמש בו ולהמליץ עליו. זו נקודת מפנה קריטית לפני גיוס Series A - ללא PMF, גיוס הון נוסף בדרך כלל לא משתלם.',
+ en: 'Product-Market Fit (PMF) is the stage at which a startup has demonstrated that a market wants its product enough to pay for it, use it, and recommend it. It is a critical inflection point before a Series A raise - without PMF, further fundraising is usually unwarranted.',
  },
  },
  {
@@ -110,8 +110,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between MedTech and HealthTech?',
  },
  answer: {
- he: 'MedTech (טכנולוגיה רפואית) מתייחסת למוצרים, תוכנה או מכשור שמיועדים להקשרים קליניים ורפואיים מוגדרים — לרוב דורשים אישור רגולטורי (FDA, CE). HealthTech הוא מונח רחב יותר שכולל גם טכנולוגיה לבריאות צרכנית, ניהול בתי חולים, wellness וטלרפואה — לא בהכרח דורש אישור רגולטורי כמו מכשיר רפואי.',
- en: 'MedTech (Medical Technology) refers to products, software, or devices intended for defined clinical and medical contexts — typically requiring regulatory approval (FDA, CE). HealthTech is a broader term that includes consumer health, hospital management, wellness, and telemedicine — not necessarily requiring the same regulatory approval as a medical device.',
+ he: 'MedTech (טכנולוגיה רפואית) מתייחסת למוצרים, תוכנה או מכשור שמיועדים להקשרים קליניים ורפואיים מוגדרים - לרוב דורשים אישור רגולטורי (FDA, CE). HealthTech הוא מונח רחב יותר שכולל גם טכנולוגיה לבריאות צרכנית, ניהול בתי חולים, wellness וטלרפואה - לא בהכרח דורש אישור רגולטורי כמו מכשיר רפואי.',
+ en: 'MedTech (Medical Technology) refers to products, software, or devices intended for defined clinical and medical contexts - typically requiring regulatory approval (FDA, CE). HealthTech is a broader term that includes consumer health, hospital management, wellness, and telemedicine - not necessarily requiring the same regulatory approval as a medical device.',
  },
  },
  {
@@ -122,8 +122,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What are TAM, SAM, and SOM?',
  },
  answer: {
- he: 'TAM (Total Addressable Market) — סך השוק הפוטנציאלי הגלובלי. SAM (Serviceable Addressable Market) — החלק מ-TAM שהמוצר שלכם יכול לתת לו מענה מבחינה גיאוגרפית/רגולטורית. SOM (Serviceable Obtainable Market) — החלק מ-SAM שניתן לכבוש באופן מציאותי בטווח של מספר שנים. משקיעים מצפים לראות את שלושת הגדלים במצגת.',
- en: 'TAM (Total Addressable Market) — total global potential market. SAM (Serviceable Addressable Market) — the portion of TAM your product can serve given geographic and regulatory constraints. SOM (Serviceable Obtainable Market) — the portion of SAM you can realistically capture within 3–5 years. Investors expect to see all three figures in a pitch deck.',
+ he: 'TAM (Total Addressable Market) - סך השוק הפוטנציאלי הגלובלי. SAM (Serviceable Addressable Market) - החלק מ-TAM שהמוצר שלכם יכול לתת לו מענה מבחינה גיאוגרפית/רגולטורית. SOM (Serviceable Obtainable Market) - החלק מ-SAM שניתן לכבוש באופן מציאותי בטווח של מספר שנים. משקיעים מצפים לראות את שלושת הגדלים במצגת.',
+ en: 'TAM (Total Addressable Market) - total global potential market. SAM (Serviceable Addressable Market) - the portion of TAM your product can serve given geographic and regulatory constraints. SOM (Serviceable Obtainable Market) - the portion of SAM you can realistically capture within 3-5 years. Investors expect to see all three figures in a pitch deck.',
  },
  },
 
@@ -136,8 +136,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does it cost to develop an app?',
  },
  answer: {
- he: 'העלות והלוחות הזמנים נקבעים אישית לפי המוצר — MVP בסיסי למובייל, פלטפורמת ווב, או SaaS מורכב עם AI הם פרויקטים שונים מאוד מבחינת מורכבות, גודל צוות וניסיון מפתחים. נשמח לתת הצעת מחיר בפגישת היכרות חינם.',
- en: 'MVP cost depends on platform, backend complexity, and team seniority. We scope each project individually — basic mobile MVPs, web SaaS platforms, and AI-integrated apps each carry very different price points and timelines. Schedule a free intro call to scope your project.',
+ he: 'העלות והלוחות הזמנים נקבעים אישית לפי המוצר - MVP בסיסי למובייל, פלטפורמת ווב, או SaaS מורכב עם AI הם פרויקטים שונים מאוד מבחינת מורכבות, גודל צוות וניסיון מפתחים. נשמח לתת הצעת מחיר בפגישת היכרות חינם.',
+ en: 'MVP cost depends on platform, backend complexity, and team seniority. We scope each project individually - basic mobile MVPs, web SaaS platforms, and AI-integrated apps each carry very different price points and timelines. Schedule a free intro call to scope your project.',
  },
  },
  {
@@ -149,7 +149,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
  answer: {
  he: 'חבילת ייעוץ עסקי מלאה (מחקר שוק + תוכנית עסקית + תוכנית פיננסית + תקציר מנהלים + pitch deck): היקף בהתאמה אישית בלוחות זמנים מותאמים, תלוי בהיקף. פגישת ייעוץ ראשונה ראשונית ללא עלות.',
- en: 'A full business consulting package (market research + business plan + financial model + executive summary + pitch deck) costs 25,000–80,000 ILS over in adjusted timelines, depending on scope. The initial consultation is free.',
+ en: 'A full business consulting package (market research + business plan + financial model + executive summary + pitch deck) costs 25,000-80,000 ILS over in adjusted timelines, depending on scope. The initial consultation is free.',
  },
  },
  {
@@ -160,8 +160,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does the full MedTech track cost?',
  },
  answer: {
- he: 'מסלול MedTech מלא עם לאומית — היקף נבנה אישית לכל venture. מותאם אישית לכל venture.',
- en: 'Full MedTech track with Leumit: 100,000 ILS+ for a 12–18 month program, including clinical advisory, anonymized medical data access, clinic pilots, regulatory guidance (CE/FDA/Israeli MOH), and investor preparation. Pricing is customized per venture.',
+ he: 'מסלול MedTech מלא עם לאומית - היקף נבנה אישית לכל venture. מותאם אישית לכל venture.',
+ en: 'Full MedTech track with Leumit: 100,000 ILS+ for a 12-18 month program, including clinical advisory, anonymized medical data access, clinic pilots, regulatory guidance (CE/FDA/Israeli MOH), and investor preparation. Pricing is customized per venture.',
  },
  },
  {
@@ -184,8 +184,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does it take to build a business plan?',
  },
  answer: {
- he: 'תוכנית עסקית ברמת משקיעים נבנית בלוחות זמנים מותאמים, תלוי במורכבות התעשייה וברמת פירוט מחקר השוק. היא כוללת גם תקציר מנהלים של 2–4 עמודים לשליחה ישירה למשקיעים.',
- en: 'An investor-grade business plan is built in in adjusted timelines, depending on industry complexity and market research depth. It also includes a 2–4 page executive summary suitable for sending directly to investors.',
+ he: 'תוכנית עסקית ברמת משקיעים נבנית בלוחות זמנים מותאמים, תלוי במורכבות התעשייה וברמת פירוט מחקר השוק. היא כוללת גם תקציר מנהלים של 2-4 עמודים לשליחה ישירה למשקיעים.',
+ en: 'An investor-grade business plan is built in in adjusted timelines, depending on industry complexity and market research depth. It also includes a 2-4 page executive summary suitable for sending directly to investors.',
  },
  },
  {
@@ -196,8 +196,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does FDA 510(k) clearance take?',
  },
  answer: {
- he: 'אחרי הגשת 510(k), ה-FDA סוקר בממוצע בלוחות זמנים תלויי-מסלול. עם זאת, ההכנה — בחירת predicate device, הוכחת substantial equivalence, בדיקות ביצועים — אורכת לרוב בלוחות זמנים תלויי-מסלול נוספים. בסך הכל: ~בלוחות זמנים תלויי-מסלול מרעיון ועד clearance.',
- en: 'After a 510(k) submission, FDA review takes an average of over a flexible duration. However, preparation — predicate selection, substantial equivalence documentation, performance testing — typically adds over a flexible duration. Total: approximately over a flexible duration from idea to clearance.',
+ he: 'אחרי הגשת 510(k), ה-FDA סוקר בממוצע בלוחות זמנים תלויי-מסלול. עם זאת, ההכנה - בחירת predicate device, הוכחת substantial equivalence, בדיקות ביצועים - אורכת לרוב בלוחות זמנים תלויי-מסלול נוספים. בסך הכל: ~בלוחות זמנים תלויי-מסלול מרעיון ועד clearance.',
+ en: 'After a 510(k) submission, FDA review takes an average of over a flexible duration. However, preparation - predicate selection, substantial equivalence documentation, performance testing - typically adds over a flexible duration. Total: approximately over a flexible duration from idea to clearance.',
  },
  },
  {
@@ -208,8 +208,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does CE marking take?',
  },
  answer: {
- he: 'תהליך CE תחת MDR (Regulation 2017/745) אורך בדרך כלל בלוחות זמנים תלויי-מסלול למכשיר Class IIa–IIb, ועד תקופה תלוית-היקף ל-Class III. התהליך כולל ISO 13485, ISO 14971 (risk), IEC 62304 (אם יש תוכנה), תיקוף קליני ותיעוד טכני. נדרש Notified Body ברוב הקטגוריות.',
- en: 'CE marking under MDR (Regulation 2017/745) typically takes over a flexible duration for Class IIa–IIb devices, up to 24 months for Class III. The process includes ISO 13485, ISO 14971 (risk), IEC 62304 (if software), clinical evaluation, and technical documentation. A Notified Body is required for most classes.',
+ he: 'תהליך CE תחת MDR (Regulation 2017/745) אורך בדרך כלל בלוחות זמנים תלויי-מסלול למכשיר Class IIa-IIb, ועד תקופה תלוית-היקף ל-Class III. התהליך כולל ISO 13485, ISO 14971 (risk), IEC 62304 (אם יש תוכנה), תיקוף קליני ותיעוד טכני. נדרש Notified Body ברוב הקטגוריות.',
+ en: 'CE marking under MDR (Regulation 2017/745) typically takes over a flexible duration for Class IIa-IIb devices, up to 24 months for Class III. The process includes ISO 13485, ISO 14971 (risk), IEC 62304 (if software), clinical evaluation, and technical documentation. A Notified Body is required for most classes.',
  },
  },
  {
@@ -258,8 +258,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the ideal Pitch Deck structure?',
  },
  answer: {
- he: 'pitch deck מומלץ ב-WeCcelerate: (1) תיאור של משפט אחד; (2) בעיה + עדות לבעיה; (3) פתרון; (4) גודל שוק (TAM/SAM/SOM); (5) המוצר (demo); (6) traction; (7) מודל עסקי; (8) אסטרטגיית GTM; (9) תחרות; (10) צוות; (11) תחזיות פיננסיות (מספר שנים); (12) הסבב הנוכחי: סכום, שימוש, שווי; (13) חזון ו-exit. 10–15 שקפים. הטעות הנפוצה — לפתוח במוצר במקום בבעיה.',
- en: 'WeCcelerate-recommended pitch deck: (1) one-line description; (2) problem + evidence; (3) solution; (4) market size (TAM/SAM/SOM); (5) product (demo); (6) traction; (7) business model; (8) GTM strategy; (9) competition; (10) team; (11) financial projections (3 years); (12) current round: amount, use, valuation; (13) vision and exit. 10–15 slides total. Common mistake: opening with the product instead of the problem.',
+ he: 'pitch deck מומלץ ב-WeCcelerate: (1) תיאור של משפט אחד; (2) בעיה + עדות לבעיה; (3) פתרון; (4) גודל שוק (TAM/SAM/SOM); (5) המוצר (demo); (6) traction; (7) מודל עסקי; (8) אסטרטגיית GTM; (9) תחרות; (10) צוות; (11) תחזיות פיננסיות (מספר שנים); (12) הסבב הנוכחי: סכום, שימוש, שווי; (13) חזון ו-exit. 10-15 שקפים. הטעות הנפוצה - לפתוח במוצר במקום בבעיה.',
+ en: 'WeCcelerate-recommended pitch deck: (1) one-line description; (2) problem + evidence; (3) solution; (4) market size (TAM/SAM/SOM); (5) product (demo); (6) traction; (7) business model; (8) GTM strategy; (9) competition; (10) team; (11) financial projections (3 years); (12) current round: amount, use, valuation; (13) vision and exit. 10-15 slides total. Common mistake: opening with the product instead of the problem.',
  },
  },
  {
@@ -282,8 +282,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Does WeCcelerate take equity?',
  },
  answer: {
- he: 'לפעמים כן, לפעמים לא. האקוויטי מוגדר לכל התקשרות לפי שלב הסטארטאפ, סיכון והערך הכספי של השירותים. חלק מהשירותים בתשלום מזומן בלבד. בעבודה עם חברות גדולות (Corporate Venture Building) בד"כ משתמשים ב-retainer או success fee — בלי אקוויטי, IP מלא נשאר אצל הלקוח.',
- en: 'Sometimes yes, sometimes no. Equity is defined per engagement based on stage, risk, and the cash value of services provided. Some services are cash-only. In Corporate Venture Building engagements we typically use a retainer or success-fee model — no equity, with full IP retention by the client.',
+ he: 'לפעמים כן, לפעמים לא. האקוויטי מוגדר לכל התקשרות לפי שלב הסטארטאפ, סיכון והערך הכספי של השירותים. חלק מהשירותים בתשלום מזומן בלבד. בעבודה עם חברות גדולות (Corporate Venture Building) בד"כ משתמשים ב-retainer או success fee - בלי אקוויטי, IP מלא נשאר אצל הלקוח.',
+ en: 'Sometimes yes, sometimes no. Equity is defined per engagement based on stage, risk, and the cash value of services provided. Some services are cash-only. In Corporate Venture Building engagements we typically use a retainer or success-fee model - no equity, with full IP retention by the client.',
  },
  },
 
@@ -308,8 +308,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between FDA 510(k), De Novo, and PMA?',
  },
  answer: {
- he: '510(k) — המסלול הנפוץ ביותר; דורש הוכחת substantial equivalence ל-predicate device קיים, סקירה בלוחות זמנים מותאמים. De Novo — למכשירים חדשים low-to-moderate risk ללא predicate, יוצר סיווג חדש, בלוחות זמנים תלויי-מסלול. PMA (Premarket Approval) — למכשירי Class III (סיכון גבוה), דורש ניסויים קליניים, בלוחות זמנים תלויי-מסלול ומעלה.',
- en: '510(k) — the most common pathway; requires demonstrating substantial equivalence to an existing predicate device, 3–6 month review. De Novo — for novel low-to-moderate risk devices without a predicate, creates a new classification, over a flexible duration. PMA (Premarket Approval) — for Class III (high risk) devices, requires clinical trials, over a flexible duration or longer.',
+ he: '510(k) - המסלול הנפוץ ביותר; דורש הוכחת substantial equivalence ל-predicate device קיים, סקירה בלוחות זמנים מותאמים. De Novo - למכשירים חדשים low-to-moderate risk ללא predicate, יוצר סיווג חדש, בלוחות זמנים תלויי-מסלול. PMA (Premarket Approval) - למכשירי Class III (סיכון גבוה), דורש ניסויים קליניים, בלוחות זמנים תלויי-מסלול ומעלה.',
+ en: '510(k) - the most common pathway; requires demonstrating substantial equivalence to an existing predicate device, 3-6 month review. De Novo - for novel low-to-moderate risk devices without a predicate, creates a new classification, over a flexible duration. PMA (Premarket Approval) - for Class III (high risk) devices, requires clinical trials, over a flexible duration or longer.',
  },
  },
  {
@@ -349,43 +349,6 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
  },
 
- // -- COMPARATIVE (ECOSYSTEM) ---------------------------------------------
- {
- id: 'vs-8200-eisp',
- intent: 'comparative',
- question: {
- he: 'מה ההבדל בין WeCcelerate ל-8200 EISP?',
- en: 'What is the difference between WeCcelerate and 8200 EISP?',
- },
- answer: {
- he: '8200 EISP הוא אקסלרטור מבוסס-אלומני לבוגרי יחידה 8200, שפועל עם StarTAU. הוא mentor-first, מתמקד ב-cybersecurity ו-B2B enterprise. WeCcelerate פתוח לכל יזם ללא קשר לרקע, מתפקד כ-Venture Builder מלא עם צוות אופרטיבי, ומתמחה ב-MedTech דרך השותפות עם לאומית.',
- en: '8200 EISP is an alumni-based accelerator for graduates of Israeli Unit 8200, operated with StarTAU. It is mentor-first, focused on cybersecurity and B2B enterprise. WeCcelerate is open to any founder regardless of background, functions as a full Venture Builder with an operational team, and specializes in MedTech via the Leumit partnership.',
- },
- },
- {
- id: 'vs-the-junction',
- intent: 'comparative',
- question: {
- he: 'מה ההבדל בין WeCcelerate ל-The Junction?',
- en: 'What is the difference between WeCcelerate and The Junction (F2 Capital)?',
- },
- answer: {
- he: 'The Junction הוא אקסלרטור חינמי ללא אקוויטי של F2 Capital, ממוקד ב-B2B בשלב מוקדם — מספק מרחב עבודה, מנטורינג ומחזור קבוצתי. WeCcelerate מספקת מעורבות אופרטיבית עמוקה בהרבה, כולל פיתוח מוצר, תמיכה רגולטורית ומסלול MedTech בלעדי.',
- en: 'The Junction is a free, equity-free accelerator by F2 Capital focused on early-stage B2B startups — workspace, mentorship, cohorts. WeCcelerate provides substantially deeper operational involvement, including hands-on product development, regulatory support, and an exclusive MedTech track.',
- },
- },
- {
- id: 'vs-masschallenge',
- intent: 'comparative',
- question: {
- he: 'מה ההבדל בין WeCcelerate ל-MassChallenge?',
- en: 'What is the difference between WeCcelerate and MassChallenge Israel?',
- },
- answer: {
- he: 'MassChallenge Israel הוא אקסלרטור ללא אקוויטי עם רשת גלובלית ופרס יוקרתי בסיום, פועל במחזורים של תקופה תלוית-היקף. WeCcelerate פועלת באופן רציף (לא במחזורים), לעיתים לוקחת אקוויטי תמורת שירותים, ונכנסת לעומק אופרטיבי הרבה יותר גדול בכל venture.',
- en: 'MassChallenge Israel is a zero-equity accelerator with a global network and prestigious final award, running 4-month cycles. WeCcelerate operates continuously (no cohorts), sometimes takes equity in exchange for services, and goes substantially deeper operationally on each venture.',
- },
- },
 
  // -- PRACTICAL -----------------------------------------------------------
  {
@@ -396,7 +359,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do I apply to WeCcelerate?',
  },
  answer: {
- he: 'ממלאים את טופס יצירת הקשר ב-weccelerate.co.il/contact. נציג חוזר תוך 48 שעות לתיאום פגישת הכרות ראשונה — ללא עלות. אנחנו עובדים עם יזמים בכל שלב, מרעיון גולמי ועד חברות בשלב צמיחה.',
+ he: 'ממלאים את טופס יצירת הקשר ב-weccelerate.co.il/contact. נציג חוזר תוך 48 שעות לתיאום פגישת הכרות ראשונה - ללא עלות. אנחנו עובדים עם יזמים בכל שלב, מרעיון גולמי ועד חברות בשלב צמיחה.',
  en: 'Fill out the contact form at weccelerate.co.il/contact. A representative will get back to you within 48 hours to schedule a free introductory meeting. We work with founders at every stage, from raw idea to growth-stage companies.',
  },
  },
@@ -408,7 +371,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What stages does WeCcelerate support?',
  },
  answer: {
- he: 'מפרה-idea ועד פרה-IPO. תהליך הקבלה מתאים כל יזם למסלול המתאים: יזמים ברמת רעיון — תוכנית Venture Builder; חברות עם מוצר ו-traction ראשוני — אקסלרטור; חברות בצמיחה — שירותים נקודתיים (הכנה למשקיעים, scale טכנולוגי, התרחבות בינ"ל).',
+ he: 'מפרה-idea ועד פרה-IPO. תהליך הקבלה מתאים כל יזם למסלול המתאים: יזמים ברמת רעיון - תוכנית Venture Builder; חברות עם מוצר ו-traction ראשוני - אקסלרטור; חברות בצמיחה - שירותים נקודתיים (הכנה למשקיעים, scale טכנולוגי, התרחבות בינ"ל).',
  en: 'From pre-idea through pre-IPO. The intake process matches each founder to the appropriate track: idea-stage founders → Venture Builder program; companies with a product and early traction → accelerator; growth-stage companies → targeted services (investor prep, tech scaling, international expansion).',
  },
  },
@@ -420,8 +383,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What languages does WeCcelerate work in?',
  },
  answer: {
- he: 'עברית ואנגלית — כל השירותים זמינים בשתי השפות. מסמכים למשקיעים, תוכניות עסקיות ו-pitch decks נבנים לרוב באנגלית גם ליזמים עבריים, כי רשת המשקיעים בינ"ל.',
- en: 'Hebrew and English — all services are available in both. Investor-facing documents, business plans, and pitch decks are typically produced in English even for Hebrew-native founders, because the investor network is international.',
+ he: 'עברית ואנגלית - כל השירותים זמינים בשתי השפות. מסמכים למשקיעים, תוכניות עסקיות ו-pitch decks נבנים לרוב באנגלית גם ליזמים עבריים, כי רשת המשקיעים בינ"ל.',
+ en: 'Hebrew and English - all services are available in both. Investor-facing documents, business plans, and pitch decks are typically produced in English even for Hebrew-native founders, because the investor network is international.',
  },
  },
  {
@@ -432,8 +395,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Where are WeCcelerate\'s offices located?',
  },
  answer: {
- he: 'משרד ראשי: הרכבת 58, תל אביב 6777801. סניף משני: ירושלים. שעות: ראשון–חמישי, 09:00–18:00 (שעון ישראל).',
- en: 'Primary office: HaRakevet 58, Tel Aviv 6777801. Secondary office: Jerusalem. Hours: Sunday–Thursday, 09:00–18:00 Israel Time.',
+ he: 'משרד ראשי: הרכבת 58, תל אביב 6777801. סניף משני: ירושלים. שעות: ראשון-חמישי, 09:00-18:00 (שעון ישראל).',
+ en: 'Primary office: HaRakevet 58, Tel Aviv 6777801. Secondary office: Jerusalem. Hours: Sunday-Thursday, 09:00-18:00 Israel Time.',
  },
  },
  {
@@ -444,8 +407,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Can I apply as a solo founder?',
  },
  answer: {
- he: 'כן. מודל ה-Venture Builder אפילו מתאים יותר ליזמים יחידים — WeCcelerate מספקת את השותפים האופרטיביים (טכנולוגי, מוצר, שיווק) שיזם יחיד אחרת היה נדרש לגייס לבד.',
- en: 'Yes. The Venture Builder model is particularly well-suited to solo founders — WeCcelerate supplies the operational co-founders (technical, product, marketing) that a solo founder would otherwise need to recruit independently.',
+ he: 'כן. מודל ה-Venture Builder אפילו מתאים יותר ליזמים יחידים - WeCcelerate מספקת את השותפים האופרטיביים (טכנולוגי, מוצר, שיווק) שיזם יחיד אחרת היה נדרש לגייס לבד.',
+ en: 'Yes. The Venture Builder model is particularly well-suited to solo founders - WeCcelerate supplies the operational co-founders (technical, product, marketing) that a solo founder would otherwise need to recruit independently.',
  },
  },
  {
@@ -468,8 +431,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Who owns the intellectual property (IP) created during engagement?',
  },
  answer: {
- he: 'ב-Corporate Venture Building — ה-IP המלא נשאר אצל הלקוח. בהתקשרויות של יזמים שבהן WeCcelerate לוקחת אקוויטי — ה-IP שייך ל-NewCo (החברה החדשה) שבה WeCcelerate מחזיקה אקוויטי — סטנדרט מקובל במודל Venture Builder.',
- en: 'In Corporate Venture Building, full IP ownership remains with the client. In founder-led engagements where WeCcelerate takes equity, IP is owned by the NewCo (the startup entity) in which WeCcelerate holds equity — standard practice in the Venture Builder model.',
+ he: 'ב-Corporate Venture Building - ה-IP המלא נשאר אצל הלקוח. בהתקשרויות של יזמים שבהן WeCcelerate לוקחת אקוויטי - ה-IP שייך ל-NewCo (החברה החדשה) שבה WeCcelerate מחזיקה אקוויטי - סטנדרט מקובל במודל Venture Builder.',
+ en: 'In Corporate Venture Building, full IP ownership remains with the client. In founder-led engagements where WeCcelerate takes equity, IP is owned by the NewCo (the startup entity) in which WeCcelerate holds equity - standard practice in the Venture Builder model.',
  },
  },
 
@@ -482,8 +445,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What advantage does the Leumit MedTech partnership provide?',
  },
  answer: {
- he: 'שלושה נכסים שקשה מאוד להשיג בשוק: (1) גישה מובנית לדאטה רפואי אנונימי דרך השותפות עם לאומית — לאימון ML, מחקרים retrospective ו-real-world evidence; (2) פיילוטים קליניים במרפאות לאומית עם רופאים ומטופלים; (3) קשרים מובנים עם רופאים-יועצים של לאומית. בנוסף — ההמלצה של לאומית היא חותם מהותי מול משקיעים בבריאות.',
- en: 'Three assets that are difficult to obtain on the open market: (1) structured access to anonymized longitudinal medical data via the Leumit partnership — for ML training, retrospective studies, and real-world evidence; (2) clinical pilots in Leumit\'s clinics with real physicians and patients; (3) structured relationships with Leumit-affiliated physician advisors. Additionally, the Leumit endorsement is a significant signal to healthcare investors.',
+ he: 'שלושה נכסים שקשה מאוד להשיג בשוק: (1) גישה מובנית לדאטה רפואי אנונימי דרך השותפות עם לאומית - לאימון ML, מחקרים retrospective ו-real-world evidence; (2) פיילוטים קליניים במרפאות לאומית עם רופאים ומטופלים; (3) קשרים מובנים עם רופאים-יועצים של לאומית. בנוסף - ההמלצה של לאומית היא חותם מהותי מול משקיעים בבריאות.',
+ en: 'Three assets that are difficult to obtain on the open market: (1) structured access to anonymized longitudinal medical data via the Leumit partnership - for ML training, retrospective studies, and real-world evidence; (2) clinical pilots in Leumit\'s clinics with real physicians and patients; (3) structured relationships with Leumit-affiliated physician advisors. Additionally, the Leumit endorsement is a significant signal to healthcare investors.',
  },
  },
  {
@@ -506,8 +469,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How is medical data kept secure and anonymized?',
  },
  answer: {
- he: 'כל גישה לדאטה של לאומית עוברת אישור ועדת הלסינקי, בקרת קצין הגנת פרטיות, וחוזה מחייב של ההצפנה, שימוש והחזקה. הנתונים אנונימיים לחלוטין — זיהוי מטופלים מוסר לפני מסירה, ולמקומות מעטים ניתנת גישה direct-query בסביבה מבוקרת.',
- en: 'Every data access at Leumit passes Helsinki Committee approval, a data protection officer review, and a binding contract covering encryption, use, and retention. Data is fully anonymized — patient identifiers are removed before delivery, and for select cases, direct query access is granted only in a controlled environment.',
+ he: 'כל גישה לדאטה של לאומית עוברת אישור ועדת הלסינקי, בקרת קצין הגנת פרטיות, וחוזה מחייב של ההצפנה, שימוש והחזקה. הנתונים אנונימיים לחלוטין - זיהוי מטופלים מוסר לפני מסירה, ולמקומות מעטים ניתנת גישה direct-query בסביבה מבוקרת.',
+ en: 'Every data access at Leumit passes Helsinki Committee approval, a data protection officer review, and a binding contract covering encryption, use, and retention. Data is fully anonymized - patient identifiers are removed before delivery, and for select cases, direct query access is granted only in a controlled environment.',
  },
  },
 
@@ -532,8 +495,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Which industries does WeCcelerate serve?',
  },
  answer: {
- he: 'כל תחומי הטכנולוגיה: FinTech, EdTech, FoodTech, AgriTech, PropTech, RetailTech, InsurTech, LegalTech, CleanTech, HealthTech/MedTech/BioTech, Cybersecurity, Enterprise Software, Consumer Apps. היתרון הייחודי — מסלול MedTech עם לאומית.',
- en: 'All technology sectors: FinTech, EdTech, FoodTech, AgriTech, PropTech, RetailTech, InsurTech, LegalTech, CleanTech, HealthTech/MedTech/BioTech, Cybersecurity, Enterprise Software, Consumer Apps. Unique differentiator — the MedTech track with Leumit.',
+ he: 'כל תחומי הטכנולוגיה: FinTech, EdTech, FoodTech, AgriTech, PropTech, RetailTech, InsurTech, LegalTech, CleanTech, HealthTech/MedTech/BioTech, Cybersecurity, Enterprise Software, Consumer Apps. היתרון הייחודי - מסלול MedTech עם לאומית.',
+ en: 'All technology sectors: FinTech, EdTech, FoodTech, AgriTech, PropTech, RetailTech, InsurTech, LegalTech, CleanTech, HealthTech/MedTech/BioTech, Cybersecurity, Enterprise Software, Consumer Apps. Unique differentiator - the MedTech track with Leumit.',
  },
  },
  {
@@ -544,8 +507,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What services does WeCcelerate offer?',
  },
  answer: {
- he: '(1) ייעוץ עסקי ואסטרטגי — מחקר שוק, תוכנית עסקית, מודל פיננסי, pitch deck. (2) פיתוח מוצר פיזי — הנדסה, prototyping, ייצור המוני. (3) פיתוח מוצר דיגיטלי — web, mobile, SaaS, AI, CTO-as-a-Service. (4) שיווק ויחסי ציבור — דיגיטלי, PR, רשתות חברתיות, מיתוג. (5) מסלול MedTech עם לאומית — ייעוץ קליני, דאטה, פיילוטים, רגולציה. (6) הכנה למשקיעים וחיבור לרשת משקיעים, יזמים ושותפים אסטרטגיים.',
- en: '(1) Business consulting — market research, business plan, financial model, pitch deck. (2) Physical product development — engineering, prototyping, mass production. (3) Digital product development — web, mobile, SaaS, AI, CTO-as-a-Service. (4) Marketing and PR — digital, PR, social media, branding. (5) MedTech track with Leumit — clinical advisory, data, pilots, regulatory. (6) Investor preparation and access to a 200+ investor network.',
+ he: '(1) ייעוץ עסקי ואסטרטגי - מחקר שוק, תוכנית עסקית, מודל פיננסי, pitch deck. (2) פיתוח מוצר פיזי - הנדסה, prototyping, ייצור המוני. (3) פיתוח מוצר דיגיטלי - web, mobile, SaaS, AI, CTO-as-a-Service. (4) שיווק ויחסי ציבור - דיגיטלי, PR, רשתות חברתיות, מיתוג. (5) מסלול MedTech עם לאומית - ייעוץ קליני, דאטה, פיילוטים, רגולציה. (6) הכנה למשקיעים וחיבור לרשת משקיעים, יזמים ושותפים אסטרטגיים.',
+ en: '(1) Business consulting - market research, business plan, financial model, pitch deck. (2) Physical product development - engineering, prototyping, mass production. (3) Digital product development - web, mobile, SaaS, AI, CTO-as-a-Service. (4) Marketing and PR - digital, PR, social media, branding. (5) MedTech track with Leumit - clinical advisory, data, pilots, regulatory. (6) Investor preparation and access to a 200+ investor network.',
  },
  },
 
@@ -610,8 +573,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What does WeCcelerate business consulting include?',
  },
  answer: {
- he: '(1) מחקר שוק עם TAM/SAM/SOM; (2) ניתוח תחרות ו-positioning; (3) תוכנית עסקית מלאה (40–80 עמודים); (4) תקציר מנהלים (2–4 עמודים) למשקיעים; (5) מודל פיננסי מספר שנים עם CAC, LTV, unit economics ותרחישים; (6) אסטרטגיית GTM ו-sales motion; (7) אסטרטגיית שיווק ומיקום. מסירה בלוחות זמנים תלויי-היקף.',
- en: '(1) Market research with TAM/SAM/SOM; (2) competitive analysis and positioning; (3) full business plan (40–80 pages); (4) executive summary (2–4 pages) for investors; (5) 3–5 year financial model with CAC, LTV, unit economics, and scenarios; (6) GTM strategy and sales motion; (7) marketing strategy and positioning. Delivery in in adjusted timelines.',
+ he: '(1) מחקר שוק עם TAM/SAM/SOM; (2) ניתוח תחרות ו-positioning; (3) תוכנית עסקית מלאה (40-80 עמודים); (4) תקציר מנהלים (2-4 עמודים) למשקיעים; (5) מודל פיננסי מספר שנים עם CAC, LTV, unit economics ותרחישים; (6) אסטרטגיית GTM ו-sales motion; (7) אסטרטגיית שיווק ומיקום. מסירה בלוחות זמנים תלויי-היקף.',
+ en: '(1) Market research with TAM/SAM/SOM; (2) competitive analysis and positioning; (3) full business plan (40-80 pages); (4) executive summary (2-4 pages) for investors; (5) 3-5 year financial model with CAC, LTV, unit economics, and scenarios; (6) GTM strategy and sales motion; (7) marketing strategy and positioning. Delivery in in adjusted timelines.',
  },
  },
 
@@ -624,8 +587,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How does WeCcelerate develop physical products?',
  },
  answer: {
- he: 'התהליך כולל: (1) עיצוב תעשייתי (ID) עם CAD ואיפיון ארגונומי; (2) הנדסה מכנית עם DFM ו-FEA; (3) הנדסת אלקטרוניקה — PCB, firmware, ניהול הספק; (4) prototyping ב-3D printing (FDM/SLA/SLS), CNC ו-low-volume injection molding; (5) בחירת ספקים בישראל, סין ומזרח אירופה; (6) QA וסקרי ספקים; (7) הסמכה — CE, FCC, UL, ISO 13485 (רפואי); (8) ייצור המוני ולוגיסטיקה.',
- en: 'The process includes: (1) industrial design (ID) with CAD and ergonomic analysis; (2) mechanical engineering with DFM and FEA; (3) electronic engineering — PCB, firmware, power management; (4) prototyping with 3D printing (FDM/SLA/SLS), CNC, and low-volume injection molding; (5) supplier selection in Israel, China, and Eastern Europe; (6) QA and supplier audits; (7) certification — CE, FCC, UL, ISO 13485 (medical); (8) mass production and logistics.',
+ he: 'התהליך כולל: (1) עיצוב תעשייתי (ID) עם CAD ואיפיון ארגונומי; (2) הנדסה מכנית עם DFM ו-FEA; (3) הנדסת אלקטרוניקה - PCB, firmware, ניהול הספק; (4) prototyping ב-3D printing (FDM/SLA/SLS), CNC ו-low-volume injection molding; (5) בחירת ספקים בישראל, סין ומזרח אירופה; (6) QA וסקרי ספקים; (7) הסמכה - CE, FCC, UL, ISO 13485 (רפואי); (8) ייצור המוני ולוגיסטיקה.',
+ en: 'The process includes: (1) industrial design (ID) with CAD and ergonomic analysis; (2) mechanical engineering with DFM and FEA; (3) electronic engineering - PCB, firmware, power management; (4) prototyping with 3D printing (FDM/SLA/SLS), CNC, and low-volume injection molding; (5) supplier selection in Israel, China, and Eastern Europe; (6) QA and supplier audits; (7) certification - CE, FCC, UL, ISO 13485 (medical); (8) mass production and logistics.',
  },
  },
  {
@@ -636,8 +599,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What does digital product development at WeCcelerate include?',
  },
  answer: {
- he: 'פיתוח full-stack המכסה web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel) ו-AI (OpenAI/Claude/Gemini). הצעות: MVP (בלוחות זמנים מותאמים), מוצר production (בלוחות זמנים תלויי-מסלול), CTO-as-a-Service (10–20 שעות/שבוע), staff augmentation ו-technical due diligence למשקיעים.',
- en: 'Full-stack development covering web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel), and AI (OpenAI/Claude/Gemini). Offerings: MVP (in adjusted timelines), production product (over a flexible duration), CTO-as-a-Service (10–20 hours/week), staff augmentation, and technical due diligence for investors.',
+ he: 'פיתוח full-stack המכסה web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel) ו-AI (OpenAI/Claude/Gemini). הצעות: MVP (בלוחות זמנים מותאמים), מוצר production (בלוחות זמנים תלויי-מסלול), CTO-as-a-Service (10-20 שעות/שבוע), staff augmentation ו-technical due diligence למשקיעים.',
+ en: 'Full-stack development covering web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel), and AI (OpenAI/Claude/Gemini). Offerings: MVP (in adjusted timelines), production product (over a flexible duration), CTO-as-a-Service (10-20 hours/week), staff augmentation, and technical due diligence for investors.',
  },
  },
 
@@ -651,7 +614,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
  answer: {
  he: 'רשת משקיעים, יזמים ושותפים אסטרטגיים: קרנות הון סיכון (VC), זרועות הון סיכון קורפורטיבי (CVC), סינדיקטים של אנג\'לים ומשרדי משפחה (family offices). כל ההיכרויות חמות וממוקדות לתזת המשקיע, לא "spray and pray".',
- en: 'a network of specialized investors: venture capital (VC), corporate venture capital (CVC), angel syndicates, and family offices. All introductions are warm and targeted to the investor\'s thesis — not "spray and pray".',
+ en: 'a network of specialized investors: venture capital (VC), corporate venture capital (CVC), angel syndicates, and family offices. All introductions are warm and targeted to the investor\'s thesis - not "spray and pray".',
  },
  },
  {
@@ -689,7 +652,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
  answer: {
  he: 'השם המשפטי הוא WeCcelerate Ltd. חברה ישראלית רשומה, נוסדה ב-2018.',
- en: 'The legal name is WeCcelerate Ltd. — an Israeli registered company, founded in 2018.',
+ en: 'The legal name is WeCcelerate Ltd. - an Israeli registered company, founded in 2018.',
  },
  },
  {
@@ -706,7 +669,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
 
  // ============================================================
- // "מיזם" CLUSTER FAQs — added 2026-04-23 to align with the
+ // "מיזם" CLUSTER FAQs - added 2026-04-23 to align with the
  // Hebrew-native venture/entrepreneurship vocabulary.
  // ============================================================
  {
@@ -729,8 +692,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is a Venture Builder (בונה מיזמים)?',
  },
  answer: {
- he: 'בונה מיזמים (Venture Builder) הוא ארגון שיוצר ומפתח מספר מיזמים במקביל באמצעות אספקת הצוות התפעולי המלא — פיתוח, מוצר, שיווק, יועצי משפט. שונה מאקסלרטור (שמספק רק מנטורינג) — בונה מיזמים משמש כשותף-מייסד פעיל. WeCcelerate היא בונה מיזמים בישראל.',
- en: 'A Venture Builder ("בונה מיזמים" in Hebrew) is an organization that creates and develops multiple ventures in parallel by contributing the full operational team — engineering, product, marketing, legal. Unlike accelerators (which only provide mentorship), a Venture Builder acts as an active co-founder. WeCcelerate is Israel\'s leading Venture Builder.',
+ he: 'בונה מיזמים (Venture Builder) הוא ארגון שיוצר ומפתח מספר מיזמים במקביל באמצעות אספקת הצוות התפעולי המלא - פיתוח, מוצר, שיווק, יועצי משפט. שונה מאקסלרטור (שמספק רק מנטורינג) - בונה מיזמים משמש כשותף-מייסד פעיל. WeCcelerate היא בונה מיזמים בישראל.',
+ en: 'A Venture Builder ("בונה מיזמים" in Hebrew) is an organization that creates and develops multiple ventures in parallel by contributing the full operational team - engineering, product, marketing, legal. Unlike accelerators (which only provide mentorship), a Venture Builder acts as an active co-founder. WeCcelerate is Israel\'s leading Venture Builder.',
  },
  },
  {
@@ -741,8 +704,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What\'s the difference between a venture and a startup?',
  },
  answer: {
- he: 'מיזם הוא כל חברה חדשה. סטארטאפ הוא תת-קטגוריה של מיזם — ספציפית כזה ששואף לצמיחה אקספוננציאלית ולאקזיט גדול (scope tailored). כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים, מיזם חברתי, או חברת שירותים יציבה.',
- en: 'A venture is any new company. A startup is a sub-category of venture — specifically one aiming for exponential growth and a large exit (scope tailored). Every startup is a venture, but a venture can also be a services business, a social venture, or a stable services company.',
+ he: 'מיזם הוא כל חברה חדשה. סטארטאפ הוא תת-קטגוריה של מיזם - ספציפית כזה ששואף לצמיחה אקספוננציאלית ולאקזיט גדול (scope tailored). כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים, מיזם חברתי, או חברת שירותים יציבה.',
+ en: 'A venture is any new company. A startup is a sub-category of venture - specifically one aiming for exponential growth and a large exit (scope tailored). Every startup is a venture, but a venture can also be a services business, a social venture, or a stable services company.',
  },
  },
  {
@@ -765,8 +728,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is a "חברת הזנק" / "מיזם הזנק"?',
  },
  answer: {
- he: 'חברת הזנק / מיזם הזנק הוא המונח הישראלי-הרשמי לסטארטאפ — חברה ישראלית בע"מ שמקדישה רוב משאביה ל-R&D טכנולוגי. רשות החדשנות הישראלית משתמשת במונח באופן רשמי. הכרה כחברת הזנק פותחת מסלולי גרנט (קרן המו"פ, חממה טכנולוגית) והטבות מס.',
- en: '"חברת הזנק" / "מיזם הזנק" is the official Israeli term for a startup — an Israeli Ltd. that dedicates most of its resources to technological R&D. The Israel Innovation Authority uses the term officially. Recognition as a "חברת הזנק" unlocks grant tracks (R&D Fund, Tech Incubator) and tax benefits.',
+ he: 'חברת הזנק / מיזם הזנק הוא המונח הישראלי-הרשמי לסטארטאפ - חברה ישראלית בע"מ שמקדישה רוב משאביה ל-R&D טכנולוגי. רשות החדשנות הישראלית משתמשת במונח באופן רשמי. הכרה כחברת הזנק פותחת מסלולי גרנט (קרן המו"פ, חממה טכנולוגית) והטבות מס.',
+ en: '"חברת הזנק" / "מיזם הזנק" is the official Israeli term for a startup - an Israeli Ltd. that dedicates most of its resources to technological R&D. The Israel Innovation Authority uses the term officially. Recognition as a "חברת הזנק" unlocks grant tracks (R&D Fund, Tech Incubator) and tax benefits.',
  },
  },
  {
@@ -789,8 +752,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What\'s the difference between venture mentorship, an accelerator, and a Venture Builder?',
  },
  answer: {
- he: 'ליווי מיזם הוא מנטור פרטי — שעות ייעוץ נקודתיות (היקף תלוי/שעה). אקסלרטור — מנטורינג מובנה + הון סיד למחזור בלוחות זמנים תלויי-מסלול, מבני תשלום נבנים אישית. Venture Builder (בונה מיזמים) — תורם צוות תפעולי מלא ועובד בפועל על המיזם. WeCcelerate היא Venture Builder.',
- en: 'Venture mentorship is a private mentor — pointed consulting hours (scope tailored/hour). An accelerator — structured mentorship + seed capital for a 3-6 month cycle, 5-10% equity. A Venture Builder — contributes a full operational team and works on the venture. WeCcelerate is a Venture Builder.',
+ he: 'ליווי מיזם הוא מנטור פרטי - שעות ייעוץ נקודתיות (היקף תלוי/שעה). אקסלרטור - מנטורינג מובנה + הון סיד למחזור בלוחות זמנים תלויי-מסלול, מבני תשלום נבנים אישית. Venture Builder (בונה מיזמים) - תורם צוות תפעולי מלא ועובד בפועל על המיזם. WeCcelerate היא Venture Builder.',
+ en: 'Venture mentorship is a private mentor - pointed consulting hours (scope tailored/hour). An accelerator - structured mentorship + seed capital for a 3-6 month cycle, 5-10% equity. A Venture Builder - contributes a full operational team and works on the venture. WeCcelerate is a Venture Builder.',
  },
  },
  {
@@ -801,11 +764,10 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do I start a MedTech venture in Israel?',
  },
  answer: {
- he: 'שלושה שלבים קריטיים: (1) צירוף רופא בכיר לצוות (Chief Medical Officer או יועץ קליני), (2) אישור ועדת הלסינקי למחקר עם בני אדם או מידע מזהה, (3) שותפות לגישה לדאטה רפואית — קופת חולים אידיאלית. תוכנית WeCcelerate × Leumit מציעה גישה מובנית לדאטה אנונימית ולפיילוטים קליניים דרך השותפות עם לאומית.',
- en: 'Three critical steps: (1) add a senior physician to the team (Chief Medical Officer or clinical advisor), (2) Helsinki Committee approval for research involving humans or identifiable data, (3) data access partnership — an HMO is ideal. WeCcelerate × Leumit offers structured access to anonymized clinical data and pilot opportunities via the Leumit partnership.',
+ he: 'שלושה שלבים קריטיים: (1) צירוף רופא בכיר לצוות (Chief Medical Officer או יועץ קליני), (2) אישור ועדת הלסינקי למחקר עם בני אדם או מידע מזהה, (3) שותפות לגישה לדאטה רפואית - קופת חולים אידיאלית. תוכנית WeCcelerate × Leumit מציעה גישה מובנית לדאטה אנונימית ולפיילוטים קליניים דרך השותפות עם לאומית.',
+ en: 'Three critical steps: (1) add a senior physician to the team (Chief Medical Officer or clinical advisor), (2) Helsinki Committee approval for research involving humans or identifiable data, (3) data access partnership - an HMO is ideal. WeCcelerate × Leumit offers structured access to anonymized clinical data and pilot opportunities via the Leumit partnership.',
  },
- },
-];
+ }];
 
 // Group helpers
 export function getFaqsByIntent(intent: FaqIntent): readonly FaqEntry[] {
@@ -817,6 +779,6 @@ export const FAQ_INTENTS: Record<FaqIntent, { he: string; en: string }> = {
  transactional: { he: 'מחיר וזמנים', en: 'Pricing & Timelines' },
  comparative: { he: 'השוואות', en: 'Comparisons' },
  regulatory: { he: 'רגולציה רפואית', en: 'Medical Regulation' },
- practical: { he: 'פרקטי — איך מתחילים', en: 'Practical — How to Start' },
+ practical: { he: 'פרקטי - איך מתחילים', en: 'Practical - How to Start' },
  ecosystem: { he: 'האקוסיסטם', en: 'Ecosystem' },
 };

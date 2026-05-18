@@ -82,10 +82,10 @@ export const BRAND = {
  tagline: 'מהרעיון להשפעה',
  },
  
- // Descriptions — Venture Builder positioning
+ // Descriptions - Venture Builder positioning
  descriptions: {
  short: {
- he: 'וויסלרייט — Venture Builder ומאיץ סטארטאפים מוביל בתל אביב וירושלים. MedTech, AI ואסטרטגיית IP.',
+ he: 'וויסלרייט - Venture Builder ומאיץ סטארטאפים מוביל בתל אביב וירושלים. MedTech, AI ואסטרטגיית IP.',
  en: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
  },
  medium: {
@@ -93,7 +93,7 @@ export const BRAND = {
  en: 'WeCcelerate is a leading Venture Builder and Startup Accelerator in Tel Aviv & Jerusalem. We specialize in MedTech, AI, and IP strategy, with an strategic partnership with Leumit Health Care.',
  },
  long: {
- he: 'וויסלרייט הוא — Venture Builder ומאיץ סטארטאפים בישראל, הפועל מתל אביב וירושלים. אנו מלווים יזמים מהרעיון לשוק בתחומי MedTech, בינה מלאכותית וטכנולוגיה עמוקה. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול Medical Accelerator בלעדי עם גישה לדאטה רפואי, פיילוטים קליניים, הכוונה רגולטורית ותמיכה בוועדת הלסינקי.',
+ he: 'וויסלרייט הוא - Venture Builder ומאיץ סטארטאפים בישראל, הפועל מתל אביב וירושלים. אנו מלווים יזמים מהרעיון לשוק בתחומי MedTech, בינה מלאכותית וטכנולוגיה עמוקה. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול Medical Accelerator בלעדי עם גישה לדאטה רפואי, פיילוטים קליניים, הכוונה רגולטורית ותמיכה בוועדת הלסינקי.',
  en: 'WeCcelerate is Israel\'s premier Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem. We guide entrepreneurs from idea to market across MedTech, AI, and deep-tech sectors. Our strategic partnership with Leumit Health Care creates an exclusive Medical Accelerator track with access to medical data, clinical pilots, and regulatory support.',
  },
  },
@@ -412,13 +412,13 @@ export function constructMetadata({
  noIndex = false,
 }: ConstructMetadataParams): Metadata {
  // Use the page-supplied title as-is. Don't pre-wrap with the brand suffix
- // here — Next.js applies the parent layout's title.template to title.default,
+ // here - Next.js applies the parent layout's title.template to title.default,
  // which would re-append the suffix and double-wrap it.
  const fullTitle = title;
 
  const metaDescription = description || SITE_CONFIG.defaultDescription;
  
- // Compile all keywords (deduplicated) — semantic core first
+ // Compile all keywords (deduplicated) - semantic core first
  const allKeywords = [...SEMANTIC_CORE,...BRAND.english.variations,...BRAND.hebrew.variations,...KEYWORDS.userIntent.hebrew,...KEYWORDS.userIntent.english,...KEYWORDS.industry.hebrew,...KEYWORDS.industry.english,...keywords,
  ];
  const uniqueKeywords = [...new Set(allKeywords)];

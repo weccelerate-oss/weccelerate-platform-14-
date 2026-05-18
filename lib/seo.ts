@@ -21,25 +21,25 @@ export const SITE_CONFIG = {
  name: 'WeCcelerate',
  url: 'https://weccelerate.co.il',
 
- // Default description — Venture Builder positioning
- defaultDescription: 'WeCcelerate — 360° wrap-around support from idea to successful global startup. Israel\'s leading Venture Builder, specializing in MedTech, AI, and IP strategy. Partnered with Leumit Health Care.',
+ // Default description - Venture Builder positioning
+ defaultDescription: 'WeCcelerate - 360° wrap-around support from idea to successful global startup. Israel\'s leading Venture Builder, specializing in MedTech, AI, and IP strategy. Partnered with Leumit Health Care.',
 
  // Title template for all pages
  titleTemplate: '%s | WeCcelerate - Venture Builder & Startup Accelerator Israel',
 
- // Descriptions by length — 360° wrap-around support framing
+ // Descriptions by length - 360° wrap-around support framing
  description: {
  short: {
- en: 'WeCcelerate — 360° wrap-around support from idea to successful global startup. Israel\'s leading Venture Builder, specializing in MedTech, AI, and IP strategy. Partnered with Leumit Health Care.',
- he: 'וויסלרייט — ליווי מעטפת 360° מרעיון לסטארט-אפ מצליח. — Venture Builder ומאיץ סטארטאפים בישראל, המתמחה ב-MedTech, AI ואסטרטגיית IP. בשותפות עם לאומית שירותי בריאות.',
+ en: 'WeCcelerate - 360° wrap-around support from idea to successful global startup. Israel\'s leading Venture Builder, specializing in MedTech, AI, and IP strategy. Partnered with Leumit Health Care.',
+ he: 'וויסלרייט - ליווי מעטפת 360° מרעיון לסטארט-אפ מצליח. - Venture Builder ומאיץ סטארטאפים בישראל, המתמחה ב-MedTech, AI ואסטרטגיית IP. בשותפות עם לאומית שירותי בריאות.',
  },
  medium: {
- en: 'WeCcelerate provides 360° wrap-around support for startups — from idea to successful global venture. We help early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor matching, and an exclusive MedTech track with Leumit Health Care.',
- he: 'וויסלרייט מספקת ליווי מעטפת 360° לסטארטאפים — מרעיון לסטארט-אפ מצליח בכל העולם. עוזרים לסטארט-אפים בתחילת הדרך לקבל מעטפת של סטארט-אפ בשלב בוגר: ייעוץ עסקי, פיתוח מוצר, שיווק, חיבור למשקיעים ומסלול MedTech בלעדי עם לאומית.',
+ en: 'WeCcelerate provides 360° wrap-around support for startups - from idea to successful global venture. We help early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor matching, and an exclusive MedTech track with Leumit Health Care.',
+ he: 'וויסלרייט מספקת ליווי מעטפת 360° לסטארטאפים - מרעיון לסטארט-אפ מצליח בכל העולם. עוזרים לסטארט-אפים בתחילת הדרך לקבל מעטפת של סטארט-אפ בשלב בוגר: ייעוץ עסקי, פיתוח מוצר, שיווק, חיבור למשקיעים ומסלול MedTech בלעדי עם לאומית.',
  },
  long: {
- en: 'WeCcelerate is Israel\'s premier Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem. We provide 360° wrap-around support — guiding entrepreneurs from idea to successful global startup. We help early-stage startups access enterprise-grade resources across MedTech, AI, and deep-tech sectors. Our strategic partnership with Leumit Health Care creates an exclusive Medical Accelerator track with access to anonymized medical data, clinical pilots, Helsinki Committee guidance, and regulatory support. From MVP development and CTO services to IP strategy, patent registration, investor preparation, and investor matching — WeCcelerate is the Innovation Hub where startups become ventures.',
- he: 'וויסלרייט הוא — Venture Builder ומאיץ סטארטאפים בישראל, הפועל מתל אביב וירושלים. אנו מספקים ליווי מעטפת 360° — מרעיון לסטארט-אפ מצליח בכל העולם. עוזרים לסטארט-אפים בתחילת הדרך לקבל מעטפת של סטארט-אפ בשלב בוגר בתחומי MedTech, בינה מלאכותית וטכנולוגיה עמוקה. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול Medical Accelerator בלעדי עם גישה לדאטה רפואי אנונימי, פיילוטים קליניים, הכוונה לוועדת הלסינקי ותמיכה רגולטורית. מפיתוח MVP ושירותי CTO ועד אסטרטגיית IP, רישום פטנטים, הכנה למשקיעים וחיבור למשקיעים — וויסלרייט הוא מרכז החדשנות שבו סטארטאפים הופכים למיזמים.',
+ en: 'WeCcelerate is Israel\'s premier Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem. We provide 360° wrap-around support - guiding entrepreneurs from idea to successful global startup. We help early-stage startups access enterprise-grade resources across MedTech, AI, and deep-tech sectors. Our strategic partnership with Leumit Health Care creates an exclusive Medical Accelerator track with access to anonymized medical data, clinical pilots, Helsinki Committee guidance, and regulatory support. From MVP development and CTO services to IP strategy, patent registration, investor preparation, and investor matching - WeCcelerate is the Innovation Hub where startups become ventures.',
+ he: 'וויסלרייט הוא - Venture Builder ומאיץ סטארטאפים בישראל, הפועל מתל אביב וירושלים. אנו מספקים ליווי מעטפת 360° - מרעיון לסטארט-אפ מצליח בכל העולם. עוזרים לסטארט-אפים בתחילת הדרך לקבל מעטפת של סטארט-אפ בשלב בוגר בתחומי MedTech, בינה מלאכותית וטכנולוגיה עמוקה. השותפות האסטרטגית שלנו עם לאומית שירותי בריאות יוצרת מסלול Medical Accelerator בלעדי עם גישה לדאטה רפואי אנונימי, פיילוטים קליניים, הכוונה לוועדת הלסינקי ותמיכה רגולטורית. מפיתוח MVP ושירותי CTO ועד אסטרטגיית IP, רישום פטנטים, הכנה למשקיעים וחיבור למשקיעים - וויסלרייט הוא מרכז החדשנות שבו סטארטאפים הופכים למיזמים.',
  },
  },
  
@@ -657,8 +657,8 @@ export const FAQ_ITEMS = [
  en: 'How much does it cost to develop an app?',
  },
  answer: {
- he: 'עלות פיתוח אפליקציה תלויה במורכבות, בפיצ\'רים ובפלטפורמה. כל פרויקט מתומחר אישית לפי ההיקף — MVP בסיסי, אפליקציה מלאה, ו-SaaS מורכב הם פרויקטים שונים מאוד. ב-WeCcelerate אנו מציעים הערכת עלויות חינם ומסלולי תשלום גמישים.',
- en: 'App development costs depend on complexity, platform, and features. We scope each project individually — basic MVPs, full apps, and complex SaaS each carry very different price points. At WeCcelerate we offer free cost estimates and flexible payment plans.',
+ he: 'עלות פיתוח אפליקציה תלויה במורכבות, בפיצ\'רים ובפלטפורמה. כל פרויקט מתומחר אישית לפי ההיקף - MVP בסיסי, אפליקציה מלאה, ו-SaaS מורכב הם פרויקטים שונים מאוד. ב-WeCcelerate אנו מציעים הערכת עלויות חינם ומסלולי תשלום גמישים.',
+ en: 'App development costs depend on complexity, platform, and features. We scope each project individually - basic MVPs, full apps, and complex SaaS each carry very different price points. At WeCcelerate we offer free cost estimates and flexible payment plans.',
  },
  },
  {
@@ -737,8 +737,8 @@ export const FAQ_ITEMS = [
  en: 'How to apply to WeCcelerate?',
  },
  answer: {
- he: 'הגשת מועמדות פשוטה — מלאו את טופס יצירת קשר באתר weccelerate.co.il/contact ונציג יחזור אליכם תוך 48 שעות לתיאום פגישת הכרות ראשונית (ללא עלות). אנו מלווים יזמים בכל שלב — מרעיון גולמי ועד חברות בצמיחה.',
- en: 'Applying is simple — fill out the contact form at weccelerate.co.il/contact and a representative will get back to you within 48 hours to schedule a free introductory meeting. We support entrepreneurs at every stage — from raw idea to growth-stage companies.',
+ he: 'הגשת מועמדות פשוטה - מלאו את טופס יצירת קשר באתר weccelerate.co.il/contact ונציג יחזור אליכם תוך 48 שעות לתיאום פגישת הכרות ראשונית (ללא עלות). אנו מלווים יזמים בכל שלב - מרעיון גולמי ועד חברות בצמיחה.',
+ en: 'Applying is simple - fill out the contact form at weccelerate.co.il/contact and a representative will get back to you within 48 hours to schedule a free introductory meeting. We support entrepreneurs at every stage - from raw idea to growth-stage companies.',
  },
  },
 ] as const;
@@ -751,9 +751,9 @@ export const FAQ_DATA = FAQ_ITEMS;
 // =============================================================================
 
 // WeCcelerate's active, owned social profiles. Twitter/X and GitHub are
-// intentionally NOT included — Twitter is not owned by the company; GitHub
+// intentionally NOT included - Twitter is not owned by the company; GitHub
 // is not user-facing. Do not add additional profiles here unless the company
-// actually owns them — schema sameAs with dead/unowned URLs damages entity
+// actually owns them - schema sameAs with dead/unowned URLs damages entity
 // recognition.
 export const SOCIAL_LINKS = {
  facebook: 'https://www.facebook.com/weccelerate',
@@ -761,7 +761,7 @@ export const SOCIAL_LINKS = {
  instagram: 'https://www.instagram.com/weccelerate.ltd',
  youtube: 'https://www.youtube.com/@WeCcelerate.Ltd1',
  tiktok: 'https://www.tiktok.com/@weccelerate',
- // Crunchbase — currently at misspelled slug `weccelerat` (missing E).
+ // Crunchbase - currently at misspelled slug `weccelerat` (missing E).
  // Update to `weccelerate` once Crunchbase support fixes the slug.
  crunchbase: 'https://www.crunchbase.com/organization/weccelerat',
 } as const;
@@ -798,7 +798,7 @@ export const CONTACT = {
  fullHe: 'סניף ירושלים, ירושלים, ישראל',
  },
  },
- // Legacy alias — points to Tel Aviv (primary office)
+ // Legacy alias - points to Tel Aviv (primary office)
  address: {
  street: 'HaRakevet 58',
  streetHe: 'רחוב הרכבת 58',
@@ -855,7 +855,7 @@ export function constructMetadata(options: MetadataOptions): Metadata {
 
  // Use the page-supplied title as-is. Each caller is responsible for keeping
  // it under ~60 chars including any brand suffix it wants. Don't pre-wrap
- // here AND set title.template — Next.js applies the parent template to
+ // here AND set title.template - Next.js applies the parent template to
  // title.default, so pre-wrapping caused the suffix to appear twice.
  const fullTitle = title;
 
