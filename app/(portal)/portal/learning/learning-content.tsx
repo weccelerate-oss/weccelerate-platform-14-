@@ -27,6 +27,8 @@ import {
   X,
   History,
   RotateCcw,
+  Flame,
+  Timer,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { COURSES_DATA, getTotalLessons } from '@/lib/courses-data';
@@ -182,7 +184,24 @@ const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ligh
 // MAIN COMPONENT
 // =============================================================================
 
-export function LearningContent({ user: _user, initialProgress }: LearningContentProps) {
+function hebrewGreeting(now: Date = new Date()): string {
+  const h = now.getHours();
+  if (h >= 5 && h < 12) return 'בוקר טוב';
+  if (h >= 12 && h < 17) return 'צהריים טובים';
+  if (h >= 17 && h < 22) return 'ערב טוב';
+  return 'לילה טוב';
+}
+
+function formatWatchTime(totalSec: number): string {
+  if (totalSec < 60) return `${totalSec} שניות`;
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  if (hours === 0) return `${minutes} דק׳`;
+  if (minutes === 0) return `${hours} שע׳`;
+  return `${hours} שע׳ ${minutes} דק׳`;
+}
+
+export function LearningContent({ user, initialProgress }: LearningContentProps) {
   // The single source of truth for "what does the user know / where did
   // they stop." Keyed by slug for O(1) lookup from any render path.
   // On load, treat any lesson past the completion threshold as completed —
@@ -225,6 +244,25 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
     [progressMap],
   );
   const overallPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+
+  // Engagement stats for the hero strip. Computed from the same progressMap
+  // so they stay perfectly in sync with the rest of the page.
+  const engagementStats = useMemo(() => {
+    let watchSec = 0;
+    let thisWeek = 0;
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    for (const p of progressMap.values()) {
+      // Sum effective watch time: full duration for completed lessons,
+      // current position for in-progress ones.
+      if (isEffectivelyDone(p) && p.durationSec) watchSec += p.durationSec;
+      else if (p.positionSec > 0) watchSec += p.positionSec;
+
+      if (p.lastWatchedAt && new Date(p.lastWatchedAt).getTime() >= weekAgo) {
+        thisWeek++;
+      }
+    }
+    return { watchSec, thisWeek };
+  }, [progressMap]);
 
   // The "continue watching" pick: the most-recently-touched in-progress lesson.
   // Falls back to nothing if everything is done or untouched.
@@ -427,23 +465,78 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
 
   return (
     <div>
-      {/* Header with hero image */}
+      {/* Header — personalized greeting, decorative orbs, headline stats */}
       <div className="relative border-b border-white/[0.04] overflow-hidden">
         <div className="absolute inset-0">
-          <img src="/images/portal/learning-hero.png" alt="" className="w-full h-full object-cover opacity-10" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/50 to-[#070b1e]" />
+          <img src="/images/portal/learning-hero.png" alt="" className="w-full h-full object-cover opacity-[0.08]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/40 to-[#070b1e]" />
         </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-gradient-to-br from-[#c8a951] to-[#e8d48b] rounded-xl text-[#070b1e]">
-              <GraduationCap className="w-6 h-6" />
+
+        {/* Soft gradient orbs — purely decorative, blurred behind content */}
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 0.5, scale: 1 }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
+          className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-[#c8a951]/20 blur-3xl pointer-events-none"
+        />
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 0.4, scale: 1 }}
+          transition={{ duration: 1.2, delay: 0.2, ease: 'easeOut' }}
+          className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-blue-500/15 blur-3xl pointer-events-none"
+        />
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-7 sm:py-10 relative z-10">
+          {/* Greeting + icon */}
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6"
+          >
+            <div className="relative flex-shrink-0">
+              {/* Halo */}
+              <div className="absolute inset-0 bg-[#c8a951]/40 blur-xl rounded-2xl" aria-hidden />
+              <div className="relative p-3 bg-gradient-to-br from-[#e8d48b] to-[#c8a951] rounded-2xl text-[#070b1e] shadow-lg">
+                <GraduationCap className="w-7 h-7" />
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">מרכז הלמידה</h1>
-              <p className="text-white/50 text-sm mt-0.5">
-                קורסים להעשרה שילוו אותך לאורך כל המסע היזמי
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-[#c8a951] uppercase tracking-wider">
+                {hebrewGreeting()}, {user.name}
               </p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight mt-0.5">
+                {completedCount === 0
+                  ? 'מסע הלמידה שלך מתחיל כאן'
+                  : completedCount === totalLessons
+                    ? 'סיימת את כל הקורסים — כל הכבוד!'
+                    : 'בוא נמשיך מאיפה שעצרת'}
+              </h1>
             </div>
+          </motion.div>
+
+          {/* Quick engagement stats */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6">
+            <StatChip
+              icon={<Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              label="שיעורים שהושלמו"
+              value={String(completedCount)}
+              accent="emerald"
+            />
+            <StatChip
+              icon={<Timer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              label="זמן צפייה"
+              value={engagementStats.watchSec > 0 ? formatWatchTime(engagementStats.watchSec) : '—'}
+              accent="blue"
+            />
+            <StatChip
+              icon={<Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              label="השבוע"
+              value={String(engagementStats.thisWeek)}
+              accent="amber"
+            />
           </div>
 
           <OverallProgress
@@ -518,6 +611,49 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
           />
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// =============================================================================
+// STAT CHIP — small accent-coloured engagement counter for the hero
+// =============================================================================
+
+const STAT_ACCENTS: Record<string, { ring: string; text: string; iconBg: string }> = {
+  emerald: { ring: 'ring-emerald-400/20', text: 'text-emerald-300', iconBg: 'bg-emerald-500/15' },
+  blue: { ring: 'ring-blue-400/20', text: 'text-blue-300', iconBg: 'bg-blue-500/15' },
+  amber: { ring: 'ring-amber-400/20', text: 'text-amber-300', iconBg: 'bg-amber-500/15' },
+};
+
+function StatChip({
+  icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  accent: 'emerald' | 'blue' | 'amber';
+}) {
+  const a = STAT_ACCENTS[accent];
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl',
+        'bg-white/[0.03] backdrop-blur-md ring-1',
+        a.ring,
+      )}
+    >
+      <div className={cn('p-1.5 sm:p-2 rounded-lg flex-shrink-0', a.iconBg, a.text)}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className={cn('text-sm sm:text-base font-bold leading-none truncate', a.text)}>
+          {value}
+        </p>
+        <p className="text-[10px] sm:text-xs text-white/50 mt-0.5 truncate">{label}</p>
+      </div>
     </div>
   );
 }
@@ -745,7 +881,12 @@ function CategoryCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+      whileHover={{ y: -2 }}
+      className={cn(
+        'bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] overflow-hidden',
+        'shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300',
+        'hover:border-white/[0.16] hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)]',
+      )}
     >
       <button
         onClick={() => onToggleCategory(category.slug)}
@@ -976,10 +1117,10 @@ function LessonRow({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.04 }}
       className={cn(
-        'group flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer',
-        'hover:bg-white/[0.03]',
+        'group flex items-center gap-3 p-2 sm:p-2.5 rounded-xl transition-all cursor-pointer',
+        'hover:bg-white/[0.04]',
         isCompleted && 'bg-white/[0.02]',
-        inProgress && 'bg-white/[0.025] ring-1 ring-[#c8a951]/10',
+        inProgress && 'bg-white/[0.025] ring-1 ring-[#c8a951]/15',
       )}
       onClick={onOpen}
     >
@@ -997,9 +1138,34 @@ function LessonRow({
         {isCompleted ? (
           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
         ) : (
-          <Circle className="w-5 h-5 text-white/20 group-hover:text-white/40" />
+          <Circle className="w-5 h-5 text-white/25 group-hover:text-white/50" />
         )}
       </button>
+
+      {/* Thumbnail — gives every lesson real visual weight. Falls back
+          gracefully on slow connections; YouTube's CDN is fast and cached. */}
+      <div className={cn(
+        'relative flex-shrink-0 w-14 h-10 sm:w-16 sm:h-12 rounded-lg overflow-hidden bg-black/40 ring-1 transition',
+        isCompleted ? 'ring-emerald-500/15' : 'ring-white/[0.06] group-hover:ring-white/15',
+      )}>
+        <img
+          src={`https://i.ytimg.com/vi/${lesson.youtubeId}/mqdefault.jpg`}
+          alt=""
+          loading="lazy"
+          className={cn(
+            'w-full h-full object-cover transition',
+            isCompleted && 'opacity-50',
+          )}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        <div className={cn(
+          'absolute inset-0 grid place-items-center transition-opacity',
+          'opacity-0 group-hover:opacity-100',
+          'bg-black/30',
+        )}>
+          <Play className="w-4 h-4 text-white fill-current" />
+        </div>
+      </div>
 
       {/* Lesson title + optional "ממשיך" tag */}
       <div className="flex-1 min-w-0">
@@ -1007,7 +1173,7 @@ function LessonRow({
           <span
             className={cn(
               'text-sm font-medium transition-colors truncate',
-              isCompleted ? 'text-white/30 line-through' : 'text-white/80',
+              isCompleted ? 'text-white/40 line-through' : 'text-white/85 group-hover:text-white',
             )}
           >
             {lesson.title}
@@ -1018,9 +1184,12 @@ function LessonRow({
             </span>
           )}
         </div>
+        <p className="text-[11px] text-white/40 mt-0.5 truncate">
+          {isCompleted ? '✓ צפית בשיעור' : inProgress ? 'בהמשך צפייה' : 'לחץ להתחיל'}
+        </p>
       </div>
 
-      {/* Play button */}
+      {/* Play affordance on the side — always visible for "ממשיך", hover for the rest */}
       <div
         className={cn(
           'flex-shrink-0 p-1.5 rounded-lg transition-all',
