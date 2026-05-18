@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
   ChevronDown,
+  ChevronLeft,
   CheckCircle2,
   Circle,
   Clock,
@@ -93,6 +94,20 @@ function buildLessonIndex(): Map<string, LessonIndex> {
   return map;
 }
 
+// Flat traversal order: every lesson in the order they appear on the page.
+// Powers "מומלץ הבא" + continuous autoplay across subcategory/category seams.
+function buildLessonOrder(): string[] {
+  const order: string[] = [];
+  for (const category of COURSES_DATA) {
+    for (const subcategory of category.subcategories) {
+      for (const lesson of subcategory.lessons) {
+        order.push(lesson.slug);
+      }
+    }
+  }
+  return order;
+}
+
 // =============================================================================
 // ICON / COLOR MAPS
 // =============================================================================
@@ -150,8 +165,22 @@ const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ligh
 export function LearningContent({ user: _user, initialProgress }: LearningContentProps) {
   // The single source of truth for "what does the user know / where did
   // they stop." Keyed by slug for O(1) lookup from any render path.
+  // On load, treat any lesson past the completion threshold as completed —
+  // covers rows written before the server-side auto-complete rule existed,
+  // so the gold progress bar reflects reality immediately.
   const [progressMap, setProgressMap] = useState<Map<string, LessonProgress>>(
-    () => new Map(initialProgress.map((p) => [p.slug, p])),
+    () => {
+      const m = new Map<string, LessonProgress>();
+      for (const p of initialProgress) {
+        const pastThreshold =
+          !p.completed &&
+          p.durationSec !== null &&
+          p.durationSec > 0 &&
+          p.positionSec / p.durationSec >= COMPLETE_RATIO;
+        m.set(p.slug, pastThreshold ? { ...p, completed: true } : p);
+      }
+      return m;
+    },
   );
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
@@ -163,6 +192,17 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
 
   const totalLessons = useMemo(() => getTotalLessons(), []);
   const lessonIndex = useMemo(() => buildLessonIndex(), []);
+  const lessonOrder = useMemo(() => buildLessonOrder(), []);
+
+  // Returns the next lesson after `slug` in display order, or null at end.
+  const getNextLesson = useCallback(
+    (slug: string): LessonIndex | null => {
+      const idx = lessonOrder.indexOf(slug);
+      if (idx < 0 || idx >= lessonOrder.length - 1) return null;
+      return lessonIndex.get(lessonOrder[idx + 1]) ?? null;
+    },
+    [lessonOrder, lessonIndex],
+  );
 
   const completedCount = useMemo(
     () => Array.from(progressMap.values()).filter((p) => p.completed).length,
@@ -247,6 +287,18 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
       if (patch.completed === false && patch.positionSec === undefined) {
         next.positionSec = 0;
       }
+      // Mirror the server's auto-complete rule on the client so the overall
+      // progress bar reflects "finished" the instant the video crosses the
+      // threshold — no waiting for the API round-trip.
+      if (
+        patch.completed === undefined &&
+        typeof next.positionSec === 'number' &&
+        typeof next.durationSec === 'number' &&
+        next.durationSec > 0 &&
+        next.positionSec / next.durationSec >= COMPLETE_RATIO
+      ) {
+        next.completed = true;
+      }
       setProgressMap((prev) => {
         const m = new Map(prev);
         m.set(slug, next);
@@ -254,7 +306,7 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
       });
 
       try {
-        await fetch('/api/portal/lessons/progress', {
+        const res = await fetch('/api/portal/lessons/progress', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -263,6 +315,32 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
           }),
           keepalive: true, // ensures saves survive a tab close on the way out
         });
+        // Trust the server's view as the source of truth — it might have
+        // auto-completed based on a different threshold or rejected the patch.
+        if (res.ok) {
+          const data = (await res.json().catch(() => null)) as
+            | {
+                success?: boolean;
+                completed?: boolean;
+                positionSec?: number;
+                durationSec?: number | null;
+                lastWatchedAt?: string | null;
+              }
+            | null;
+          if (data?.success && typeof data.completed === 'boolean') {
+            setProgressMap((prev) => {
+              const m = new Map(prev);
+              m.set(slug, {
+                slug,
+                completed: data.completed!,
+                positionSec: data.positionSec ?? next.positionSec,
+                durationSec: data.durationSec ?? next.durationSec,
+                lastWatchedAt: data.lastWatchedAt ?? next.lastWatchedAt,
+              });
+              return m;
+            });
+          }
+        }
       } catch {
         // Revert on hard failure so the UI doesn't lie.
         setProgressMap((prev) => {
@@ -309,6 +387,22 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
     ensureLessonVisible(continueLesson.lesson.slug);
     openLesson(continueLesson.lesson, continueLesson.category.color);
   }, [continueLesson, openLesson, ensureLessonVisible]);
+
+  // Switch the modal to the next lesson without closing it. Powers both the
+  // "Up Next" CTA and the autoplay countdown.
+  const playNext = useCallback(
+    (currentSlug: string) => {
+      const next = getNextLesson(currentSlug);
+      if (!next) {
+        setActiveLesson(null);
+        return;
+      }
+      ensureLessonVisible(next.lesson.slug);
+      setActiveLesson(next.lesson);
+      setActiveCategoryColor(next.category.color);
+    },
+    [getNextLesson, ensureLessonVisible],
+  );
 
   return (
     <div>
@@ -386,9 +480,11 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
       <AnimatePresence>
         {activeLesson && (
           <VideoModal
+            key={activeLesson.slug}
             lesson={activeLesson}
             color={activeCategoryColor}
             progress={progressMap.get(activeLesson.slug)}
+            nextLesson={getNextLesson(activeLesson.slug)}
             onToggleComplete={() => toggleLessonComplete(activeLesson.slug)}
             onSavePosition={(positionSec, durationSec) =>
               patchProgress(activeLesson.slug, { positionSec, durationSec })
@@ -396,6 +492,7 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
             onAutoComplete={(positionSec, durationSec) =>
               patchProgress(activeLesson.slug, { completed: true, positionSec, durationSec })
             }
+            onPlayNext={() => playNext(activeLesson.slug)}
             onClose={closeLesson}
           />
         )}
@@ -461,7 +558,6 @@ function OverallProgress({
 
 function ContinueCard({
   entry,
-  progress,
   onResume,
 }: {
   entry: LessonIndex;
@@ -469,12 +565,7 @@ function ContinueCard({
   onResume: () => void;
 }) {
   const colors = COLOR_MAP[entry.category.color] || COLOR_MAP.blue;
-  const percent = progressPercent(progress);
   const thumb = `https://i.ytimg.com/vi/${entry.lesson.youtubeId}/hqdefault.jpg`;
-  const remainingSec =
-    progress.durationSec && progress.durationSec > 0
-      ? Math.max(0, progress.durationSec - progress.positionSec)
-      : null;
 
   return (
     <motion.div
@@ -508,13 +599,6 @@ function ContinueCard({
               <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current ms-0.5" />
             </span>
           </div>
-          {/* Thumbnail-bottom progress bar */}
-          <div className="absolute bottom-0 inset-x-0 h-1 bg-black/40">
-            <div
-              className={cn('h-full transition-all', colors.progress)}
-              style={{ width: `${percent}%` }}
-            />
-          </div>
         </button>
 
         {/* Text + CTA */}
@@ -530,28 +614,7 @@ function ContinueCard({
             {entry.category.name} · {entry.subcategory.name}
           </p>
 
-          <div className="mt-3 flex items-center gap-3">
-            <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
-              <motion.div
-                className={cn('h-full rounded-full', colors.progress)}
-                initial={{ width: 0 }}
-                animate={{ width: `${percent}%` }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-              />
-            </div>
-            <span className="text-xs font-medium text-white/60 tabular-nums whitespace-nowrap">
-              {progress.durationSec
-                ? `${formatTime(progress.positionSec)} / ${formatTime(progress.durationSec)}`
-                : formatTime(progress.positionSec)}
-            </span>
-          </div>
-
-          <div className="mt-3 sm:mt-4 flex items-center justify-between gap-3">
-            <span className="text-xs text-white/40">
-              {remainingSec !== null
-                ? `נשארו ${formatTime(remainingSec)}`
-                : `צפית עד ${formatTime(progress.positionSec)}`}
-            </span>
+          <div className="mt-4 flex items-center justify-end">
             <button
               onClick={onResume}
               className={cn(
@@ -590,46 +653,35 @@ function RecentlyWatchedStrip({
       </div>
       {/* Horizontal scroll on mobile, wraps on desktop */}
       <div className="flex gap-2 overflow-x-auto sm:flex-wrap pb-1 -mx-1 px-1 scrollbar-hide">
-        {items.map(({ entry, progress }) => {
-          const percent = progressPercent(progress);
-          const colors = COLOR_MAP[entry.category.color] || COLOR_MAP.blue;
-          return (
-            <button
-              key={entry.lesson.slug}
-              onClick={() => onOpen(entry.lesson.slug)}
-              className={cn(
-                'group flex-shrink-0 flex items-center gap-2 max-w-[240px] sm:max-w-none',
-                'px-3 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] transition',
+        {items.map(({ entry, progress }) => (
+          <button
+            key={entry.lesson.slug}
+            onClick={() => onOpen(entry.lesson.slug)}
+            className={cn(
+              'group flex-shrink-0 flex items-center gap-2 max-w-[240px] sm:max-w-none',
+              'px-3 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] transition',
+            )}
+          >
+            <div className="relative flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-black/40">
+              <img
+                src={`https://i.ytimg.com/vi/${entry.lesson.youtubeId}/default.jpg`}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+                <Play className="w-3.5 h-3.5 text-white fill-current" />
+              </div>
+            </div>
+            <div className="min-w-0 text-right">
+              <p className="text-xs font-medium text-white/80 truncate max-w-[150px] sm:max-w-[200px]">
+                {entry.lesson.title}
+              </p>
+              {progress.completed && (
+                <p className="text-[10px] text-emerald-400 font-medium">הושלם</p>
               )}
-            >
-              <div className="relative flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-black/40">
-                <img
-                  src={`https://i.ytimg.com/vi/${entry.lesson.youtubeId}/default.jpg`}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/30 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-                  <Play className="w-3.5 h-3.5 text-white fill-current" />
-                </div>
-                <div className="absolute bottom-0 inset-x-0 h-0.5 bg-black/40">
-                  <div className={cn('h-full', colors.progress)} style={{ width: `${percent}%` }} />
-                </div>
-              </div>
-              <div className="min-w-0 text-right">
-                <p className="text-xs font-medium text-white/80 truncate max-w-[150px] sm:max-w-[200px]">
-                  {entry.lesson.title}
-                </p>
-                <p className="text-[10px] text-white/40 tabular-nums">
-                  {progress.completed ? (
-                    <span className="text-emerald-400">הושלם</span>
-                  ) : (
-                    `${percent}%`
-                  )}
-                </p>
-              </div>
-            </button>
-          );
-        })}
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -893,7 +945,6 @@ function LessonRow({
   const colors = COLOR_MAP[color] || COLOR_MAP.blue;
   const isCompleted = Boolean(progress?.completed);
   const inProgress = isInProgress(progress);
-  const percent = progressPercent(progress);
 
   return (
     <motion.div
@@ -908,7 +959,9 @@ function LessonRow({
       )}
       onClick={onOpen}
     >
-      {/* Completion / progress indicator */}
+      {/* Completion indicator — no progress bar, by design. The system still
+          tracks position internally; the YouTube player surfaces it to the
+          user. We only show "started" via the side badge. */}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -919,14 +972,12 @@ function LessonRow({
       >
         {isCompleted ? (
           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-        ) : inProgress ? (
-          <ProgressRing percent={percent} className={colors.ring} />
         ) : (
           <Circle className="w-5 h-5 text-white/20 group-hover:text-white/40" />
         )}
       </button>
 
-      {/* Lesson info + optional thin progress bar */}
+      {/* Lesson title + optional "ממשיך" tag */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
           <span
@@ -943,21 +994,6 @@ function LessonRow({
             </span>
           )}
         </div>
-        {inProgress && (
-          <div className="mt-1.5 flex items-center gap-2">
-            <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className={cn('h-full rounded-full transition-all duration-500', colors.progress)}
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-            <span className="text-[10px] text-white/40 tabular-nums whitespace-nowrap">
-              {progress?.durationSec
-                ? `${formatTime(progress.positionSec)} / ${formatTime(progress.durationSec)}`
-                : formatTime(progress?.positionSec ?? 0)}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Play button */}
@@ -1031,21 +1067,27 @@ function loadYouTubeApi(): Promise<void> {
 
 const SAVE_INTERVAL_MS = 10_000; // throttle in-flight saves while playing
 
+const AUTOPLAY_COUNTDOWN_SEC = 6;
+
 function VideoModal({
   lesson,
   color,
   progress,
+  nextLesson,
   onToggleComplete,
   onSavePosition,
   onAutoComplete,
+  onPlayNext,
   onClose,
 }: {
   lesson: LessonData;
   color: string;
   progress: LessonProgress | undefined;
+  nextLesson: LessonIndex | null;
   onToggleComplete: () => void;
   onSavePosition: (positionSec: number, durationSec: number) => void;
   onAutoComplete: (positionSec: number, durationSec: number) => void;
+  onPlayNext: () => void;
   onClose: () => void;
 }) {
   const colors = COLOR_MAP[color] || COLOR_MAP.blue;
@@ -1058,6 +1100,12 @@ function VideoModal({
   const autoCompletedRef = useRef<boolean>(false);
   const tickHandleRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [showResumeToast, setShowResumeToast] = useState<number>(resumeFrom);
+  // Autoplay-next countdown. -1 means "not running". Ticks down once per
+  // second; on 0 we hand control to the parent to swap lessons.
+  const [nextCountdown, setNextCountdown] = useState<number>(-1);
+  const triggerNextOverlay = useCallback(() => {
+    if (nextLesson) setNextCountdown(AUTOPLAY_COUNTDOWN_SEC);
+  }, [nextLesson]);
 
   // Build a stable internal id for the player host element.
   const hostId = useMemo(
@@ -1161,6 +1209,9 @@ function VideoModal({
               }
               // Force one final save → triggers auto-complete branch.
               saveNow({ force: true });
+              // Kick off the autoplay-next countdown. The overlay handles
+              // the rest (countdown UI + cancellation).
+              triggerNextOverlay();
             }
           },
         },
@@ -1197,6 +1248,18 @@ function VideoModal({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, saveNow]);
+
+  // Autoplay countdown: tick once per second; on 0, switch to the next
+  // lesson. Cancelling sets it back to -1.
+  useEffect(() => {
+    if (nextCountdown < 0) return;
+    if (nextCountdown === 0) {
+      onPlayNext();
+      return;
+    }
+    const t = setTimeout(() => setNextCountdown((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+  }, [nextCountdown, onPlayNext]);
 
   return (
     <motion.div
@@ -1249,6 +1312,69 @@ function VideoModal({
           >
             <X className="w-5 h-5" />
           </button>
+
+          {/* Up-Next overlay — fires when the video ends, gives the user
+              ~6 seconds to either jump straight to the next lesson or back
+              off. The radial progress on the play button visualises the
+              countdown. */}
+          <AnimatePresence>
+            {nextCountdown >= 0 && nextLesson && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  className="w-full max-w-md bg-[#0d1321] rounded-2xl border border-white/[0.08] shadow-2xl overflow-hidden"
+                >
+                  <div className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 text-xs font-medium text-[#c8a951] uppercase tracking-wider mb-2">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      השיעור הבא · מתחיל בעוד {nextCountdown}
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="relative flex-shrink-0 w-24 sm:w-28 aspect-video rounded-lg overflow-hidden bg-black/40">
+                        <img
+                          src={`https://i.ytimg.com/vi/${nextLesson.lesson.youtubeId}/hqdefault.jpg`}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/30 grid place-items-center">
+                          <Play className="w-5 h-5 text-white fill-current" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm sm:text-base font-bold text-white leading-snug line-clamp-2">
+                          {nextLesson.lesson.title}
+                        </h4>
+                        <p className="text-xs text-white/50 mt-1 line-clamp-1">
+                          {nextLesson.category.name} · {nextLesson.subcategory.name}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center gap-2">
+                      <button
+                        onClick={() => setNextCountdown(-1)}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-white/[0.12] text-white/70 hover:bg-white/[0.05] transition"
+                      >
+                        ביטול
+                      </button>
+                      <button
+                        onClick={onPlayNext}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-l from-[#e8d48b] to-[#c8a951] text-[#070b1e] hover:brightness-105 transition flex items-center justify-center gap-2"
+                      >
+                        <Play className="w-4 h-4 fill-current" />
+                        התחל עכשיו
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Lesson Info */}
@@ -1278,28 +1404,47 @@ function VideoModal({
             </button>
           </div>
 
-          {/* Inline progress strip — shows the user we're tracking */}
-          {progress && (progress.positionSec >= MIN_RESUME_SEC || progress.completed) && (
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                <div
-                  className={cn('h-full rounded-full transition-all duration-500', colors.progress)}
-                  style={{ width: `${progressPercent(progress)}%` }}
-                />
-              </div>
-              <span className="text-xs text-white/50 tabular-nums whitespace-nowrap">
-                {progress.completed
-                  ? 'הושלם'
-                  : progress.durationSec
-                    ? `${formatTime(progress.positionSec)} / ${formatTime(progress.durationSec)}`
-                    : formatTime(progress.positionSec)}
-              </span>
-            </div>
-          )}
-
           <p className="text-white/60 leading-relaxed text-sm sm:text-base">
             {lesson.description}
           </p>
+
+          {/* "Up next" rail — always available so the user can jump ahead
+              without waiting for the video to end. Hidden when there's no
+              next lesson (end of curriculum). */}
+          {nextLesson && (
+            <button
+              onClick={() => {
+                saveNow({ force: true });
+                onPlayNext();
+              }}
+              className="mt-5 group w-full flex items-center gap-3 p-3 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.15] transition text-right"
+            >
+              <div className="relative flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-black/40">
+                <img
+                  src={`https://i.ytimg.com/vi/${nextLesson.lesson.youtubeId}/hqdefault.jpg`}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+                  <Play className="w-4 h-4 text-white fill-current" />
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold text-[#c8a951] uppercase tracking-wider">
+                  השיעור הבא
+                </p>
+                <p className="text-sm font-semibold text-white truncate mt-0.5">
+                  {nextLesson.lesson.title}
+                </p>
+                <p className="text-xs text-white/40 truncate">
+                  {nextLesson.subcategory.name}
+                </p>
+              </div>
+              <div className="flex-shrink-0 grid place-items-center w-9 h-9 rounded-lg bg-[#c8a951]/15 text-[#c8a951] group-hover:bg-[#c8a951]/25 transition">
+                <ChevronLeft className="w-5 h-5" />
+              </div>
+            </button>
+          )}
         </div>
       </motion.div>
     </motion.div>
