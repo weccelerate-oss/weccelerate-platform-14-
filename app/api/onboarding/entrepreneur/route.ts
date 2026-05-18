@@ -67,6 +67,25 @@ export async function POST(req: NextRequest) {
   }
   const provided = req.headers.get('x-onboarding-secret');
   if (provided !== expected) {
+    // Audit the auth failure so the admin can see misconfigured
+    // integrations (wrong secret, wrong URL) in the webhook activity
+    // panel — otherwise these would fail silently.
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: 'onboarding.unauthorized',
+          description: `Onboarding webhook rejected: missing/wrong x-onboarding-secret`,
+          metadata: {
+            providedHeader: provided ? `${provided.slice(0, 4)}…(${provided.length} chars)` : null,
+            userAgent: req.headers.get('user-agent') ?? null,
+            referer: req.headers.get('referer') ?? null,
+            timestamp: new Date().toISOString(),
+          },
+        },
+      });
+    } catch {
+      /* swallow */
+    }
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -79,6 +98,22 @@ export async function POST(req: NextRequest) {
   }
   const parsed = BodySchema.safeParse(body);
   if (!parsed.success) {
+    // Same logic as auth: log validation errors so the admin sees a
+    // mis-mapped Apps Script that's sending the wrong field names.
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: 'onboarding.validation_failed',
+          description: 'Onboarding webhook validation failed',
+          metadata: {
+            issues: parsed.error.flatten(),
+            timestamp: new Date().toISOString(),
+          },
+        },
+      });
+    } catch {
+      /* swallow */
+    }
     return NextResponse.json(
       { ok: false, error: 'Validation failed', issues: parsed.error.flatten() },
       { status: 400 },

@@ -10,6 +10,7 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { UsersTable } from './users-table';
 import { CreateUserDialog } from './create-user-dialog';
+import { OnboardingStatusCard } from './onboarding-status-card';
 
 export const metadata: Metadata = {
   title: 'ניהול משתמשים | Admin',
@@ -29,6 +30,118 @@ export interface WelcomeEmailStatus {
   // flow *ran* — and that flow always tries to send — but no explicit
   // success or failure was recorded).
   confirmed: boolean;
+}
+
+export interface OnboardingActivity {
+  counts: {
+    provisioned: number;
+    spamBlocked: number;
+    unauthorized: number;
+    validationFailed: number;
+    emailSent: number;
+    emailFailed: number;
+  };
+  lastSuccess: { at: string; email: string | null; source: string | null } | null;
+  lastFailure: { at: string; action: string; detail: string | null } | null;
+  daysSinceLastEvent: number | null;
+}
+
+const ONBOARDING_ACTIONS = [
+  'user.provisioned',
+  'onboarding.spam_blocked',
+  'onboarding.unauthorized',
+  'onboarding.validation_failed',
+  'user.welcome_email_sent',
+  'user.welcome_email_failed',
+];
+
+async function getOnboardingActivity(): Promise<OnboardingActivity> {
+  const { prisma } = await import('@/lib/db');
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  try {
+    const rows = await prisma.activityLog.findMany({
+      where: {
+        action: { in: ONBOARDING_ACTIONS },
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        action: true,
+        createdAt: true,
+        description: true,
+        metadata: true,
+      },
+    });
+
+    const counts = {
+      provisioned: 0,
+      spamBlocked: 0,
+      unauthorized: 0,
+      validationFailed: 0,
+      emailSent: 0,
+      emailFailed: 0,
+    };
+    let lastSuccess: OnboardingActivity['lastSuccess'] = null;
+    let lastFailure: OnboardingActivity['lastFailure'] = null;
+    for (const row of rows) {
+      switch (row.action) {
+        case 'user.provisioned':
+          counts.provisioned++;
+          if (!lastSuccess) {
+            const meta = (row.metadata as Record<string, unknown> | null) ?? {};
+            lastSuccess = {
+              at: row.createdAt.toISOString(),
+              email: typeof meta.email === 'string' ? meta.email : null,
+              source: typeof meta.source === 'string' ? meta.source : null,
+            };
+          }
+          break;
+        case 'onboarding.spam_blocked':
+          counts.spamBlocked++;
+          break;
+        case 'onboarding.unauthorized':
+          counts.unauthorized++;
+          break;
+        case 'onboarding.validation_failed':
+          counts.validationFailed++;
+          break;
+        case 'user.welcome_email_sent':
+          counts.emailSent++;
+          break;
+        case 'user.welcome_email_failed':
+          counts.emailFailed++;
+          break;
+      }
+      if (
+        !lastFailure &&
+        ['onboarding.unauthorized', 'onboarding.validation_failed', 'user.welcome_email_failed'].includes(
+          row.action,
+        )
+      ) {
+        lastFailure = {
+          at: row.createdAt.toISOString(),
+          action: row.action,
+          detail: row.description ?? null,
+        };
+      }
+    }
+
+    const lastEvent = rows[0];
+    const daysSinceLastEvent = lastEvent
+      ? Math.floor((Date.now() - lastEvent.createdAt.getTime()) / 86_400_000)
+      : null;
+
+    return { counts, lastSuccess, lastFailure, daysSinceLastEvent };
+  } catch (error) {
+    console.error('[Admin] Onboarding activity lookup failed:', error);
+    return {
+      counts: { provisioned: 0, spamBlocked: 0, unauthorized: 0, validationFailed: 0, emailSent: 0, emailFailed: 0 },
+      lastSuccess: null,
+      lastFailure: null,
+      daysSinceLastEvent: null,
+    };
+  }
 }
 
 async function getUsers() {
@@ -127,7 +240,7 @@ async function getUsers() {
 }
 
 export default async function UsersManagementPage() {
-  const users = await getUsers();
+  const [users, onboarding] = await Promise.all([getUsers(), getOnboardingActivity()]);
 
   const entrepreneurs = users.filter((u: { role?: string | null }) => u.role === 'ENTREPRENEUR');
   // "Awaiting first login" = was given a temp password (mustChangePassword)
@@ -167,6 +280,8 @@ export default async function UsersManagementPage() {
         </div>
         <CreateUserDialog />
       </div>
+
+      <OnboardingStatusCard data={onboarding} />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
