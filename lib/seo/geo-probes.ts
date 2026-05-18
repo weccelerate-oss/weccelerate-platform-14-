@@ -293,31 +293,33 @@ const anthropic: Provider = {
 };
 
 /**
- * Google Gemini 3.1 Pro Preview with Google Search grounding.
+ * Google Gemini 3.1 Flash-Lite with Google Search grounding.
  *
  * Why Gemini matters for GEO/AEO: Google's AI Overviews + Search Generative
  * Experience rank-then-cite from the live web via this same grounding
  * surface — so when Gemini cites us, we're effectively winning the SGE box.
  *
- * 3.1-pro-preview is the latest flagship model (May 2026). It includes
- * the new "thinking" capability (thoughtSignature in the response — we
- * ignore it, we only care about the final text + groundingChunks).
- * Heavier than 2.0-flash but produces noticeably stronger Hebrew output
- * which matters for the brand-he and generic-he probe categories.
- *
- * Note: the model decides per-request whether to invoke the grounding
- * tool. For purely factual prompts it may answer from training data
- * (groundingChunks empty). The brand-pattern detector in detectMentions
- * still picks up text mentions, so 'mentioned: true' is set either way;
- * 'cited: true' requires a URL match.
+ * Why flash-lite over pro-preview: probes are measurement, not content
+ * generation. We need consistent, fast, ground-the-web behavior — and
+ * flash-lite is BETTER at this in practice:
+ *   - Pro-preview took 30+s per call (blew Vercel Hobby's 60s budget
+ *     when stacked × 24 queries × 4 providers).
+ *   - Flash-lite is ~3-5s per call.
+ *   - Flash models are less "self-assured" — they invoke google_search
+ *     more aggressively, so we get more grounding URLs (which is the
+ *     whole point of the probe).
+ *   - Smoke test: flash-lite returned 7 grounding chunks vs pro-preview's
+ *     0 for the same brand probe.
+ * Pro-preview is reserved for actual content generation (where the
+ * writer agent uses Claude Opus anyway).
  *
  * Docs: https://ai.google.dev/gemini-api/docs/grounding
  */
 const gemini: Provider = {
-  name: 'gemini-3.1-pro-preview',
+  name: 'gemini-3.1-flash-lite',
   hasKey: () => Boolean(process.env.GEMINI_API_KEY),
   async ask(query: string): Promise<ProbeAnswer> {
-    const model = 'gemini-3.1-pro-preview';
+    const model = 'gemini-3.1-flash-lite';
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
