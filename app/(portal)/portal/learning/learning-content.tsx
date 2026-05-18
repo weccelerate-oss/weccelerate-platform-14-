@@ -317,8 +317,10 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
           }),
           keepalive: true, // ensures saves survive a tab close on the way out
         });
-        // Trust the server's view as the source of truth — it might have
-        // auto-completed based on a different threshold or rejected the patch.
+        // Reconcile with the server's view: it may have auto-completed
+        // based on its own threshold. But never downgrade `completed: true`
+        // to false unless the caller asked for it explicitly — otherwise a
+        // racing position-only save could silently un-mark a finished lesson.
         if (res.ok) {
           const data = (await res.json().catch(() => null)) as
             | {
@@ -330,11 +332,17 @@ export function LearningContent({ user: _user, initialProgress }: LearningConten
               }
             | null;
           if (data?.success && typeof data.completed === 'boolean') {
+            const serverSaysCompleted = data.completed;
+            const explicitUnmark = patch.completed === false;
             setProgressMap((prev) => {
               const m = new Map(prev);
+              const current = m.get(slug);
+              const finalCompleted = explicitUnmark
+                ? serverSaysCompleted
+                : current?.completed || serverSaysCompleted; // monotone up
               m.set(slug, {
                 slug,
-                completed: data.completed!,
+                completed: finalCompleted,
                 positionSec: data.positionSec ?? next.positionSec,
                 durationSec: data.durationSec ?? next.durationSec,
                 lastWatchedAt: data.lastWatchedAt ?? next.lastWatchedAt,
@@ -1384,13 +1392,25 @@ function VideoModal({
           <div className="flex items-start justify-between gap-4 mb-4">
             <h3 className="text-xl font-bold text-white">{lesson.title}</h3>
             <button
-              onClick={onToggleComplete}
+              onClick={() => {
+                // When already done, treat the click as an un-mark request
+                // and confirm — the button used to silently flip back to
+                // "not completed" on a stray click, which surprised users.
+                if (
+                  isCompleted &&
+                  !window.confirm('השיעור מסומן כהושלם. לסמן אותו כלא הושלם?')
+                ) {
+                  return;
+                }
+                onToggleComplete();
+              }}
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all flex-shrink-0',
                 isCompleted
                   ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15 border border-emerald-500/20'
                   : 'bg-[#c8a951]/10 text-[#c8a951] hover:bg-[#c8a951]/15 border border-[#c8a951]/20',
               )}
+              title={isCompleted ? 'השיעור הושלם — לחץ לבטל את הסימון' : 'סמן את השיעור כהושלם'}
             >
               {isCompleted ? (
                 <>

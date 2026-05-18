@@ -69,14 +69,18 @@ export async function POST(req: NextRequest) {
 
     // Lesson isn't seeded yet — return optimistic OK so the UI keeps state
     // client-side. The next time the seed runs, real persistence kicks in.
+    //
+    // CRITICAL: do NOT echo back `completed` here. If we did, a follow-up
+    // position-only save (no `completed` flag) would echo `completed: false`,
+    // which the client would then sync back, silently un-marking a lesson
+    // the user already finished. By omitting `completed`/`positionSec` from
+    // the response, the client's sync guard (`typeof data.completed === 'boolean'`)
+    // short-circuits and the local state is preserved.
     if (!lesson) {
       return NextResponse.json({
         success: true,
         source: 'optimistic',
         slug: lessonSlug,
-        completed: completed ?? false,
-        positionSec: positionSec ?? 0,
-        durationSec: durationSec ?? null,
       });
     }
 
