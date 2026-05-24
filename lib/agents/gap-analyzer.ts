@@ -83,10 +83,14 @@ export async function analyzeGaps(): Promise<AnalyzeSummary> {
       ratePct < 30 ? LOW_CITE_SEVERITY :
       MEDIUM_CITE_SEVERITY;
 
-    // Strip our own host from the competitor list.
-    const competitors = (row.competitors ?? []).filter(
-      (h: string) => h && !h.toLowerCase().includes('weccelerate.co.il'),
-    );
+    // Strip our own host from the competitor list. Also canonicalize
+    // www.example.com → example.com so the same competitor doesn't show
+    // up twice when one source URL had www. and another didn't.
+    const competitors = Array.from(new Set(
+      (row.competitors ?? [])
+        .filter((h: string) => h && !h.toLowerCase().includes('weccelerate.co.il'))
+        .map((h: string) => h.replace(/^www\./i, '')),
+    ));
 
     // Find an existing open gap for the same query (idempotent).
     const existing = await prisma.contentGap.findFirst({

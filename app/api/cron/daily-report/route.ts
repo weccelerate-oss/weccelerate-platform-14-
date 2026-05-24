@@ -1,22 +1,23 @@
+// MANUAL-TRIGGER ONLY — not on cron schedule. See david-daily/ for the scheduled entry point.
 /**
  * GET /api/cron/daily-report
  *
- * דוד שולח את הדוח היומי שלו במייל. רץ אחרי כל שאר ה-crons (08:00 UTC),
- * אוסף את כל ה-AgentDecision מהיממה האחרונה ומסביר מה קרה ולמה.
+ * דוד שולח את הדוח היומי שלו במייל. כיום משולב לתוך david-daily; השרת
+ * הזה נשאר כ-endpoint ידני לבדיקה (curl עם CRON_SECRET).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { DAVID, DAVID_EMAIL_FROM, DAVID_EMAIL_TO } from '@/lib/agents/david';
+import { requireCron } from '@/lib/auth/require-cron';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
-  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const unauth = requireCron(req);
+  if (unauth) return unauth;
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ ok: false, reason: 'RESEND_API_KEY not set' });
   }

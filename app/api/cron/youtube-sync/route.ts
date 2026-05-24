@@ -7,13 +7,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { requireCron } from '@/lib/auth/require-cron';
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret
-  const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const unauth = requireCron(request);
+  if (unauth) return unauth;
 
   try {
     const { syncYouTubeVideos } = await import('@/lib/youtube-sync');

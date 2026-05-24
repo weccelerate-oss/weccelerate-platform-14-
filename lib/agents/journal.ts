@@ -248,9 +248,18 @@ export async function writeDailyJournalEntry(stages: Array<{
     .join(' · ');
 
   // Pull today's quick wins and pains from the in-flight stage details so
-  // the summary reflects this exact run, not a separate query.
+  // the summary reflects this exact run, not a separate query. The write
+  // stage now returns MultiWriteResult (DA-4) — one tick can publish up
+  // to MAX_ARTICLES_PER_DAY guides, so we summarize counts instead of a
+  // single slug.
   const writeStage = stages.find((s) => s.stage === 'write');
-  const writeDetail = (writeStage?.detail ?? {}) as { ok?: boolean; slug?: string; reason?: string };
+  const writeDetail = (writeStage?.detail ?? {}) as {
+    attempted?: number;
+    published?: number;
+    drafts?: number;
+    stoppedReason?: string;
+    results?: Array<{ ok?: boolean; slug?: string; reason?: string }>;
+  };
   const probeStage = stages.find((s) => s.stage === 'probe');
   const probeDetail = (probeStage?.detail ?? {}) as { scheduled?: number; cited?: number; mentioned?: number };
 
@@ -264,14 +273,21 @@ export async function writeDailyJournalEntry(stages: Array<{
   }
   if (writeStage?.skipped) {
     summaryParts.push('✍️ לא יום כתיבה.');
-  } else if (writeDetail.ok && writeDetail.slug) {
-    summaryParts.push(`✍️ פרסמתי /guides/${writeDetail.slug}.`);
-  } else if (!writeDetail.ok && writeDetail.reason) {
-    summaryParts.push(`✍️ לא פרסמתי — ${writeDetail.reason}`);
+  } else if (writeDetail.published !== undefined) {
+    const slugs = (writeDetail.results ?? [])
+      .filter((r) => r.ok && r.slug)
+      .map((r) => `/guides/${r.slug}`)
+      .join(', ');
+    summaryParts.push(
+      `✍️ פרסמתי ${writeDetail.published ?? 0} מאמרים (${writeDetail.drafts ?? 0} טיוטות) מתוך ${writeDetail.attempted ?? 0} ניסיונות` +
+        (slugs ? ` — ${slugs}` : '') +
+        (writeDetail.stoppedReason ? ` · עצירה: ${writeDetail.stoppedReason}` : '') +
+        '.',
+    );
   }
 
   await logDecision({
-    agent: 'gap-analyzer', // 'gap-analyzer' is one of the allowed agent values; semantically this is "system"
+    agent: 'system',
     action: 'daily-summary',
     reasoning: summaryParts.join(' '),
     payload: {

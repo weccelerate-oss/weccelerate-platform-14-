@@ -13,6 +13,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logDecision } from '@/lib/agents/decision-log';
 
 // =============================================================================
 // QUERIES — what we ask each LLM
@@ -476,6 +477,28 @@ export async function runAllProbes(opts?: { maxQueries?: number }): Promise<Prob
     tasks.push(runOneProbe(provider, query.query, query.category, summary));
   }
   await Promise.allSettled(tasks);
+
+  // DA-11: total-outage alarm. If every probe failed, log a decision so
+  // tomorrow's journal/insights pick it up — without this the failure
+  // was silent because the *stage* didn't throw (Promise.allSettled
+  // swallows each rejection).
+  if (summary.total > 0 && summary.failed === summary.total) {
+    await logDecision({
+      agent: 'system',
+      action: 'all-probes-failed',
+      reasoning:
+        `כל ${summary.total} השאילתות נכשלו השעה. ` +
+        `ספקים פעילים: ${activeProviders.map((p) => p.name).join(', ')}. ` +
+        `סביר ש-API key פג, rate limit, או downtime של הספק.`,
+      payload: {
+        total: summary.total,
+        failed: summary.failed,
+        byProvider: summary.byProvider,
+        providersTried: activeProviders.map((p) => p.name),
+      },
+      success: false,
+    });
+  }
 
   return summary;
 }

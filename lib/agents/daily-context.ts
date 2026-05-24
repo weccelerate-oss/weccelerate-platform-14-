@@ -146,9 +146,44 @@ export function summarizeRecentGuidesForPrompt(ctx: DailyContext): string {
 /**
  * Returns true if a guide on the same `query` was already written in the
  * last 30 days. Caller should skip and pick the next gap.
+ *
+ * We use TWO matchers:
+ *   1. Exact-normalized — catches "מהי ועדת הלסינקי?" vs "מהי ועדת הלסינקי".
+ *   2. Token-Jaccard ≥ 0.6 — catches near-duplicates like "מהי ועדת הלסינקי"
+ *      vs "ועדת הלסינקי — מדריך", which previously slipped past the exact
+ *      check and let David write the same article twice in a week.
  */
 export function isQueryAlreadyCovered(query: string, ctx: DailyContext): boolean {
   const norm = (s: string) => s.trim().toLowerCase();
   const target = norm(query);
-  return ctx.recentGuides.some((g) => g.sourceQuery && norm(g.sourceQuery) === target);
+  const targetTokens = tokenize(query);
+
+  return ctx.recentGuides.some((g) => {
+    if (!g.sourceQuery) return false;
+    if (norm(g.sourceQuery) === target) return true;
+    if (targetTokens.size === 0) return false;
+    const existingTokens = tokenize(g.sourceQuery);
+    if (existingTokens.size === 0) return false;
+    return jaccard(targetTokens, existingTokens) >= 0.6;
+  });
+}
+
+/** Split into lowercase tokens by whitespace + punctuation, drop empties. */
+function tokenize(s: string): Set<string> {
+  return new Set(
+    s
+      .toLowerCase()
+      .split(/[\s  -​.,;:!?()[\]{}"'״׳`\-—–_/\\|]+/u)
+      .filter((t) => t.length > 0),
+  );
+}
+
+function jaccard(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 && b.size === 0) return 0;
+  let intersect = 0;
+  for (const tok of a) {
+    if (b.has(tok)) intersect += 1;
+  }
+  const union = a.size + b.size - intersect;
+  return union === 0 ? 0 : intersect / union;
 }

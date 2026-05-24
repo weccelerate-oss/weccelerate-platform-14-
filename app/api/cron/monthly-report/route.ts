@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireCron } from '@/lib/auth/require-cron';
 
 const ACTION_LABELS: Record<string, string> = {
   'click.phone': 'שיחות טלפון',
@@ -13,11 +14,8 @@ const ACTION_LABELS: Record<string, string> = {
 const TRACKED_ACTIONS = Object.keys(ACTION_LABELS);
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret (Vercel sets this automatically)
-  const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const unauth = requireCron(request);
+  if (unauth) return unauth;
 
   try {
     const { prisma } = await import('@/lib/db');

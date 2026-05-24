@@ -875,7 +875,7 @@ model AgentDecision {
   timestamp    DateTime @default(now())
 
   // Which agent made the decision
-  agent        String   // 'gap-analyzer' | 'content-writer' | 'self-improver' | 'competitor-watch'
+  agent        String   // 'gap-analyzer' | 'content-writer' | 'self-improver' | 'competitor-watch' | 'system'
 
   // What kind of decision
   action       String   // 'picked-gap' | 'wrote-guide' | 'skipped-publish' | 'queued-refresh' | etc.

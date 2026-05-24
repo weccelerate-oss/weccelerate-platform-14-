@@ -44,6 +44,56 @@ export interface WriteResult {
   slug?: string;
 }
 
+// DA-4 — let David ship more than one guide per writing day when the queue
+// is long. MAX_ARTICLES_PER_DAY caps the daily Anthropic spend; BUDGET_MS
+// keeps the cron well inside Vercel's 60s Hobby maxDuration (or 300s Pro)
+// so we never time out mid-publish and orphan a gap in `in_progress`.
+const MAX_ARTICLES_PER_DAY = 3;
+const BUDGET_MS = 50_000; // leave headroom under maxDuration
+
+export interface MultiWriteResult {
+  attempted: number;
+  published: number;
+  drafts: number;
+  results: WriteResult[];
+  stoppedReason: 'budget' | 'cap' | 'queue-empty';
+}
+
+/**
+ * Run the writer in a loop, producing up to MAX_ARTICLES_PER_DAY guides
+ * per tick or until BUDGET_MS elapses. Stops early on the FIRST idle
+ * result (no more eligible gaps) so we don't burn the budget polling
+ * an empty queue.
+ */
+export async function writeGuidesForTick(opts?: {
+  context?: DailyContext;
+  journal?: JournalSummary;
+}): Promise<MultiWriteResult> {
+  const start = Date.now();
+  const results: WriteResult[] = [];
+  let stoppedReason: MultiWriteResult['stoppedReason'] = 'cap';
+
+  for (let i = 0; i < MAX_ARTICLES_PER_DAY; i++) {
+    if (Date.now() - start >= BUDGET_MS) {
+      stoppedReason = 'budget';
+      break;
+    }
+    const r = await writeNextGuide(opts);
+    results.push(r);
+    // Idle reasons mean the queue is exhausted for today — don't keep
+    // polling. Other non-ok reasons (policy fail, draft, etc.) consumed
+    // a gap, so we can legitimately try another candidate.
+    if (!r.ok && (r.reason?.startsWith('אין ContentGap') || r.reason?.startsWith('דילגתי על'))) {
+      stoppedReason = 'queue-empty';
+      break;
+    }
+  }
+
+  const published = results.filter((r) => r.ok).length;
+  const drafts = results.filter((r) => !r.ok && r.guideId).length;
+  return { attempted: results.length, published, drafts, results, stoppedReason };
+}
+
 export async function writeNextGuide(opts?: { context?: DailyContext; journal?: JournalSummary }): Promise<WriteResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     return { ok: false, reason: 'ANTHROPIC_API_KEY not set — agent disabled' };
@@ -59,21 +109,41 @@ export async function writeNextGuide(opts?: { context?: DailyContext; journal?: 
   //    Pool is 50, not 10, so a front-loaded list of recent duplicates
   //    doesn't strand David when the queue genuinely has fresh topics
   //    further down.
+  // Cap by severity ≥ 50: severity-40 gaps come from queries with 30-60%
+  // cite rate, which means we already have a presence. Spending an Anthropic
+  // round-trip there is lower ROI than letting the queue stay focused on
+  // 0% and <30% gaps. The cap is a queue-length governor too — without it,
+  // a backlog of dozens of severity-40 entries crowds out fresher urgent
+  // gaps.
   const candidates = await prisma.contentGap.findMany({
-    where: { status: 'open' },
+    where: { status: 'open', severity: { gte: 50 } },
     orderBy: [{ severity: 'desc' }, { detectedAt: 'asc' }],
     take: 50,
   });
 
+  // Atomic claim: replace the previous SELECT+UPDATE race with a single
+  // updateMany guarded on `status: 'open'`. If two writer ticks run in
+  // parallel (cron retry, manual trigger), only the one whose updateMany
+  // returns count=1 owns the gap. The loser falls through to the next
+  // candidate.
   let gap: typeof candidates[number] | null = null;
   let skippedDuplicates = 0;
+  let skippedRaces = 0;
   for (const candidate of candidates) {
     if (isQueryAlreadyCovered(candidate.query, ctx)) {
       skippedDuplicates += 1;
       continue;
     }
-    gap = candidate;
-    break;
+    const claim = await prisma.contentGap.updateMany({
+      where: { id: candidate.id, status: 'open' },
+      data: { status: 'in_progress' },
+    });
+    if (claim.count === 1) {
+      gap = candidate;
+      break;
+    }
+    // Lost the race or status changed between SELECT and UPDATE — try next.
+    skippedRaces += 1;
   }
 
   if (!gap) {
@@ -100,14 +170,10 @@ export async function writeNextGuide(opts?: { context?: DailyContext; journal?: 
       (gap.competitors.length > 0
         ? `המתחרים שכן מצוטטים בנושא: ${gap.competitors.slice(0, 3).join(', ')} — ננתח את הגישה שלהם ונבנה תוכן עמוק יותר.`
         : 'אף מתחרה לא מצוטט בעצמו → הזדמנות לתפוס מקום ראשון.'),
-    payload: { gapId: gap.id, query: gap.query, severity: gap.severity, competitors: gap.competitors, skippedDuplicates },
+    payload: { gapId: gap.id, query: gap.query, severity: gap.severity, competitors: gap.competitors, skippedDuplicates, skippedRaces },
   });
 
-  // Mark in-progress so a parallel run doesn't pick the same gap.
-  await prisma.contentGap.update({
-    where: { id: gap.id },
-    data: { status: 'in_progress' },
-  });
+  // (Atomic claim already happened above — no separate mark step needed.)
 
   try {
     const research = await runResearch(gap.query, gap.competitors);
@@ -142,6 +208,50 @@ export async function writeNextGuide(opts?: { context?: DailyContext; journal?: 
         },
       });
       return { ok: false, reason: `Policy: ${policyLint.violations[0]}` };
+    }
+
+    // DA-3 — fact-check JSON parse failed twice. Save the article as a
+    // DRAFT so the dashboard surfaces it for manual review instead of
+    // silently shipping unverified copy. We still ran the policy gate,
+    // so anything obviously broken is already blocked above.
+    if (factCheck.unparsed) {
+      const slug = await deriveUniqueSlug(article.titleHe);
+      const draft = await prisma.generatedGuide.create({
+        data: {
+          slug,
+          titleHe: article.titleHe,
+          titleEn: article.titleEn ?? null,
+          metaDescription: article.metaDescription,
+          category: gap.category ?? 'general',
+          contentHe: article.contentHe,
+          contentEn: article.contentEn ?? null,
+          modelChain: [MODEL_RESEARCH, MODEL_WRITE, MODEL_FACTCHECK],
+          citedSources: research.sources.slice(0, 30),
+          internalLinks,
+          factCheckScore: null,
+          seoScore: seoLint.score,
+          wordCount: countWords(article.contentHe),
+          status: 'draft',
+          publishedAt: null,
+        },
+      });
+      // Keep the gap "in_progress" so a future re-fact-check can complete
+      // the publish, but link it to the draft so the operator can find it.
+      await prisma.contentGap.update({
+        where: { id: gap.id },
+        data: { generatedGuideId: draft.id, rejectReason: 'Fact-check unparseable; saved as draft for review.' },
+      });
+      await logDecision({
+        agent: 'content-writer',
+        action: 'saved-draft-unparsed-factcheck',
+        reasoning:
+          `שמרתי את המאמר על "${gap.query}" כטיוטה — ה-fact-check לא החזיר JSON תקין פעמיים. ` +
+          `כדאי לעבור עליו ידנית ב-/admin לפני פרסום. slug: /guides/${slug}.`,
+        payload: { gapId: gap.id, draftId: draft.id, slug, factCheckNotes: factCheck.notes },
+        success: false,
+        durationMs: Date.now() - startedAt,
+      });
+      return { ok: false, reason: 'Fact-check unparsed — saved as draft', guideId: draft.id, slug };
     }
 
     // Quality gate — refuse to publish if either score is too low.
@@ -403,6 +513,8 @@ function pickInternalLinks(title: string, body: string): string[] {
 interface FactCheckResult {
   score: number; // 0-100
   notes: string;
+  /** True if BOTH parse attempts failed — caller should ship as draft, not published. */
+  unparsed?: boolean;
 }
 
 async function runFactCheck(content: string, sources: string[]): Promise<FactCheckResult> {
@@ -447,10 +559,17 @@ Return JSON only:
   const parsedRetry = safeParseJson<FactCheckResult>(retry);
   if (parsedRetry) return parsedRetry;
 
-  // Both attempts failed to produce parseable JSON. Score 75 (well above the
-  // 60 cutoff) is a deliberate optimistic default: we'd rather publish an
-  // article we couldn't fact-check than silently drop a finished draft.
-  return { score: 75, notes: 'Fact-check JSON parse failed twice — defaulted optimistically' };
+  // Both attempts failed to produce parseable JSON. DON'T auto-publish:
+  // an unverified article going live unflagged was a real liability. We
+  // emit an "unparsed" sentinel so the caller can save the draft with a
+  // null score and `status: 'draft'`, surfacing it on the dashboard for
+  // manual review instead of silently shipping. The numeric score (0) is
+  // a placeholder — callers should check the `unparsed` flag first.
+  return {
+    score: 0,
+    notes: 'Fact-check JSON parse failed twice — article saved as draft for manual review.',
+    unparsed: true,
+  };
 }
 
 interface SeoLintResult {
@@ -552,12 +671,10 @@ function lintPolicy(a: ArticlePayload): PolicyLintResult {
     violations.push(`mentions competitors: ${competitorHits.join(', ')}`);
   }
 
-  // Banned em-dashes / en-dashes — the most reliable AI-tell in Hebrew prose.
-  // We sanitize on the way in too (see sanitizeBody below) but this is the
-  // belt: any article that still has them shouldn't be published.
-  if (/[—–]/.test(text)) {
-    violations.push('contains em-dash or en-dash (AI tell)');
-  }
+  // DA-17 — the em-dash / en-dash check was dead code: sanitizeArticleBody
+  // (called before this lint) strips all em/en dashes to ASCII hyphens, so
+  // by the time we got here `text` could never contain '—' or '–'. The
+  // sanitizer is the source of truth; the policy lint no longer needs it.
 
   return { passed: violations.length === 0, violations };
 }
@@ -574,19 +691,51 @@ interface AnthropicCall {
 }
 
 async function callAnthropic(req: AnthropicCall): Promise<unknown> {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': process.env.ANTHROPIC_API_KEY!,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(req),
-  });
-  if (!res.ok) {
-    throw new Error(`Anthropic ${res.status}: ${await res.text()}`);
+  // 429 = rate limit, 529 = overloaded. Both deserve an exponential
+  // backoff retry before we give up — they're the most common causes of
+  // a single-shot failure that would otherwise mark a writing day as a
+  // total loss.
+  const RETRY_STATUSES = new Set([429, 529]);
+  const BACKOFF_MS = [2_000, 4_000];
+
+  let lastErr: Error | null = null;
+  for (let attempt = 0; attempt <= BACKOFF_MS.length; attempt++) {
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.ANTHROPIC_API_KEY!,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(req),
+        // 120s is well above the longest legitimate Claude call we've
+        // seen (~90s for an 8000-token Hebrew article). Beyond that
+        // we'd rather fail fast and let the cron's outer timeout
+        // surface a clean error in the email.
+        signal: AbortSignal.timeout(120_000),
+      });
+      if (res.ok) return res.json();
+      const bodyText = await res.text();
+      const err = new Error(`Anthropic ${res.status} [${req.model}]: ${bodyText.slice(0, 500)}`);
+      if (RETRY_STATUSES.has(res.status) && attempt < BACKOFF_MS.length) {
+        lastErr = err;
+        await new Promise((r) => setTimeout(r, BACKOFF_MS[attempt]));
+        continue;
+      }
+      throw err;
+    } catch (e) {
+      // Network / abort errors — also retryable up to the cap.
+      const err = e instanceof Error ? e : new Error(String(e));
+      if (attempt < BACKOFF_MS.length && !err.message.startsWith('Anthropic ')) {
+        lastErr = err;
+        await new Promise((r) => setTimeout(r, BACKOFF_MS[attempt]));
+        continue;
+      }
+      throw err;
+    }
   }
-  return res.json();
+  throw lastErr ?? new Error(`Anthropic failed after retries [${req.model}]`);
 }
 
 function extractText(data: unknown): string {
@@ -616,7 +765,17 @@ function extractToolUrls(data: unknown): string[] {
 function safeParseJson<T>(text: string): T | null {
   // Strip code fences if present.
   const cleaned = text.replace(/```json\s*|\s*```/g, '').trim();
-  // Find the first {...} block.
+  // Try parsing the whole cleaned blob first — when the model obeyed the
+  // "JSON only" instruction this is exactly right and avoids the nested-
+  // brace slice fallback misparsing the article body (which contains
+  // its own { } inside markdown / code samples).
+  try {
+    return JSON.parse(cleaned) as T;
+  } catch {
+    // Fall through to slice-based recovery.
+  }
+  // Find the outermost {...} block. lastIndexOf('}') was the original
+  // recovery path — keep it as a fallback for messy outputs.
   const start = cleaned.indexOf('{');
   const end = cleaned.lastIndexOf('}');
   if (start < 0 || end <= start) return null;
@@ -662,15 +821,28 @@ async function slugTaken(slug: string): Promise<boolean> {
   return Boolean(existing);
 }
 
+let _indexNowWarnedOnce = false;
 async function pingIndexNow(url: string): Promise<void> {
+  // DA-16 — never ping with a hardcoded fallback key. The key MUST live in
+  // INDEXNOW_KEY env (and a matching `${key}.txt` MUST be served from the
+  // site root); without that the call is at best a no-op and at worst it
+  // reveals our key publicly.
+  const key = process.env.INDEXNOW_KEY;
+  if (!key) {
+    if (!_indexNowWarnedOnce) {
+      console.warn('[pingIndexNow] INDEXNOW_KEY unset — skipping IndexNow ping (Bing will crawl on its own).');
+      _indexNowWarnedOnce = true;
+    }
+    return;
+  }
   try {
     await fetch('https://api.indexnow.org/IndexNow', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify({
         host: 'weccelerate.co.il',
-        key: process.env.INDEXNOW_KEY ?? 'a7f3c912b8e04d569f1a2c3b4d5e6f78',
-        keyLocation: `https://weccelerate.co.il/${process.env.INDEXNOW_KEY ?? 'a7f3c912b8e04d569f1a2c3b4d5e6f78'}.txt`,
+        key,
+        keyLocation: `https://weccelerate.co.il/${key}.txt`,
         urlList: [url],
       }),
     });

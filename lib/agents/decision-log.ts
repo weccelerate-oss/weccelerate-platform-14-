@@ -6,7 +6,7 @@
 import { prisma } from '@/lib/db';
 
 export interface DecisionInput {
-  agent: 'gap-analyzer' | 'content-writer' | 'self-improver' | 'competitor-watch';
+  agent: 'gap-analyzer' | 'content-writer' | 'self-improver' | 'competitor-watch' | 'system';
   action: string;
   reasoning: string;
   payload?: Record<string, unknown>;

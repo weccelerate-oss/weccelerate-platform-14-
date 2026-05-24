@@ -16,7 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runAllProbes } from '@/lib/seo/geo-probes';
 import { analyzeGaps } from '@/lib/agents/gap-analyzer';
-import { writeNextGuide } from '@/lib/agents/content-writer';
+import { writeGuidesForTick } from '@/lib/agents/content-writer';
 import { runSelfImprover } from '@/lib/agents/self-improver';
 import { loadDailyContext, type DailyContext } from '@/lib/agents/daily-context';
 import { planForToday, planForTomorrow } from '@/lib/agents/daily-plan';
@@ -26,14 +26,19 @@ import { writeDailyJournalEntry } from '@/lib/agents/journal';
 import { runBiweeklyReplan, shouldRunReplan } from '@/lib/agents/biweekly-replanner';
 import { prisma } from '@/lib/db';
 import { DAVID, DAVID_EMAIL_FROM, DAVID_EMAIL_TO } from '@/lib/agents/david';
+import { requireCron } from '@/lib/auth/require-cron';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 // The full pipeline (probe + analyze + write + improve + replan + report)
 // has to fit here. Writing days run two Anthropic round-trips (writer +
-// fact-check), each can take 30-90s for a 1500-word Hebrew article. 60s was
-// truncating the writer mid-call and marking the stage as a silent error.
-export const maxDuration = 300;
+// fact-check), each can take 30-90s for a 1500-word Hebrew article.
+//
+// Vercel Hobby caps maxDuration at 60s and will REJECT a deploy that asks
+// for 300. Set VERCEL_PLAN=pro in the project env vars once you upgrade —
+// until then we cap at 60s and the writer's per-tick budget (BUDGET_MS in
+// content-writer.ts) is sized to fit inside that envelope.
+export const maxDuration = process.env.VERCEL_PLAN === 'pro' ? 300 : 60;
 
 interface StageResult {
   stage: string;
@@ -46,9 +51,8 @@ interface StageResult {
 }
 
 export async function GET(req: NextRequest) {
-  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const unauth = requireCron(req);
+  if (unauth) return unauth;
 
   const today = planForToday();
   const tomorrow = planForTomorrow();
@@ -85,7 +89,7 @@ export async function GET(req: NextRequest) {
   // Stage 3: Write — only on writing days. Pass both context (recent guides
   // dedupe) AND journal (avoid past mistakes / imitate past wins).
   if (today.plan.shouldWrite) {
-    results.push(await runStage('write', () => writeNextGuide({ context: ctx, journal })));
+    results.push(await runStage('write', () => writeGuidesForTick({ context: ctx, journal })));
   } else {
     results.push({
       stage: 'write',
@@ -129,8 +133,12 @@ export async function GET(req: NextRequest) {
   results.push(await runStage('report', () => sendDailyReport(ctx, today, tomorrow, results)));
 
   // Stage 7: Append today's entry to the journal — David's diary. Reads back
-  // tomorrow morning and informs every decision.
-  await writeDailyJournalEntry(results);
+  // tomorrow morning and informs every decision. Best-effort: a journal write
+  // failure must NOT poison the cron response (the operator already got the
+  // email + the report stage already ran).
+  await writeDailyJournalEntry(results).catch((e) =>
+    console.error('journal-write-failed', e),
+  );
 
   return NextResponse.json({ ok: true, weekday: today.weekday, plan: today.plan.label, results });
 }
@@ -201,13 +209,39 @@ async function sendDailyReport(
 
   const stagesHtml = stages.map((s) => {
     const status = s.skipped ? '⏸ דילגתי' : s.ok ? '✅ הצלחה' : '❌ כשל';
+    // HTML-escape the error excerpt. Anthropic 5xx bodies contain HTML and JSON
+    // that would otherwise break the email layout (and on a bad day, exfil
+    // markup into the rendered DOM). Widen the excerpt to 800 chars so the
+    // operator can actually see what model + what status code came back —
+    // 200 chars was clipping the response body before the useful part.
     const detail = s.skipped
-      ? s.skipReason ?? ''
+      ? escapeHtml(s.skipReason ?? '')
       : s.error
-        ? `שגיאה: ${s.error}`
+        ? `<pre style="background:#fef2f2;color:#991b1b;padding:8px;border-radius:4px;font-size:11px;white-space:pre-wrap;word-break:break-word;margin:4px 0 0;">${escapeHtml(s.error.slice(0, 800))}</pre>`
         : `(${Math.round(s.durationMs / 100) / 10}s)`;
     return `<li style="margin-bottom:4px;"><strong>${s.stage}</strong> — ${status} ${detail}</li>`;
   }).join('');
+
+  // DA-11: surface a red banner when EVERY probe failed — a silent total
+  // outage was previously hidden inside a green "✅ הצלחה probe (12.3s)"
+  // line because the *stage* didn't throw. The all-probes-failed decision
+  // itself is logged inside runAllProbes (lib/seo/geo-probes.ts); here we
+  // just render the operator-facing banner from the stage detail.
+  const probeSummaryForBanner = (probeStage?.detail ?? {}) as {
+    total?: number;
+    failed?: number;
+  };
+  const allProbesFailed =
+    probeStage?.ok === true &&
+    typeof probeSummaryForBanner.total === 'number' &&
+    typeof probeSummaryForBanner.failed === 'number' &&
+    probeSummaryForBanner.total > 0 &&
+    probeSummaryForBanner.failed === probeSummaryForBanner.total;
+  const allProbesFailedBanner = allProbesFailed
+    ? `<div style="background:#fef2f2;border:2px solid #dc2626;color:#991b1b;padding:14px 18px;border-radius:8px;margin-bottom:16px;font-weight:bold;">
+        ⚠️ כל ${probeSummaryForBanner.total} השאילתות נכשלו היום. בדוק את ה-API keys של הספקים (Perplexity / OpenAI) ואת מצב Anthropic.
+      </div>`
+    : '';
 
   // Recent guides — David's "what did I do this week" memory, surfaced.
   const memoryHtml = ctx.recentGuides.length === 0
@@ -224,6 +258,8 @@ async function sendDailyReport(
     <h1 style="margin:6px 0 0;font-size:24px;">${today.plan.label} — ${todayLabel}</h1>
     <p style="margin:10px 0 0;font-size:14px;opacity:0.95;line-height:1.5;">${today.plan.description}</p>
   </div>
+
+  ${allProbesFailedBanner}
 
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
     <div style="background:#f1f5f9;padding:14px;border-radius:8px;text-align:center;">
@@ -276,4 +312,14 @@ async function sendDailyReport(
   });
 
   return { sent: true };
+}
+
+/** Minimal HTML escaper for embedding untrusted error strings in the email body. */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
