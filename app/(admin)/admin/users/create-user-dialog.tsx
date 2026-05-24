@@ -119,10 +119,13 @@ export function CreateUserDialog() {
       {/* Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
+          {/* Backdrop.
+              AO-13: do NOT dismiss on backdrop click once the temp password
+              is shown — a stray click would destroy the only copy of the
+              credential. The "סגור" button stays the only way out. */}
           <div
             className="absolute inset-0 bg-black/50"
-            onClick={handleClose}
+            onClick={result ? undefined : handleClose}
           />
 
           {/* Dialog */}

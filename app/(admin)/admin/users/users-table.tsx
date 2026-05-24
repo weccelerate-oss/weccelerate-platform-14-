@@ -27,20 +27,22 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toggleUserActiveAction, resetUserPasswordAction, deleteUserAction } from '../actions';
+// AO-16: WelcomeEmailStatus is re-exported from page.tsx — single source of truth.
+import type { WelcomeEmailStatus } from './page';
 import type { User, Project, UserRole } from '@prisma/client';
 
-export interface WelcomeEmailStatus {
-  status: 'sent' | 'failed' | 'none';
-  at: string | null;
-  source: string | null;
-  error: string | null;
-  confirmed: boolean;
-}
+// Re-export for downstream consumers (kept here so existing
+// `import { WelcomeEmailStatus } from './users-table'` callers still work).
+export type { WelcomeEmailStatus };
 
+// AO-12: extend the User shape with the auto-provisioning columns the row
+// renders, so the badge code no longer needs `as any` casts.
 interface UserWithProjects extends User {
   projects: Pick<Project, 'id' | 'name' | 'status'>[];
   _count: { projects: number };
   welcomeEmail?: WelcomeEmailStatus;
+  provisionedSource?: string | null;
+  provisionedAt?: Date | null;
 }
 
 interface UsersTableProps {
@@ -71,10 +73,22 @@ export function UsersTable({ users }: UsersTableProps) {
   const [roleFilter, setRoleFilter] = useState<UserRole | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [loginFilter, setLoginFilter] = useState<
-    'all' | 'logged-in' | 'email-sent-pending' | 'email-failed' | 'no-email' | 'never'
+    | 'all'
+    | 'logged-in'
+    | 'email-sent-pending'
+    | 'email-inferred-sent'
+    | 'email-failed'
+    | 'no-email'
+    | 'never'
   >('all');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [showTempPassword, setShowTempPassword] = useState<{ id: string; password: string } | null>(null);
+  const [showTempPassword, setShowTempPassword] = useState<{
+    id: string;
+    password: string;
+    emailSent: boolean;
+    emailError?: string;
+  } | null>(null);
+  const [resetPasswordCopied, setResetPasswordCopied] = useState(false);
 
   // Filter users
   const filteredUsers = users.filter((user) => {
@@ -91,10 +105,22 @@ export function UsersTable({ users }: UsersTableProps) {
       (statusFilter === 'inactive' && !user.isActive);
 
     const emailStatus = user.welcomeEmail?.status ?? 'none';
+    const emailConfirmed = user.welcomeEmail?.confirmed ?? false;
+    // AO-19: split "sent" by whether it's confirmed (real Resend log) or
+    // inferred from provision metadata. The old "no-email" bucket mixed
+    // both, which masked accounts that probably-but-not-certainly got
+    // an email.
     const matchesLogin =
       loginFilter === 'all' ||
       (loginFilter === 'logged-in' && user.lastLoginAt) ||
-      (loginFilter === 'email-sent-pending' && emailStatus === 'sent' && !user.lastLoginAt) ||
+      (loginFilter === 'email-sent-pending' &&
+        emailStatus === 'sent' &&
+        emailConfirmed === true &&
+        !user.lastLoginAt) ||
+      (loginFilter === 'email-inferred-sent' &&
+        emailStatus === 'sent' &&
+        emailConfirmed === false &&
+        !user.lastLoginAt) ||
       (loginFilter === 'email-failed' && emailStatus === 'failed') ||
       (loginFilter === 'no-email' && emailStatus === 'none' && !user.lastLoginAt) ||
       (loginFilter === 'never' && !user.lastLoginAt);
@@ -128,7 +154,13 @@ export function UsersTable({ users }: UsersTableProps) {
       try {
         const result = await resetUserPasswordAction(userId);
         if (result.success && result.tempPassword) {
-          setShowTempPassword({ id: userId, password: result.tempPassword });
+          setShowTempPassword({
+            id: userId,
+            password: result.tempPassword,
+            emailSent: result.emailSent ?? false,
+            emailError: result.emailError,
+          });
+          setResetPasswordCopied(false);
         } else if (!result.success) {
           alert(result.error || 'שגיאה באיפוס הסיסמה');
         }
@@ -137,6 +169,22 @@ export function UsersTable({ users }: UsersTableProps) {
       }
       setActionId(null);
     });
+  };
+
+  // AO-13: copy temp password to clipboard with visual confirmation —
+  // makes it less likely the admin loses the credential to a stray click.
+  const handleCopyResetPassword = () => {
+    if (!showTempPassword) return;
+    navigator.clipboard.writeText(showTempPassword.password).then(
+      () => {
+        setResetPasswordCopied(true);
+        setTimeout(() => setResetPasswordCopied(false), 2000);
+      },
+      () => {
+        // Clipboard API can fail on insecure origins — fall back to a select-all hint.
+        alert('לא ניתן להעתיק אוטומטית. סמן את הסיסמה ידנית והעתק.');
+      },
+    );
   };
 
   const handleDelete = (userId: string) => {
@@ -205,7 +253,8 @@ export function UsersTable({ users }: UsersTableProps) {
           >
             <option value="all">מצב כניסה: הכול</option>
             <option value="logged-in">נכנסו לפורטל</option>
-            <option value="email-sent-pending">קיבלו מייל וטרם נכנסו</option>
+            <option value="email-sent-pending">קיבלו מייל (מאומת) וטרם נכנסו</option>
+            <option value="email-inferred-sent">הוזמנו (לוג חסר) וטרם נכנסו</option>
             <option value="email-failed">המייל נכשל</option>
             <option value="no-email">לא נשלח מייל</option>
             <option value="never">טרם נכנסו לפורטל</option>
@@ -216,19 +265,41 @@ export function UsersTable({ users }: UsersTableProps) {
       {/* Temp password notification */}
       {showTempPassword && (
         <div className="m-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
               <p className="font-medium text-amber-800 mb-1">סיסמה זמנית נוצרה</p>
+              {/* Tell the admin whether the email actually went out — if it
+                  did, manual copy/paste is just a backup. */}
               <p className="text-sm text-amber-700">
-                העתק את הסיסמה ושלח למשתמש. היא תוצג פעם אחת בלבד.
+                {showTempPassword.emailSent
+                  ? 'הסיסמה נשלחה במייל למשתמש. ההצגה כאן היא גיבוי בלבד.'
+                  : showTempPassword.emailError
+                    ? `שליחת המייל נכשלה (${showTempPassword.emailError}) — העתק את הסיסמה ושלח ידנית.`
+                    : 'העתק את הסיסמה ושלח למשתמש. היא תוצג פעם אחת בלבד.'}
               </p>
-              <code className="mt-2 block bg-white px-3 py-2 rounded border border-amber-200 font-mono text-lg">
-                {showTempPassword.password}
-              </code>
+              <div className="mt-2 flex items-center gap-2">
+                <code className="flex-1 bg-white px-3 py-2 rounded border border-amber-200 font-mono text-lg select-all">
+                  {showTempPassword.password}
+                </code>
+                {/* AO-13: copy-to-clipboard so a backdrop or stray-click
+                    accident doesn't lose the only copy of the credential. */}
+                <button
+                  type="button"
+                  onClick={handleCopyResetPassword}
+                  className={cn(
+                    'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                    resetPasswordCopied
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-amber-100 text-amber-800 hover:bg-amber-200',
+                  )}
+                >
+                  {resetPasswordCopied ? 'הועתק ✓' : 'העתק'}
+                </button>
+              </div>
             </div>
             <button
               onClick={() => setShowTempPassword(null)}
-              className="text-amber-600 hover:text-amber-800"
+              className="text-amber-600 hover:text-amber-800 flex-shrink-0"
             >
               ✕
             </button>
@@ -283,13 +354,14 @@ export function UsersTable({ users }: UsersTableProps) {
                         לא פעיל
                       </span>
                     )}
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(user as any).provisionedSource && (
+                    {/* AO-12: provisionedSource / provisionedAt are now on
+                        UserWithProjects, no `as any` needed. */}
+                    {user.provisionedSource && (
                       <span
-                        title={`נוצר אוטומטית מ-${(user as any).provisionedSource}${(user as any).provisionedAt ? ` ב-${new Date((user as any).provisionedAt).toLocaleDateString('he-IL')}` : ''}`}
+                        title={`נוצר אוטומטית מ-${user.provisionedSource}${user.provisionedAt ? ` ב-${new Date(user.provisionedAt).toLocaleDateString('he-IL')}` : ''}`}
                         className="px-2 py-0.5 text-xs font-medium rounded-full bg-violet-50 text-violet-700 border border-violet-200"
                       >
-                        🤖 auto · {(user as any).provisionedSource}
+                        🤖 auto · {user.provisionedSource}
                       </span>
                     )}
                     {user.role === 'ENTREPRENEUR' && (() => {
@@ -308,29 +380,31 @@ export function UsersTable({ users }: UsersTableProps) {
                         // The cohort the admin cares most about: the welcome
                         // message went out (confirmed by Resend log, or
                         // inferred from provisioning metadata for users that
-                        // pre-date the logger). Tooltip carries the exact
-                        // send time, source, and confidence level.
+                        // pre-date the logger). AO-7: when inferred, never
+                        // claim "מייל נשלח" — say "הוזמן (לוג חסר)" so the
+                        // admin knows the Resend log can't confirm delivery.
                         const sentAt = email.at ? new Date(email.at) : null;
                         const days = sentAt
                           ? Math.max(0, Math.floor((Date.now() - sentAt.getTime()) / 86_400_000))
                           : null;
-                        const confidenceNote = email.confirmed
-                          ? ''
-                          : ' (היסטורי, לפי תאריך יצירת המשתמש)';
-                        const tooltipBase = sentAt
-                          ? `נשלח מייל ב-${sentAt.toLocaleString('he-IL')}${email.source ? ` (${email.source})` : ''}${days !== null ? ` · ${days} ימים ללא כניסה` : ''}`
-                          : 'מייל קבלת פנים נשלח';
+                        const tooltipBase = email.confirmed
+                          ? sentAt
+                            ? `נשלח מייל ב-${sentAt.toLocaleString('he-IL')}${email.source ? ` (${email.source})` : ''}${days !== null ? ` · ${days} ימים ללא כניסה` : ''}`
+                            : 'מייל קבלת פנים נשלח'
+                          : `המשתמש סופק אוטומטית${email.source ? ` (${email.source})` : ''} — אין לוג Resend מאשר משלוח. ייתכן שהמייל נשלח (זה מה שהקוד עושה) אבל אי-אפשר לוודא.`;
                         return (
                           <span
-                            title={tooltipBase + confidenceNote}
+                            title={tooltipBase}
                             className={cn(
                               'px-2 py-0.5 text-xs font-medium rounded-full border',
                               email.confirmed
                                 ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                : 'bg-amber-50/60 text-amber-700/80 border-amber-200 border-dashed',
+                                : 'bg-slate-50 text-slate-600 border-slate-200 border-dashed',
                             )}
                           >
-                            📩 מייל נשלח{!email.confirmed && '*'} · ממתין לכניסה{days && days > 0 ? ` · ${days} ימים` : ''}
+                            {email.confirmed
+                              ? `📩 מייל נשלח · ממתין לכניסה${days && days > 0 ? ` · ${days} ימים` : ''}`
+                              : '📩 הוזמן (לוג חסר)'}
                           </span>
                         );
                       }

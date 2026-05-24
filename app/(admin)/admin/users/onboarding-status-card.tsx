@@ -37,7 +37,16 @@ const EVENT_STYLE: Record<string, { icon: string; label: string; color: string }
 };
 
 export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
-  const { counts, lastSuccess, lastFailure, spamBlocks, daysSinceLastEvent, recentEvents } = data;
+  const {
+    counts,
+    lastSuccess,
+    lastFailure,
+    spamBlocks,
+    daysSinceLastEvent,
+    recentEvents,
+    spamBlocksTotal,
+    spamBlocksTruncated,
+  } = data;
   const totalHits =
     counts.provisioned +
     counts.spamBlocked +
@@ -152,6 +161,20 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
             </span>
             {' · '}
             <span className="text-slate-500">{formatRelative(lastFailure.at)}</span>
+            {/* AO-20: include the email + source so the admin can identify
+                which integration / lead is broken without scanning the log. */}
+            {lastFailure.email && (
+              <>
+                {' · '}
+                <span className="font-mono text-xs text-slate-600">{lastFailure.email}</span>
+              </>
+            )}
+            {lastFailure.source && (
+              <>
+                {' · '}
+                <span className="text-xs text-slate-400">({lastFailure.source})</span>
+              </>
+            )}
           </p>
           {lastFailure.detail && (
             <p className="text-xs text-slate-500 mt-1 line-clamp-2">{lastFailure.detail}</p>
@@ -164,7 +187,14 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
       {spamBlocks.length > 0 && (
         <details className="border-t border-slate-100 group bg-amber-50/40" open>
           <summary className="cursor-pointer px-4 sm:px-5 py-3 text-sm font-medium text-amber-900 hover:bg-amber-50 select-none flex items-center justify-between">
-            <span>🛡️ פניות שנחסמו כספאם ({spamBlocks.length})</span>
+            <span>
+              🛡️ פניות שנחסמו כספאם ({spamBlocks.length}
+              {/* AO-8: surface that the activity-log query was capped so
+                  the admin knows extra rejected rows exist beyond what's
+                  visible here. */}
+              {spamBlocksTotal > spamBlocks.length && ` מתוך ${spamBlocksTotal}`}
+              )
+            </span>
             <span className="text-xs text-amber-700/70 font-normal">לחץ להסתיר</span>
           </summary>
           <div className="divide-y divide-amber-100">
@@ -188,7 +218,7 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
                           ? 'bg-rose-100 text-rose-700'
                           : 'bg-amber-100 text-amber-700'
                       }`}
-                      title="ציון חשד (0-100). מעל 50 נחסם."
+                      title="ציון חשד (0-100). מעל 60 נחסם, 31-60 דורש בדיקה."
                     >
                       ציון {block.score}
                     </span>
@@ -233,6 +263,14 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
             הספאם פילטר חוסם <code className="bg-amber-100 px-1 py-0.5 rounded text-[10px]">@example.com</code>,
             מיילים זמניים, ומחרוזות עם &ldquo;test&rdquo;. אימיילים אמיתיים
             (<code className="bg-amber-100 px-1 py-0.5 rounded text-[10px]">@gmail.com</code> וכו׳) לא ייחסמו.
+            {spamBlocksTruncated && spamBlocksTotal > spamBlocks.length && (
+              <>
+                {' '}
+                <strong className="text-amber-900">
+                  · ועוד {spamBlocksTotal - spamBlocks.length} חסומים שלא הוצגו (תקרת תצוגה).
+                </strong>
+              </>
+            )}
           </p>
         </details>
       )}

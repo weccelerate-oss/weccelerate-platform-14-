@@ -31,18 +31,30 @@ export interface WelcomeEmailInput {
   tempPassword: string;
 }
 
-/** Fetched lazily once per server instance, then reused. */
-let cachedLogoBuffer: Buffer | null = null;
+/**
+ * Fetched lazily once per server instance, then reused for up to 24h.
+ *
+ * AO-10: a pinned-forever cache means a logo swap (rare, but possible —
+ * we host through Vercel + bust on deploy) would never reach already-warm
+ * lambdas. 24h is a safe ceiling because Resend retries failed sends
+ * within 24h anyway, so the worst case is one batch with the old logo
+ * across the rollover.
+ */
+const LOGO_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+let cachedLogo: { buffer: Buffer; fetchedAt: number } | null = null;
 async function getLogoBuffer(): Promise<Buffer | null> {
-  if (cachedLogoBuffer) return cachedLogoBuffer;
+  if (cachedLogo && Date.now() - cachedLogo.fetchedAt < LOGO_CACHE_TTL_MS) {
+    return cachedLogo.buffer;
+  }
   try {
     const res = await fetch(LOGO_PUBLIC_URL, { cache: 'no-store' });
-    if (!res.ok) return null;
+    if (!res.ok) return cachedLogo?.buffer ?? null; // keep stale on transient failure
     const arr = await res.arrayBuffer();
-    cachedLogoBuffer = Buffer.from(arr);
-    return cachedLogoBuffer;
+    cachedLogo = { buffer: Buffer.from(arr), fetchedAt: Date.now() };
+    return cachedLogo.buffer;
   } catch {
-    return null;
+    // Network glitch — return stale cache if we have one, else null.
+    return cachedLogo?.buffer ?? null;
   }
 }
 

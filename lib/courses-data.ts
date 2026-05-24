@@ -596,13 +596,3 @@ export function getTotalLessons(): number {
     0
   );
 }
-
-/** Get lesson count per subcategory */
-export function getSubcategoryLessonCount(subcategorySlug: string): number {
-  for (const cat of COURSES_DATA) {
-    for (const sub of cat.subcategories) {
-      if (sub.slug === subcategorySlug) return sub.lessons.length;
-    }
-  }
-  return 0;
-}

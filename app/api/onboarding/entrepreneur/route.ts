@@ -36,25 +36,40 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { provisionEntrepreneur } from '@/lib/onboarding/provision';
+import crypto from 'crypto';
+import { provisionEntrepreneur, OnboardingBodySchema } from '@/lib/onboarding/provision';
 import { runSpamFilter } from '@/lib/leads/spam-filter';
+import { checkRateLimit } from '@/lib/leads/rate-limit';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const BodySchema = z.object({
-  name: z.string().min(2, 'name too short').max(200),
-  email: z.string().email('invalid email').max(320),
-  phone: z.string().max(40).optional().nullable(),
-  company: z.string().max(200).optional().nullable(),
-  message: z.string().max(4000).optional().nullable(),
-  source: z.string().max(40).optional(),
-  raw: z.record(z.string(), z.unknown()).optional(),
-  /** If true, run the auth + spam filter but skip user creation and email. */
-  dryRun: z.boolean().optional(),
-});
+// Re-exported from provision.ts so callers have a single source of truth.
+const BodySchema = OnboardingBodySchema;
+
+/** sha256(secret).slice(0,8) — irreversible fingerprint safe to write to logs. */
+function fingerprintSecret(value: string): string {
+  return crypto.createHash('sha256').update(value).digest('hex').slice(0, 8);
+}
+
+/** Hash PII so the audit log can correlate without storing the raw value. */
+function hashPii(value: string): string {
+  return crypto.createHash('sha256').update(value.trim().toLowerCase()).digest('hex').slice(0, 16);
+}
+
+/** Extract client IP from common proxy headers (Vercel, Cloudflare, nginx). */
+function extractIp(req: NextRequest): string | null {
+  const fwd = req.headers.get('x-forwarded-for');
+  if (fwd) {
+    // x-forwarded-for can be a comma-separated chain; the original client is first.
+    const first = fwd.split(',')[0]?.trim();
+    if (first) return first;
+  }
+  const real = req.headers.get('x-real-ip');
+  if (real) return real.trim();
+  return null;
+}
 
 export async function POST(req: NextRequest) {
   // 1. Auth check — never run without the shared secret.
@@ -76,7 +91,11 @@ export async function POST(req: NextRequest) {
           action: 'onboarding.unauthorized',
           description: `Onboarding webhook rejected: missing/wrong x-onboarding-secret`,
           metadata: {
-            providedHeader: provided ? `${provided.slice(0, 4)}…(${provided.length} chars)` : null,
+            // SECURITY: never log the literal prefix — that's enough to
+            // start guessing the real secret. Store an sha256 fingerprint
+            // + length so the admin can still tell two wrong secrets apart.
+            providedFingerprint: provided ? fingerprintSecret(provided) : null,
+            providedLength: provided ? provided.length : 0,
             userAgent: req.headers.get('user-agent') ?? null,
             referer: req.headers.get('referer') ?? null,
             timestamp: new Date().toISOString(),
@@ -137,17 +156,31 @@ export async function POST(req: NextRequest) {
   if (spam.decision === 'drop') {
     // Log to the same audit log as lead spam — keeps the dashboard simple.
     // Skip the log entirely on dry-run so testing doesn't pollute the audit.
+    //
+    // PRIVACY: high-confidence spam (score >= 80) is almost certainly a
+    // bot or scraper, so we don't keep their raw PII indefinitely — we
+    // store sha256-truncated fingerprints instead. This still lets the
+    // admin de-dup repeat offenders without giving us a giant directory
+    // of bot-controlled mailboxes.
+    // TODO(maintenance): add a scheduled job that purges spam_blocked
+    // rows older than 30 days regardless of hashing.
     if (!data.dryRun) {
+      const highConfidence = spam.score >= 80;
       try {
         await prisma.activityLog.create({
           data: {
             action: 'onboarding.spam_blocked',
-            description: `Onboarding spam blocked (score ${spam.score}): ${data.email}`,
+            description: highConfidence
+              ? `Onboarding spam blocked (score ${spam.score}, PII hashed)`
+              : `Onboarding spam blocked (score ${spam.score}): ${data.email}`,
             metadata: {
-              email: data.email,
-              name: data.name,
-              phone: data.phone || null,
-              company: data.company || null,
+              email: highConfidence ? null : data.email,
+              emailHash: highConfidence ? hashPii(data.email) : null,
+              name: highConfidence ? null : data.name,
+              phone: highConfidence ? null : data.phone || null,
+              phoneHash: highConfidence && data.phone ? hashPii(data.phone) : null,
+              company: highConfidence ? null : data.company || null,
+              piiHashed: highConfidence,
               spamScore: spam.score,
               spamCodes: spam.codes,
               spamReasons: spam.reasons,
@@ -167,6 +200,41 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // 3b. Rate limit — runs after spam to avoid wasting blocklist queries on
+  // obvious junk. Blocks abusive IPs / emails that bypass the heuristic
+  // filter via slow drip.
+  const clientIp = extractIp(req);
+  try {
+    const rate = await checkRateLimit({ email: data.email, ip: clientIp });
+    if (!rate.allowed) {
+      // Same 422 semantics as the spam path: don't tell the bot it can retry.
+      if (!data.dryRun) {
+        try {
+          await prisma.activityLog.create({
+            data: {
+              action: 'onboarding.spam_blocked',
+              description: `Onboarding rate-limited (${rate.reason}): ${rate.detail}`,
+              metadata: {
+                email: data.email,
+                reason: rate.reason,
+                detail: rate.detail,
+                source: data.source ?? 'webhook',
+              },
+            },
+          });
+        } catch {
+          /* swallow */
+        }
+      }
+      return NextResponse.json(
+        { ok: false, error: 'Submission rejected', reason: rate.reason },
+        { status: 422 },
+      );
+    }
+  } catch {
+    // Rate-limit infra down — fail open rather than block legitimate signups.
+  }
+
   // 4. Dry-run — connectivity check passed, exit before touching the DB.
   if (data.dryRun) {
     return NextResponse.json({
@@ -179,6 +247,8 @@ export async function POST(req: NextRequest) {
   }
 
   // 5. Provision (idempotent on email).
+  // If the spam filter flagged the submission as borderline (31-60), still
+  // create the account but mark `mustReview` so the admin can audit it.
   const result = await provisionEntrepreneur({
     name: data.name,
     email: data.email,
@@ -187,6 +257,7 @@ export async function POST(req: NextRequest) {
     message: data.message ?? undefined,
     rawFormData: data.raw,
     source: data.source ?? 'webhook',
+    mustReview: spam.decision === 'review',
   });
 
   if (!result.ok) {

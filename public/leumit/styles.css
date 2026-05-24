@@ -89,6 +89,38 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: -0.01em;
 }
 
+/* ----- Brand lockup IMAGE — real co-branded artwork in 4 contexts ----- */
+
+.lockup-img {
+  display: block;
+  height: auto;
+  /* The source PNG is high-resolution; tell the browser to scale smoothly. */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.lockup-img--hero {
+  width: clamp(220px, 24vw, 320px);
+  /* Subtle lift so the white logo art reads cleanly over dark photo grain */
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
+}
+
+.lockup-img--stage {
+  width: clamp(180px, 18vw, 240px);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+}
+
+.lockup-img--reveal {
+  width: clamp(280px, 60vw, 720px);
+  max-width: 90%;
+  filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.5));
+}
+
+.lockup-img--partnership {
+  width: clamp(280px, 50vw, 520px);
+  margin: 0 auto;
+}
+
 /* ============================================================================
    1. HERO
    ============================================================================ */
@@ -458,6 +490,29 @@ a { color: inherit; text-decoration: none; }
   padding: 120px 5vw;
 }
 
+/* Hero strip — large co-brand lockup centered above the explainer.
+   Subtle coral wash behind it so the logo gets a halo and the section
+   reads as a true brand moment instead of just an info block. */
+.partnership__hero {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 80px;
+  padding: 40px 0;
+}
+
+.partnership__hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 50% 70% at 50% 50%,
+    rgba(255, 78, 58, 0.06) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
 .partnership__inner {
   max-width: 1200px;
   margin: 0 auto;
@@ -653,8 +708,16 @@ a { color: inherit; text-decoration: none; }
   .hero__topbar, .hero__bottom { gap: 16px; }
   .hero__topbar { font-size: 18px; }
 
-  .stage-lockup  { top: 18px; right: 5vw; font-size: 17px; }
+  .stage-lockup  { top: 18px; right: 5vw; }
   .stage-counter { top: 18px; left: 5vw; }
+
+  /* Logo images scale down on mobile */
+  .lockup-img--hero   { width: 180px; }
+  .lockup-img--stage  { width: 140px; }
+  .lockup-img--reveal { width: 80%; }
+
+  .partnership__hero { margin-bottom: 48px; padding: 24px 0; }
+  .lockup-img--partnership { width: 80%; }
 
   .partnership__inner { grid-template-columns: 1fr; gap: 40px; }
   .partnership__title { font-size: clamp(28px, 8vw, 44px); margin-bottom: 24px; }

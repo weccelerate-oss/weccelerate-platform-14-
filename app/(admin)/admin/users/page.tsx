@@ -54,7 +54,15 @@ export interface OnboardingActivity {
     emailFailed: number;
   };
   lastSuccess: { at: string; email: string | null; source: string | null } | null;
-  lastFailure: { at: string; action: string; detail: string | null } | null;
+  /** AO-20: also carry email + source so the banner / detail row can show
+   *  exactly which integration failed, not just the action name. */
+  lastFailure: {
+    at: string;
+    action: string;
+    detail: string | null;
+    email: string | null;
+    source: string | null;
+  } | null;
   /** ALL spam blocks in the 30-day window, newest first. Lets the admin
    *  review what got rejected and decide whether anything was a false
    *  positive worth recovering by adding the user manually. */
@@ -69,6 +77,11 @@ export interface OnboardingActivity {
     email: string | null;
     name: string | null;
   }>;
+  /** Total spam-block rows actually present (after take cap). Lets the UI
+   *  warn when the user is viewing a truncated list. */
+  spamBlocksTotal: number;
+  /** True when activityLog query hit the take-limit cap (AO-8). */
+  spamBlocksTruncated: boolean;
 }
 
 const ONBOARDING_ACTIONS = [
@@ -79,6 +92,11 @@ const ONBOARDING_ACTIONS = [
   'user.welcome_email_sent',
   'user.welcome_email_failed',
 ];
+
+// AO-8: hard cap on the activity-log query so a flood of spam attempts
+// can't render the admin page unbounded. 200 rows comfortably covers a
+// month of normal traffic; a footer warns when the cap is hit.
+const ONBOARDING_ACTIVITY_LIMIT = 200;
 
 async function getOnboardingActivity(): Promise<OnboardingActivity> {
   const { prisma } = await import('@/lib/db');
@@ -91,6 +109,7 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
         createdAt: { gte: thirtyDaysAgo },
       },
       orderBy: { createdAt: 'desc' },
+      take: ONBOARDING_ACTIVITY_LIMIT,
       select: {
         action: true,
         createdAt: true,
@@ -98,6 +117,17 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
         metadata: true,
       },
     });
+
+    // Count actual total of spam-blocks in the window so we can warn about
+    // truncation independently of the page-bound row list above.
+    const spamBlocksTotal = await prisma.activityLog
+      .count({
+        where: {
+          action: 'onboarding.spam_blocked',
+          createdAt: { gte: thirtyDaysAgo },
+        },
+      })
+      .catch(() => 0);
 
     const counts = {
       provisioned: 0,
@@ -164,6 +194,10 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
           at: row.createdAt.toISOString(),
           action: row.action,
           detail: row.description ?? null,
+          // AO-20: preserve email + source so the banner doesn't lose the
+          // most useful context for debugging "which integration broke".
+          email: typeof meta.email === 'string' ? meta.email : null,
+          source: typeof meta.source === 'string' ? meta.source : null,
         };
       }
     }
@@ -187,7 +221,16 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
       },
     );
 
-    return { counts, lastSuccess, lastFailure, spamBlocks, daysSinceLastEvent, recentEvents };
+    return {
+      counts,
+      lastSuccess,
+      lastFailure,
+      spamBlocks,
+      daysSinceLastEvent,
+      recentEvents,
+      spamBlocksTotal,
+      spamBlocksTruncated: rows.length >= ONBOARDING_ACTIVITY_LIMIT,
+    };
   } catch (error) {
     console.error('[Admin] Onboarding activity lookup failed:', error);
     return {
@@ -197,6 +240,8 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
       spamBlocks: [],
       daysSinceLastEvent: null,
       recentEvents: [],
+      spamBlocksTotal: 0,
+      spamBlocksTruncated: false,
     };
   }
 }

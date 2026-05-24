@@ -12,6 +12,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { generateTempPassword } from '@/lib/security/generate-password';
 import type { UrgencyLevel, EventStatus, VideoCategory, UserRole, ProjectStatus } from '@prisma/client';
 
 // =============================================================================
@@ -546,11 +547,30 @@ export async function updateUserAction(id: string, data: Partial<CreateUserFormD
 
 export async function toggleUserActiveAction(id: string, isActive: boolean) {
   try {
-    await verifyAdmin();
-    await prisma.user.update({
+    const actor = await verifyAdmin();
+    const updated = await prisma.user.update({
       where: { id },
       data: { isActive },
+      select: { id: true, email: true },
     });
+
+    // Audit (AO-6) — admin enable/disable is sensitive and must leave a trail.
+    await prisma.activityLog
+      .create({
+        data: {
+          action: 'admin.user.toggle_active',
+          description: `Admin ${(actor as any).email ?? '?'} set user ${updated.email} → ${isActive ? 'active' : 'disabled'}`,
+          userId: updated.id,
+          metadata: {
+            actorId: (actor as any).id ?? null,
+            actorEmail: (actor as any).email ?? null,
+            targetUserId: updated.id,
+            targetEmail: updated.email,
+            newIsActive: isActive,
+          },
+        },
+      })
+      .catch((err) => console.error('[Admin] toggleUserActiveAction audit failed:', err));
 
     revalidatePath('/admin/users');
 
@@ -563,23 +583,88 @@ export async function toggleUserActiveAction(id: string, isActive: boolean) {
 
 export async function resetUserPasswordAction(id: string) {
   try {
-    await verifyAdmin();
+    const actor = await verifyAdmin();
     const tempPassword = generateTempPassword();
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
 
     // Reissuing a temp password resets the "must change on next login" flag
     // so the funnel correctly tracks the new wait period.
-    await prisma.user.update({
+    const user = await prisma.user.update({
       where: { id },
       data: {
         password: hashedPassword,
         mustChangePassword: true,
       },
+      select: { id: true, email: true, name: true },
     });
 
-    // TODO: Send email with new password
+    // Try to email the new credentials. We reuse the welcome-email template
+    // because the message ("here is your one-time password, change it on
+    // first login") is identical in shape. Failure does NOT block the
+    // action — the admin still has the plaintext in the modal as fallback.
+    //
+    // AO-3 note: emailing plaintext temp passwords is intentional. The user
+    // never sees them again — they're forced to change on first login via
+    // `mustChangePassword=true`, so the plaintext-in-transit window is
+    // bounded by their first portal visit. This is the standard pattern
+    // for admin-initiated resets; a "set a new password" magic link would
+    // be the alternative but requires a token table + flow we don't have.
+    let emailSent = false;
+    let emailError: string | undefined;
+    try {
+      const { sendWelcomeEmail } = await import('@/lib/onboarding/welcome-email');
+      const result = await sendWelcomeEmail({
+        to: user.email,
+        name: user.name,
+        tempPassword,
+      });
+      emailSent = result.ok;
+      if (!result.ok) emailError = result.error;
+    } catch (err) {
+      emailError = err instanceof Error ? err.message : String(err);
+    }
 
-    return { success: true, tempPassword };
+    // Audit the reset itself + the email outcome.
+    await prisma.activityLog
+      .create({
+        data: {
+          action: 'admin.user.password_reset',
+          description: `Admin ${(actor as any).email ?? '?'} reset password for ${user.email} (email ${emailSent ? 'sent' : 'failed'})`,
+          userId: user.id,
+          metadata: {
+            actorId: (actor as any).id ?? null,
+            actorEmail: (actor as any).email ?? null,
+            targetUserId: user.id,
+            targetEmail: user.email,
+            emailSent,
+            emailError: emailError ?? null,
+          },
+        },
+      })
+      .catch((err) => console.error('[Admin] resetUserPasswordAction audit failed:', err));
+
+    // Mirror the welcome-email audit so the user.welcome_email_* feed stays
+    // accurate (the funnel widget on /admin/users keys off these actions).
+    await prisma.activityLog
+      .create({
+        data: {
+          action: emailSent ? 'user.welcome_email_sent' : 'user.welcome_email_failed',
+          description: emailSent
+            ? `Reset-password email sent to ${user.email}`
+            : `Reset-password email failed for ${user.email}: ${emailError}`,
+          userId: user.id,
+          metadata: {
+            email: user.email,
+            source: 'admin_reset',
+            error: emailError ?? null,
+          },
+        },
+      })
+      .catch((err) => console.error('[Admin] welcome_email audit (reset) failed:', err));
+
+    revalidatePath('/admin/users');
+
+    return { success: true, tempPassword, emailSent, emailError };
   } catch (error) {
     console.error('[Admin] Error resetting password:', error);
     return { success: false, error: 'Failed to reset password' };
@@ -588,12 +673,38 @@ export async function resetUserPasswordAction(id: string) {
 
 export async function deleteUserAction(id: string) {
   try {
-    await verifyAdmin();
+    const actor = await verifyAdmin();
+
+    // Capture identifying info BEFORE the delete so the audit row still has
+    // a human-readable email/role after the user is gone.
+    const target = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, email: true, role: true, name: true },
+    });
 
     // Hard delete — cascade removes projects, files, notes, etc.
     await prisma.user.delete({
       where: { id },
     });
+
+    // Audit (AO-6). userId is null because the row is gone; identifying
+    // info is preserved in metadata.
+    await prisma.activityLog
+      .create({
+        data: {
+          action: 'admin.user.delete',
+          description: `Admin ${(actor as any).email ?? '?'} deleted user ${target?.email ?? id}`,
+          metadata: {
+            actorId: (actor as any).id ?? null,
+            actorEmail: (actor as any).email ?? null,
+            targetUserId: id,
+            targetEmail: target?.email ?? null,
+            targetRole: target?.role ?? null,
+            targetName: target?.name ?? null,
+          },
+        },
+      })
+      .catch((err) => console.error('[Admin] deleteUserAction audit failed:', err));
 
     revalidatePath('/admin/users');
 
@@ -1274,18 +1385,4 @@ export async function deleteProjectFileAction(fileId: string) {
   }
 }
 
-function generateTempPassword(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  const specialChars = '!@#$%';
-  let password = '';
-  
-  // 8 alphanumeric chars
-  for (let i = 0; i < 8; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  
-  // Add 1-2 special chars
-  password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
-  
-  return password;
-}
+// generateTempPassword moved to lib/security/generate-password.ts (crypto-secure RNG).

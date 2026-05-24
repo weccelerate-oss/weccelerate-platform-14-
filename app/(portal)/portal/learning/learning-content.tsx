@@ -60,10 +60,14 @@ const COMPLETE_REMAINING_SEC = 1.5; // ≤ 1.5s left → already "done"
 
 // Shared rule: a position counts as "finished" if it's within 1.5 seconds
 // of the end OR past 92% of the runtime. Mirrors the server.
+// Position is clamped to [0, durationSec] to guard against the player
+// reporting a slightly-overshoot value at the very end. (LC-8)
 function isEffectivelyComplete(positionSec: number, durationSec: number | null): boolean {
   if (!durationSec || durationSec <= 0) return false;
-  if (durationSec - positionSec <= COMPLETE_REMAINING_SEC) return true;
-  return positionSec / durationSec >= COMPLETE_RATIO;
+  if (!Number.isFinite(positionSec) || positionSec < 0) return false;
+  const clamped = positionSec > durationSec ? durationSec : positionSec;
+  if (durationSec - clamped <= COMPLETE_REMAINING_SEC) return true;
+  return clamped / durationSec >= COMPLETE_RATIO;
 }
 
 // Treat a lesson as "effectively done" if the completed flag is set OR
@@ -79,13 +83,6 @@ function isEffectivelyDone(p: LessonProgress | undefined): boolean {
 
 function isInProgress(p: LessonProgress | undefined): p is LessonProgress {
   return Boolean(p && !isEffectivelyDone(p) && p.positionSec >= MIN_RESUME_SEC);
-}
-
-function progressPercent(p: LessonProgress | undefined): number {
-  if (!p) return 0;
-  if (p.completed) return 100;
-  if (!p.durationSec || p.durationSec <= 0) return 0;
-  return Math.min(100, Math.round((p.positionSec / p.durationSec) * 100));
 }
 
 function formatTime(totalSec: number): string {
@@ -210,22 +207,54 @@ function formatWatchTime(totalSec: number): string {
   return `${hours} שע׳ ${minutes} דק׳`;
 }
 
+// Lightweight dev logger — strips console noise from production bundles
+// without scattering NODE_ENV checks across the file. (LC-16)
+const isDev = process.env.NODE_ENV !== 'production';
+const devLog = (...args: unknown[]) => {
+  if (isDev) console.log(...args);
+};
+
 export function LearningContent({ user, initialProgress }: LearningContentProps) {
   // The single source of truth for "what does the user know / where did
   // they stop." Keyed by slug for O(1) lookup from any render path.
   // On load, treat any lesson past the completion threshold as completed —
   // covers rows written before the server-side auto-complete rule existed,
   // so the gold progress bar reflects reality immediately.
-  const [progressMap, setProgressMap] = useState<Map<string, LessonProgress>>(
-    () => {
-      const m = new Map<string, LessonProgress>();
-      for (const p of initialProgress) {
-        const pastThreshold = !p.completed && isEffectivelyComplete(p.positionSec, p.durationSec);
-        m.set(p.slug, pastThreshold ? { ...p, completed: true } : p);
-      }
-      return m;
+  //
+  // We also remember which slugs we flipped locally so we can reconcile
+  // them with the server in an effect below — otherwise the UI shows
+  // "done" but the DB row still says completed:false. (LC-20 / LC-9)
+  const [{ map: progressMap, autoCompletedOnLoad }, setProgressState] = useState<{
+    map: Map<string, LessonProgress>;
+    autoCompletedOnLoad: string[];
+  }>(() => {
+    const m = new Map<string, LessonProgress>();
+    const flipped: string[] = [];
+    for (const p of initialProgress) {
+      const pastThreshold = !p.completed && isEffectivelyComplete(p.positionSec, p.durationSec);
+      if (pastThreshold) flipped.push(p.slug);
+      m.set(p.slug, pastThreshold ? { ...p, completed: true } : p);
+    }
+    return { map: m, autoCompletedOnLoad: flipped };
+  });
+  const setProgressMap = useCallback(
+    (updater: (prev: Map<string, LessonProgress>) => Map<string, LessonProgress>) => {
+      setProgressState((s) => ({ ...s, map: updater(s.map) }));
     },
+    [],
   );
+
+  // Non-blocking schema-stale toast. Replaces the cross-user
+  // `window.__learningSchemaHintShown` + alert() combo. The flag was on
+  // `window`, so it leaked across logged-in users on the same tab and the
+  // alert() blocked the render pass. (LC-10)
+  const [schemaHint, setSchemaHint] = useState<string | null>(null);
+  const schemaHintShownRef = useRef(false);
+  // Reset the one-shot flag whenever the user id changes (account swap).
+  useEffect(() => {
+    schemaHintShownRef.current = false;
+    setSchemaHint(null);
+  }, [user.id]);
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(COURSES_DATA.map((c) => c.slug)),
@@ -336,37 +365,59 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
     async (
       slug: string,
       patch: { completed?: boolean; positionSec?: number; durationSec?: number },
+      /**
+       * Set true for tab-close paths (visibilitychange/pagehide) so the
+       * browser keeps the request alive after navigation. We don't read
+       * the response in that case — `keepalive: true` + a body read is
+       * undefined behaviour on some browsers and Safari just discards
+       * the body. (LC-14)
+       */
+      transport: { keepalive?: boolean } = {},
     ) => {
-      const previous = progressMap.get(slug);
-      const next: LessonProgress = {
-        slug,
-        completed: patch.completed ?? previous?.completed ?? false,
-        positionSec: patch.positionSec ?? previous?.positionSec ?? 0,
-        durationSec: patch.durationSec ?? previous?.durationSec ?? null,
-        lastWatchedAt: new Date().toISOString(),
-      };
-      // If the user un-completes manually, also wipe the cursor so the row
-      // doesn't claim "in progress 100%" right after.
-      if (patch.completed === false && patch.positionSec === undefined) {
-        next.positionSec = 0;
-      }
-      // Mirror the server's auto-complete rule on the client so the overall
-      // progress bar reflects "finished" the instant the video crosses the
-      // threshold — no waiting for the API round-trip.
-      if (
-        patch.completed === undefined &&
-        isEffectivelyComplete(next.positionSec, next.durationSec)
-      ) {
-        next.completed = true;
-      }
+      // Capture the pre-update snapshot for the catch path. Reading from
+      // the closure's progressMap was racy when several saves overlapped:
+      // a slow save could revert to a value already overwritten by a newer
+      // save. Reading inside the functional updater gives us the live
+      // "previous" without rebuilding the callback on every map change. (LC-15)
+      let previous: LessonProgress | undefined;
+      let next: LessonProgress | null = null;
+
       setProgressMap((prev) => {
+        previous = prev.get(slug);
+        const candidate: LessonProgress = {
+          slug,
+          completed: patch.completed ?? previous?.completed ?? false,
+          positionSec: patch.positionSec ?? previous?.positionSec ?? 0,
+          durationSec: patch.durationSec ?? previous?.durationSec ?? null,
+          lastWatchedAt: new Date().toISOString(),
+        };
+        // If the user un-completes manually, also wipe the cursor so the row
+        // doesn't claim "in progress 100%" right after.
+        if (patch.completed === false && patch.positionSec === undefined) {
+          candidate.positionSec = 0;
+        }
+        // Mirror the server's auto-complete rule on the client so the overall
+        // progress bar reflects "finished" the instant the video crosses the
+        // threshold — no waiting for the API round-trip.
+        if (
+          patch.completed === undefined &&
+          isEffectivelyComplete(candidate.positionSec, candidate.durationSec)
+        ) {
+          candidate.completed = true;
+        }
+        next = candidate;
         const m = new Map(prev);
-        m.set(slug, next);
+        m.set(slug, candidate);
         return m;
       });
 
+      // setState is synchronous before re-render in React's batched flush
+      // for callable updaters — `next` is guaranteed populated here.
+      if (!next) return;
+      const optimistic = next;
+
       try {
-        console.log('[learning] saving', slug, patch);
+        devLog('[learning] saving', slug, patch);
         const res = await fetch('/api/portal/lessons/progress', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -374,8 +425,12 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
             lessonSlug: slug,
             ...patch,
           }),
-          keepalive: true, // ensures saves survive a tab close on the way out
+          ...(transport.keepalive ? { keepalive: true } : {}),
         });
+
+        // For unload-path saves, the response body may or may not arrive
+        // depending on the browser. Bail without reading. (LC-14)
+        if (transport.keepalive) return;
 
         // Surface 5xx loudly — used to be silent and that's exactly how
         // "progress doesn't survive refresh" went undiagnosed.
@@ -383,22 +438,20 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
           const errorPayload = (await res.json().catch(() => null)) as
             | { error?: string; detail?: string; hint?: string }
             | null;
-          console.error(
-            '[learning] save failed',
-            res.status,
-            errorPayload?.detail || errorPayload?.error,
-          );
+          if (isDev) {
+            console.error(
+              '[learning] save failed',
+              res.status,
+              errorPayload?.detail || errorPayload?.error,
+            );
+          }
           if (errorPayload?.hint) {
-            console.warn('[learning] hint:', errorPayload.hint);
-            // Show the admin once — every other render of the page might
-            // repeat this. Just enough to make a stale schema visible.
-            if (typeof window !== 'undefined' && !window.__learningSchemaHintShown) {
-              window.__learningSchemaHintShown = true;
-              alert(
-                'שגיאת שמירה בהתקדמות:\n\n' +
-                  (errorPayload.detail ?? '') +
-                  '\n\n' +
-                  errorPayload.hint,
+            // Surface a non-blocking toast once per session per user.
+            // The flag is a ref (not window), so it resets on user switch. (LC-10)
+            if (!schemaHintShownRef.current) {
+              schemaHintShownRef.current = true;
+              setSchemaHint(
+                'שגיאת שמירה בהתקדמות. ' + errorPayload.hint,
               );
             }
           }
@@ -419,7 +472,7 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
               source?: string;
             }
           | null;
-        console.log('[learning] saved', slug, data);
+        devLog('[learning] saved', slug, data);
         if (data?.success && typeof data.completed === 'boolean') {
           const serverSaysCompleted = data.completed;
           const explicitUnmark = patch.completed === false;
@@ -432,16 +485,17 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
             m.set(slug, {
               slug,
               completed: finalCompleted,
-              positionSec: data.positionSec ?? next.positionSec,
-              durationSec: data.durationSec ?? next.durationSec,
-              lastWatchedAt: data.lastWatchedAt ?? next.lastWatchedAt,
+              positionSec: data.positionSec ?? optimistic.positionSec,
+              durationSec: data.durationSec ?? optimistic.durationSec,
+              lastWatchedAt: data.lastWatchedAt ?? optimistic.lastWatchedAt,
             });
             return m;
           });
         }
       } catch (err) {
-        console.error('[learning] save threw', err);
-        // Revert on hard failure so the UI doesn't lie.
+        if (isDev) console.error('[learning] save threw', err);
+        // Revert on hard failure so the UI doesn't lie. Use the captured
+        // `previous` snapshot from the start of this call. (LC-15)
         setProgressMap((prev) => {
           const m = new Map(prev);
           if (previous) m.set(slug, previous);
@@ -450,8 +504,22 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
         });
       }
     },
-    [progressMap],
+    [setProgressMap],
   );
+
+  // Reconcile rows that we auto-flipped to `completed: true` on first paint
+  // (the catalog said the user passed the threshold, but the DB row still
+  // had completed:false). Fire one POST per flipped slug so the server
+  // catches up. We only do this once per mount. (LC-20 / LC-9)
+  const reconciledRef = useRef(false);
+  useEffect(() => {
+    if (reconciledRef.current) return;
+    if (autoCompletedOnLoad.length === 0) return;
+    reconciledRef.current = true;
+    for (const slug of autoCompletedOnLoad) {
+      void patchProgress(slug, { completed: true });
+    }
+  }, [autoCompletedOnLoad, patchProgress]);
 
   const toggleLessonComplete = useCallback(
     (slug: string) => {
@@ -615,7 +683,6 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
           {continueLesson && (
             <ContinueCard
               entry={continueLesson}
-              progress={progressMap.get(continueLesson.lesson.slug)!}
               onResume={openContinueLesson}
             />
           )}
@@ -665,15 +732,40 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
             progress={progressMap.get(activeLesson.slug)}
             nextLesson={getNextLesson(activeLesson.slug)}
             onToggleComplete={() => toggleLessonComplete(activeLesson.slug)}
-            onSavePosition={(positionSec, durationSec) =>
-              patchProgress(activeLesson.slug, { positionSec, durationSec })
+            // Save callbacks take the slug explicitly so the modal can pin
+            // them to the lesson that was active when the player mounted —
+            // protects against the cleanup-after-swap race where saveNow
+            // would otherwise write the previous video's position against
+            // the freshly-loaded next lesson's slug. (LC-4)
+            onSavePosition={(slug, positionSec, durationSec, opts) =>
+              patchProgress(slug, { positionSec, durationSec }, opts)
             }
-            onAutoComplete={(positionSec, durationSec) =>
-              patchProgress(activeLesson.slug, { completed: true, positionSec, durationSec })
+            onAutoComplete={(slug, positionSec, durationSec) =>
+              patchProgress(slug, { completed: true, positionSec, durationSec })
             }
             onPlayNext={() => playNext(activeLesson.slug)}
             onClose={closeLesson}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Non-blocking schema-stale toast — replaces the alert()-and-window
+          flag combo. Click to dismiss. (LC-10) */}
+      <AnimatePresence>
+        {schemaHint && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            role="alert"
+            onClick={() => setSchemaHint(null)}
+            className="fixed bottom-4 right-4 z-50 max-w-sm p-4 rounded-xl bg-red-900/90 text-white text-sm shadow-2xl border border-red-500/40 cursor-pointer"
+          >
+            <div className="flex items-start gap-2">
+              <X className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">{schemaHint}</div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
@@ -807,7 +899,6 @@ function ContinueCard({
   onResume,
 }: {
   entry: LessonIndex;
-  progress: LessonProgress;
   onResume: () => void;
 }) {
   const colors = COLOR_MAP[entry.category.color] || COLOR_MAP.blue;
@@ -826,7 +917,13 @@ function ContinueCard({
         <img
           src={thumbHigh}
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = thumbFallback;
+            // Without the guard, a YouTube outage that returns 404 for both
+            // sizes triggers an infinite onError → swap → onError loop and
+            // pegs the main thread. (LC-11)
+            const img = e.currentTarget as HTMLImageElement;
+            if (img.dataset.fallbackUsed) return;
+            img.dataset.fallbackUsed = '1';
+            img.src = thumbFallback;
           }}
           alt=""
           className="w-full h-full object-cover scale-110 blur-md opacity-60"
@@ -855,7 +952,11 @@ function ContinueCard({
           <img
             src={thumbHigh}
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = thumbFallback;
+              // Same guard as the background image — see LC-11.
+              const img = e.currentTarget as HTMLImageElement;
+              if (img.dataset.fallbackUsed) return;
+              img.dataset.fallbackUsed = '1';
+              img.src = thumbFallback;
             }}
             alt=""
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -1343,37 +1444,6 @@ function SubcategorySection({
 }
 
 // =============================================================================
-// PROGRESS RING — partial-fill circle icon for in-progress lessons
-// =============================================================================
-
-function ProgressRing({
-  percent,
-  className,
-}: {
-  percent: number;
-  className?: string;
-}) {
-  const radius = 8;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference * (1 - Math.min(100, Math.max(0, percent)) / 100);
-  return (
-    <svg viewBox="0 0 20 20" className={cn('w-5 h-5 -rotate-90', className)}>
-      <circle cx="10" cy="10" r={radius} className="fill-none stroke-white/15" strokeWidth="2" />
-      <circle
-        cx="10"
-        cy="10"
-        r={radius}
-        className="fill-none transition-[stroke-dashoffset] duration-500"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeDasharray={circumference}
-        strokeDashoffset={dashOffset}
-      />
-    </svg>
-  );
-}
-
-// =============================================================================
 // LESSON ROW
 // =============================================================================
 
@@ -1508,8 +1578,6 @@ type YTPlayer = {
 type YTPlayerEvent = { target: YTPlayer; data?: number };
 declare global {
   interface Window {
-    /** One-shot flag so the schema-stale alert only fires once per session. */
-    __learningSchemaHintShown?: boolean;
     YT?: {
       Player: new (
         el: string | HTMLElement,
@@ -1528,22 +1596,66 @@ declare global {
   }
 }
 
-// Load the IFrame API exactly once across the app session.
+// Load the IFrame API exactly once across the app session. If the load
+// fails (offline, ad-blocker, slow network), reject after a hard timeout
+// so the modal can fall back to a "watch on YouTube" link instead of
+// spinning forever. (LC-6 / LC-7 / LC-25)
+const YT_API_LOAD_TIMEOUT_MS = 10_000;
 let ytApiPromise: Promise<void> | null = null;
 function loadYouTubeApi(): Promise<void> {
   if (typeof window === 'undefined') return Promise.resolve();
   if (window.YT?.Player) return Promise.resolve();
   if (ytApiPromise) return ytApiPromise;
 
-  ytApiPromise = new Promise<void>((resolve) => {
+  ytApiPromise = new Promise<void>((resolve, reject) => {
     const existing = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      existing?.();
+    let settled = false;
+    const finishOk = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
       resolve();
     };
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
+    const finishErr = (err: Error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      // Reset so the next modal-open attempt re-tries the load. Without
+      // this, a transient network glitch would permanently break video
+      // playback for the rest of the session. (LC-7)
+      ytApiPromise = null;
+      reject(err);
+    };
+
+    window.onYouTubeIframeAPIReady = () => {
+      existing?.();
+      finishOk();
+    };
+
+    // De-dupe the script tag: HMR / Strict-Mode double-mounts used to
+    // append it twice and the second copy never fires the global
+    // callback, so the second promise resolution path silently dropped. (LC-25)
+    const existingTag = document.querySelector<HTMLScriptElement>(
+      'script[src*="youtube.com/iframe_api"], script[src*="youtube-nocookie.com/iframe_api"]',
+    );
+    if (existingTag) {
+      // If YT is already loading, wait for it via the callback we just
+      // installed. If it's already loaded, resolve immediately.
+      if (window.YT?.Player) {
+        finishOk();
+      }
+    } else {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      tag.onerror = () =>
+        finishErr(new Error('YouTube IFrame API script failed to load'));
+      document.head.appendChild(tag);
+    }
+
+    const timer = setTimeout(
+      () => finishErr(new Error('YouTube IFrame API load timed out')),
+      YT_API_LOAD_TIMEOUT_MS,
+    );
   });
   return ytApiPromise;
 }
@@ -1568,8 +1680,13 @@ function VideoModal({
   progress: LessonProgress | undefined;
   nextLesson: LessonIndex | null;
   onToggleComplete: () => void;
-  onSavePosition: (positionSec: number, durationSec: number) => void;
-  onAutoComplete: (positionSec: number, durationSec: number) => void;
+  onSavePosition: (
+    slug: string,
+    positionSec: number,
+    durationSec: number,
+    opts?: { keepalive?: boolean },
+  ) => void;
+  onAutoComplete: (slug: string, positionSec: number, durationSec: number) => void;
   onPlayNext: () => void;
   onClose: () => void;
 }) {
@@ -1582,7 +1699,14 @@ function VideoModal({
   const lastSavedRef = useRef<{ position: number; at: number }>({ position: 0, at: 0 });
   const autoCompletedRef = useRef<boolean>(false);
   const tickHandleRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Track which slug the *currently mounted* player belongs to. The cleanup
+  // for the previous lesson runs after React has already swapped `lesson`
+  // to the next one — without this ref, the final save would be attributed
+  // to the wrong slug. (LC-4)
+  const playerSlugRef = useRef<string | null>(null);
   const [showResumeToast, setShowResumeToast] = useState<number>(resumeFrom);
+  // YT API load failure state — drives the fallback UI. (LC-6)
+  const [ytLoadError, setYtLoadError] = useState(false);
   // Autoplay-next countdown. -1 means "not running". Ticks down once per
   // second; on 0 we hand control to the parent to swap lessons.
   const [nextCountdown, setNextCountdown] = useState<number>(-1);
@@ -1598,11 +1722,14 @@ function VideoModal({
 
   // Save the latest position. Used by the tick interval, pause handler,
   // and unmount cleanup. Pulls live state from the player so we never
-  // save stale numbers.
+  // save stale numbers. The save is always attributed to the slug the
+  // player is currently bound to (`playerSlugRef`), not the prop value
+  // that React may have already swapped to the next lesson. (LC-4)
   const saveNow = useCallback(
-    (opts?: { force?: boolean }) => {
+    (opts?: { force?: boolean; keepalive?: boolean }) => {
       const player = playerRef.current;
-      if (!player) return;
+      const slug = playerSlugRef.current;
+      if (!player || !slug) return;
       let position = 0;
       let duration = 0;
       try {
@@ -1626,11 +1753,11 @@ function VideoModal({
       // Auto-complete near the end — fire once.
       if (!autoCompletedRef.current && isEffectivelyComplete(position, duration)) {
         autoCompletedRef.current = true;
-        onAutoComplete(position, duration);
+        onAutoComplete(slug, position, duration);
         return;
       }
 
-      onSavePosition(position, duration);
+      onSavePosition(slug, position, duration, opts?.keepalive ? { keepalive: true } : undefined);
     },
     [onSavePosition, onAutoComplete],
   );
@@ -1642,64 +1769,93 @@ function VideoModal({
     return () => clearTimeout(t);
   }, [showResumeToast]);
 
+  // Reset autoplay countdown when the lesson changes — otherwise a
+  // countdown left running from the previous video could fire onPlayNext
+  // after `nextLesson` had already gone null (end-of-curriculum case). (LC-12)
+  useEffect(() => {
+    setNextCountdown(-1);
+    setYtLoadError(false);
+  }, [lesson.youtubeId]);
+
   // Mount the YT player when the modal opens; tear down on close.
   useEffect(() => {
     let disposed = false;
+    const mountSlug = lesson.slug;
 
-    void loadYouTubeApi().then(() => {
-      if (disposed || !playerHostRef.current || !window.YT?.Player) return;
+    loadYouTubeApi()
+      .then(() => {
+        if (disposed || !playerHostRef.current || !window.YT?.Player) return;
 
-      autoCompletedRef.current = false;
-      lastSavedRef.current = { position: resumeFrom, at: 0 };
+        autoCompletedRef.current = false;
+        lastSavedRef.current = { position: resumeFrom, at: 0 };
 
-      playerRef.current = new window.YT.Player(playerHostRef.current, {
-        videoId: lesson.youtubeId,
-        playerVars: {
-          rel: 0,
-          modestbranding: 1,
-          start: resumeFrom > 0 ? resumeFrom : undefined,
-          playsinline: 1,
-        },
-        events: {
-          onReady: (e) => {
-            // Defensive: some browsers ignore `start` param — seek manually.
-            if (resumeFrom > 0) {
-              try {
-                e.target.seekTo(resumeFrom, true);
-              } catch {
-                /* swallow */
-              }
-            }
+        const created = new window.YT.Player(playerHostRef.current, {
+          videoId: lesson.youtubeId,
+          playerVars: {
+            rel: 0,
+            modestbranding: 1,
+            start: resumeFrom > 0 ? resumeFrom : undefined,
+            playsinline: 1,
           },
-          onStateChange: (e) => {
-            const state = e.data;
-            const YT = window.YT;
-            if (!YT) return;
-            if (state === YT.PlayerState.PLAYING) {
-              // Start ticking — save every SAVE_INTERVAL_MS.
-              if (tickHandleRef.current) clearInterval(tickHandleRef.current);
-              tickHandleRef.current = setInterval(() => saveNow(), SAVE_INTERVAL_MS);
-            } else if (state === YT.PlayerState.PAUSED) {
-              if (tickHandleRef.current) {
-                clearInterval(tickHandleRef.current);
-                tickHandleRef.current = null;
+          events: {
+            onReady: (e) => {
+              // Defensive: some browsers ignore `start` param — seek manually.
+              if (resumeFrom > 0) {
+                try {
+                  e.target.seekTo(resumeFrom, true);
+                } catch {
+                  /* swallow */
+                }
               }
-              saveNow({ force: true });
-            } else if (state === YT.PlayerState.ENDED) {
-              if (tickHandleRef.current) {
-                clearInterval(tickHandleRef.current);
-                tickHandleRef.current = null;
+            },
+            onStateChange: (e) => {
+              const state = e.data;
+              const YT = window.YT;
+              if (!YT) return;
+              if (state === YT.PlayerState.PLAYING) {
+                // Start ticking — save every SAVE_INTERVAL_MS.
+                if (tickHandleRef.current) clearInterval(tickHandleRef.current);
+                tickHandleRef.current = setInterval(() => saveNow(), SAVE_INTERVAL_MS);
+              } else if (state === YT.PlayerState.PAUSED) {
+                if (tickHandleRef.current) {
+                  clearInterval(tickHandleRef.current);
+                  tickHandleRef.current = null;
+                }
+                saveNow({ force: true });
+              } else if (state === YT.PlayerState.ENDED) {
+                if (tickHandleRef.current) {
+                  clearInterval(tickHandleRef.current);
+                  tickHandleRef.current = null;
+                }
+                // Force one final save → triggers auto-complete branch.
+                saveNow({ force: true });
+                // Kick off the autoplay-next countdown. The overlay handles
+                // the rest (countdown UI + cancellation).
+                triggerNextOverlay();
               }
-              // Force one final save → triggers auto-complete branch.
-              saveNow({ force: true });
-              // Kick off the autoplay-next countdown. The overlay handles
-              // the rest (countdown UI + cancellation).
-              triggerNextOverlay();
-            }
+            },
           },
-        },
+        });
+
+        // Re-check disposal: cleanup may have run while `new YT.Player` was
+        // still in flight (fast modal close), leaving a zombie iframe that
+        // keeps playing audio with no owner. (LC-3)
+        if (disposed) {
+          try {
+            created.destroy();
+          } catch {
+            /* swallow */
+          }
+          return;
+        }
+
+        playerRef.current = created;
+        playerSlugRef.current = mountSlug;
+      })
+      .catch((err) => {
+        if (isDev) console.error('[learning] YT API failed:', err);
+        if (!disposed) setYtLoadError(true);
       });
-    });
 
     return () => {
       disposed = true;
@@ -1709,12 +1865,17 @@ function VideoModal({
       }
       // Final save before tear-down so closing the modal mid-video persists.
       saveNow({ force: true });
+      // Null the ref *before* destroy so any error thrown synchronously
+      // doesn't leave us pointing at a half-destroyed instance — Strict
+      // Mode's double-invoke would then call destroy() on a dead handle. (LC-5)
+      const dead = playerRef.current;
+      playerRef.current = null;
+      playerSlugRef.current = null;
       try {
-        playerRef.current?.destroy();
+        dead?.destroy();
       } catch {
         /* swallow */
       }
-      playerRef.current = null;
     };
     // We intentionally re-mount the player only when the lesson changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1732,17 +1893,38 @@ function VideoModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, saveNow]);
 
+  // Use keepalive only on the tab-close paths: visibilitychange when hidden
+  // + the legacy pagehide. Regular in-tab saves go through the normal
+  // fetch path so we can actually read the response. (LC-14)
+  useEffect(() => {
+    const onPagehide = () => saveNow({ force: true, keepalive: true });
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        saveNow({ force: true, keepalive: true });
+      }
+    };
+    window.addEventListener('pagehide', onPagehide);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('pagehide', onPagehide);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [saveNow]);
+
   // Autoplay countdown: tick once per second; on 0, switch to the next
-  // lesson. Cancelling sets it back to -1.
+  // lesson. Cancelling sets it back to -1. Inner null-check on nextLesson
+  // — `nextLesson` could go null between the countdown starting and 0
+  // firing (e.g. last lesson). (LC-12)
   useEffect(() => {
     if (nextCountdown < 0) return;
     if (nextCountdown === 0) {
-      onPlayNext();
+      if (nextLesson) onPlayNext();
+      else setNextCountdown(-1);
       return;
     }
     const t = setTimeout(() => setNextCountdown((n) => n - 1), 1000);
     return () => clearTimeout(t);
-  }, [nextCountdown, onPlayNext]);
+  }, [nextCountdown, onPlayNext, nextLesson]);
 
   return (
     <motion.div
@@ -1768,6 +1950,25 @@ function VideoModal({
         <div className="relative aspect-video bg-black">
           {/* IFrame API replaces this div in place */}
           <div ref={playerHostRef} id={hostId} className="w-full h-full" />
+
+          {/* YT API load failure fallback — gives the user a way out
+              instead of staring at a black box. (LC-6) */}
+          {ytLoadError && (
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 p-6 text-center bg-black/90">
+              <p className="text-white/90 text-sm">
+                נכשלה טעינת הנגן. ייתכן שחוסם פרסומות חוסם את YouTube.
+              </p>
+              <a
+                href={`https://www.youtube.com/watch?v=${lesson.youtubeId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-l from-[#e8d48b] to-[#c8a951] text-[#070b1e] text-sm font-semibold hover:brightness-110 transition"
+              >
+                <Play className="w-4 h-4 fill-current" />
+                פתח ב-YouTube
+              </a>
+            </div>
+          )}
 
           {/* Resume toast */}
           <AnimatePresence>

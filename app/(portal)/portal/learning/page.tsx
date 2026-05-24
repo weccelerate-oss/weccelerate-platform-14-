@@ -32,10 +32,18 @@ export default async function LearningPage() {
     initialProgress = [];
   }
 
+  // Safety net: the redirect above guarantees session.user exists, but the
+  // id is still typed as optional on the session shape. Fall back rather
+  // than asserting with `!`. (LC-23)
+  const userId = session.user.id;
+  if (!userId) {
+    redirect('/login?callbackUrl=/portal/learning');
+  }
+
   return (
     <LearningContent
       user={{
-        id: session.user.id!,
+        id: userId,
         name: session.user.name || 'יזם',
       }}
       initialProgress={initialProgress}

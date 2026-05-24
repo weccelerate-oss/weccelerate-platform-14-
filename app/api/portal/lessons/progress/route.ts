@@ -19,24 +19,49 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { COURSES_DATA } from '@/lib/courses-data';
 import type { CategoryData, SubcategoryData, LessonData } from '@/lib/courses-data';
+import { rateLimit } from '@/lib/rate-limit';
+
+type CatalogEntry = {
+  category: CategoryData;
+  subcategory: SubcategoryData;
+  lesson: LessonData;
+};
+
+/**
+ * Build a slug → catalog entry index at module load. Walking the catalog on
+ * every request is O(N) and silently picks the *first* match when slugs
+ * collide. Building a Map once at boot lets us assert uniqueness loudly and
+ * gives O(1) lookups. (LC-2)
+ */
+const LESSON_CATALOG_INDEX: Map<string, CatalogEntry> = (() => {
+  const map = new Map<string, CatalogEntry>();
+  for (const category of COURSES_DATA) {
+    for (const subcategory of category.subcategories) {
+      for (const lesson of subcategory.lessons) {
+        if (map.has(lesson.slug)) {
+          // Surface duplicates loudly at boot — production logs will show
+          // the offending slug so an editor can rename it. We don't throw
+          // (would crash all routes) but the error is impossible to miss.
+          console.error(
+            `[lessons/progress] duplicate lesson slug in catalog: "${lesson.slug}" — ` +
+              `existing under ${map.get(lesson.slug)?.category.slug}/` +
+              `${map.get(lesson.slug)?.subcategory.slug}, ` +
+              `new under ${category.slug}/${subcategory.slug}`,
+          );
+        }
+        map.set(lesson.slug, { category, subcategory, lesson });
+      }
+    }
+  }
+  return map;
+})();
 
 /**
  * Find a lesson in the static catalog by slug, returning the full chain
  * (category → subcategory → lesson) so we can seed all three at once.
  */
-function findLessonInCatalog(slug: string): {
-  category: CategoryData;
-  subcategory: SubcategoryData;
-  lesson: LessonData;
-} | null {
-  for (const category of COURSES_DATA) {
-    for (const subcategory of category.subcategories) {
-      for (const lesson of subcategory.lessons) {
-        if (lesson.slug === slug) return { category, subcategory, lesson };
-      }
-    }
-  }
-  return null;
+function findLessonInCatalog(slug: string): CatalogEntry | null {
+  return LESSON_CATALOG_INDEX.get(slug) ?? null;
 }
 
 /**
@@ -44,51 +69,77 @@ function findLessonInCatalog(slug: string): {
  * UserLessonProgress to it. Walks the chain (category → subcategory →
  * lesson) and upserts each level. Idempotent — safe to call on every
  * progress write, but we only call it on the cold path (lesson missing).
+ *
+ * Two concurrent first-time hits used to race: both passed the `findUnique`
+ * miss, both called upsert, and Prisma raised P2002 on the loser. We now
+ * (a) run the chain in a single $transaction and (b) retry on P2002 by
+ * re-reading the row that the winner just created. (LC-1)
  */
 async function ensureLessonSeeded(slug: string): Promise<string | null> {
   const entry = findLessonInCatalog(slug);
   if (!entry) return null;
 
-  const category = await prisma.courseCategory.upsert({
-    where: { slug: entry.category.slug },
-    update: {},
-    create: {
-      name: entry.category.name,
-      slug: entry.category.slug,
-      description: entry.category.description,
-      icon: entry.category.icon,
-      color: entry.category.color,
-    },
-    select: { id: true },
-  });
+  const attempt = async (): Promise<string> => {
+    return prisma.$transaction(async (tx) => {
+      const category = await tx.courseCategory.upsert({
+        where: { slug: entry.category.slug },
+        update: {},
+        create: {
+          name: entry.category.name,
+          slug: entry.category.slug,
+          description: entry.category.description,
+          icon: entry.category.icon,
+          color: entry.category.color,
+        },
+        select: { id: true },
+      });
 
-  const subcategory = await prisma.courseSubcategory.upsert({
-    where: { slug: entry.subcategory.slug },
-    update: {},
-    create: {
-      name: entry.subcategory.name,
-      slug: entry.subcategory.slug,
-      description: entry.subcategory.description,
-      categoryId: category.id,
-    },
-    select: { id: true },
-  });
+      const subcategory = await tx.courseSubcategory.upsert({
+        where: { slug: entry.subcategory.slug },
+        update: {},
+        create: {
+          name: entry.subcategory.name,
+          slug: entry.subcategory.slug,
+          description: entry.subcategory.description,
+          categoryId: category.id,
+        },
+        select: { id: true },
+      });
 
-  const lesson = await prisma.courseLesson.upsert({
-    where: { slug: entry.lesson.slug },
-    update: {},
-    create: {
-      title: entry.lesson.title,
-      slug: entry.lesson.slug,
-      description: entry.lesson.description,
-      youtubeUrl: entry.lesson.youtubeUrl,
-      youtubeId: entry.lesson.youtubeId,
-      subcategoryId: subcategory.id,
-    },
-    select: { id: true },
-  });
+      const lesson = await tx.courseLesson.upsert({
+        where: { slug: entry.lesson.slug },
+        update: {},
+        create: {
+          title: entry.lesson.title,
+          slug: entry.lesson.slug,
+          description: entry.lesson.description,
+          youtubeUrl: entry.lesson.youtubeUrl,
+          youtubeId: entry.lesson.youtubeId,
+          subcategoryId: subcategory.id,
+        },
+        select: { id: true },
+      });
 
-  return lesson.id;
+      return lesson.id;
+    });
+  };
+
+  try {
+    return await attempt();
+  } catch (err) {
+    // P2002 = unique constraint violation. Means another request beat us to
+    // it — the winner already created the row, so a follow-up read returns
+    // the canonical id. We also retry once on transient errors for safety.
+    const code = (err as { code?: string })?.code;
+    if (code === 'P2002') {
+      const existing = await prisma.courseLesson.findUnique({
+        where: { slug: entry.lesson.slug },
+        select: { id: true },
+      });
+      if (existing) return existing.id;
+    }
+    throw err;
+  }
 }
 
 export type LessonProgressEntry = {
@@ -108,13 +159,63 @@ export type LessonProgressEntry = {
 // Either condition trips the auto-complete branch.
 const COMPLETE_RATIO = 0.92;
 const COMPLETE_REMAINING_SEC = 1.5;
-const MIN_RESUME_SEC = 5; // ignore micro-positions (autoplay flicker)
+// Skip the lastWatchedAt bump if neither completion nor a real position
+// change came through — avoids spamming the row on every micro-save. (LC-21)
+const MIN_POSITION_DELTA_SEC = 3;
+
+/**
+ * Same-origin check — a minimal CSRF guard. NextAuth already validates its
+ * own session cookie via the session lookup, but a malicious page on
+ * example.evil can still trigger an authenticated POST from the user's
+ * browser. Rejecting cross-origin posts cheaply closes that. (LC-24)
+ */
+function isSameOrigin(req: NextRequest): boolean {
+  const origin = req.headers.get('origin');
+  const host = req.headers.get('host');
+  if (!origin || !host) {
+    // No Origin header (e.g. same-site GET-following-redirect, server-to-server)
+    // — fall back to referer host match. If neither is present, allow:
+    // NextAuth still validated the session, and some proxies strip these.
+    const referer = req.headers.get('referer');
+    if (!referer) return true;
+    try {
+      return new URL(referer).host === host;
+    } catch {
+      return false;
+    }
+  }
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isSameOrigin(req)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+
+    // Per-user rate limit. Saves fire every ~10s while a video plays plus
+    // pause/close bursts; 120/min is generous and catches runaway loops or
+    // a malicious script trying to hammer the row. (LC-24)
+    const limit = rateLimit(`lessons-progress:${userId}`, {
+      limit: 120,
+      windowSeconds: 60,
+    });
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429, headers: { 'Retry-After': '60' } },
+      );
     }
 
     const body = await req.json().catch(() => null);
@@ -132,8 +233,6 @@ export async function POST(req: NextRequest) {
     if (!lessonSlug || typeof lessonSlug !== 'string') {
       return NextResponse.json({ error: 'lessonSlug required' }, { status: 400 });
     }
-
-    const userId = session.user.id;
 
     let lesson = await prisma.courseLesson.findUnique({
       where: { slug: lessonSlug },
@@ -168,10 +267,21 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Read the current row up-front so we can decide whether the
+    // lastWatchedAt timestamp actually needs to move. (LC-21)
+    const existing = await prisma.userLessonProgress
+      .findUnique({
+        where: { userId_lessonId: { userId, lessonId: lesson.id } },
+        select: {
+          completed: true,
+          positionSec: true,
+          durationSec: true,
+        },
+      })
+      .catch(() => null);
+
     // Build the partial update — only set fields the client actually sent.
-    const update: Record<string, unknown> = {
-      lastWatchedAt: new Date(),
-    };
+    const update: Record<string, unknown> = {};
     const create: Record<string, unknown> = {
       userId,
       lessonId: lesson.id,
@@ -180,18 +290,28 @@ export async function POST(req: NextRequest) {
       positionSec: 0,
     };
 
-    let safePosition: number | null = null;
-    if (typeof positionSec === 'number' && Number.isFinite(positionSec) && positionSec >= 0) {
-      safePosition = Math.floor(positionSec);
-      update.positionSec = safePosition;
-      create.positionSec = safePosition;
-    }
-
     let safeDuration: number | null = null;
     if (typeof durationSec === 'number' && Number.isFinite(durationSec) && durationSec > 0) {
       safeDuration = Math.floor(durationSec);
       update.durationSec = safeDuration;
       create.durationSec = safeDuration;
+    } else if (existing?.durationSec) {
+      // Use the previously-stored duration when the client didn't send one,
+      // so the clamp below still works on position-only saves.
+      safeDuration = existing.durationSec;
+    }
+
+    let safePosition: number | null = null;
+    if (typeof positionSec === 'number' && Number.isFinite(positionSec) && positionSec >= 0) {
+      // Clamp to duration server-side so a slightly-overshoot value (the
+      // player has reported position > duration on some browsers near the
+      // end) doesn't break the percent math or the auto-complete branch. (LC-8)
+      safePosition = Math.floor(positionSec);
+      if (safeDuration !== null && safePosition > safeDuration) {
+        safePosition = safeDuration;
+      }
+      update.positionSec = safePosition;
+      create.positionSec = safePosition;
     }
 
     // Auto-complete when the user has watched essentially the whole video.
@@ -224,6 +344,25 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Decide whether lastWatchedAt should actually bump. We touch it when:
+    //   - this is a fresh row (no existing data), OR
+    //   - completion is changing, OR
+    //   - position moved by ≥ MIN_POSITION_DELTA_SEC seconds. (LC-21)
+    let bumpTimestamp = false;
+    if (!existing) {
+      bumpTimestamp = true;
+    } else if (typeof effectiveCompleted === 'boolean' && effectiveCompleted !== existing.completed) {
+      bumpTimestamp = true;
+    } else if (
+      safePosition !== null &&
+      Math.abs(safePosition - (existing.positionSec ?? 0)) >= MIN_POSITION_DELTA_SEC
+    ) {
+      bumpTimestamp = true;
+    }
+    if (bumpTimestamp) {
+      update.lastWatchedAt = new Date();
+    }
+
     const saved = await prisma.userLessonProgress.upsert({
       where: {
         userId_lessonId: {
@@ -247,19 +386,34 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     // Detailed error surfacing — the symptoms of a stale DB schema (missing
     // positionSec/durationSec/lastWatchedAt columns) are silent in
-    // production because the outer catch used to swallow the message. Now
-    // we echo back the actual error and a hint for the most common cause so
-    // the client can show a useful toast and the admin can fix it from logs.
+    // production because the outer catch used to swallow the message. We
+    // still log it server-side, but only return the raw Prisma error to
+    // clients when DEBUG_PROGRESS_API=1 or the user is an admin. (LC-17)
     const message = error instanceof Error ? error.message : String(error);
     console.error('[lessons/progress] upsert failed:', message);
     const looksLikeSchemaIssue = /positionSec|durationSec|lastWatchedAt|column.*does not exist|Unknown arg/i.test(message);
+
+    let canSeeDetails = process.env.DEBUG_PROGRESS_API === '1';
+    if (!canSeeDetails) {
+      try {
+        const s = await auth();
+        canSeeDetails = s?.user?.role === 'ADMIN';
+      } catch {
+        /* swallow */
+      }
+    }
+
     return NextResponse.json(
       {
         error: 'Internal server error',
-        detail: message.slice(0, 600),
-        hint: looksLikeSchemaIssue
-          ? 'הסכמה של ה-DB ככל הנראה לא עודכנה. הרץ: `npx prisma db push --config prisma/prisma.config.ts --skip-generate` ואז re-deploy ב-Vercel.'
-          : undefined,
+        ...(canSeeDetails
+          ? {
+              detail: message.slice(0, 600),
+              hint: looksLikeSchemaIssue
+                ? 'הסכמה של ה-DB ככל הנראה לא עודכנה. הרץ: `npx prisma db push --config prisma/prisma.config.ts --skip-generate` ואז re-deploy ב-Vercel.'
+                : undefined,
+            }
+          : {}),
       },
       { status: 500 },
     );
@@ -307,14 +461,17 @@ export async function GET() {
 
     return NextResponse.json({ entries, completedSlugs });
   } catch (error) {
+    // Used to return HTTP 200 with an error payload — that quietly broke
+    // client retries that check `res.ok`. Honour the actual failure now. (LC-22)
     const message = error instanceof Error ? error.message : String(error);
     console.error('[lessons/progress] fetch failed:', message);
-    return NextResponse.json({
-      entries: [],
-      completedSlugs: [],
-      error: 'fetch failed',
-      detail: message.slice(0, 600),
-    });
+    return NextResponse.json(
+      {
+        entries: [],
+        completedSlugs: [],
+        error: 'fetch failed',
+      },
+      { status: 500 },
+    );
   }
 }
-
