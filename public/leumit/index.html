@@ -10,7 +10,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Rubik:wght@300;400;700;900&display=swap" />
 
-  <link rel="stylesheet" href="./styles.css" />
+  <!-- Absolute paths — relative './styles.css' breaks on /leumit (without
+       trailing slash) because the browser treats /leumit as a file, not a
+       directory, and resolves ./ to the site root. -->
+  <link rel="stylesheet" href="/leumit/styles.css" />
 </head>
 <body>
 
@@ -186,6 +189,6 @@
     <a class="outro__cta" href="#" id="outro-cta">הצטרף לתוכנית</a>
   </section>
 
-  <script src="./script.js"></script>
+  <script src="/leumit/script.js"></script>
 </body>
 </html>

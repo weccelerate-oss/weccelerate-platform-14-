@@ -216,6 +216,16 @@ export function middleware(request: NextRequest) {
   // Also skip Next.js metadata routes (opengraph-image, twitter-image, icon,
   // apple-icon) so social share previews work without being rewritten into
   // /sites/main and 404-ing.
+  // /leumit and /leumit/ → rewrite straight to the static index.html in
+  // public/leumit/. Doing this here (in middleware) instead of in
+  // next.config.rewrites because afterFiles rewrites are evaluated AFTER
+  // the public/ static-file lookup, and there's no "leumit" file at the
+  // root of public/, so the rewrite never gets a chance to fire.
+  if (pathname === '/leumit' || pathname === '/leumit/') {
+    url.pathname = '/leumit/index.html';
+    return NextResponse.rewrite(url);
+  }
+
   if (pathname.startsWith('/api/') ||
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/admin') ||
@@ -223,9 +233,9 @@ export function middleware(request: NextRequest) {
       pathname.startsWith('/login') ||
       pathname.startsWith('/forgot-password') ||
       pathname.startsWith('/reset-password') ||
-      // /leumit/ is a static landing page served from public/leumit/.
-      // Without this skip it would get rewritten to /sites/main/leumit/ → 404.
-      pathname === '/leumit' ||
+      // Sub-assets of the leumit landing have file extensions and are
+      // already excluded by the middleware matcher, but keeping this
+      // skip line for clarity and as belt-and-suspenders.
       pathname.startsWith('/leumit/') ||
       pathname === '/opengraph-image' ||
       pathname === '/twitter-image' ||
