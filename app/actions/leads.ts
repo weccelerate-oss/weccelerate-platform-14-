@@ -556,7 +556,7 @@ export async function submitEventRegistration(
 // QUICK LEAD ACTION
 // =============================================================================
 
-const VALID_FORM_TYPES = ['contact', 'application', 'newsletter', 'event', 'api'] as const;
+const VALID_FORM_TYPES = ['contact', 'application', 'newsletter', 'event', 'api', 'leumit_landing'] as const;
 
 const LeadSchema = z.object({
   name: z.string().min(1).max(200),

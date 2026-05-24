@@ -1,4 +1,5 @@
 import HeroLeumit from './sections/HeroLeumit';
+import ScrollVideoStory from './sections/ScrollVideoStory';
 import StatsBar from './sections/StatsBar';
 import BioScanShowcase from './sections/BioScanShowcase';
 import TracksGrid from './sections/TracksGrid';
@@ -11,6 +12,7 @@ export default function LeumitLandingPage() {
   return (
     <main id="main-content" className="relative">
       <HeroLeumit />
+      <ScrollVideoStory />
       <StatsBar />
       <BioScanShowcase />
       <TracksGrid />
