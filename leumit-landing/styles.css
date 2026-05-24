@@ -1,0 +1,645 @@
+/* ============================================================================
+   WeCcelerate — Cinematic landing page
+   Documentary-cinematic, editorial, late-night Tel Aviv tech.
+   Dark with bursts of electric coral. No purple, no corporate blue.
+   ============================================================================ */
+
+/* ----- Design tokens ----- */
+:root {
+  --bg: #0a0a0b;
+  --bg-soft: #141416;
+  --fg: #f8f6f0;
+  --fg-mute: #6a6863;
+  --accent: #ff4e3a;
+  --accent-warm: #ffb14e;
+  --line: rgba(248, 246, 240, 0.08);
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ----- Reset / base ----- */
+*,
+*::before,
+*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+body { min-height: 100vh; }
+
+img, video { display: block; max-width: 100%; }
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ----- Global grain overlay ----- */
+.grain {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  z-index: 100;
+}
+
+/* ============================================================================
+   1. HERO
+   ============================================================================ */
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100vh;
+  min-height: 100dvh;        /* mobile: tracks the visible viewport when URL bar collapses */
+  padding:
+    max(32px, env(safe-area-inset-top))
+    max(5vw, env(safe-area-inset-right))
+    max(32px, env(safe-area-inset-bottom))
+    max(5vw, env(safe-area-inset-left));
+  z-index: 2;
+}
+
+.hero__topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hero__brand-meta {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--fg-mute);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  animation: pulse 1.8s var(--ease) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.5); opacity: 0.55; }
+}
+
+/* Centered massive italic serif headline */
+.hero__title {
+  font-family: 'Instrument Serif', 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(56px, 14vw, 200px);
+  line-height: 0.88;
+  letter-spacing: -0.025em;
+  color: var(--fg);
+  margin: auto 0;
+  padding: 8vh 0;
+}
+
+.hero__line {
+  display: block;
+}
+
+/* The accent block embedded in the italic serif */
+.accent-block {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  font-size: 0.82em;          /* slightly smaller so it sits inside the serif baseline */
+  color: var(--accent);
+  letter-spacing: -0.05em;
+  display: inline-block;
+  transform: translateY(-0.04em);
+}
+
+.hero__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.hero__lede {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: 0.15em;
+  color: var(--fg-mute);
+  text-transform: uppercase;
+  max-width: 360px;
+}
+
+.scroll-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.scroll-hint__label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--fg-mute);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.scroll-hint__track {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 40px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.scroll-hint__bar {
+  position: absolute;
+  top: -16px;
+  left: 0;
+  width: 100%;
+  height: 16px;
+  background: var(--accent);
+  animation: drop 2.2s var(--ease) infinite;
+}
+
+@keyframes drop {
+  0%   { top: -16px; opacity: 0;   }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { top: 40px;  opacity: 0;   }
+}
+
+/* ============================================================================
+   2. SCROLL-DRIVEN VIDEO STAGE
+   ============================================================================ */
+.scroll-section {
+  position: relative;
+  width: 100%;
+  height: 600vh;            /* the scroll-driver: 6× viewport */
+  background: var(--bg);
+  z-index: 1;
+}
+
+.sticky-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;            /* mobile: avoid jumpy resizes when URL bar shows/hides */
+  width: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+.stage-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  /* iOS Safari: hint to the compositor that this is a video layer */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Radial vignette */
+.stage-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0) 40%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  z-index: 2;
+}
+
+/* Brand mark — top-left of the stage. In RTL we still want this LEFT corner. */
+.stage-brand {
+  position: absolute;
+  top: 28px;
+  left: 5vw;
+  font-size: 22px;
+  line-height: 1;
+  z-index: 5;
+  /* Force LTR for the brand mark so "We" stays before "ccelerate" visually */
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.brand-we {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: -0.04em;
+}
+
+.brand-rest {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+}
+
+/* Counter — top-right of the stage */
+.stage-counter {
+  position: absolute;
+  top: 28px;
+  right: 5vw;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 5;
+  direction: ltr;            /* keep "01 ─── 06" reading left to right */
+  unicode-bidi: isolate;
+}
+
+.counter-current {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--fg);
+  letter-spacing: 0.06em;
+  min-width: 24px;
+  text-align: center;
+}
+
+.counter-track {
+  position: relative;
+  display: block;
+  width: 80px;
+  height: 1px;
+  background: var(--line);
+}
+
+.counter-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.2s linear;
+}
+
+.counter-total {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--fg-mute);
+  letter-spacing: 0.1em;
+}
+
+/* Side dots — visually on the LEFT edge of the viewport. The page is RTL,
+   but these are an absolute-positioned UI affordance unrelated to text flow. */
+.stage-dots {
+  position: absolute;
+  left: 5vw;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 5;
+}
+
+.stage-dot {
+  width: 2px;
+  height: 24px;
+  background: rgba(248, 246, 240, 0.15);
+  border-radius: 2px;
+  padding: 0;
+  transition:
+    height 0.5s var(--ease),
+    background 0.5s var(--ease);
+  cursor: pointer;
+}
+
+.stage-dot:hover {
+  background: rgba(248, 246, 240, 0.55);
+}
+
+.stage-dot.is-passed {
+  background: rgba(248, 246, 240, 0.4);
+}
+
+.stage-dot.is-active {
+  height: 56px;
+  background: var(--accent);
+}
+
+/* Scene-text overlays — bottom-right (natural for RTL reading) */
+.scenes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.scene-text {
+  position: absolute;
+  bottom: 12vh;
+  right: 5vw;
+  max-width: 720px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s var(--ease),
+    transform 0.8s var(--ease);
+  text-align: right;
+}
+
+.scene-text.is-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scene-text__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.scene-text__line {
+  display: inline-block;
+  width: 80px;
+  max-width: 80px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.scene-text__headline {
+  font-family: 'Instrument Serif', 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(44px, 8vw, 140px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.scene-text__sub {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 300;
+  font-size: clamp(14px, 1.4vw, 18px);
+  line-height: 1.55;
+  color: var(--fg-mute);
+  max-width: 500px;
+  margin-top: 20px;
+}
+
+/* Final logo reveal */
+.logo-reveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s var(--ease);
+  padding: 0 5vw;
+}
+
+.logo-reveal.is-visible {
+  opacity: 1;
+}
+
+.logo-reveal__brand {
+  font-size: clamp(64px, 16vw, 220px);
+  line-height: 1;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.logo-reveal__tag {
+  margin-top: 28px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--fg-mute);
+}
+
+/* ============================================================================
+   3. OUTRO / CTA
+   ============================================================================ */
+.outro {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 70vh;
+  padding: 64px 5vw;
+  background: var(--bg);
+  gap: 48px;
+}
+
+.outro__title {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(36px, 5.5vw, 80px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  max-width: 800px;
+}
+
+.outro__cta {
+  display: inline-block;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--fg);
+  padding: 18px 36px;
+  transition:
+    background 0.3s var(--ease),
+    color 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+  cursor: pointer;
+}
+
+.outro__cta:hover,
+.outro__cta:focus-visible {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+  outline: none;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ----------------------------------------------------------------------------
+   Three breakpoints:
+     - Tablet  (≤ 1024px): tighter spacing, mid font scaling
+     - Phone   (≤ 768px):  drop side-dots, scene-text full-width, smaller hero
+     - Small   (≤ 480px):  more aggressive font scaling, single-column metas
+   ============================================================================ */
+
+/* Tablet — fluid intermediate tier */
+@media (max-width: 1024px) {
+  .stage-counter { gap: 10px; }
+  .counter-track { width: 60px; }
+  .stage-dots    { gap: 10px; }
+  .scene-text__headline { font-size: clamp(40px, 9vw, 110px); }
+}
+
+/* Phone */
+@media (max-width: 768px) {
+  /* Drop the side-dot navigation — it's an enthusiast feature on small screens */
+  .stage-dots { display: none; }
+
+  /* Counter — tighten everything */
+  .counter-track    { width: 40px; }
+  .counter-current  { font-size: 12px; }
+  .counter-total    { font-size: 12px; }
+
+  /* Scene-text fills the viewport bottom-third on mobile */
+  .scene-text {
+    bottom: 14vh;
+    bottom: 14dvh;
+    right: 5vw;
+    left: 5vw;
+    max-width: 100%;
+    text-align: right;
+  }
+
+  .scene-text__headline { font-size: 13vw; line-height: 1.0; }
+  .scene-text__sub {
+    font-size: 15px;
+    margin-top: 16px;
+    max-width: 100%;
+    line-height: 1.6;
+  }
+  .scene-text__meta {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    margin-bottom: 14px;
+  }
+  .scene-text__line { width: 40px; max-width: 40px; }
+
+  /* Hero typography — slightly more restrained on phones */
+  .hero__title { font-size: 16vw; line-height: 0.92; padding: 4vh 0; }
+  .hero__lede  { max-width: 100%; font-size: 10px; }
+
+  .hero__topbar,
+  .hero__bottom { gap: 16px; }
+
+  /* Top-of-stage UI */
+  .stage-brand   { top: 18px; left: 5vw; font-size: 18px; }
+  .stage-counter { top: 18px; right: 5vw; }
+
+  /* Outro tightens */
+  .outro       { padding: 48px 5vw; gap: 32px; min-height: 60vh; min-height: 60dvh; }
+  .outro__cta  { padding: 16px 28px; font-size: 12px; }
+
+  /* The scroll hint label tilts back to horizontal for thumb-readability */
+  .scroll-hint__label {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+  .scroll-hint__track { width: 24px; height: 1px; }
+  .scroll-hint__bar   { width: 8px; height: 100%; top: 0; left: -8px; animation: drop-horizontal 2.2s var(--ease) infinite; }
+}
+
+@keyframes drop-horizontal {
+  0%   { left: -8px;             opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { left: calc(100% + 8px); opacity: 0; }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+  .hero { padding-top: max(20px, env(safe-area-inset-top)); }
+
+  .hero__title    { font-size: 18vw; }
+  .hero__topbar   { flex-direction: column; align-items: flex-start; }
+  .hero__bottom   { flex-direction: column; align-items: flex-start; }
+  .scroll-hint    { align-self: flex-end; }
+
+  .scene-text__headline { font-size: 14vw; }
+
+  .outro__title { font-size: 32px; line-height: 1.15; }
+
+  /* Counter — hide the bar entirely on tiny screens, keep just "01 / 06" */
+  .counter-track { display: none; }
+  .stage-counter::before {
+    content: '/';
+    color: var(--fg-mute);
+    margin: 0 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Landscape phone — keep stage-text from colliding with the bottom URL bar */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .scene-text { bottom: 8vh; bottom: 8dvh; }
+  .hero       { padding: 16px 5vw; }
+  .hero__title { font-size: 9vh; padding: 2vh 0; }
+}
+
+/* Touch devices — bigger tap targets even on tablets */
+@media (hover: none) and (pointer: coarse) {
+  .stage-dot   { width: 4px; }
+  .stage-dot.is-active { width: 4px; }
+  .outro__cta  { min-height: 48px; display: inline-flex; align-items: center; }
+}
+
+/* Reduce motion — kill pulses + scroll-bar drop but keep scroll-driven video */
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot { animation: none; }
+  .scroll-hint__bar { animation: none; opacity: 0.6; top: 12px; }
+  .scene-text { transition: opacity 0.3s linear, transform 0.3s linear; }
+  .logo-reveal { transition: opacity 0.3s linear; }
+}

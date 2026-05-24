@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>WeCcelerate — תאוצה לדור הבא של הרפואה</title>
+  <meta name="description" content="פלטפורמת ההאצה הישראלית ליזמי MedTech. סיפור אחד, לילה אחד בתל אביב, דור הבא של הרפואה." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Rubik:wght@300;400;700;900&display=swap" />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- ====================================================================
+       Film grain — single SVG overlay, fixed across the entire viewport.
+       Lives above the page background, below everything else's z-index 1.
+       ==================================================================== -->
+  <svg class="grain" aria-hidden="true">
+    <filter id="grain-filter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#grain-filter)" />
+  </svg>
+
+  <!-- ====================================================================
+       1. HERO
+       ==================================================================== -->
+  <section class="hero">
+    <header class="hero__topbar">
+      <div class="hero__brand-meta">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        WeCcelerate / 2026
+      </div>
+      <div class="hero__brand-meta">Tel Aviv · MedTech Accelerator</div>
+    </header>
+
+    <h1 class="hero__title" aria-label="תאוצה לדור הבא של הרפואה">
+      <span class="hero__line">תאוצה</span>
+      <span class="hero__line">ל<span class="accent-block">דור הבא</span></span>
+      <span class="hero__line">של הרפואה.</span>
+    </h1>
+
+    <footer class="hero__bottom">
+      <p class="hero__lede">
+        פלטפורמת ההאצה הישראלית ליזמי MedTech.
+        <br />
+        גלול למטה כדי לראות איך נראית תאוצה אמיתית.
+      </p>
+
+      <div class="scroll-hint" aria-hidden="true">
+        <span class="scroll-hint__label">SCROLL</span>
+        <span class="scroll-hint__track">
+          <span class="scroll-hint__bar"></span>
+        </span>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ====================================================================
+       2. SCROLL-DRIVEN VIDEO  (600vh outer, 100vh sticky inner)
+       ==================================================================== -->
+  <section class="scroll-section" id="scroll-section">
+    <div class="sticky-stage">
+
+      <!-- The video element — driven by currentTime, never autoplayed.
+           src points at /public/LEUMIT.mp4 of the parent project (one level up). -->
+      <video
+        id="hero-video"
+        class="stage-video"
+        src="../public/LEUMIT.mp4"
+        muted
+        playsinline
+        preload="auto"
+        webkit-playsinline="true"
+      ></video>
+
+      <!-- Vignette over the video -->
+      <div class="stage-vignette" aria-hidden="true"></div>
+
+      <!-- Pinned UI: top-left brand -->
+      <div class="stage-brand">
+        <span class="brand-we">We</span><span class="brand-rest">ccelerate</span>
+      </div>
+
+      <!-- Pinned UI: top-right counter -->
+      <div class="stage-counter" aria-hidden="true">
+        <span class="counter-current" id="counter-current">01</span>
+        <span class="counter-track">
+          <span class="counter-fill" id="counter-fill"></span>
+        </span>
+        <span class="counter-total">06</span>
+      </div>
+
+      <!-- Pinned UI: left-side progress dots (RTL → visually on the right edge) -->
+      <nav class="stage-dots" aria-label="ניווט בין סצנות" id="stage-dots">
+        <button class="stage-dot" data-scene="0" aria-label="סצנה 1"></button>
+        <button class="stage-dot" data-scene="1" aria-label="סצנה 2"></button>
+        <button class="stage-dot" data-scene="2" aria-label="סצנה 3"></button>
+        <button class="stage-dot" data-scene="3" aria-label="סצנה 4"></button>
+        <button class="stage-dot" data-scene="4" aria-label="סצנה 5"></button>
+        <button class="stage-dot" data-scene="5" aria-label="סצנה 6"></button>
+      </nav>
+
+      <!-- 6 scene texts -->
+      <div class="scenes" id="scenes">
+
+        <div class="scene-text" data-scene="0">
+          <div class="scene-text__meta">
+            <span>SCENE 01 — הרגע</span>
+            <span class="scene-text__line"></span>
+          </div>
+          <h2 class="scene-text__headline">רעיון אחד.</h2>
+          <p class="scene-text__sub">זה מתחיל באישה אחת, בלילה אחד, עם פרוטוטיפ שעוד אף אחד לא ראה.</p>
+        </div>
+
+        <div class="scene-text" data-scene="1">
+          <div class="scene-text__meta">
+            <span>SCENE 02 — האקוסיסטם</span>
+            <span class="scene-text__line"></span>
+          </div>
+          <h2 class="scene-text__headline">קבוצה אחת.</h2>
+          <p class="scene-text__sub">לא לבד יותר. סביבה שלמה של יזמים, מנטורים ויצירה משותפת.</p>
+        </div>
+
+        <div class="scene-text" data-scene="2">
+          <div class="scene-text__meta">
+            <span>SCENE 03 — התאוצה</span>
+            <span class="scene-text__line"></span>
+          </div>
+          <h2 class="scene-text__headline">שיחה אחת.</h2>
+          <p class="scene-text__sub">הניסיון שלוקח שנים להשיג — מועבר ישירות, peer to peer.</p>
+        </div>
+
+        <div class="scene-text" data-scene="3">
+          <div class="scene-text__meta">
+            <span>SCENE 04 — הפלט</span>
+            <span class="scene-text__line"></span>
+          </div>
+          <h2 class="scene-text__headline">רעיון שעובד.</h2>
+          <p class="scene-text__sub">מסקיצה על מפית לפרוטוטיפ. מפרוטוטיפ למוצר. מהר.</p>
+        </div>
+
+        <div class="scene-text" data-scene="4">
+          <div class="scene-text__meta">
+            <span>SCENE 05 — המומנטום</span>
+            <span class="scene-text__line"></span>
+          </div>
+          <h2 class="scene-text__headline">במה.</h2>
+          <p class="scene-text__sub">משקיעים, שותפים, תעשייה. אנחנו פותחים את הדלתות.</p>
+        </div>
+
+        <div class="scene-text" data-scene="5">
+          <div class="scene-text__meta">
+            <span>SCENE 06 — הניצחון</span>
+            <span class="scene-text__line"></span>
+          </div>
+          <h2 class="scene-text__headline">
+            סוף יום אחד.
+            <br />
+            תחילה של משהו גדול.
+          </h2>
+        </div>
+
+      </div>
+
+      <!-- Final logo reveal — fades in during the last 8% of scroll -->
+      <div class="logo-reveal" id="logo-reveal" aria-hidden="true">
+        <div class="logo-reveal__brand">
+          <span class="brand-we">We</span><span class="brand-rest">ccelerate</span>
+        </div>
+        <div class="logo-reveal__tag">תאוצה לדור הבא של MedTech</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       3. OUTRO / CTA
+       ==================================================================== -->
+  <section class="outro">
+    <h2 class="outro__title">מוכן לבנות את הסטארטאפ הבא של הרפואה הישראלית?</h2>
+    <a class="outro__cta" href="#" id="outro-cta">הצטרף לתוכנית</a>
+  </section>
+
+  <script src="./script.js"></script>
+</body>
+</html>
