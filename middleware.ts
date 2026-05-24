@@ -223,6 +223,10 @@ export function middleware(request: NextRequest) {
       pathname.startsWith('/login') ||
       pathname.startsWith('/forgot-password') ||
       pathname.startsWith('/reset-password') ||
+      // /leumit/ is a static landing page served from public/leumit/.
+      // Without this skip it would get rewritten to /sites/main/leumit/ → 404.
+      pathname === '/leumit' ||
+      pathname.startsWith('/leumit/') ||
       pathname === '/opengraph-image' ||
       pathname === '/twitter-image' ||
       pathname === '/icon' ||

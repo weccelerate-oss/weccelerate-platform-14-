@@ -66,6 +66,16 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Static-page rewrites. /leumit and /leumit/ both serve the static
+  // landing in public/leumit/index.html. Without this, Next.js would
+  // 404 on the bare path because it doesn't auto-serve directory indexes.
+  async rewrites() {
+    return [
+      { source: '/leumit', destination: '/leumit/index.html' },
+      { source: '/leumit/', destination: '/leumit/index.html' },
+    ];
+  },
+
   // Performance
   poweredByHeader: false,
   compress: true,
