@@ -3,24 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>WeCcelerate — תאוצה לדור הבא של הרפואה</title>
-  <meta name="description" content="פלטפורמת ההאצה הישראלית ליזמי MedTech. סיפור אחד, לילה אחד בתל אביב, דור הבא של הרפואה." />
+  <title>לאומית × WeCcelerate — מסלול ההאצה לחדשנות רפואית</title>
+  <meta name="description" content="מסלול ההאצה המשותף של לאומית ו-WeCcelerate ליזמי MedTech. מהרגע הראשון — גישה לרופאים, מטופלים ופיילוטים אמיתיים." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Rubik:wght@300;400;700;900&display=swap" />
 
-  <!-- Absolute paths — relative './styles.css' breaks on /leumit (without
-       trailing slash) because the browser treats /leumit as a file, not a
-       directory, and resolves ./ to the site root. -->
+  <!-- Absolute path — relative './styles.css' breaks on /leumit (no trailing
+       slash) because the browser resolves ./ against the URL itself. -->
   <link rel="stylesheet" href="/leumit/styles.css" />
 </head>
 <body>
 
-  <!-- ====================================================================
-       Film grain — single SVG overlay, fixed across the entire viewport.
-       Lives above the page background, below everything else's z-index 1.
-       ==================================================================== -->
+  <!-- Global film grain overlay -->
   <svg class="grain" aria-hidden="true">
     <filter id="grain-filter">
       <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch" />
@@ -33,25 +29,26 @@
        1. HERO
        ==================================================================== -->
   <section class="hero">
+    <div class="hero__wash" aria-hidden="true"></div>
+
     <header class="hero__topbar">
-      <div class="hero__brand-meta">
-        <span class="pulse-dot" aria-hidden="true"></span>
-        WeCcelerate / 2026
+      <div class="hero__meta">PROGRAM / 2026 — TEL AVIV</div>
+      <div class="lockup">
+        <span class="lockup__leumit">לאומית</span>
+        <span class="lockup__x">×</span>
+        <span class="lockup__we">We</span><span class="lockup__rest">ccelerate</span>
       </div>
-      <div class="hero__brand-meta">Tel Aviv · MedTech Accelerator</div>
     </header>
 
-    <h1 class="hero__title" aria-label="תאוצה לדור הבא של הרפואה">
-      <span class="hero__line">תאוצה</span>
-      <span class="hero__line">ל<span class="accent-block">דור הבא</span></span>
-      <span class="hero__line">של הרפואה.</span>
+    <h1 class="hero__title" aria-label="כאן רפואה פוגשת חדשנות">
+      <span class="hero__line">כאן <span class="accent-block">רפואה</span></span>
+      <span class="hero__line">פוגשת <span class="accent-block">חדשנות</span>.</span>
     </h1>
 
     <footer class="hero__bottom">
       <p class="hero__lede">
-        פלטפורמת ההאצה הישראלית ליזמי MedTech.
-        <br />
-        גלול למטה כדי לראות איך נראית תאוצה אמיתית.
+        מסלול ההאצה המשותף של לאומית ו-WeCcelerate ליזמי MedTech.
+        מהרגע הראשון — גישה לרופאים, מטופלים ופיילוטים אמיתיים.
       </p>
 
       <div class="scroll-hint" aria-hidden="true">
@@ -64,13 +61,11 @@
   </section>
 
   <!-- ====================================================================
-       2. SCROLL-DRIVEN VIDEO  (600vh outer, 100vh sticky inner)
+       2. SCROLL-DRIVEN VIDEO (600vh outer · 100vh sticky inner)
        ==================================================================== -->
   <section class="scroll-section" id="scroll-section">
     <div class="sticky-stage">
 
-      <!-- The video element — driven by currentTime, never autoplayed.
-           Served from the site root by Vercel/Next.js public/ folder. -->
       <video
         id="hero-video"
         class="stage-video"
@@ -81,15 +76,18 @@
         webkit-playsinline="true"
       ></video>
 
-      <!-- Vignette over the video -->
       <div class="stage-vignette" aria-hidden="true"></div>
 
-      <!-- Pinned UI: top-left brand -->
-      <div class="stage-brand">
-        <span class="brand-we">We</span><span class="brand-rest">ccelerate</span>
+      <!-- Pinned brand lockup, top-right (RTL natural) -->
+      <div class="stage-lockup">
+        <div class="lockup lockup--stage">
+          <span class="lockup__leumit">לאומית</span>
+          <span class="lockup__x">×</span>
+          <span class="lockup__we">We</span><span class="lockup__rest">ccelerate</span>
+        </div>
       </div>
 
-      <!-- Pinned UI: top-right counter -->
+      <!-- Pinned counter, top-left -->
       <div class="stage-counter" aria-hidden="true">
         <span class="counter-current" id="counter-current">01</span>
         <span class="counter-track">
@@ -98,7 +96,7 @@
         <span class="counter-total">06</span>
       </div>
 
-      <!-- Pinned UI: left-side progress dots (RTL → visually on the right edge) -->
+      <!-- Side dots — RTL natural is right edge -->
       <nav class="stage-dots" aria-label="ניווט בין סצנות" id="stage-dots">
         <button class="stage-dot" data-scene="0" aria-label="סצנה 1"></button>
         <button class="stage-dot" data-scene="1" aria-label="סצנה 2"></button>
@@ -108,7 +106,7 @@
         <button class="stage-dot" data-scene="5" aria-label="סצנה 6"></button>
       </nav>
 
-      <!-- 6 scene texts -->
+      <!-- 6 scene-text overlays -->
       <div class="scenes" id="scenes">
 
         <div class="scene-text" data-scene="0">
@@ -117,7 +115,7 @@
             <span class="scene-text__line"></span>
           </div>
           <h2 class="scene-text__headline">רעיון אחד.</h2>
-          <p class="scene-text__sub">זה מתחיל באישה אחת, בלילה אחד, עם פרוטוטיפ שעוד אף אחד לא ראה.</p>
+          <p class="scene-text__sub">זה מתחיל בלילה אחד, על שולחן אחד, עם פרוטוטיפ שעוד אף אחד לא ראה.</p>
         </div>
 
         <div class="scene-text" data-scene="1">
@@ -125,8 +123,8 @@
             <span>SCENE 02 — האקוסיסטם</span>
             <span class="scene-text__line"></span>
           </div>
-          <h2 class="scene-text__headline">קבוצה אחת.</h2>
-          <p class="scene-text__sub">לא לבד יותר. סביבה שלמה של יזמים, מנטורים ויצירה משותפת.</p>
+          <h2 class="scene-text__headline">לא לבד.</h2>
+          <p class="scene-text__sub">סביבה שלמה של יזמים, מנטורים ורופאים. כל הניסיון של לאומית — מאחורי כל אחד מהם.</p>
         </div>
 
         <div class="scene-text" data-scene="2">
@@ -134,8 +132,8 @@
             <span>SCENE 03 — התאוצה</span>
             <span class="scene-text__line"></span>
           </div>
-          <h2 class="scene-text__headline">שיחה אחת.</h2>
-          <p class="scene-text__sub">הניסיון שלוקח שנים להשיג — מועבר ישירות, peer to peer.</p>
+          <h2 class="scene-text__headline">ניסיון שמאיץ.</h2>
+          <p class="scene-text__sub">רופאים, מומחים קליניים, אנשי רגולציה — בגישה ישירה. הדרך מהרעיון לאישור מתקצרת.</p>
         </div>
 
         <div class="scene-text" data-scene="3">
@@ -143,8 +141,8 @@
             <span>SCENE 04 — הפלט</span>
             <span class="scene-text__line"></span>
           </div>
-          <h2 class="scene-text__headline">רעיון שעובד.</h2>
-          <p class="scene-text__sub">מסקיצה על מפית לפרוטוטיפ. מפרוטוטיפ למוצר. מהר.</p>
+          <h2 class="scene-text__headline">מוצר שמגיע למטופל.</h2>
+          <p class="scene-text__sub">פיילוטים ברשת המרפאות של לאומית. נתונים אמיתיים. תוצאות אמיתיות.</p>
         </div>
 
         <div class="scene-text" data-scene="4">
@@ -152,41 +150,83 @@
             <span>SCENE 05 — המומנטום</span>
             <span class="scene-text__line"></span>
           </div>
-          <h2 class="scene-text__headline">במה.</h2>
-          <p class="scene-text__sub">משקיעים, שותפים, תעשייה. אנחנו פותחים את הדלתות.</p>
+          <h2 class="scene-text__headline">מסטארטאפ — לתעשייה.</h2>
+          <p class="scene-text__sub">משקיעים, שותפים, גישה לשווקים. ישראל היא הצעד הראשון.</p>
         </div>
 
         <div class="scene-text" data-scene="5">
           <div class="scene-text__meta">
-            <span>SCENE 06 — הניצחון</span>
+            <span>SCENE 06 — הסיום</span>
             <span class="scene-text__line"></span>
           </div>
           <h2 class="scene-text__headline">
-            סוף יום אחד.
+            בריאות אחרת.
             <br />
-            תחילה של משהו גדול.
+            מתחילה כאן.
           </h2>
         </div>
 
       </div>
 
-      <!-- Final logo reveal — fades in during the last 8% of scroll -->
+      <!-- Logo reveal — fades in during the last 8% of scroll -->
       <div class="logo-reveal" id="logo-reveal" aria-hidden="true">
-        <div class="logo-reveal__brand">
-          <span class="brand-we">We</span><span class="brand-rest">ccelerate</span>
+        <div class="lockup lockup--reveal">
+          <span class="lockup__leumit">לאומית</span>
+          <span class="lockup__x">×</span>
+          <span class="lockup__we">We</span><span class="lockup__rest">ccelerate</span>
         </div>
-        <div class="logo-reveal__tag">תאוצה לדור הבא של MedTech</div>
+        <p class="logo-reveal__tag">מסלול ההאצה לחדשנות רפואית בישראל.</p>
       </div>
 
     </div>
   </section>
 
   <!-- ====================================================================
-       3. OUTRO / CTA
+       3. THE PARTNERSHIP
+       ==================================================================== -->
+  <section class="partnership">
+    <div class="partnership__inner">
+      <div class="partnership__col">
+        <div class="partnership__eyebrow">מי אנחנו</div>
+        <h2 class="partnership__title">שני שמות. מטרה אחת.</h2>
+        <p class="partnership__body">
+          <strong>לאומית</strong> היא אחת מארבע קופות החולים הגדולות בישראל, עם מאות מרפאות ומיליוני מבוטחים.
+          <strong>WeCcelerate</strong> היא פלטפורמת ההאצה לסטארטאפי MedTech ישראליים.
+          ביחד אנחנו מקצרים את הדרך מהרעיון לבריאות אמיתית.
+        </p>
+      </div>
+
+      <ul class="partnership__stats" aria-label="מה התכנית מציעה">
+        <li class="stat-row">
+          <span class="stat-row__num">01</span>
+          <span class="stat-row__dash">—</span>
+          <span class="stat-row__text">גישה ישירה לרופאים ולנתונים קליניים</span>
+        </li>
+        <li class="stat-row">
+          <span class="stat-row__num">02</span>
+          <span class="stat-row__dash">—</span>
+          <span class="stat-row__text">פיילוטים אמיתיים במערך המרפאות</span>
+        </li>
+        <li class="stat-row">
+          <span class="stat-row__num">03</span>
+          <span class="stat-row__dash">—</span>
+          <span class="stat-row__text">ליווי רגולטורי, עסקי וטכנולוגי</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       4. OUTRO / CTA
        ==================================================================== -->
   <section class="outro">
-    <h2 class="outro__title">מוכן לבנות את הסטארטאפ הבא של הרפואה הישראלית?</h2>
-    <a class="outro__cta" href="#" id="outro-cta">הצטרף לתוכנית</a>
+    <div class="outro__eyebrow">קול קורא פתוח</div>
+    <h2 class="outro__title">יש לך רעיון שיכול לשנות את הרפואה הישראלית?</h2>
+    <p class="outro__sub">אנחנו מחפשים יזמים שלא חוששים מהדרך הארוכה. אם זה אתה — בוא לדבר.</p>
+
+    <a class="outro__cta" href="#" id="outro-cta">הגש מועמדות</a>
+
+    <p class="outro__footer">לאומית × Weccelerate · 2026</p>
   </section>
 
   <script src="/leumit/script.js"></script>

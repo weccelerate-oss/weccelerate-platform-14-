@@ -1,26 +1,21 @@
 /* ============================================================================
-   WeCcelerate — Cinematic landing page
-   Documentary-cinematic, editorial, late-night Tel Aviv tech.
-   Dark with bursts of electric coral. No purple, no corporate blue.
+   לאומית × WeCcelerate — Cinematic partnership landing
+   Editorial, dark, late-night Tel Aviv tech. Coral is the dominant accent;
+   Leumit blue appears ONLY on the word "לאומית" inside the brand lockup.
    ============================================================================ */
 
-/* ----- Design tokens ----- */
 :root {
   --bg: #0a0a0b;
   --bg-soft: #141416;
   --fg: #f8f6f0;
   --fg-mute: #6a6863;
-  --accent: #ff4e3a;
-  --accent-warm: #ffb14e;
+  --accent: #ff4e3a;        /* WeCcelerate coral */
+  --leumit: #0a72b8;        /* Leumit institutional blue — lockup ONLY */
   --line: rgba(248, 246, 240, 0.08);
-
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ----- Reset / base ----- */
-*,
-*::before,
-*::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   background: var(--bg);
@@ -34,20 +29,11 @@ html, body {
 }
 
 body { min-height: 100vh; }
-
 img, video { display: block; max-width: 100%; }
-
-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-}
-
+button { background: none; border: none; cursor: pointer; font: inherit; color: inherit; }
 a { color: inherit; text-decoration: none; }
 
-/* ----- Global grain overlay ----- */
+/* ----- Global grain ----- */
 .grain {
   position: fixed;
   inset: 0;
@@ -60,21 +46,79 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================================
+   BRAND LOCKUP
+   Reads RTL-naturally: "לאומית × Weccelerate".
+   ============================================================================ */
+
+.lockup {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+  line-height: 1;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.lockup__leumit {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 900;
+  color: var(--leumit);
+  letter-spacing: -0.02em;
+  font-size: 0.85em;
+}
+
+.lockup__x {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--fg-mute);
+  margin: 0 0.4em;
+  font-size: 0.9em;
+}
+
+.lockup__we {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: -0.05em;
+}
+
+.lockup__rest {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================================
    1. HERO
    ============================================================================ */
+
 .hero {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 100vh;
-  min-height: 100dvh;        /* mobile: tracks the visible viewport when URL bar collapses */
+  min-height: 100dvh;
   padding:
     max(32px, env(safe-area-inset-top))
     max(5vw, env(safe-area-inset-right))
     max(32px, env(safe-area-inset-bottom))
     max(5vw, env(safe-area-inset-left));
   z-index: 2;
+  overflow: hidden;
+}
+
+.hero__wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 60% 50% at 0% 0%,
+    rgba(255, 78, 58, 0.08) 0%,
+    transparent 60%
+  );
+  z-index: -1;
 }
 
 .hero__topbar {
@@ -83,35 +127,18 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+  font-size: 22px;
 }
 
-.hero__brand-meta {
+.hero__meta {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.25em;
+  letter-spacing: 0.2em;
   color: var(--fg-mute);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
 }
 
-.pulse-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 12px var(--accent);
-  animation: pulse 1.8s var(--ease) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(1.5); opacity: 0.55; }
-}
-
-/* Centered massive italic serif headline */
 .hero__title {
   font-family: 'Instrument Serif', 'Times New Roman', serif;
   font-style: italic;
@@ -124,20 +151,17 @@ a { color: inherit; text-decoration: none; }
   padding: 8vh 0;
 }
 
-.hero__line {
-  display: block;
-}
+.hero__line { display: block; }
 
-/* The accent block embedded in the italic serif */
 .accent-block {
   font-family: 'Rubik', sans-serif;
   font-weight: 900;
   font-style: normal;
-  font-size: 0.82em;          /* slightly smaller so it sits inside the serif baseline */
+  font-size: 0.82em;
   color: var(--accent);
   letter-spacing: -0.05em;
   display: inline-block;
-  transform: translateY(-0.04em);
+  transform: translateY(-0.05em);
 }
 
 .hero__bottom {
@@ -167,7 +191,7 @@ a { color: inherit; text-decoration: none; }
 .scroll-hint__label {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 10px;
-  letter-spacing: 0.35em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--fg-mute);
   writing-mode: vertical-rl;
@@ -194,19 +218,20 @@ a { color: inherit; text-decoration: none; }
 }
 
 @keyframes drop {
-  0%   { top: -16px; opacity: 0;   }
+  0%   { top: -16px; opacity: 0; }
   20%  { opacity: 1; }
   80%  { opacity: 1; }
-  100% { top: 40px;  opacity: 0;   }
+  100% { top: 40px;  opacity: 0; }
 }
 
 /* ============================================================================
-   2. SCROLL-DRIVEN VIDEO STAGE
+   2. SCROLL-DRIVEN STAGE
    ============================================================================ */
+
 .scroll-section {
   position: relative;
   width: 100%;
-  height: 600vh;            /* the scroll-driver: 6× viewport */
+  height: 600vh;
   background: var(--bg);
   z-index: 1;
 }
@@ -215,7 +240,7 @@ a { color: inherit; text-decoration: none; }
   position: sticky;
   top: 0;
   height: 100vh;
-  height: 100dvh;            /* mobile: avoid jumpy resizes when URL bar shows/hides */
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
   background: #000;
@@ -228,12 +253,10 @@ a { color: inherit; text-decoration: none; }
   height: 100%;
   object-fit: cover;
   pointer-events: none;
-  /* iOS Safari: hint to the compositor that this is a video layer */
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
 }
 
-/* Radial vignette */
 .stage-vignette {
   position: absolute;
   inset: 0;
@@ -243,47 +266,32 @@ a { color: inherit; text-decoration: none; }
     rgba(0, 0, 0, 0) 40%,
     rgba(0, 0, 0, 0.6) 100%
   );
-  z-index: 2;
+  z-index: 7;
 }
 
-/* Brand mark — top-left of the stage. In RTL we still want this LEFT corner. */
-.stage-brand {
-  position: absolute;
-  top: 28px;
-  left: 5vw;
-  font-size: 22px;
-  line-height: 1;
-  z-index: 5;
-  /* Force LTR for the brand mark so "We" stays before "ccelerate" visually */
-  direction: ltr;
-  unicode-bidi: isolate;
-}
-
-.brand-we {
-  font-family: 'Rubik', sans-serif;
-  font-weight: 900;
-  color: var(--accent);
-  letter-spacing: -0.04em;
-}
-
-.brand-rest {
-  font-family: 'Instrument Serif', serif;
-  font-style: italic;
-  color: var(--fg);
-  letter-spacing: -0.01em;
-}
-
-/* Counter — top-right of the stage */
-.stage-counter {
+.stage-lockup {
   position: absolute;
   top: 28px;
   right: 5vw;
+  z-index: 20;
+  font-size: 20px;
+}
+
+.lockup--stage { font-size: inherit; }
+
+.stage-counter {
+  position: absolute;
+  top: 28px;
+  left: 5vw;
   display: inline-flex;
   align-items: center;
   gap: 14px;
-  z-index: 5;
-  direction: ltr;            /* keep "01 ─── 06" reading left to right */
+  z-index: 20;
+  direction: ltr;
   unicode-bidi: isolate;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
 }
 
 .counter-current {
@@ -321,17 +329,15 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.1em;
 }
 
-/* Side dots — visually on the LEFT edge of the viewport. The page is RTL,
-   but these are an absolute-positioned UI affordance unrelated to text flow. */
 .stage-dots {
   position: absolute;
-  left: 5vw;
+  right: 5vw;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   gap: 14px;
-  z-index: 5;
+  z-index: 20;
 }
 
 .stage-dot {
@@ -340,43 +346,28 @@ a { color: inherit; text-decoration: none; }
   background: rgba(248, 246, 240, 0.15);
   border-radius: 2px;
   padding: 0;
-  transition:
-    height 0.5s var(--ease),
-    background 0.5s var(--ease);
-  cursor: pointer;
+  transition: height 0.5s var(--ease), background 0.5s var(--ease);
 }
 
-.stage-dot:hover {
-  background: rgba(248, 246, 240, 0.55);
-}
+.stage-dot:hover { background: rgba(248, 246, 240, 0.55); }
+.stage-dot.is-passed { background: rgba(248, 246, 240, 0.4); }
+.stage-dot.is-active { height: 56px; background: var(--accent); }
 
-.stage-dot.is-passed {
-  background: rgba(248, 246, 240, 0.4);
-}
-
-.stage-dot.is-active {
-  height: 56px;
-  background: var(--accent);
-}
-
-/* Scene-text overlays — bottom-right (natural for RTL reading) */
 .scenes {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 4;
+  z-index: 6;
 }
 
 .scene-text {
   position: absolute;
   bottom: 12vh;
   right: 5vw;
-  max-width: 720px;
+  max-width: 70vw;
   opacity: 0;
   transform: translateY(24px);
-  transition:
-    opacity 0.8s var(--ease),
-    transform 0.8s var(--ease);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
   text-align: right;
 }
 
@@ -390,7 +381,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 14px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.3em;
@@ -427,7 +418,6 @@ a { color: inherit; text-decoration: none; }
   margin-top: 20px;
 }
 
-/* Final logo reveal */
 .logo-reveal {
   position: absolute;
   inset: 0;
@@ -436,23 +426,16 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   justify-content: center;
   text-align: center;
-  z-index: 6;
+  z-index: 25;
   opacity: 0;
   pointer-events: none;
   transition: opacity 1.2s var(--ease);
   padding: 0 5vw;
 }
 
-.logo-reveal.is-visible {
-  opacity: 1;
-}
+.logo-reveal.is-visible { opacity: 1; }
 
-.logo-reveal__brand {
-  font-size: clamp(64px, 16vw, 220px);
-  line-height: 1;
-  direction: ltr;
-  unicode-bidi: isolate;
-}
+.lockup--reveal { font-size: clamp(60px, 14vw, 180px); }
 
 .logo-reveal__tag {
   margin-top: 28px;
@@ -461,11 +444,106 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.35em;
   text-transform: uppercase;
   color: var(--fg-mute);
+  max-width: 600px;
 }
 
 /* ============================================================================
-   3. OUTRO / CTA
+   3. PARTNERSHIP
    ============================================================================ */
+
+.partnership {
+  position: relative;
+  z-index: 2;
+  background: var(--bg);
+  padding: 120px 5vw;
+}
+
+.partnership__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(48px, 8vw, 120px);
+  align-items: start;
+}
+
+.partnership__eyebrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--fg-mute);
+  margin-bottom: 24px;
+}
+
+.partnership__title {
+  font-family: 'Instrument Serif', 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 32px;
+}
+
+.partnership__body {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--fg);
+  max-width: 480px;
+}
+
+.partnership__body strong {
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.partnership__stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+}
+
+.stat-row:last-child { border-bottom: 1px solid var(--line); }
+
+.stat-row__num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  flex-shrink: 0;
+}
+
+.stat-row__dash {
+  color: var(--fg-mute);
+  flex-shrink: 0;
+}
+
+.stat-row__text {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--fg);
+}
+
+/* ============================================================================
+   4. OUTRO / CTA
+   ============================================================================ */
+
 .outro {
   position: relative;
   z-index: 2;
@@ -475,38 +553,55 @@ a { color: inherit; text-decoration: none; }
   justify-content: center;
   text-align: center;
   min-height: 70vh;
-  padding: 64px 5vw;
+  min-height: 70dvh;
+  padding: 80px 5vw;
   background: var(--bg);
-  gap: 48px;
+}
+
+.outro__eyebrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent);
 }
 
 .outro__title {
-  font-family: 'Instrument Serif', serif;
+  font-family: 'Instrument Serif', 'Times New Roman', serif;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(36px, 5.5vw, 80px);
+  font-size: clamp(36px, 6vw, 88px);
   line-height: 1.05;
   letter-spacing: -0.02em;
   color: var(--fg);
-  max-width: 800px;
+  max-width: 880px;
+  margin-top: 24px;
+}
+
+.outro__sub {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--fg-mute);
+  max-width: 520px;
+  margin-top: 24px;
 }
 
 .outro__cta {
   display: inline-block;
+  margin-top: 48px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 13px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.25em;
   color: var(--fg);
   background: transparent;
   border: 1px solid var(--fg);
   padding: 18px 36px;
-  transition:
-    background 0.3s var(--ease),
-    color 0.3s var(--ease),
-    border-color 0.3s var(--ease);
-  cursor: pointer;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease);
 }
 
 .outro__cta:hover,
@@ -517,103 +612,81 @@ a { color: inherit; text-decoration: none; }
   outline: none;
 }
 
-/* ============================================================================
-   RESPONSIVE
-   ----------------------------------------------------------------------------
-   Three breakpoints:
-     - Tablet  (≤ 1024px): tighter spacing, mid font scaling
-     - Phone   (≤ 768px):  drop side-dots, scene-text full-width, smaller hero
-     - Small   (≤ 480px):  more aggressive font scaling, single-column metas
-   ============================================================================ */
-
-/* Tablet — fluid intermediate tier */
-@media (max-width: 1024px) {
-  .stage-counter { gap: 10px; }
-  .counter-track { width: 60px; }
-  .stage-dots    { gap: 10px; }
-  .scene-text__headline { font-size: clamp(40px, 9vw, 110px); }
+.outro__footer {
+  margin-top: 96px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-mute);
 }
 
-/* Phone */
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .partnership { padding: 80px 5vw; }
+  .partnership__inner { gap: 48px; }
+}
+
 @media (max-width: 768px) {
-  /* Drop the side-dot navigation — it's an enthusiast feature on small screens */
   .stage-dots { display: none; }
 
-  /* Counter — tighten everything */
-  .counter-track    { width: 40px; }
-  .counter-current  { font-size: 12px; }
-  .counter-total    { font-size: 12px; }
+  .counter-track { width: 40px; }
+  .counter-current, .counter-total { font-size: 12px; }
 
-  /* Scene-text fills the viewport bottom-third on mobile */
   .scene-text {
     bottom: 14vh;
     bottom: 14dvh;
     right: 5vw;
     left: 5vw;
     max-width: 100%;
-    text-align: right;
   }
-
   .scene-text__headline { font-size: 13vw; line-height: 1.0; }
-  .scene-text__sub {
-    font-size: 15px;
-    margin-top: 16px;
-    max-width: 100%;
-    line-height: 1.6;
-  }
-  .scene-text__meta {
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    margin-bottom: 14px;
-  }
-  .scene-text__line { width: 40px; max-width: 40px; }
+  .scene-text__sub      { font-size: 15px; margin-top: 16px; max-width: 100%; line-height: 1.6; }
+  .scene-text__meta     { font-size: 10px; letter-spacing: 0.25em; margin-bottom: 14px; }
+  .scene-text__line     { width: 40px; max-width: 40px; }
 
-  /* Hero typography — slightly more restrained on phones */
-  .hero__title { font-size: 16vw; line-height: 0.92; padding: 4vh 0; }
-  .hero__lede  { max-width: 100%; font-size: 10px; }
+  .hero__title  { font-size: 16vw; line-height: 0.92; padding: 4vh 0; }
+  .hero__lede   { max-width: 100%; font-size: 10px; }
+  .hero__topbar, .hero__bottom { gap: 16px; }
+  .hero__topbar { font-size: 18px; }
 
-  .hero__topbar,
-  .hero__bottom { gap: 16px; }
+  .stage-lockup  { top: 18px; right: 5vw; font-size: 17px; }
+  .stage-counter { top: 18px; left: 5vw; }
 
-  /* Top-of-stage UI */
-  .stage-brand   { top: 18px; left: 5vw; font-size: 18px; }
-  .stage-counter { top: 18px; right: 5vw; }
+  .partnership__inner { grid-template-columns: 1fr; gap: 40px; }
+  .partnership__title { font-size: clamp(28px, 8vw, 44px); margin-bottom: 24px; }
+  .partnership__body  { font-size: 15px; max-width: 100%; }
+  .stat-row__text     { font-size: 16px; }
 
-  /* Outro tightens */
-  .outro       { padding: 48px 5vw; gap: 32px; min-height: 60vh; min-height: 60dvh; }
-  .outro__cta  { padding: 16px 28px; font-size: 12px; }
+  .outro         { padding: 64px 5vw; min-height: 60vh; min-height: 60dvh; }
+  .outro__title  { font-size: clamp(28px, 8vw, 48px); }
+  .outro__sub    { font-size: 15px; }
+  .outro__cta    { padding: 16px 28px; font-size: 12px; min-height: 48px; display: inline-flex; align-items: center; }
+  .outro__footer { margin-top: 64px; font-size: 10px; }
 
-  /* The scroll hint label tilts back to horizontal for thumb-readability */
-  .scroll-hint__label {
-    writing-mode: horizontal-tb;
-    transform: none;
-  }
+  .scroll-hint__label { writing-mode: horizontal-tb; transform: none; }
   .scroll-hint__track { width: 24px; height: 1px; }
   .scroll-hint__bar   { width: 8px; height: 100%; top: 0; left: -8px; animation: drop-horizontal 2.2s var(--ease) infinite; }
 }
 
 @keyframes drop-horizontal {
-  0%   { left: -8px;             opacity: 0; }
+  0%   { left: -8px; opacity: 0; }
   20%  { opacity: 1; }
   80%  { opacity: 1; }
   100% { left: calc(100% + 8px); opacity: 0; }
 }
 
-/* Small phone */
 @media (max-width: 480px) {
   .hero { padding-top: max(20px, env(safe-area-inset-top)); }
-
   .hero__title    { font-size: 18vw; }
-  .hero__topbar   { flex-direction: column; align-items: flex-start; }
+  .hero__topbar   { flex-direction: column; align-items: flex-end; gap: 12px; font-size: 17px; }
   .hero__bottom   { flex-direction: column; align-items: flex-start; }
   .scroll-hint    { align-self: flex-end; }
-
   .scene-text__headline { font-size: 14vw; }
-
-  .outro__title { font-size: 32px; line-height: 1.15; }
-
-  /* Counter — hide the bar entirely on tiny screens, keep just "01 / 06" */
-  .counter-track { display: none; }
+  .counter-track  { display: none; }
   .stage-counter::before {
     content: '/';
     color: var(--fg-mute);
@@ -622,24 +695,19 @@ a { color: inherit; text-decoration: none; }
   }
 }
 
-/* Landscape phone — keep stage-text from colliding with the bottom URL bar */
 @media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
   .scene-text { bottom: 8vh; bottom: 8dvh; }
-  .hero       { padding: 16px 5vw; }
+  .hero { padding: 16px 5vw; }
   .hero__title { font-size: 9vh; padding: 2vh 0; }
 }
 
-/* Touch devices — bigger tap targets even on tablets */
 @media (hover: none) and (pointer: coarse) {
-  .stage-dot   { width: 4px; }
+  .stage-dot { width: 4px; }
   .stage-dot.is-active { width: 4px; }
-  .outro__cta  { min-height: 48px; display: inline-flex; align-items: center; }
 }
 
-/* Reduce motion — kill pulses + scroll-bar drop but keep scroll-driven video */
 @media (prefers-reduced-motion: reduce) {
-  .pulse-dot { animation: none; }
   .scroll-hint__bar { animation: none; opacity: 0.6; top: 12px; }
-  .scene-text { transition: opacity 0.3s linear, transform 0.3s linear; }
-  .logo-reveal { transition: opacity 0.3s linear; }
+  .scene-text       { transition: opacity 0.3s linear, transform 0.3s linear; }
+  .logo-reveal      { transition: opacity 0.3s linear; }
 }
