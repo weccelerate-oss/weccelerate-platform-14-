@@ -59,11 +59,11 @@ export const WEEKLY_PLAN: Record<Weekday, DailyPlan> = {
   wednesday: {
     label: 'יום רביעי — חיזוק ותיקון',
     probeFocus: ['brand-en', 'brand-he', 'service'],
-    shouldWrite: false,
+    shouldWrite: true,
     shouldImprove: true,
     description:
-      'יום ללא פרסום חדש — במקום זאת, רץ Self-Improver על מאמרים מ-14+ ימים שעדיין לא הביאו ציטוט, ' +
-      'מסמן אותם לעריכה מחדש מזווית אחרת, ובודק זינוק במתחרים.',
+      'יום משולב — Self-Improver רץ על מאמרים ישנים שלא הניבו ציטוטים, ובמקביל ' +
+      'נכתב מאמר חדש שמכסה את הפער הברנדי/שירותי הכי בוער.',
   },
   thursday: {
     label: 'יום חמישי — MedTech',
@@ -75,13 +75,13 @@ export const WEEKLY_PLAN: Record<Weekday, DailyPlan> = {
       'וכותב מדריך ב-MedTech (היתרון התחרותי המרכזי שלנו).',
   },
   friday: {
-    label: 'יום שישי — סקירה תחרותית',
+    label: 'יום שישי — סקירה ופרסום',
     probeFocus: ['generic-en', 'generic-he', 'medtech'],
-    shouldWrite: false,
+    shouldWrite: true,
     shouldImprove: true,
     description:
-      'סקירה תחרותית שבועית — בודק אילו מתחרים זינקו השבוע, מסמן הזדמנויות counter-content, ' +
-      'ולא מפרסם (כדי לא להעמיס על הבוקר של שישי).',
+      'סקירה תחרותית + פרסום — בודק אילו מתחרים זינקו השבוע, מסמן הזדמנויות counter-content, ' +
+      'וכותב מאמר תגובה שמכוון לפער שזיהינו השבוע.',
   },
   saturday: {
     label: 'שבת — שקט',

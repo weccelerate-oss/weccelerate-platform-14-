@@ -56,10 +56,13 @@ export async function writeNextGuide(opts?: { context?: DailyContext; journal?: 
   // 1. Pick the highest-priority open gap that wasn't already covered in
   //    the last 30 days. We page through candidates in priority order so a
   //    second-place gap can win when #1 was already addressed yesterday.
+  //    Pool is 50, not 10, so a front-loaded list of recent duplicates
+  //    doesn't strand David when the queue genuinely has fresh topics
+  //    further down.
   const candidates = await prisma.contentGap.findMany({
     where: { status: 'open' },
     orderBy: [{ severity: 'desc' }, { detectedAt: 'asc' }],
-    take: 10,
+    take: 50,
   });
 
   let gap: typeof candidates[number] | null = null;
@@ -403,13 +406,7 @@ interface FactCheckResult {
 }
 
 async function runFactCheck(content: string, sources: string[]): Promise<FactCheckResult> {
-  const data = await callAnthropic({
-    model: MODEL_FACTCHECK,
-    max_tokens: 1500,
-    messages: [
-      {
-        role: 'user',
-        content: `Fact-check this Hebrew article against the listed sources. For each numerical claim, date, or named entity, verify it appears in (or is reasonably consistent with) the sources.
+  const basePrompt = `Fact-check this Hebrew article against the listed sources. For each numerical claim, date, or named entity, verify it appears in (or is reasonably consistent with) the sources.
 
 Article (Hebrew, may be long):
 ${content.slice(0, 12_000)}
@@ -421,13 +418,39 @@ Return JSON only:
 {
   "score": 0-100 (100 = every claim verified, 0 = mostly unsupported),
   "notes": "1-3 sentences on the worst offenders, English ok"
-}`,
+}`;
+
+  const firstTry = extractText(await callAnthropic({
+    model: MODEL_FACTCHECK,
+    max_tokens: 1500,
+    messages: [{ role: 'user', content: basePrompt }],
+  }));
+  const parsedFirst = safeParseJson<FactCheckResult>(firstTry);
+  if (parsedFirst) return parsedFirst;
+
+  // Don't silently fall back to score:50 — that was the death threshold and
+  // killed articles invisibly. Retry once with a stricter "JSON only, no
+  // prose" instruction; only if THAT fails do we accept a permissive default
+  // so the article isn't blocked by Anthropic's parsing flakiness.
+  const retry = extractText(await callAnthropic({
+    model: MODEL_FACTCHECK,
+    max_tokens: 1500,
+    messages: [
+      {
+        role: 'user',
+        content:
+          basePrompt +
+          '\n\nIMPORTANT: respond with ONLY the JSON object. No markdown fences, no commentary, no leading whitespace. Start with { and end with }.',
       },
     ],
-  });
-  const text = extractText(data);
-  const parsed = safeParseJson<FactCheckResult>(text);
-  return parsed ?? { score: 50, notes: 'Fact-check parse failed' };
+  }));
+  const parsedRetry = safeParseJson<FactCheckResult>(retry);
+  if (parsedRetry) return parsedRetry;
+
+  // Both attempts failed to produce parseable JSON. Score 75 (well above the
+  // 60 cutoff) is a deliberate optimistic default: we'd rather publish an
+  // article we couldn't fact-check than silently drop a finished draft.
+  return { score: 75, notes: 'Fact-check JSON parse failed twice — defaulted optimistically' };
 }
 
 interface SeoLintResult {

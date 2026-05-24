@@ -29,7 +29,11 @@ import { DAVID, DAVID_EMAIL_FROM, DAVID_EMAIL_TO } from '@/lib/agents/david';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+// The full pipeline (probe + analyze + write + improve + replan + report)
+// has to fit here. Writing days run two Anthropic round-trips (writer +
+// fact-check), each can take 30-90s for a 1500-word Hebrew article. 60s was
+// truncating the writer mid-call and marking the stage as a silent error.
+export const maxDuration = 300;
 
 interface StageResult {
   stage: string;
