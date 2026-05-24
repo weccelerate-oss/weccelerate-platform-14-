@@ -111,8 +111,8 @@ export default function HeroLeumit() {
 
           <ScrollReveal variant="up" delay={300}>
             <p className="text-base sm:text-lg md:text-xl text-white/60 leading-relaxed mb-8 sm:mb-12 max-w-2xl mx-auto px-2 sm:px-0">
-              ליווי מעטפת 360° ליזמי רפואה דיגיטלית — מהרעיון לאישור הרגולטורי, עם גישה
-              למאגר המטופלים של לאומית, רופאים מומחים וייעוץ FDA ישיר.
+              ליווי מעטפת מקצה לקצה ליזמי רפואה דיגיטלית — מהרעיון לאישור הרגולטורי, עם גישה
+              למאגר הקליני של לאומית, רופאים מומחים וייעוץ רגולטורי.
             </p>
           </ScrollReveal>
 

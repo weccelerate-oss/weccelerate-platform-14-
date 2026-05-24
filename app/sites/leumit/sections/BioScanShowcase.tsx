@@ -64,10 +64,10 @@ export default function BioScanShowcase() {
                 <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-cyan-300/80 mb-1">
                   גישה לדאטה
                 </div>
-                <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-l from-cyan-300 to-[#D4AF37] bg-clip-text text-transparent tabular-nums">
-                  720K+
+                <div className="text-lg sm:text-xl font-bold bg-gradient-to-l from-cyan-300 to-[#D4AF37] bg-clip-text text-transparent">
+                  מאגר קליני רחב
                 </div>
-                <div className="text-[9px] sm:text-[10px] text-white/50 mt-1">מטופלים אנונימיים</div>
+                <div className="text-[9px] sm:text-[10px] text-white/50 mt-1">בכפוף לאישור ועדת הלסינקי</div>
               </motion.div>
 
               {/* Bottom floating tag */}

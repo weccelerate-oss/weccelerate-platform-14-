@@ -88,7 +88,7 @@ export default function TracksGrid() {
           </ScrollReveal>
           <ScrollReveal variant="up" delay={100}>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight leading-tight">
-              6 מסלולי ליווי.{' '}
+              מסלולי ליווי מקיפים.{' '}
               <span className="bg-gradient-to-l from-cyan-400 to-[#D4AF37] bg-clip-text text-transparent">
                 מעטפת אחת.
               </span>

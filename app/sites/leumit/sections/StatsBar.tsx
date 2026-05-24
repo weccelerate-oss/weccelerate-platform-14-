@@ -1,87 +1,43 @@
-'use client';
+/**
+ * Pillars bar — qualitative value props, no hard numbers.
+ *
+ * Replaced the original "720K patients / 8.7M visits / 200+ investors / 6
+ * tracks" stats with non-committal value pillars. Reason: in regulated
+ * medtech we don't want to make data-backed promises on a public marketing
+ * page (patient counts, conversion implied, "real results" etc.). Each
+ * pillar speaks to a CAPABILITY we offer, not a measured outcome.
+ */
 
-import { useEffect, useRef, useState } from 'react';
+import { Stethoscope, ShieldCheck, Users, Compass } from 'lucide-react';
 
-interface Stat {
-  value: number;
-  suffix: string;
+interface Pillar {
+  Icon: typeof Stethoscope;
   label: string;
-  sublabel: string;
+  sub: string;
 }
 
-const STATS: Stat[] = [
+const PILLARS: Pillar[] = [
   {
-    value: 720,
-    suffix: 'K+',
-    label: 'מטופלים',
-    sublabel: 'ברשת לאומית',
+    Icon: Stethoscope,
+    label: 'גישה קלינית',
+    sub: 'רופאים, מומחים ומסגרות פעולה ברשת לאומית',
   },
   {
-    value: 8.7,
-    suffix: 'M',
-    label: 'ביקורים שנתיים',
-    sublabel: 'בקליניקות ברחבי הארץ',
+    Icon: ShieldCheck,
+    label: 'ליווי רגולטורי',
+    sub: 'FDA, CE, ועדת הלסינקי ומשרד הבריאות',
   },
   {
-    value: 200,
-    suffix: '+',
-    label: 'משקיעים',
-    sublabel: 'ברשת WeCcelerate',
+    Icon: Users,
+    label: 'רשת שותפים',
+    sub: 'משקיעים, יזמים ושותפים אסטרטגיים',
   },
   {
-    value: 6,
-    suffix: '',
-    label: 'מסלולי ליווי',
-    sublabel: 'עסקיים ורפואיים',
+    Icon: Compass,
+    label: 'ליווי בינתחומי',
+    sub: 'אסטרטגיה, מוצר, רגולציה ומימון תחת גג אחד',
   },
 ];
-
-function CountUp({ end, suffix }: { end: number; suffix: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const started = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !started.current) {
-            started.current = true;
-            const duration = 1800;
-            const steps = 60;
-            const increment = end / steps;
-            let current = 0;
-            const timer = setInterval(() => {
-              current += increment;
-              if (current >= end) {
-                setCount(end);
-                clearInterval(timer);
-              } else {
-                setCount(current);
-              }
-            }, duration / steps);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [end]);
-
-  const display = end < 10 ? count.toFixed(1) : Math.floor(count).toString();
-
-  return (
-    <span ref={ref}>
-      {display}
-      {suffix}
-    </span>
-  );
-}
 
 export default function StatsBar() {
   return (
@@ -97,25 +53,25 @@ export default function StatsBar() {
 
       <div className="container-corporate relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
-          {STATS.map((stat, idx) => (
+          {PILLARS.map(({ Icon, label, sub }, idx) => (
             <div
               key={idx}
               className="text-center md:border-l border-white/5 first:border-l-0 md:px-4"
             >
-              <div className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-b from-white via-cyan-100 to-cyan-300 bg-clip-text text-transparent mb-2 tabular-nums">
-                <CountUp end={stat.value} suffix={stat.suffix} />
+              <div className="flex justify-center mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-[#D4AF37]/10 border border-cyan-400/30 flex items-center justify-center backdrop-blur-sm shadow-lg shadow-cyan-500/10">
+                  <Icon className="w-7 h-7 text-cyan-300" strokeWidth={1.6} />
+                </div>
               </div>
-              <div className="text-sm font-semibold text-white uppercase tracking-wide mb-1">
-                {stat.label}
+              <div className="text-base sm:text-lg font-semibold text-white tracking-wide mb-1.5">
+                {label}
               </div>
-              <div className="text-xs text-white/40">{stat.sublabel}</div>
+              <div className="text-xs sm:text-sm text-white/45 leading-relaxed max-w-[14rem] mx-auto">
+                {sub}
+              </div>
             </div>
           ))}
         </div>
-
-        <p className="text-center text-xs text-white/30 mt-10 max-w-2xl mx-auto">
-          * גישה לדאטה רפואית מותנית באישור ועדת הלסינקי ובהתאמה לרגולציית הגנת הפרטיות.
-        </p>
       </div>
     </section>
   );
