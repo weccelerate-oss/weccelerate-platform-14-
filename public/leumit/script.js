@@ -1,17 +1,9 @@
 /* ============================================================================
-   WeCcelerate — Scroll-driven cinematic landing
-   ----------------------------------------------------------------------------
-   The video plays NOT by autoplay but by mapping window scroll → currentTime.
-   Driver:
-     - .scroll-section is 600vh tall
-     - .sticky-stage is sticky 100vh inside it
-     - total scrollable distance for the section = 600vh - 100vh = 500vh
-     - progress = (scrollY - sectionTop) / (500vh), clamped 0..1
-     - video.currentTime = progress * video.duration
-
-   iOS Safari quirk: currentTime seeking is locked until the video has played
-   once after a user gesture. On the first touch/click anywhere, we
-   play→pause to unlock it.
+   לאומית × WeCcelerate — Cinematic landing
+   - Scroll position → video.currentTime (Apple-style scroll-jacked video)
+   - Floating cyan/gold particle canvas in the hero
+   - Scene + dot + counter activation
+   - iOS Safari currentTime unlock on first user gesture
    ============================================================================ */
 
 (function () {
@@ -25,108 +17,152 @@
   const counterCurrent = document.getElementById('counter-current');
   const counterFill   = document.getElementById('counter-fill');
   const logoReveal    = document.getElementById('logo-reveal');
-  const outroCta      = document.getElementById('outro-cta');
+  const particlesCanvas = document.getElementById('particles');
 
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // -------------------- Floating particles in the hero --------------------
+  // Cyan + gold orbs drifting around the hero. Matches the FloatingOrbs +
+  // Sparkles components on the real Leumit site, but in vanilla canvas so
+  // this static landing has no React dependency.
+  function startParticles() {
+    if (!particlesCanvas || reduceMotion) return;
+    const ctx = particlesCanvas.getContext('2d');
+    if (!ctx) return;
+
+    const isMobile = window.innerWidth < 768;
+    const count = isMobile ? 12 : 24;
+    let width = 0, height = 0, dpr = 1;
+    const particles = [];
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const hero = particlesCanvas.parentElement;
+      if (!hero) return;
+      const rect = hero.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      particlesCanvas.width = width * dpr;
+      particlesCanvas.height = height * dpr;
+      particlesCanvas.style.width = width + 'px';
+      particlesCanvas.style.height = height + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function spawn() {
+      particles.length = 0;
+      for (let i = 0; i < count; i++) {
+        // ~25% gold sparkles (small), 75% cyan orbs (slightly bigger).
+        const isGold = Math.random() < 0.25;
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          r: isGold ? 1 + Math.random() * 1.5 : 2 + Math.random() * 3,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: (Math.random() - 0.5) * 0.25,
+          color: isGold ? 'rgba(212, 175, 55, ' : 'rgba(103, 232, 249, ',
+          baseAlpha: isGold ? 0.55 : 0.35,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+    }
+
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(now - last, 50);
+      last = now;
+      ctx.clearRect(0, 0, width, height);
+      for (const p of particles) {
+        p.x += p.vx * dt * 0.05;
+        p.y += p.vy * dt * 0.05;
+        p.phase += dt * 0.001;
+        if (p.x < -10) p.x = width + 10;
+        if (p.x > width + 10) p.x = -10;
+        if (p.y < -10) p.y = height + 10;
+        if (p.y > height + 10) p.y = -10;
+        // Subtle twinkle on alpha.
+        const alpha = p.baseAlpha * (0.6 + 0.4 * Math.sin(p.phase));
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3);
+        grad.addColorStop(0, p.color + alpha + ')');
+        grad.addColorStop(1, p.color + '0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(frame);
+    }
+
+    resize();
+    spawn();
+    requestAnimationFrame(frame);
+
+    let resizeT = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeT);
+      resizeT = window.setTimeout(() => { resize(); spawn(); }, 150);
+    }, { passive: true });
+  }
+
+  // -------------------- Scroll-driven video --------------------
   if (!video || !scrollSection || sceneNodes.length === 0) {
-    console.warn('[leumit] missing required elements; aborting.');
+    console.warn('[leumit] missing required scroll-driven elements; particles only.');
+    if (document.readyState !== 'loading') startParticles();
+    else document.addEventListener('DOMContentLoaded', startParticles);
     return;
   }
 
-  // -------------------- State --------------------
-  const TOTAL_SCENES = 6;             // matches the 6 .scene-text blocks
-  const REVEAL_AT    = 0.92;          // logo reveal fades in after this progress
-
-  let videoDuration   = 0;            // filled in once metadata loads
-  let sectionTop      = 0;            // cached on resize
-  let sectionScrollLen = 1;           // cached on resize (600vh - 100vh)
-  let ticking         = false;
-  let lastActiveScene = -1;
-  let videoReady      = false;
-  let iosUnlocked     = false;
-  let lastSeekTime    = 0;            // throttle currentTime writes on mobile
-
-  // Coarse pointer = touch device; iOS Safari is the gnarliest.
+  const TOTAL_SCENES = 6;
+  const REVEAL_AT = 0.92;
   const IS_TOUCH = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  // Seek threshold: on touch we write currentTime less aggressively to avoid
-  // decoder thrash; on desktop we can afford finer-grained updates.
   const SEEK_THRESHOLD_SEC = IS_TOUCH ? 0.05 : 0.01;
 
-  // -------------------- Layout cache --------------------
-  /**
-   * Recompute the section's top offset and the scrollable distance inside it.
-   * Called on load and on every resize.
-   */
+  let videoDuration = 0;
+  let sectionTop = 0;
+  let sectionScrollLen = 1;
+  let ticking = false;
+  let lastActiveScene = -1;
+  let videoReady = false;
+  let iosUnlocked = false;
+  let lastSeekTime = 0;
+
   function measureLayout() {
     const rect = scrollSection.getBoundingClientRect();
     sectionTop = rect.top + window.scrollY;
-    // Inner sticky stage is 100vh; outer is 600vh; usable scroll = outer - inner
     sectionScrollLen = scrollSection.offsetHeight - window.innerHeight;
     if (sectionScrollLen <= 0) sectionScrollLen = 1;
   }
 
-  // -------------------- Per-frame render --------------------
-  /**
-   * Compute scroll progress relative to the scroll-section, then update:
-   *  - video.currentTime
-   *  - active scene-text
-   *  - active progress dot
-   *  - counter number + bar fill
-   *  - logo reveal opacity (last 8%)
-   */
   function render() {
     ticking = false;
-
     const scrolled = window.scrollY - sectionTop;
     let progress = scrolled / sectionScrollLen;
     if (progress < 0) progress = 0;
     if (progress > 1) progress = 1;
 
-    // Drive the video by scroll position. Avoid setting currentTime before
-    // the video has duration — it would throw on some browsers.
     if (videoReady && videoDuration > 0) {
       const t = progress * videoDuration;
-      // Don't write the same value back — avoids decoder thrash on stale frames.
-      // Threshold is larger on touch devices (iOS Safari is slow to honor
-      // currentTime updates and will queue them, causing visible jitter).
       if (Math.abs(t - lastSeekTime) > SEEK_THRESHOLD_SEC) {
         try {
           video.currentTime = t;
           lastSeekTime = t;
-        } catch (_) { /* swallow — iOS pre-unlock or transient decoder state */ }
+        } catch (_) { /* iOS pre-unlock or transient decoder state */ }
       }
     }
 
-    // Scene activation. Each scene owns 1/TOTAL_SCENES of the timeline,
-    // except scene 5 which extends to 1.0 inclusive.
-    const activeScene = Math.min(
-      TOTAL_SCENES - 1,
-      Math.floor(progress * TOTAL_SCENES),
-    );
-
+    const activeScene = Math.min(TOTAL_SCENES - 1, Math.floor(progress * TOTAL_SCENES));
     if (activeScene !== lastActiveScene) {
-      sceneNodes.forEach((node, i) => {
-        node.classList.toggle('is-active', i === activeScene);
-      });
+      sceneNodes.forEach((node, i) => node.classList.toggle('is-active', i === activeScene));
       dotNodes.forEach((dot, i) => {
         dot.classList.toggle('is-active', i === activeScene);
         dot.classList.toggle('is-passed', i < activeScene);
       });
-      if (counterCurrent) {
-        counterCurrent.textContent = String(activeScene + 1).padStart(2, '0');
-      }
+      if (counterCurrent) counterCurrent.textContent = String(activeScene + 1).padStart(2, '0');
       lastActiveScene = activeScene;
     }
 
-    // Counter bar fill — smoother than scene-step ticks.
-    if (counterFill) {
-      counterFill.style.width = (progress * 100).toFixed(2) + '%';
-    }
-
-    // Logo reveal — fade in during the last 8% of the scroll section.
-    if (logoReveal) {
-      logoReveal.classList.toggle('is-visible', progress > REVEAL_AT);
-    }
+    if (counterFill) counterFill.style.width = (progress * 100).toFixed(2) + '%';
+    if (logoReveal)  logoReveal.classList.toggle('is-visible', progress > REVEAL_AT);
   }
 
   function onScrollOrResize() {
@@ -135,13 +171,8 @@
     window.requestAnimationFrame(render);
   }
 
-  // -------------------- Wire up --------------------
   window.addEventListener('scroll', onScrollOrResize, { passive: true });
 
-  // Resize handling — debounced. iOS Safari fires `resize` constantly as the
-  // URL bar shows/hides during scroll; running measureLayout every time
-  // would thrash layout. 150ms is short enough to feel responsive on real
-  // resizes, long enough to let URL-bar fluctuation settle.
   let resizeTimer = 0;
   const onResize = () => {
     clearTimeout(resizeTimer);
@@ -153,7 +184,6 @@
   window.addEventListener('resize', onResize, { passive: true });
   window.addEventListener('orientationchange', onResize, { passive: true });
 
-  // Wait for video metadata before doing the first paint of currentTime.
   video.addEventListener('loadedmetadata', () => {
     videoDuration = video.duration || 0;
     videoReady = videoDuration > 0;
@@ -161,37 +191,26 @@
     render();
   }, { once: true });
 
-  // If the video errors, log it but don't break the page — the UI still
-  // works as a static layout.
   video.addEventListener('error', (e) => {
     console.error('[leumit] video load error', e, video.error);
   });
 
-  // -------------------- iOS Safari unlock --------------------
-  /**
-   * iOS Safari refuses to honor `video.currentTime = ...` until the video
-   * has been played by a user gesture. So on the first touch/click we
-   * silently play → pause to unlock seeking. We attach to multiple events
-   * because iOS treats them inconsistently.
-   */
+  // iOS Safari refuses to honor video.currentTime = ... until the video has
+  // been played once by a user gesture. Unlock on first touch/click.
   function unlockIosVideo() {
     if (iosUnlocked) return;
     iosUnlocked = true;
     const p = video.play();
     if (p && typeof p.then === 'function') {
-      p.then(() => video.pause()).catch(() => { /* user agent blocked, fine */ });
+      p.then(() => video.pause()).catch(() => { /* blocked; fine */ });
     } else {
       video.pause();
     }
   }
-
-  ['touchstart', 'click'].forEach((ev) => {
+  ['touchstart', 'click', 'pointerdown'].forEach((ev) => {
     window.addEventListener(ev, unlockIosVideo, { once: true, passive: true });
   });
 
-  // -------------------- Side-dot navigation --------------------
-  // Clicking a dot scrolls to that scene's start. Scene i begins at
-  // (i / TOTAL_SCENES) of the inner scroll range.
   dotNodes.forEach((dot) => {
     dot.addEventListener('click', () => {
       const sceneIndex = parseInt(dot.dataset.scene || '0', 10);
@@ -200,24 +219,13 @@
     });
   });
 
-  // CTA — anchor placeholder; replace with the real flow later.
-  if (outroCta) {
-    outroCta.addEventListener('click', (e) => {
-      // Let it act as a real anchor if href is set; otherwise just prevent.
-      if (!outroCta.getAttribute('href') || outroCta.getAttribute('href') === '#') {
-        e.preventDefault();
-        console.log('[leumit] CTA clicked — wire up the destination here.');
-      }
-    });
-  }
-
-  // -------------------- First render --------------------
   document.addEventListener('DOMContentLoaded', () => {
     measureLayout();
     render();
+    startParticles();
   });
 
-  // Belt-and-suspenders: also run once now in case DOMContentLoaded already fired.
   measureLayout();
   render();
+  if (document.readyState !== 'loading') startParticles();
 })();
