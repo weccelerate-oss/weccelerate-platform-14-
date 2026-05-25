@@ -20,7 +20,6 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 
 interface Scene {
   meta: string;
@@ -83,6 +82,13 @@ export default function ScrollVideoStory() {
   // queues writes and the result is visible stuttering during fast scroll.
   const seekThresholdRef = useRef(0.01);
 
+  // Touch / iOS: scroll-driven currentTime seeking is unreliable on mobile
+  // even after the unlock trick (some users don't tap, some devices ignore
+  // it entirely). On touch we fall back to autoplay+loop and let the scene
+  // text still cycle by scroll. Desktop keeps the cinematic scroll-jacked
+  // behavior. Detected after mount so SSR markup matches first paint.
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
   // -------------------- Layout cache --------------------
   const measureLayout = useCallback(() => {
     const section = sectionRef.current;
@@ -101,7 +107,9 @@ export default function ScrollVideoStory() {
     if (p < 0) p = 0;
     if (p > 1) p = 1;
 
-    if (videoReadyRef.current && videoDurationRef.current > 0) {
+    // Only seek by scroll on non-touch devices. Touch falls back to
+    // autoplay+loop so the video actually plays without a user gesture.
+    if (!isTouchDevice && videoReadyRef.current && videoDurationRef.current > 0) {
       const t = p * videoDurationRef.current;
       if (Math.abs(t - lastSeekRef.current) > seekThresholdRef.current) {
         const v = videoRef.current;
@@ -131,6 +139,7 @@ export default function ScrollVideoStory() {
   useEffect(() => {
     const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     seekThresholdRef.current = isTouch ? 0.05 : 0.01;
+    setIsTouchDevice(isTouch);
 
     measureLayout();
     render();
@@ -214,13 +223,18 @@ export default function ScrollVideoStory() {
       aria-label="סיפור השותפות"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
-        {/* Video — driven by scroll, never autoplayed */}
+        {/* Video — scroll-driven on desktop, autoplay+loop on touch.
+            `key` forces remount when touch detection changes after mount so
+            autoplay attribute actually takes effect on iOS. */}
         <video
+          key={isTouchDevice ? 'touch' : 'desktop'}
           ref={videoRef}
           src="/LEUMIT.mp4"
           muted
           playsInline
           preload="auto"
+          autoPlay={isTouchDevice}
+          loop={isTouchDevice}
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           // @ts-expect-error iOS-only attribute for old WebKit
           webkit-playsinline="true"
@@ -236,6 +250,19 @@ export default function ScrollVideoStory() {
           aria-hidden
         />
 
+        {/* Bottom-text scrim — guarantees the scene-text headline is legible
+            even when the underlying frame is bright. Stronger at the bottom,
+            fades out by 60% upward. Combined with the radial vignette this
+            keeps text legible across every frame of the video. */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-[70%] pointer-events-none z-[7]"
+          style={{
+            background:
+              'linear-gradient(to top, rgba(4,11,22,0.92) 0%, rgba(4,11,22,0.6) 25%, rgba(4,11,22,0.25) 55%, transparent 100%)',
+          }}
+          aria-hidden
+        />
+
         {/* Subtle cyan wash */}
         <div
           className="absolute inset-0 pointer-events-none z-[6]"
@@ -245,17 +272,6 @@ export default function ScrollVideoStory() {
           }}
           aria-hidden
         />
-
-        {/* Pinned brand lockup (top-right, RTL natural) */}
-        <div className="absolute top-7 right-[5vw] z-20">
-          <Image
-            src="/images/leumit-weccelerate-transparent.png"
-            alt="לאומית × WeCcelerate"
-            width={240}
-            height={60}
-            className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_16px_rgba(6,182,212,0.5)]"
-          />
-        </div>
 
         {/* Counter (top-left) */}
         <div
@@ -326,14 +342,23 @@ export default function ScrollVideoStory() {
                 </div>
                 <h2
                   className="font-black text-white leading-[1.0] tracking-tight whitespace-pre-line"
-                  style={{ fontSize: 'clamp(40px, 7vw, 120px)' }}
+                  style={{
+                    fontSize: 'clamp(40px, 7vw, 120px)',
+                    // Belt-and-suspenders legibility — the bottom-scrim
+                    // handles most of it but a soft shadow keeps the
+                    // headline crisp against bright video frames too.
+                    textShadow: '0 2px 24px rgba(4,11,22,0.85), 0 1px 4px rgba(0,0,0,0.7)',
+                  }}
                 >
                   {scene.headline}
                 </h2>
                 {scene.sub && (
                   <p
-                    className="mt-5 max-w-md text-white/60 leading-relaxed"
-                    style={{ fontSize: 'clamp(14px, 1.4vw, 18px)' }}
+                    className="mt-5 max-w-md text-white/80 leading-relaxed"
+                    style={{
+                      fontSize: 'clamp(14px, 1.4vw, 18px)',
+                      textShadow: '0 1px 8px rgba(4,11,22,0.9)',
+                    }}
                   >
                     {scene.sub}
                   </p>
@@ -360,7 +385,8 @@ export default function ScrollVideoStory() {
                   'radial-gradient(ellipse at center, rgba(6,182,212,0.18) 0%, rgba(212,175,55,0.10) 50%, transparent 80%)',
               }}
             />
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/images/leumit-weccelerate-transparent.png"
               alt="לאומית × WeCcelerate"
               width={800}
