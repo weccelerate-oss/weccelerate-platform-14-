@@ -34,11 +34,14 @@ export const runtime = 'nodejs';
 // has to fit here. Writing days run two Anthropic round-trips (writer +
 // fact-check), each can take 30-90s for a 1500-word Hebrew article.
 //
-// Vercel Hobby caps maxDuration at 60s and will REJECT a deploy that asks
-// for 300. Set VERCEL_PLAN=pro in the project env vars once you upgrade —
-// until then we cap at 60s and the writer's per-tick budget (BUDGET_MS in
-// content-writer.ts) is sized to fit inside that envelope.
-export const maxDuration = process.env.VERCEL_PLAN === 'pro' ? 300 : 60;
+// Next.js segment configs must be statically analyzable LITERALS — using a
+// ternary on process.env breaks the build with "Invalid segment configuration
+// export detected". We previously tried that for Hobby/Pro switching and it
+// caused 4 consecutive failed deploys. Going with a static 300 here: Vercel
+// silently caps to the plan's actual limit, so a Hobby project still runs at
+// 60s but the deploy doesn't reject. When upgrading to Pro this value takes
+// effect automatically.
+export const maxDuration = 300;
 
 interface StageResult {
   stage: string;
