@@ -1,9 +1,9 @@
 /**
  * Welcome Onboarding Component
  *
- * Displayed when an entrepreneur's project hasn't been set up yet.
- * Focuses on the journey they're already in, not on starting something new.
- * Provides access to the learning center and team communication.
+ * Shown when an entrepreneur's project isn't set up yet. The page leads
+ * with the Learning Center — that's the thing they can actually do today
+ * while the team prepares their project behind the scenes.
  */
 
 'use client';
@@ -11,26 +11,17 @@
 import { motion } from 'framer-motion';
 import {
   GraduationCap,
-  FileText,
-  Target,
-  CheckCircle2,
-  Calendar,
   MessageSquare,
-  Sparkles,
-  ChevronLeft,
   BookOpen,
   TrendingUp,
   Briefcase,
   Rocket,
-  LogOut,
+  Clock,
+  PlayCircle,
+  ChevronLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { signOut } from 'next-auth/react';
 import { COURSES_DATA, getTotalLessons } from '@/lib/courses-data';
-
-// =============================================================================
-// TYPES
-// =============================================================================
 
 interface WelcomeOnboardingProps {
   user: {
@@ -41,90 +32,50 @@ interface WelcomeOnboardingProps {
   };
 }
 
-// =============================================================================
-// JOURNEY STAGES
-// =============================================================================
-
-const JOURNEY_STAGES = [
+const FEATURED_CATEGORIES = [
   {
-    id: 'onboarding',
-    title: 'הצטרפות לתוכנית',
-    description: 'נרשמת בהצלחה לפורטל היזמים',
-    icon: <CheckCircle2 className="w-5 h-5" />,
-    color: 'text-emerald-600',
-    iconBg: 'bg-emerald-50',
-    completed: true,
+    title: 'מושגים פיננסיים',
+    description: 'דוחות, רווחיות, יחסים פיננסיים',
+    href: '/portal/learning',
+    icon: TrendingUp,
+    accent: 'from-sky-400/30 to-blue-600/10',
+    iconColor: 'text-sky-300',
+    borderColor: 'border-sky-400/20',
   },
   {
-    id: 'setup',
-    title: 'הקמת הפרויקט',
-    description: 'הצוות שלנו מכין את הפרויקט שלך - זה ייקח רגע',
-    icon: <Target className="w-5 h-5" />,
-    color: 'text-blue-600',
-    iconBg: 'bg-blue-50',
-    current: true,
-  },
-  {
-    id: 'mentoring',
-    title: 'ליווי אישי',
-    description: 'פגישות עם מנטור ותמיכה מקצועית',
-    icon: <Calendar className="w-5 h-5" />,
-    color: 'text-violet-600',
-    iconBg: 'bg-violet-50',
-  },
-  {
-    id: 'growth',
-    title: 'צמיחה והתפתחות',
-    description: 'מעקב אחר התקדמות וגיוס הון',
-    icon: <TrendingUp className="w-5 h-5" />,
-    color: 'text-amber-600',
-    iconBg: 'bg-amber-50',
-  },
-];
-
-// =============================================================================
-// FEATURED COURSES (from the course data)
-// =============================================================================
-
-const FEATURED_COURSES = [
-  {
-    title: 'דוחות כספיים',
-    description: 'אבני היסוד של כל חברה ומיזם',
-    lessonsCount: COURSES_DATA[0]?.subcategories[0]?.lessons.length || 10,
-    icon: <TrendingUp className="w-5 h-5" />,
-    color: 'text-blue-600',
-    bg: 'bg-blue-50',
-    border: 'border-blue-100',
-  },
-  {
-    title: 'תוכנית עסקית',
-    description: 'מפת הדרכים של הסטארטאפ שלך',
-    lessonsCount: COURSES_DATA[1]?.subcategories[0]?.lessons.length || 3,
-    icon: <Briefcase className="w-5 h-5" />,
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-100',
+    title: 'מושגים עסקיים',
+    description: 'תוכנית עסקית, מודל הכנסה, שוק יעד',
+    href: '/portal/learning',
+    icon: Briefcase,
+    accent: 'from-emerald-400/30 to-emerald-700/10',
+    iconColor: 'text-emerald-300',
+    borderColor: 'border-emerald-400/20',
   },
   {
     title: 'השקעות וצמיחה',
-    description: 'גיוס הון, סוגי משקיעים ואסטרטגיות',
-    lessonsCount: COURSES_DATA[2]?.subcategories[0]?.lessons.length || 13,
-    icon: <Rocket className="w-5 h-5" />,
-    color: 'text-violet-600',
-    bg: 'bg-violet-50',
-    border: 'border-violet-100',
+    description: 'גיוסי הון, סוגי משקיעים, אסטרטגיות',
+    href: '/portal/learning',
+    icon: Rocket,
+    accent: 'from-violet-400/30 to-purple-700/10',
+    iconColor: 'text-violet-300',
+    borderColor: 'border-violet-400/20',
+  },
+  {
+    title: 'ניהול זמן',
+    description: 'תעדוף, פוקוס, הרגלי עבודה של יזם',
+    href: '/portal/learning',
+    icon: Clock,
+    accent: 'from-amber-400/30 to-amber-700/10',
+    iconColor: 'text-amber-300',
+    borderColor: 'border-amber-400/20',
   },
 ];
-
-// =============================================================================
-// COMPONENT
-// =============================================================================
 
 export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
   const firstName = user.name?.split(' ')[0] || 'יזם';
   const totalLessons = getTotalLessons();
+  const totalCategories = COURSES_DATA.length;
 
-  // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'בוקר טוב';
@@ -135,175 +86,190 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
 
   return (
     <div>
-      {/* Hero with background image */}
+      {/* Hero — full-bleed background image */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src="/images/portal/welcome-hero.png" alt="" className="w-full h-full object-cover opacity-15" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/60 to-[#070b1e]" />
+          <img
+            src="/images/portal/learning-hero.png"
+            alt=""
+            className="w-full h-full object-cover opacity-20"
+            onError={(e) => {
+              // Fallback to existing welcome hero if the new image isn't uploaded yet.
+              (e.currentTarget as HTMLImageElement).src = '/images/portal/welcome-hero.png';
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/70 via-[#070b1e]/85 to-[#070b1e]" />
+          {/* Subtle gold glow */}
+          <div
+            className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[300px] rounded-full pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse at center, rgba(200,169,81,0.10) 0%, transparent 70%)',
+            }}
+          />
         </div>
 
-        <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
-        {/* Greeting */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
-        >
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-            {getGreeting()}, {firstName}!
-          </h1>
-          <p className="text-white/60 text-base max-w-lg">
-            הפרויקט שלך בהכנה. בינתיים, אפשר להתחיל ללמוד ולהתכונן למסע היזמי.
-          </p>
-        </motion.div>
-
-        {/* Journey Progress */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] p-5 sm:p-6 mb-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-        >
-          <h2 className="text-[15px] font-semibold text-white/90 mb-5">
-            המסע שלך ב-WeCcelerate
-          </h2>
-          <div className="space-y-4">
-            {JOURNEY_STAGES.map((stage, index) => (
-              <div key={stage.id} className="flex items-start gap-4">
-                {/* Step indicator */}
-                <div className="flex flex-col items-center">
-                  <div className={cn(
-                    'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
-                    stage.completed ? 'bg-emerald-500/10 text-emerald-400' : stage.current ? 'bg-[#c8a951]/10 text-[#c8a951] ring-2 ring-[#c8a951]/20' : 'bg-white/[0.04] text-white/30'
-                  )}>
-                    {stage.icon}
-                  </div>
-                  {index < JOURNEY_STAGES.length - 1 && (
-                    <div className={cn(
-                      'w-0.5 h-6 mt-1',
-                      stage.completed ? 'bg-emerald-500/30' : 'bg-white/[0.08]'
-                    )} />
-                  )}
-                </div>
-                {/* Content */}
-                <div className="flex-1 min-w-0 pt-1.5">
-                  <div className="flex items-center gap-2">
-                    <h3 className={cn(
-                      'font-semibold text-sm',
-                      stage.completed ? 'text-emerald-400' : stage.current ? 'text-white' : 'text-white/30'
-                    )}>
-                      {stage.title}
-                    </h3>
-                    {stage.completed && (
-                      <span className="text-[10px] font-medium text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">הושלם</span>
-                    )}
-                    {stage.current && (
-                      <span className="text-[10px] font-medium text-[#c8a951] bg-[#c8a951]/10 px-1.5 py-0.5 rounded flex items-center gap-1 border border-[#c8a951]/20">
-                        <span className="w-1.5 h-1.5 bg-[#c8a951] rounded-full animate-pulse" />
-                        כרגע
-                      </span>
-                    )}
-                  </div>
-                  <p className={cn(
-                    'text-xs mt-0.5',
-                    stage.completed || stage.current ? 'text-white/50' : 'text-white/30'
-                  )}>
-                    {stage.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Learning Center CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-l from-slate-900 via-slate-800 to-slate-900 p-6 sm:p-8 mb-6"
-        >
-          <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-            <div className="absolute -top-16 -left-16 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl" />
-            <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-violet-500/15 rounded-full blur-3xl" />
-          </div>
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 bg-white/10 rounded-lg">
-                <GraduationCap className="w-5 h-5 text-cyan-400" />
-              </div>
-              <h2 className="text-lg font-bold text-white">מרכז הלמידה</h2>
-            </div>
-            <p className="text-slate-300 mb-5 max-w-lg leading-relaxed">
-              בזמן שהפרויקט שלך בהקמה, נצל את הזמן ללמוד את הבסיס.
-              {totalLessons} שיעורי וידאו בנושאי פיננסים, עסקים, השקעות ופיתוח - כל מה שיזם צריך לדעת.
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
+          {/* Greeting */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 text-center sm:text-right"
+          >
+            <p className="text-[11px] font-semibold tracking-[0.3em] text-[#c8a951] uppercase mb-3">
+              מרכז הלמידה · WeCcelerate
             </p>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">
+              {getGreeting()}, {firstName}.
+            </h1>
+            <p className="text-white/65 text-base sm:text-lg max-w-2xl leading-relaxed sm:mx-0 mx-auto">
+              הצוות שלנו כבר עובד על הפרויקט שלך. בזמן הזה — כל הידע שיזם צריך מחכה לך כאן.
+            </p>
+          </motion.div>
 
-            {/* Featured course cards */}
-            <div className="grid sm:grid-cols-3 gap-3 mb-5">
-              {FEATURED_COURSES.map((course, index) => (
-                <motion.div
-                  key={course.title}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + index * 0.08 }}
-                  className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10"
-                >
-                  <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center mb-3', 'bg-white/10')}>
-                    <span className="text-white">{course.icon}</span>
-                  </div>
-                  <h3 className="font-semibold text-white text-sm mb-1">{course.title}</h3>
-                  <p className="text-slate-400 text-xs mb-2">{course.description}</p>
-                  <span className="text-[11px] text-cyan-400 font-medium">{course.lessonsCount} שיעורים</span>
-                </motion.div>
-              ))}
+          {/* Stats strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-3 gap-px bg-white/[0.06] rounded-2xl border border-white/[0.08] overflow-hidden mb-8"
+          >
+            <div className="bg-[#070b1e]/60 backdrop-blur-sm p-4 sm:p-5 text-center">
+              <p className="text-2xl sm:text-3xl font-bold text-[#c8a951] tabular-nums">{totalLessons}</p>
+              <p className="text-[11px] sm:text-xs text-white/55 mt-1 tracking-wide">שיעורי וידאו</p>
             </div>
-
-            <a
-              href="/portal/learning"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] font-bold rounded-sm hover:scale-[1.03] transition-all text-sm shadow-[0_0_20px_rgba(200,169,81,0.25)]"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>התחל ללמוד</span>
-            </a>
-          </div>
-        </motion.div>
-
-        {/* WhatsApp contact */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-        >
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-              <MessageSquare className="w-5 h-5 text-emerald-400" />
+            <div className="bg-[#070b1e]/60 backdrop-blur-sm p-4 sm:p-5 text-center">
+              <p className="text-2xl sm:text-3xl font-bold text-[#c8a951] tabular-nums">{totalCategories}</p>
+              <p className="text-[11px] sm:text-xs text-white/55 mt-1 tracking-wide">קטגוריות לימוד</p>
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-sm text-white/90 mb-1">יש שאלות? אנחנו כאן</h3>
-              <p className="text-xs text-white/50 mb-3">הצוות שלנו זמין בוואטסאפ לכל שאלה או בקשה</p>
+            <div className="bg-[#070b1e]/60 backdrop-blur-sm p-4 sm:p-5 text-center">
+              <p className="text-2xl sm:text-3xl font-bold text-[#c8a951]">∞</p>
+              <p className="text-[11px] sm:text-xs text-white/55 mt-1 tracking-wide">גישה בלתי מוגבלת</p>
+            </div>
+          </motion.div>
+
+          {/* Featured Learning Center card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-bl from-[#0e1736] via-[#0a1024] to-[#070b1e] p-6 sm:p-10 mb-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+          >
+            {/* Decorative blobs */}
+            <div className="absolute -top-24 -right-24 w-72 h-72 bg-[#c8a951]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#c8a951] to-[#8b7330] flex items-center justify-center shadow-[0_4px_16px_rgba(200,169,81,0.4)]">
+                  <GraduationCap className="w-6 h-6 text-[#070b1e]" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">מרכז הלמידה</h2>
+                  <p className="text-xs text-white/45 mt-0.5">שיעורים בעברית · נצפים בכל מכשיר</p>
+                </div>
+              </div>
+
+              <p className="text-white/70 mb-7 max-w-2xl leading-relaxed text-sm sm:text-base">
+                ספריית וידאו מקצועית בעברית — פיננסים, עסקים, גיוס הון וניהול. כתבנו אותה
+                כדי שתבוא ערוכ/ה לפגישה הבאה שלך עם מנטור, משקיע, או רואה חשבון.
+              </p>
+
+              {/* Category grid */}
+              <div className="grid sm:grid-cols-2 gap-3 mb-7">
+                {FEATURED_CATEGORIES.map((cat, index) => {
+                  const Icon = cat.icon;
+                  return (
+                    <motion.a
+                      key={cat.title}
+                      href={cat.href}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25 + index * 0.07 }}
+                      className={cn(
+                        'group relative overflow-hidden rounded-xl border bg-white/[0.03] backdrop-blur-sm p-4 sm:p-5',
+                        'hover:bg-white/[0.06] hover:scale-[1.02] hover:shadow-lg transition-all duration-200',
+                        cat.borderColor,
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'absolute inset-0 bg-gradient-to-bl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none',
+                          cat.accent,
+                        )}
+                      />
+                      <div className="relative flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center flex-shrink-0">
+                          <Icon className={cn('w-5 h-5', cat.iconColor)} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-white text-sm mb-1 flex items-center gap-1.5">
+                            {cat.title}
+                            <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all text-white/60" />
+                          </h3>
+                          <p className="text-xs text-white/55 leading-relaxed">{cat.description}</p>
+                        </div>
+                      </div>
+                    </motion.a>
+                  );
+                })}
+              </div>
+
+              {/* Primary CTA */}
               <a
-                href={`https://wa.me/972555647538?text=${encodeURIComponent('היי, אני יזם/ת בתוכנית ויש לי שאלה')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 font-medium rounded-xl hover:bg-emerald-500/15 transition-colors text-sm border border-emerald-500/20"
+                href="/portal/learning"
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-[#c8a951] via-[#e8d48b] to-[#c8a951] text-[#070b1e] font-bold rounded-xl hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(200,169,81,0.45)] transition-all text-sm sm:text-base shadow-[0_4px_20px_rgba(200,169,81,0.25)]"
               >
-                <MessageSquare className="w-4 h-4" />
-                <span>שלח הודעה</span>
+                <PlayCircle className="w-5 h-5" />
+                <span>התחילו לצפות</span>
+                <ChevronLeft className="w-4 h-4" />
               </a>
             </div>
-          </div>
-        </motion.div>
-      </main>
+          </motion.div>
 
-      {/* Footer */}
+          {/* WhatsApp contact */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="bg-white/[0.03] backdrop-blur-md rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm text-white/90 mb-1">יש שאלה? אנחנו כאן.</h3>
+                <p className="text-xs text-white/50 mb-3">
+                  הצוות שלנו זמין בוואטסאפ — שאלה על שיעור, על התוכנית, או כל דבר אחר.
+                </p>
+                <a
+                  href={`https://wa.me/972555647538?text=${encodeURIComponent('היי, אני יזם/ת בתוכנית ויש לי שאלה')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 font-medium rounded-xl hover:bg-emerald-500/15 transition-colors text-sm border border-emerald-500/20"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>שלח/י הודעה</span>
+                </a>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Tiny "what's next" hint */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.55 }}
+            className="mt-6 flex items-center justify-center gap-2 text-xs text-white/40"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>הפרויקט האישי שלך יפתח בלוח שלך ברגע שהצוות יסיים את ההכנה</span>
+          </motion.div>
+        </main>
       </div>
 
       <footer className="py-8 text-center text-sm text-white/30 border-t border-white/[0.06]">
-        <p>
-          WeCcelerate &mdash; מאיצים יזמות
-        </p>
+        <p>WeCcelerate &mdash; מאיצים יזמות</p>
       </footer>
     </div>
   );
