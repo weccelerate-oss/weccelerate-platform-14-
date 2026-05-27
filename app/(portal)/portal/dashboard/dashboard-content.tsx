@@ -104,8 +104,8 @@ export function DashboardContent({
       {/* Greeting */}
       <div className="relative px-4 sm:px-6 lg:px-8 pt-6 pb-2 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <img src="/images/portal/dashboard-hero.png" alt="" className="w-full h-full object-cover opacity-[0.06]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/60 to-[#070b1e]" />
+          <img src="/images/portal/dashboard-hero.png" alt="" className="w-full h-full object-cover opacity-25" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/45 to-[#070b1e]" />
         </div>
         <h1 className="relative z-10 text-lg sm:text-xl font-bold text-white" suppressHydrationWarning>{greeting}, {firstName}</h1>
         <p className="relative z-10 text-xs text-white/50">הנה סיכום ההתקדמות של הפרויקט שלך</p>
@@ -146,7 +146,7 @@ export function DashboardContent({
               className="block relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.08] p-5 text-white group hover:border-[#c8a951]/20 transition-all"
             >
               <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                <img src="/images/portal/learning-hero.png" alt="" className="w-full h-full object-cover opacity-10" />
+                <img src="/images/portal/learning-hero.png" alt="" className="w-full h-full object-cover opacity-25" />
               </div>
               <div className="relative">
                 <div className="flex items-center gap-2 mb-3">

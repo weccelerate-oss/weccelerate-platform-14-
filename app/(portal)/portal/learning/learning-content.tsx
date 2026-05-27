@@ -576,8 +576,8 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
       {/* Header — personalized greeting, decorative orbs, headline stats */}
       <div className="relative border-b border-white/[0.04] overflow-hidden">
         <div className="absolute inset-0">
-          <img src="/images/portal/learning-hero.png" alt="" className="w-full h-full object-cover opacity-[0.08]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/40 to-[#070b1e]" />
+          <img src="/images/portal/learning-hero.png" alt="" className="w-full h-full object-cover opacity-40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/55 to-[#070b1e]" />
         </div>
 
         {/* Slow drifting orbs — premium ambient motion. Each orb circles its

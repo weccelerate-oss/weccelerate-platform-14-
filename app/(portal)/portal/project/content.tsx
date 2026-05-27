@@ -43,8 +43,8 @@ export function ProjectPageContent({ project, matchedServices, dealStatus }: Pro
       {/* Header with hero */}
       <div className="relative border-b border-white/[0.06] overflow-hidden">
         <div className="absolute inset-0">
-          <img src="/images/portal/project-hero.png" alt="" className="w-full h-full object-cover opacity-10" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/50 to-[#070b1e]" />
+          <img src="/images/portal/project-hero.png" alt="" className="w-full h-full object-cover opacity-40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/55 to-[#070b1e]" />
         </div>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 relative z-10">
           <h1 className="text-2xl font-bold text-white">הפרויקט שלי</h1>
