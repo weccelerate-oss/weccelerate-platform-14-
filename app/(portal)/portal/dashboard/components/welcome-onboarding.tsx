@@ -92,13 +92,12 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
           <img
             src="/images/portal/learning-hero.png"
             alt=""
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-40"
             onError={(e) => {
-              // Fallback to existing welcome hero if the new image isn't uploaded yet.
               (e.currentTarget as HTMLImageElement).src = '/images/portal/welcome-hero.png';
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/70 via-[#070b1e]/85 to-[#070b1e]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/55 via-[#070b1e]/75 to-[#070b1e]" />
           {/* Subtle gold glow */}
           <div
             className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[300px] rounded-full pointer-events-none"
