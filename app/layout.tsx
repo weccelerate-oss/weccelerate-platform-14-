@@ -70,16 +70,17 @@ export const metadata: Metadata = {
   // Manifest
   manifest: "/manifest.webmanifest",
 
-  // Icons — WeCcelerate logo
+  // Icons — W-only mark (favicon). NOTE: /logo.png stays the full brand logo
+  // for SEO/structured data; only the favicon/PWA icons use the W.
   icons: {
     icon: [
-      { url: "/logo.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "256x256", type: "image/x-icon" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/logo.png",
+    shortcut: "/favicon.ico",
     apple: [
-      { url: "/logo.png", sizes: "180x180", type: "image/png" },
+      { url: "/icon-512.png", sizes: "180x180", type: "image/png" },
     ],
   },
 
