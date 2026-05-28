@@ -18,6 +18,9 @@
 import { Resend } from 'resend';
 
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev';
+// The visible sender (david@weccelerate.co.il) is a send-only identity with no
+// real mailbox, so replies must be routed to a monitored inbox or they bounce.
+const REPLY_TO = process.env.RESEND_REPLY_TO ?? 'info@weccelerate.co.il';
 // Hardcoded canonical URL — same reason as the logo: NEXTAUTH_URL /
 // AUTH_URL can resolve to localhost or a Vercel preview hostname in some
 // environments, and the welcome email must always point at production.
@@ -87,6 +90,7 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
     const { error } = await resend.emails.send({
       from: FROM,
       to: input.to,
+      replyTo: REPLY_TO,
       subject,
       html,
       text,
