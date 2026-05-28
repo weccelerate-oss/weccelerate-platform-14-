@@ -43,7 +43,7 @@ export function PortalNavbar({ userName, userEmail }: PortalNavbarProps) {
             <img
               src="/images/logos/weccelerate-logo.jpeg"
               alt="WeCcelerate"
-              className="h-9 w-auto rounded-lg object-cover"
+              className="h-12 w-auto rounded-lg object-contain"
             />
           </Link>
 
