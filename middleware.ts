@@ -220,6 +220,8 @@ export function middleware(request: NextRequest) {
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/admin') ||
       pathname.startsWith('/portal') ||
+      pathname.startsWith('/onboarding') ||
+      pathname === '/og' || pathname.startsWith('/og/') ||
       pathname.startsWith('/login') ||
       pathname.startsWith('/forgot-password') ||
       pathname.startsWith('/reset-password') ||
