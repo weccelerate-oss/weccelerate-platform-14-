@@ -17,3 +17,6 @@ tsconfig.tsbuildinfo
 
 # Claude Code local state
 .claude/scheduled_tasks.lock
+
+# Veteran/alumni contact lists (PII — never commit)
+ListId_*.csv

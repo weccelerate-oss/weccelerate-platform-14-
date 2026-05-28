@@ -46,6 +46,9 @@ export interface ProvisionInput {
    *  audit the borderline submission. (Schema has no boolean column for
    *  this; lives in metadata until the field is added.) */
   mustReview?: boolean;
+  /** Which welcome email to send. 'veteran' = existing alumnus migrating from
+   *  Smoove; uses the short, neutral copy. Defaults to 'standard'. */
+  emailVariant?: 'standard' | 'veteran';
 }
 
 export interface ProvisionResult {
@@ -170,6 +173,7 @@ export async function provisionEntrepreneur(input: ProvisionInput): Promise<Prov
     to: email,
     name: input.name.trim(),
     tempPassword,
+    variant: input.emailVariant ?? 'standard',
   });
 
   // Audit the email outcome either way — the admin needs to see who

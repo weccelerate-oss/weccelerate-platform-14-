@@ -29,6 +29,10 @@ export interface WelcomeEmailInput {
   to: string;
   name: string;
   tempPassword: string;
+  /** 'standard' = brand-new entrepreneur. 'veteran' = existing alumnus whose
+   *  Smoove course content moved to the portal. Veteran copy is short, neutral
+   *  (no name greeting — the source list has swapped names), and human. */
+  variant?: 'standard' | 'veteran';
 }
 
 /**
@@ -70,13 +74,16 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
   const logoSrc = logoBuffer ? `cid:${LOGO_CID}` : LOGO_PUBLIC_URL;
   const html = buildHtml(input, loginUrl, logoSrc);
   const text = buildText(input, loginUrl);
+  const subject = input.variant === 'veteran'
+    ? 'הקורסים שלך עברו לפורטל היזמים החדש'
+    : 'ברוך הבא ל-WeCcelerate — פרטי הכניסה לפורטל';
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: FROM,
       to: input.to,
-      subject: 'ברוך הבא ל-WeCcelerate — פרטי הכניסה לפורטל',
+      subject,
       html,
       text,
       ...(logoBuffer
@@ -100,10 +107,11 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
   }
 }
 
-function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: string, logoSrc: string): string {
+function buildHtml({ name, to, tempPassword, variant }: WelcomeEmailInput, loginUrl: string, logoSrc: string): string {
   const escName = escapeHtml(name);
   const escTo = escapeHtml(to);
   const escPwd = escapeHtml(tempPassword);
+  const isVeteran = variant === 'veteran';
 
   return `<!DOCTYPE html>
 <html dir="rtl" lang="he">
@@ -150,12 +158,12 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
       <tr>
         <td style="padding:36px 36px 8px;text-align:center;">
           <h1 style="margin:0;font-size:26px;font-weight:700;color:#0f172a;line-height:1.3;">
-            ברוך הבא, <span style="color:#070b1e;">${escName}</span>
+            ${isVeteran ? 'שלום' : `ברוך הבא, <span style="color:#070b1e;">${escName}</span>`}
           </h1>
           <p style="margin:12px 0 0;font-size:15px;color:#475569;line-height:1.6;">
-            פתחנו עבורך חשבון בפורטל היזמים של WeCcelerate.
-            <br />
-            הנה פרטי הכניסה האישיים שלך.
+            ${isVeteran
+              ? 'השקנו פורטל יזמים חדש, וכל הקורסים שקיבלת אצלנו עברו לשם.<br />כדי להיכנס ולצפות בהם, אלה פרטי הכניסה שלך:'
+              : 'פתחנו עבורך חשבון בפורטל היזמים של WeCcelerate.<br />הנה פרטי הכניסה האישיים שלך.'}
           </p>
         </td>
       </tr>
@@ -242,9 +250,9 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
       </tr>
 
       <!-- ============================================================ -->
-      <!-- WHAT YOU GET                                                   -->
+      <!-- WHAT YOU GET — standard only; veterans get a shorter email     -->
       <!-- ============================================================ -->
-      <tr>
+      ${isVeteran ? '' : `<tr>
         <td style="padding:24px 36px 8px;">
           <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#94a3b8;font-weight:700;margin-bottom:10px;">
             מה מחכה לך בפורטל
@@ -254,7 +262,7 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
             ${benefitRow('💬', 'תקשורת עם הצוות', 'הודעות, עדכונים ופגישות — מסונכרן אחד-לאחד.')}
           </table>
         </td>
-      </tr>
+      </tr>`}
 
       <!-- ============================================================ -->
       <!-- DISCLAIMER                                                     -->
@@ -262,7 +270,9 @@ function buildHtml({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: stri
       <tr>
         <td style="padding:24px 36px 32px;">
           <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.6;text-align:center;">
-            אם לא מילאת טופס הצטרפות — אפשר להתעלם מהמייל. החשבון יישאר רדום עד שתתחבר.
+            ${isVeteran
+              ? 'אם המייל הגיע אליך בטעות, אפשר להתעלם.'
+              : 'אם לא מילאת טופס הצטרפות — אפשר להתעלם מהמייל. החשבון יישאר רדום עד שתתחבר.'}
           </p>
         </td>
       </tr>
@@ -316,7 +326,24 @@ function benefitRow(icon: string, title: string, body: string): string {
   </tr>`;
 }
 
-function buildText({ name, to, tempPassword }: WelcomeEmailInput, loginUrl: string): string {
+function buildText({ name, to, tempPassword, variant }: WelcomeEmailInput, loginUrl: string): string {
+  if (variant === 'veteran') {
+    return `שלום,
+
+השקנו פורטל יזמים חדש, וכל הקורסים שקיבלת אצלנו עברו לשם.
+כדי להיכנס ולצפות בהם, אלה פרטי הכניסה שלך:
+
+דוא״ל:        ${to}
+סיסמה זמנית:  ${tempPassword}
+
+כניסה לפורטל: ${loginUrl}
+
+בכניסה הראשונה תתבקש לבחור סיסמה חדשה.
+
+צוות WeCcelerate
+${PORTAL_URL}`;
+  }
+
   return `WeCcelerate · פורטל היזמים
 ========================================
 
