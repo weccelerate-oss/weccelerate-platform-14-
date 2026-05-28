@@ -313,9 +313,6 @@ export function OnboardingStatusCard({ data }: { data: OnboardingActivity }) {
               );
             })}
           </div>
-          <p className="px-4 sm:px-5 py-2 text-[11px] text-slate-400 border-t border-slate-100 bg-slate-50/50">
-            💡 מציג את 12 האירועים האחרונים. בדיקות עם <code className="bg-slate-200/60 px-1 py-0.5 rounded text-[10px]">dryRun</code> לא מופיעות כאן בכוונה.
-          </p>
         </details>
       )}
 
