@@ -38,11 +38,11 @@ export function LoginContent() {
         <div className="flex justify-center mb-10">
           <Link href="/">
             <Image
-              src="/images/logos/weccelerate-logo.jpeg"
+              src="/images/weccelerate-gold.png"
               alt="WeCcelerate"
-              width={400}
-              height={223}
-              className="h-16 w-auto rounded-xl object-contain"
+              width={384}
+              height={256}
+              className="h-16 w-auto object-contain"
               priority
             />
           </Link>

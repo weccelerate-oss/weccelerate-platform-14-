@@ -41,9 +41,9 @@ export function PortalNavbar({ userName, userEmail }: PortalNavbarProps) {
           {/* Logo */}
           <Link href="/portal/dashboard" className="flex items-center gap-2.5">
             <img
-              src="/images/logos/weccelerate-logo.jpeg"
+              src="/images/weccelerate-gold.png"
               alt="WeCcelerate"
-              className="h-12 w-auto rounded-lg object-contain"
+              className="h-12 w-auto object-contain"
             />
           </Link>
 
