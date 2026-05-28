@@ -58,7 +58,7 @@ export function SetPasswordForm({ userEmail }: { userEmail: string }) {
         <li>· אות גדולה אחת לפחות (A-Z)</li>
         <li>· אות קטנה אחת לפחות (a-z)</li>
         <li>· מספר אחד לפחות</li>
-        <li>· תו מיוחד אחד לפחות (!@#$%^&*)</li>
+        <li>· תו מיוחד אחד לפחות (!@#$%^&*-)</li>
       </ul>
 
       {state.message && !state.success && (

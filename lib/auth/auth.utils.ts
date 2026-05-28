@@ -53,7 +53,9 @@ export function validatePasswordStrength(password: string): {
   if (!/[0-9]/.test(password)) {
     errors.push('Password must contain at least one number');
   }
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+  // Hyphen (-) is placed last in the class so it's a literal, not a range.
+  // This is the ASCII hyphen U+002D, not the em-dash —.
+  if (!/[!@#$%^&*(),.?":{}|<>-]/.test(password)) {
     errors.push('Password must contain at least one special character');
   }
 
