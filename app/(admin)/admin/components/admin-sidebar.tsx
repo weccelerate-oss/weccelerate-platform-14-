@@ -135,11 +135,11 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
         <div className="p-6 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/logos/weccelerate-logo.jpeg"
+              src="/images/weccelerate-gold.png"
               alt="WeCcelerate"
-              width={140}
-              height={35}
-              className="h-8 w-auto object-contain"
+              width={300}
+              height={200}
+              className="h-14 w-auto object-contain"
             />
           </div>
           <p className="text-xs text-slate-400 mt-1">לוח בקרה למנהלים</p>
