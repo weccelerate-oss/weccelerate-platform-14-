@@ -37,11 +37,11 @@ export function PortalNavbar({ userName, userEmail }: PortalNavbarProps) {
     <header className="sticky top-0 z-40 bg-[#0a0e27]/90 backdrop-blur-xl border-b border-white/[0.06]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Top row: Logo + User */}
-        <div className="flex items-center justify-between h-14">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/portal/dashboard" className="flex items-center gap-2.5">
             <img
-              src="/images/weccelerate-gold.png"
+              src="/images/weccelerate-gold-trimmed.png"
               alt="WeCcelerate"
               className="h-12 w-auto object-contain"
             />
