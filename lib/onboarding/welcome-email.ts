@@ -80,7 +80,11 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
+    // The Resend SDK does NOT throw on API errors (4xx/5xx) — it resolves with
+    // an { error } object. We MUST inspect it; otherwise a rejected send (e.g.
+    // 403 "testing domain restriction" when the from-domain isn't verified)
+    // would be reported as a success and silently lose the email.
+    const { error } = await resend.emails.send({
       from: FROM,
       to: input.to,
       subject,
@@ -100,6 +104,11 @@ export async function sendWelcomeEmail(input: WelcomeEmailInput): Promise<{ ok: 
           }
         : {}),
     });
+    if (error) {
+      const name = (error as { name?: string }).name ?? 'ResendError';
+      const message = (error as { message?: string }).message ?? String(error);
+      return { ok: false, error: `${name}: ${message}` };
+    }
     return { ok: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
