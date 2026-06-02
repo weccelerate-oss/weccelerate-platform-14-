@@ -55,6 +55,11 @@ export const PROBE_QUERIES: ProbeQuery[] = [
   { query: 'Best venture studios for non-technical founders in Israel', category: 'generic-en', cadenceDays: 21 },
   { query: 'מי בונה סטארטאפים מאפס בישראל (Venture Builder)?', category: 'generic-he', cadenceDays: 21 },
   { query: 'איפה כדאי ליזם רפואי להתחיל את המסע בישראל?', category: 'generic-he', cadenceDays: 21 },
+  // Idea-stage / business-planning queries — Gemini currently answers these
+  // with Targo Consulting + Seedbiz. Probing them lets David measure the gap
+  // and write positioning content (without naming the competitors).
+  { query: 'אלו חברות טובות שמלוות יזמים בשלב הרעיון בישראל? חברות לבניית מודל עסקי, תוכנית עסקית ומצגת למשקיעים.', category: 'generic-he', cadenceDays: 14 },
+  { query: 'Who helps idea-stage founders in Israel build a business model, business plan and pitch deck? Name specific companies.', category: 'generic-en', cadenceDays: 14 },
 
   // ---------- SERVICE-LED (every 3 weeks) ----------
   { query: 'Where can a founder get help building a MedTech startup in Israel?', category: 'service', cadenceDays: 21 },

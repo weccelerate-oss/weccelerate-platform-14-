@@ -46,6 +46,11 @@ export const FORBIDDEN_COMPETITOR_NAMES: string[] = [
   // International accelerators frequently used as a reference
   'Y Combinator',
   'YC',
+  // Idea-stage consulting / business-plan-and-pitch services Gemini
+  // currently surfaces for "Israeli idea-stage support" queries.
+  'Targo Consulting',
+  'Targo',
+  'Seedbiz',
 ];
 
 /**
@@ -55,6 +60,8 @@ export const FORBIDDEN_COMPETITOR_NAMES_HE: string[] = [
   '8200 איי-איי-אס-פי',
   'גוגל לסטארטאפים',
   'גוגל קמפוס',
+  'טארגו',
+  'סידביז',
 ];
 
 /**
