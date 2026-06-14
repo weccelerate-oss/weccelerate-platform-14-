@@ -69,11 +69,17 @@ interface StoryItem {
   id: string;
   companyName: string;
   quote: string;
+  quoteEn?: string;
   personName: string;
+  personNameEn?: string;
   personRole?: string;
+  personRoleEn?: string;
   personImage?: string;
   industry?: string;
-  metrics?: Array<{ label: string; value: string }> | { items: Array<{ label: string; value: string }> };
+  industryEn?: string;
+  metrics?:
+    | Array<{ label: string; labelEn?: string; value: string; valueEn?: string }>
+    | { items: Array<{ label: string; labelEn?: string; value: string; valueEn?: string }> };
 }
 
 interface HomepageContentProps {
@@ -302,7 +308,9 @@ function VideosSection({ videos }: { videos: VideoItem[] }) {
 // =============================================================================
 
 function TestimonialsSection({ stories }: { stories: StoryItem[] }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const pick = (he: string | undefined, en: string | undefined) =>
+    lang === 'en' && en && en.trim() ? en : he;
 
   return (
     <section className="relative py-24 sm:py-32 overflow-hidden">
@@ -326,18 +334,21 @@ function TestimonialsSection({ stories }: { stories: StoryItem[] }) {
               : story.metrics && 'items' in story.metrics
                 ? story.metrics.items
                 : [];
+            const displayName = pick(story.personName, story.personNameEn) ?? '';
+            const displayRole = pick(story.personRole, story.personRoleEn);
+            const displayIndustry = pick(story.industry, story.industryEn);
             return (
               <div key={story.id} className="glass-card p-8 w-[300px] sm:w-[400px] flex-shrink-0 snap-center">
                 <Quote className="w-8 h-8 text-gold-500/30 mb-4" />
                 <p className="text-white/70 text-sm leading-relaxed mb-6 line-clamp-4">
-                  &ldquo;{story.quote}&rdquo;
+                  &ldquo;{pick(story.quote, story.quoteEn)}&rdquo;
                 </p>
                 {metrics.length > 0 && (
                   <div className="flex gap-4 mb-6 pb-6 border-b border-white/5">
                     {metrics.slice(0, 3).map((m) => (
                       <div key={m.label}>
-                        <p className="text-lg font-bold text-gold-400" dir="ltr">{m.value}</p>
-                        <p className="text-xs text-white/60">{m.label}</p>
+                        <p className="text-lg font-bold text-gold-400" dir="ltr">{pick(m.value, m.valueEn)}</p>
+                        <p className="text-xs text-white/60">{pick(m.label, m.labelEn)}</p>
                       </div>
                     ))}
                   </div>
@@ -345,20 +356,20 @@ function TestimonialsSection({ stories }: { stories: StoryItem[] }) {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#c8a951]/25 to-[#e8d48b]/10 border border-[#c8a951]/30 flex items-center justify-center flex-shrink-0">
                     <span className="text-[#c8a951] font-bold text-xs">
-                      {story.personName.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
+                      {displayName.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
                     </span>
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{story.personName}</p>
+                    <p className="text-white font-semibold text-sm">{displayName}</p>
                     <p className="text-white/60 text-xs">
-                      {story.personRole} · {story.companyName}
+                      {displayRole} · {story.companyName}
                     </p>
                   </div>
                 </div>
-                {story.industry && (
+                {displayIndustry && (
                   <div className="mt-4">
                     <span className="inline-block bg-white/5 text-white/60 text-xs px-3 py-1 rounded-full">
-                      {story.industry}
+                      {displayIndustry}
                     </span>
                   </div>
                 )}
@@ -601,7 +612,12 @@ function CTASection() {
 // =============================================================================
 
 function Footer() {
-  const { t, dir } = useLanguage();
+  const { t, dir, lang } = useLanguage();
+  const en = lang === 'en';
+
+  // Guide deep-links: in English route to the English mirror where one exists
+  // (slugs differ between languages), else fall back to the English guides hub.
+  const guidesHub = en ? '/en/guides' : '/guides';
 
   const footerLinks = {
     company: [
@@ -623,15 +639,16 @@ function Footer() {
       { name: t('footer.events'), href: '/events' },
       { name: t('footer.blog'), href: '/blog' },
       { name: t('footer.videos'), href: '/videos' },
-      { name: 'מדריכים', href: '/guides' },
+      { name: t('footer.guides'), href: guidesHub },
       // Direct links to highest-traffic guides — boosts internal PageRank
       // by giving Google strong site-wide signals on the most commercial
       // pages. Order: highest-volume keyword first.
-      { name: 'איך להקים מיזם', href: '/guides/eich-lehakim-mizam' },
-      { name: 'איך מגייסים משקיעים', href: '/guides/eich-mgayisim-mashkim' },
-      { name: 'מסלול MedTech עם לאומית', href: '/guides/eich-lehakim-startup-refui' },
-      { name: 'שאלות נפוצות', href: '/faq' },
-      { name: 'WeCcelerate בתקשורת', href: '/press' },
+      { name: t('footer.guideStartVenture'), href: en ? guidesHub : '/guides/eich-lehakim-mizam' },
+      { name: t('footer.guideRaiseInvestors'), href: en ? '/en/guides/raise-funding-israel' : '/guides/eich-mgayisim-mashkim' },
+      { name: t('footer.guideMedtechTrack'), href: en ? '/en/guides/medtech-startup-israel' : '/guides/eich-lehakim-startup-refui' },
+      // /faq and /press translate in place (no /en mirror needed).
+      { name: t('footer.faq'), href: '/faq' },
+      { name: t('footer.press'), href: '/press' },
     ],
   };
 

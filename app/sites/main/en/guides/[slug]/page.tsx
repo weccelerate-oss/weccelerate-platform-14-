@@ -225,30 +225,33 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
         />
       ))}
 
-      <article className="min-h-screen bg-white" id="main-content">
+      <article
+        className="min-h-screen bg-[#070b1e] text-white font-heebo"
+        id="main-content"
+      >
         <div className="mx-auto max-w-3xl px-4 py-12 md:py-16" dir="ltr" lang="en">
           {/* Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-500">
-            <Link href="/en" className="hover:text-slate-900">
+          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-white/40">
+            <Link href="/en" className="hover:text-white/80 transition-colors">
               Home
             </Link>
             <span className="mx-2">›</span>
-            <Link href="/en/guides" className="hover:text-slate-900">
+            <Link href="/en/guides" className="hover:text-white/80 transition-colors">
               Guides
             </Link>
             <span className="mx-2">›</span>
-            <span aria-current="page" className="text-slate-900">
+            <span aria-current="page" className="text-white/80">
               {guide.targetKeyword}
             </span>
           </nav>
 
           {/* Language switch to Hebrew */}
-          <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm">
-            <span className="text-slate-600">Reading in English</span>
+          <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
+            <span className="text-white/55">Reading in English</span>
             <Link
               href={hebrewUrl}
               hrefLang="he"
-              className="font-medium text-blue-700 hover:underline"
+              className="font-semibold text-[#e8d48b] hover:text-[#c8a951] transition-colors"
               aria-label="Read this guide in Hebrew"
             >
               קרא בעברית ←
@@ -257,23 +260,23 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
 
           {/* Header */}
           <header className="mb-8">
-            <div className="mb-3 flex items-center gap-3 text-xs text-slate-500">
-              <span className="rounded-full bg-blue-50 px-3 py-1 font-medium text-blue-700">
+            <div className="mb-3 flex items-center gap-3 text-xs text-white/40">
+              <span className="rounded-full border border-[#c8a951]/30 bg-[#c8a951]/10 px-3 py-1 font-semibold text-[#e8d48b] uppercase tracking-wider">
                 {category.en}
               </span>
               <span>{guide.readingTimeMinutes} min read</span>
               <span>·</span>
               <time dateTime={guide.lastUpdated}>Updated {guide.lastUpdated}</time>
             </div>
-            <h1 className="mb-5 text-3xl font-bold leading-tight text-slate-900 md:text-4xl">
+            <h1 className="mb-5 text-3xl font-bold leading-tight text-white md:text-4xl">
               {guide.h1}
             </h1>
 
-            <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
+            <div className="rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.08] via-transparent to-[#c8a951]/[0.04] p-5">
+              <div className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-[#c8a951]">
                 Quick Answer
               </div>
-              <p data-speakable className="text-lg leading-relaxed text-slate-900">
+              <p data-speakable className="text-lg leading-relaxed text-white">
                 {guide.speakableAnswer}
               </p>
             </div>
@@ -282,28 +285,28 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
           {/* Table of contents */}
           <nav
             aria-label="Table of Contents"
-            className="mb-10 rounded-xl border border-slate-200 bg-slate-50 p-5"
+            className="mb-10 rounded-2xl border border-white/8 bg-white/[0.02] p-5"
           >
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#c8a951]">
               Contents
             </h2>
-            <ol className="list-decimal space-y-1.5 pl-5 text-slate-700">
+            <ol className="list-decimal space-y-1.5 pl-5 text-white/70">
               {guide.sections.map((s, i) => (
                 <li key={i}>
-                  <a href={`#section-${i + 1}`} className="hover:text-blue-700 hover:underline">
+                  <a href={`#section-${i + 1}`} className="hover:text-[#e8d48b] transition-colors">
                     {s.heading}
                   </a>
                 </li>
               ))}
               {guide.howToSteps && (
                 <li>
-                  <a href="#howto" className="hover:text-blue-700 hover:underline">
+                  <a href="#howto" className="hover:text-[#e8d48b] transition-colors">
                     Step-by-step
                   </a>
                 </li>
               )}
               <li>
-                <a href="#faq" className="hover:text-blue-700 hover:underline">
+                <a href="#faq" className="hover:text-[#e8d48b] transition-colors">
                   FAQ
                 </a>
               </li>
@@ -311,24 +314,22 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
           </nav>
 
           {/* Body sections */}
-          <div className="prose prose-slate max-w-none">
+          <div className="space-y-12">
             {guide.sections.map((section, i) => (
-              <section key={i} id={`section-${i + 1}`} className="mb-10 scroll-mt-24">
-                <h2 className="mb-4 text-2xl font-bold text-slate-900">{section.heading}</h2>
-                {section.paragraphs.map((p, j) => (
-                  <p key={j} className="mb-4 leading-relaxed text-slate-700">
-                    {p}
-                  </p>
-                ))}
-                {section.list && (
-                  <ul className="mb-4 list-disc space-y-2 pl-6 text-slate-700">
-                    {section.list.map((item, j) => (
-                      <li key={j} className="leading-relaxed">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+              <section key={i} id={`section-${i + 1}`} className="scroll-mt-24">
+                <h2 className="mb-4 text-2xl md:text-3xl font-bold tracking-tight text-white">{section.heading}</h2>
+                <div className="space-y-4 text-white/75 leading-relaxed">
+                  {section.paragraphs.map((p, j) => (
+                    <p key={j}>{p}</p>
+                  ))}
+                  {section.list && (
+                    <ul className="list-disc space-y-2 pl-6 marker:text-[#c8a951]">
+                      {section.list.map((item, j) => (
+                        <li key={j}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </section>
             ))}
           </div>
@@ -337,21 +338,24 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
           {guide.howToSteps && (
             <section
               id="howto"
-              className="mb-12 scroll-mt-24 rounded-2xl border border-slate-200 p-6"
+              className="mt-14 scroll-mt-24 rounded-2xl border border-white/8 bg-white/[0.02] p-7"
             >
-              <h2 className="mb-6 text-2xl font-bold text-slate-900">Step-by-step</h2>
+              <p className="text-[#c8a951] text-xs font-bold uppercase tracking-[0.22em] mb-3">
+                Step by step
+              </p>
+              <h2 className="mb-6 text-2xl md:text-3xl font-bold tracking-tight text-white">Step-by-step</h2>
               <ol className="space-y-5">
                 {guide.howToSteps.map((step, i) => (
                   <li key={i} className="flex gap-4">
                     <div
                       aria-hidden="true"
-                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold text-white"
+                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#c8a951] to-[#e8d48b] font-bold text-[#070b1e] shadow-lg shadow-[#c8a951]/20"
                     >
                       {i + 1}
                     </div>
                     <div className="flex-1">
-                      <h3 className="mb-1 text-lg font-semibold text-slate-900">{step.name}</h3>
-                      <p className="text-slate-700">{step.text}</p>
+                      <h3 className="mb-1 text-lg font-semibold text-white">{step.name}</h3>
+                      <p className="text-white/65 leading-relaxed">{step.text}</p>
                     </div>
                   </li>
                 ))}
@@ -360,66 +364,81 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
           )}
 
           {/* FAQ */}
-          <section id="faq" className="mb-12 scroll-mt-24">
-            <h2 className="mb-6 text-2xl font-bold text-slate-900">Frequently Asked Questions</h2>
+          <section id="faq" className="mt-14 scroll-mt-24">
+            <p className="text-[#c8a951] text-xs font-bold uppercase tracking-[0.22em] mb-3">
+              FAQ
+            </p>
+            <h2 className="mb-6 text-2xl md:text-3xl font-bold tracking-tight text-white">Frequently Asked Questions</h2>
             <div className="space-y-3">
               {guide.faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group rounded-xl border border-slate-200 bg-white p-5 open:border-blue-400 open:shadow-sm"
+                  className="group rounded-2xl border border-white/8 bg-white/[0.02] p-5 open:border-[#c8a951]/30 open:bg-[#c8a951]/[0.04] transition-colors"
                 >
-                  <summary className="flex cursor-pointer items-start justify-between gap-3 text-lg font-semibold text-slate-900 [&::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer items-start justify-between gap-3 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden">
                     <span>{faq.q}</span>
                     <span
                       aria-hidden="true"
-                      className="flex-shrink-0 text-slate-400 transition group-open:rotate-180"
+                      className="flex-shrink-0 text-[#c8a951] transition group-open:rotate-180"
                     >
                       ⌄
                     </span>
                   </summary>
-                  <div className="mt-3 leading-relaxed text-slate-700">{faq.a}</div>
+                  <div className="mt-3 leading-relaxed text-white/70">{faq.a}</div>
                 </details>
               ))}
             </div>
           </section>
 
           {/* CTA to service */}
-          <section className="mb-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white">
-            <h2 className="mb-3 text-2xl font-bold">{guide.ctaLabel}</h2>
-            <p className="mb-5 opacity-90">
-              The WeCcelerate team has supported ventures launched that collectively significant capital raised. Start with a free introductory call.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/contact"
-                className="rounded-lg bg-white px-6 py-3 font-semibold text-slate-900 transition hover:bg-slate-100"
-              >
-                Get in touch
-              </Link>
-              <Link
-                href={guide.ctaServicePath}
-                className="rounded-lg border border-white/40 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
-              >
-                Learn about this service
-              </Link>
+          <section className="mt-14 relative overflow-hidden rounded-2xl border border-[#c8a951]/30 bg-gradient-to-br from-[#c8a951]/[0.10] via-transparent to-[#c8a951]/[0.04] p-8">
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(ellipse at center, rgba(200,169,81,0.10) 0%, transparent 70%)',
+              }}
+            />
+            <div className="relative z-10">
+              <h2 className="mb-3 text-2xl md:text-3xl font-bold text-white">{guide.ctaLabel}</h2>
+              <p className="mb-6 text-white/70 leading-relaxed">
+                The WeCcelerate team has supported ventures launched that collectively significant capital raised. Start with a free introductory call.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] px-6 py-3 font-bold rounded-xl shadow-lg shadow-[#c8a951]/20 hover:shadow-xl hover:shadow-[#c8a951]/30 transition-all"
+                >
+                  Get in touch
+                </Link>
+                <Link
+                  href={guide.ctaServicePath}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3 font-semibold text-white hover:border-white/40 hover:bg-white/[0.04] transition-all"
+                >
+                  Learn about this service
+                </Link>
+              </div>
             </div>
           </section>
 
           {/* Related guides */}
           {relatedGuides.length > 0 && (
-            <section>
-              <h2 className="mb-5 text-2xl font-bold text-slate-900">Related Guides</h2>
+            <section className="mt-14">
+              <p className="text-[#c8a951] text-xs font-bold uppercase tracking-[0.22em] mb-3">
+                Related reads
+              </p>
+              <h2 className="mb-5 text-2xl md:text-3xl font-bold tracking-tight text-white">Related Guides</h2>
               <div className="grid gap-4 md:grid-cols-2">
                 {relatedGuides.map((g) => (
                   <Link
                     key={g.slug}
                     href={`/en/guides/${g.slug}`}
-                    className="group rounded-xl border border-slate-200 p-4 transition hover:border-blue-400 hover:shadow-sm"
+                    className="group rounded-2xl border border-white/8 bg-white/[0.02] p-5 hover:border-[#c8a951]/30 hover:bg-[#c8a951]/[0.04] transition-all"
                   >
-                    <div className="mb-1 text-xs text-slate-500">
+                    <div className="mb-1 text-xs text-[#c8a951] uppercase tracking-wider font-semibold">
                       {GUIDE_CATEGORIES_EN[g.category].en}
                     </div>
-                    <div className="font-semibold text-slate-900 group-hover:text-blue-700">
+                    <div className="font-semibold text-white group-hover:text-[#e8d48b] transition-colors">
                       {g.h1}
                     </div>
                   </Link>

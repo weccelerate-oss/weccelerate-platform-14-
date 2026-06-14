@@ -155,20 +155,32 @@ export interface SuccessStory {
   logoUrl?: string;
   /** Testimonial quote */
   quote: string;
+  /** Testimonial quote (English) */
+  quoteEn?: string;
   /** Link to full case study/project page */
   projectLink?: string;
   /** Person who gave the testimonial */
   personName?: string;
+  /** Person who gave the testimonial (English) */
+  personNameEn?: string;
   /** Person's role/title */
   personRole?: string;
+  /** Person's role/title (English) */
+  personRoleEn?: string;
   /** Person's photo URL */
   personImage?: string;
   /** Industry/sector */
   industry?: string;
+  /** Industry/sector (English) */
+  industryEn?: string;
   /** Key metrics/results achieved */
   metrics?: {
     label: string;
+    /** Metric label (English) */
+    labelEn?: string;
     value: string;
+    /** Metric value (English) */
+    valueEn?: string;
   }[];
   /** Featured story */
   isFeatured?: boolean;

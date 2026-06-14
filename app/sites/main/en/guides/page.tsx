@@ -84,34 +84,38 @@ export default function GuidesHubPageEn() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildCollectionPageSchema()) }}
       />
 
-      <main className="min-h-screen bg-white" id="main-content">
-        <div className="mx-auto max-w-4xl px-4 py-12 md:py-16" dir="ltr" lang="en">
-          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-500">
-            <Link href="/en" className="hover:text-slate-900">
+      <main
+        className="min-h-screen bg-[#070b1e] text-white font-heebo"
+        id="main-content"
+        dir="ltr"
+      >
+        <div className="mx-auto max-w-4xl px-4 py-12 md:py-16" lang="en">
+          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-white/40">
+            <Link href="/en" className="hover:text-white/80 transition-colors">
               Home
             </Link>
             <span className="mx-2">›</span>
-            <span aria-current="page" className="text-slate-900">
+            <span aria-current="page" className="text-white/80">
               Guides
             </span>
           </nav>
 
-          <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm">
-            <span className="text-slate-600">Reading in English</span>
+          <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
+            <span className="text-white/55">Reading in English</span>
             <Link
               href="/guides"
               hrefLang="he"
-              className="font-medium text-blue-700 hover:underline"
+              className="font-semibold text-[#e8d48b] hover:text-[#c8a951] transition-colors"
             >
               לעברית ←
             </Link>
           </div>
 
           <header className="mb-10">
-            <h1 className="mb-4 text-3xl font-bold text-slate-900 md:text-5xl">
+            <h1 className="mb-4 text-3xl font-bold text-white md:text-5xl">
               WeCcelerate Startup Guides
             </h1>
-            <p data-speakable className="max-w-3xl text-lg leading-relaxed text-slate-700">
+            <p data-speakable className="max-w-3xl text-lg leading-relaxed text-white/60">
               {GUIDES_EN.length} in-depth guides for founders building startups in Israel —
               MedTech regulation, Helsinki Committee, FDA 510(k), fundraising, and the
               Venture Builder model. Written by the WeCcelerate team, updated for 2026.
@@ -121,20 +125,20 @@ export default function GuidesHubPageEn() {
           <div className="space-y-12">
             {categories.map(({ category, label, guides }) => (
               <section key={category}>
-                <h2 className="mb-2 text-2xl font-bold text-slate-900">{label.en}</h2>
-                <p className="mb-5 text-slate-600">{label.description}</p>
+                <h2 className="mb-2 text-2xl font-bold text-white">{label.en}</h2>
+                <p className="mb-5 text-white/55">{label.description}</p>
                 <ul className="space-y-3">
                   {guides.map((g) => (
                     <li key={g.slug}>
                       <Link
                         href={`/en/guides/${g.slug}`}
-                        className="block rounded-xl border border-slate-200 p-5 transition hover:border-blue-400 hover:shadow-sm"
+                        className="group block rounded-2xl border border-white/8 bg-gradient-to-b from-white/[0.03] to-transparent p-5 transition-all duration-300 hover:border-[#c8a951]/40 hover:from-[#c8a951]/[0.06]"
                       >
-                        <div className="mb-2 text-xs text-slate-500">
+                        <div className="mb-2 text-xs text-white/40">
                           {g.readingTimeMinutes} min read · Updated {g.lastUpdated}
                         </div>
-                        <h3 className="mb-1 text-lg font-semibold text-slate-900">{g.h1}</h3>
-                        <p className="text-sm text-slate-600">{g.metaDescription}</p>
+                        <h3 className="mb-1 text-lg font-semibold text-white group-hover:text-[#e8d48b] transition-colors">{g.h1}</h3>
+                        <p className="text-sm text-white/55">{g.metaDescription}</p>
                       </Link>
                     </li>
                   ))}
@@ -143,25 +147,34 @@ export default function GuidesHubPageEn() {
             ))}
           </div>
 
-          <section className="mt-16 rounded-2xl bg-slate-900 p-8 text-center text-white">
-            <h2 className="mb-3 text-2xl font-bold">Looking for something specific?</h2>
-            <p className="mb-6 text-slate-300">
-              The Hebrew catalog has 24 guides. If you read Hebrew, start there.
-            </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <Link
-                href="/guides"
-                hrefLang="he"
-                className="rounded-lg bg-white px-6 py-3 font-semibold text-slate-900 transition hover:bg-slate-100"
-              >
-                Hebrew Catalog (24 guides) →
-              </Link>
-              <Link
-                href="/contact"
-                className="rounded-lg border border-white/40 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
-              >
-                Get in touch
-              </Link>
+          <section className="mt-16 relative overflow-hidden rounded-2xl border border-[#c8a951]/30 bg-gradient-to-br from-[#c8a951]/[0.08] via-transparent to-[#c8a951]/[0.04] p-8 text-center">
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(ellipse at center, rgba(200,169,81,0.10) 0%, transparent 70%)',
+              }}
+            />
+            <div className="relative z-10">
+              <h2 className="mb-3 text-2xl font-bold text-white">Looking for something specific?</h2>
+              <p className="mb-6 text-white/70">
+                The Hebrew catalog has 24 guides. If you read Hebrew, start there.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Link
+                  href="/guides"
+                  hrefLang="he"
+                  className="rounded-xl bg-gradient-to-r from-[#c8a951] to-[#e8d48b] px-6 py-3 font-bold text-[#070b1e] shadow-lg shadow-[#c8a951]/20 transition-all hover:shadow-xl hover:shadow-[#c8a951]/30"
+                >
+                  Hebrew Catalog (24 guides) →
+                </Link>
+                <Link
+                  href="/contact"
+                  className="rounded-xl border border-white/20 px-6 py-3 font-semibold text-white transition-all hover:border-white/40 hover:bg-white/[0.04]"
+                >
+                  Get in touch
+                </Link>
+              </div>
             </div>
           </section>
         </div>
