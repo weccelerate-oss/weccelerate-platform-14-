@@ -106,7 +106,7 @@ export default function EnMedTechGuidePillar() {
       <main className="min-h-screen bg-white" id="main-content" dir="ltr">
         <div className="mx-auto max-w-5xl px-4 py-12 md:py-16">
           <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-500">
-            <Link href="/en" className="hover:text-slate-900">Home</Link>
+            <Link href="/" className="hover:text-slate-900">Home</Link>
             <span className="mx-2">›</span>
             <span aria-current="page" className="text-slate-900">MedTech Guide</span>
           </nav>

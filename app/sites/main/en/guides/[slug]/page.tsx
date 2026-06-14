@@ -205,7 +205,6 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
 
   const relatedGuides = getRelatedGuidesEn(guide);
   const category = GUIDE_CATEGORIES_EN[guide.category];
-  const hebrewUrl = `/guides/${guide.hebrewSlug}`;
 
   const schemas: Array<Record<string, unknown>> = [
     buildArticleSchema(guide),
@@ -232,7 +231,7 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
         <div className="mx-auto max-w-3xl px-4 py-12 md:py-16" dir="ltr" lang="en">
           {/* Breadcrumbs */}
           <nav aria-label="Breadcrumb" className="mb-6 text-sm text-white/40">
-            <Link href="/en" className="hover:text-white/80 transition-colors">
+            <Link href="/" className="hover:text-white/80 transition-colors">
               Home
             </Link>
             <span className="mx-2">›</span>
@@ -244,19 +243,6 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
               {guide.targetKeyword}
             </span>
           </nav>
-
-          {/* Language switch to Hebrew */}
-          <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
-            <span className="text-white/55">Reading in English</span>
-            <Link
-              href={hebrewUrl}
-              hrefLang="he"
-              className="font-semibold text-[#e8d48b] hover:text-[#c8a951] transition-colors"
-              aria-label="Read this guide in Hebrew"
-            >
-              קרא בעברית ←
-            </Link>
-          </div>
 
           {/* Header */}
           <header className="mb-8">

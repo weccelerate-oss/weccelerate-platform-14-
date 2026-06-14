@@ -91,7 +91,7 @@ export default function GuidesHubPageEn() {
       >
         <div className="mx-auto max-w-4xl px-4 py-12 md:py-16" lang="en">
           <nav aria-label="Breadcrumb" className="mb-6 text-sm text-white/40">
-            <Link href="/en" className="hover:text-white/80 transition-colors">
+            <Link href="/" className="hover:text-white/80 transition-colors">
               Home
             </Link>
             <span className="mx-2">›</span>
@@ -99,17 +99,6 @@ export default function GuidesHubPageEn() {
               Guides
             </span>
           </nav>
-
-          <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
-            <span className="text-white/55">Reading in English</span>
-            <Link
-              href="/guides"
-              hrefLang="he"
-              className="font-semibold text-[#e8d48b] hover:text-[#c8a951] transition-colors"
-            >
-              לעברית ←
-            </Link>
-          </div>
 
           <header className="mb-10">
             <h1 className="mb-4 text-3xl font-bold text-white md:text-5xl">

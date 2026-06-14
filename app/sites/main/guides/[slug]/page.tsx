@@ -197,7 +197,6 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
 
   const relatedGuides = getRelatedGuides(guide);
   const category = GUIDE_CATEGORIES[guide.category];
-  const enSlug = getEnSlugFromHebrew(guide.slug);
 
   const schemas: Array<Record<string, unknown>> = [
     buildArticleSchema(guide),
@@ -239,20 +238,6 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
               <span className="mx-2">›</span>
               <span aria-current="page" className="text-white/80">{guide.targetKeyword}</span>
             </nav>
-
-            {enSlug && (
-              <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
-                <span className="text-white/55">קוראים בעברית</span>
-                <Link
-                  href={`/en/guides/${enSlug}`}
-                  hrefLang="en"
-                  className="font-semibold text-[#e8d48b] hover:text-[#c8a951] transition-colors"
-                  aria-label="Read this guide in English"
-                >
-                  Read in English →
-                </Link>
-              </div>
-            )}
 
             <div className="mb-3 flex items-center gap-3 text-xs text-white/40">
               <span className="rounded-full border border-[#c8a951]/30 bg-[#c8a951]/10 px-3 py-1 font-semibold text-[#e8d48b] uppercase tracking-wider">
