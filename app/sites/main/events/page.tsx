@@ -38,8 +38,10 @@ async function getEventsData() {
       return events.map((e: {
         id: string;
         name: string;
+        nameEn?: string | null;
         slug: string;
         description?: string | null;
+        descriptionEn?: string | null;
         date: Date | string;
         time?: string | null;
         city?: string | null;
@@ -50,8 +52,10 @@ async function getEventsData() {
       }) => ({
         id: e.id,
         name: e.name,
+        nameEn: e.nameEn ?? null,
         slug: e.slug,
         description: e.description,
+        descriptionEn: e.descriptionEn ?? null,
         date: e.date,
         time: e.time ?? null,
         city: e.city ?? null,
@@ -64,8 +68,10 @@ async function getEventsData() {
     return mockEvents.map((e) => ({
       id: e.id,
       name: e.name,
+      nameEn: null,
       slug: e.slug ?? e.id,
       description: e.description ?? null,
+      descriptionEn: null,
       date: new Date(e.date),
       time: e.time ?? null,
       city: e.location?.city ?? null,
@@ -78,8 +84,10 @@ async function getEventsData() {
     return mockEvents.map((e) => ({
       id: e.id,
       name: e.name,
+      nameEn: null,
       slug: e.slug ?? e.id,
       description: e.description ?? null,
+      descriptionEn: null,
       date: new Date(e.date),
       time: e.time ?? null,
       city: e.location?.city ?? null,

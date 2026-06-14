@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Calendar, Clock, MapPin, Tag, ArrowLeft } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 // =============================================================================
 // TYPES & HELPERS
@@ -10,8 +11,10 @@ import { Calendar, Clock, MapPin, Tag, ArrowLeft } from 'lucide-react';
 interface EventItem {
   id: string;
   name: string;
+  nameEn?: string | null;
   slug: string;
   description: string | null;
+  descriptionEn?: string | null;
   date: Date;
   time: string | null;
   city: string | null;
@@ -21,14 +24,14 @@ interface EventItem {
   registrationLink: string | null;
 }
 
-const statusFilters: Record<string, string> = {
-  all: 'הכל',
-  UPCOMING: 'קרובים',
-  PAST: 'עברו',
+const STATUS_FILTER_KEYS: Record<string, string> = {
+  all: 'events.filter.all',
+  UPCOMING: 'events.filter.upcoming',
+  PAST: 'events.filter.past',
 };
 
-function formatEventDate(date: Date): string {
-  return new Date(date).toLocaleDateString('he-IL', {
+function formatEventDate(date: Date, locale: string): string {
+  return new Date(date).toLocaleDateString(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -36,11 +39,11 @@ function formatEventDate(date: Date): string {
   });
 }
 
-function formatShortDate(date: Date): { day: string; month: string } {
+function formatShortDate(date: Date, locale: string): { day: string; month: string } {
   const d = new Date(date);
   return {
-    day: d.toLocaleDateString('he-IL', { day: 'numeric' }),
-    month: d.toLocaleDateString('he-IL', { month: 'short' }),
+    day: d.toLocaleDateString(locale, { day: 'numeric' }),
+    month: d.toLocaleDateString(locale, { month: 'short' }),
   };
 }
 
@@ -49,6 +52,7 @@ function formatShortDate(date: Date): { day: string; month: string } {
 // =============================================================================
 
 export function EventGrid({ events }: { events: EventItem[] }) {
+  const { t } = useLanguage();
   const [activeStatus, setActiveStatus] = useState('all');
 
   const filtered =
@@ -60,7 +64,7 @@ export function EventGrid({ events }: { events: EventItem[] }) {
     <>
       {/* Filter Pills */}
       <div className="flex flex-wrap gap-2 mb-12">
-        {Object.entries(statusFilters).map(([key, label]) => (
+        {Object.entries(STATUS_FILTER_KEYS).map(([key, labelKey]) => (
           <button
             key={key}
             onClick={() => setActiveStatus(key)}
@@ -70,14 +74,14 @@ export function EventGrid({ events }: { events: EventItem[] }) {
                 : 'bg-white/[0.05] text-white/60 hover:bg-white/[0.1] hover:text-white border border-white/[0.06]'
             }`}
           >
-            {label}
+            {t(labelKey)}
           </button>
         ))}
       </div>
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <p className="text-center text-white/40 py-20">אין אירועים להצגה.</p>
+        <p className="text-center text-white/40 py-20">{t('events.empty')}</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((event) => (
@@ -94,8 +98,14 @@ export function EventGrid({ events }: { events: EventItem[] }) {
 // =============================================================================
 
 function EventCard({ event }: { event: EventItem }) {
-  const { day, month } = formatShortDate(event.date);
+  const { t, lang } = useLanguage();
+  const locale = lang === 'en' ? 'en-US' : 'he-IL';
+  const { day, month } = formatShortDate(event.date, locale);
   const isPast = event.status === 'PAST';
+
+  const name = lang === 'en' && event.nameEn ? event.nameEn : event.name;
+  const description =
+    lang === 'en' && event.descriptionEn ? event.descriptionEn : event.description;
 
   return (
     <div
@@ -108,7 +118,7 @@ function EventCard({ event }: { event: EventItem }) {
         {event.imageUrl ? (
           <img
             src={event.imageUrl}
-            alt={event.name}
+            alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -117,7 +127,7 @@ function EventCard({ event }: { event: EventItem }) {
           </div>
         )}
         {/* Date Badge */}
-        <div className="absolute top-3 right-3 bg-[#c8a951] rounded-lg px-3 py-2 text-center min-w-[52px] shadow-lg">
+        <div className="absolute top-3 end-3 bg-[#c8a951] rounded-lg px-3 py-2 text-center min-w-[52px] shadow-lg">
           <span className="block text-[#070b1e] text-lg font-bold leading-none">
             {day}
           </span>
@@ -127,8 +137,8 @@ function EventCard({ event }: { event: EventItem }) {
         </div>
         {/* Status Badge */}
         {isPast && (
-          <span className="absolute top-3 left-3 bg-white/10 text-white/50 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
-            הסתיים
+          <span className="absolute top-3 start-3 bg-white/10 text-white/50 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
+            {t('events.ended')}
           </span>
         )}
       </div>
@@ -142,11 +152,11 @@ function EventCard({ event }: { event: EventItem }) {
           </span>
         )}
         <h3 className="text-white font-semibold text-base mb-2 line-clamp-2 group-hover:text-[#c8a951] transition-colors">
-          {event.name}
+          {name}
         </h3>
-        {event.description && (
+        {description && (
           <p className="text-white/40 text-sm line-clamp-2 mb-4">
-            {event.description}
+            {description}
           </p>
         )}
 
@@ -154,7 +164,7 @@ function EventCard({ event }: { event: EventItem }) {
         <div className="flex flex-wrap gap-3 text-white/30 text-xs mb-5">
           <span className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" />
-            {formatEventDate(event.date)}
+            {formatEventDate(event.date, locale)}
           </span>
           {event.time && (
             <span className="flex items-center gap-1.5" dir="ltr">
@@ -164,7 +174,7 @@ function EventCard({ event }: { event: EventItem }) {
           )}
           <span className="flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5" />
-            {event.city || 'אונליין'}
+            {event.city || t('events.online')}
           </span>
         </div>
 
@@ -176,12 +186,12 @@ function EventCard({ event }: { event: EventItem }) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] px-5 py-2.5 text-sm font-bold rounded-lg hover:scale-[1.03] transition-all duration-300"
           >
-            פרטים והרשמה
+            {t('events.detailsAndRegister')}
             <ArrowLeft className="w-4 h-4" />
           </a>
         ) : isPast ? (
           <span className="inline-block text-white/20 text-sm font-medium">
-            האירוע הסתיים
+            {t('events.endedFull')}
           </span>
         ) : null}
       </div>

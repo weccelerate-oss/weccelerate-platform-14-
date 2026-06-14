@@ -12,6 +12,7 @@ import {
   User,
   ArrowLeft,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 // =============================================================================
 // TYPES
@@ -28,15 +29,6 @@ export interface VideoItem {
   speaker?: string;
   views?: number;
 }
-
-const categoryLabels: Record<string, string> = {
-  interview: 'ראיון',
-  summary: 'סיכום',
-  webinar: 'וובינר',
-  tutorial: 'הדרכה',
-  testimonial: 'עדות',
-  highlight: 'היילייט',
-};
 
 function formatDuration(seconds: number): string {
   const hrs = Math.floor(seconds / 3600);
@@ -86,8 +78,14 @@ function getThumbnailUrl(video: VideoItem): string | null {
 // =============================================================================
 
 export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
+  const { t, dir } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const categoryLabel = (category: string) =>
+    t(`videos.category.${category}`) !== `videos.category.${category}`
+      ? t(`videos.category.${category}`)
+      : category;
 
   const activeVideo = videos[activeIndex];
   const hasNext = activeIndex < videos.length - 1;
@@ -140,7 +138,7 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
               <button
                 onClick={() => setIsPlaying(true)}
                 className="group absolute inset-0 w-full h-full cursor-pointer"
-                aria-label={`נגן: ${activeVideo.title}`}
+                aria-label={t('videos.showcase.playAria').replace('{title}', activeVideo.title)}
               >
                 {activeThumbnail ? (
                   <img
@@ -178,26 +176,26 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
             <button
               onClick={(e) => { e.stopPropagation(); goPrev(); }}
               disabled={!hasPrev}
-              className={`absolute top-1/2 right-3 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+              className={`absolute top-1/2 start-3 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                 hasPrev
                   ? 'bg-black/50 backdrop-blur-sm text-white hover:bg-[#c8a951] hover:text-[#070b1e] border border-white/10 hover:border-[#c8a951]'
                   : 'bg-black/20 text-white/20 cursor-not-allowed'
               }`}
-              aria-label="סרטון קודם"
+              aria-label={t('videos.showcase.prev')}
             >
-              <ChevronRight className="w-5 h-5" />
+              {dir === 'rtl' ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); goNext(); }}
               disabled={!hasNext}
-              className={`absolute top-1/2 left-3 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+              className={`absolute top-1/2 end-3 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                 hasNext
                   ? 'bg-black/50 backdrop-blur-sm text-white hover:bg-[#c8a951] hover:text-[#070b1e] border border-white/10 hover:border-[#c8a951]'
                   : 'bg-black/20 text-white/20 cursor-not-allowed'
               }`}
-              aria-label="סרטון הבא"
+              aria-label={t('videos.showcase.next')}
             >
-              <ChevronLeft className="w-5 h-5" />
+              {dir === 'rtl' ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
             </button>
 
             {/* Video counter */}
@@ -213,7 +211,7 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
             {/* Category pill */}
             {activeVideo.category && (
               <span className="inline-block bg-[#c8a951]/15 text-[#e8d48b] text-xs font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#c8a951]/20 mb-4">
-                {categoryLabels[activeVideo.category] || activeVideo.category}
+                {categoryLabel(activeVideo.category)}
               </span>
             )}
 
@@ -240,7 +238,7 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
               {activeVideo.views != null && activeVideo.views > 0 && (
                 <span className="flex items-center gap-1.5" dir="ltr">
                   <Eye className="w-3.5 h-3.5" />
-                  {formatViews(activeVideo.views)} צפיות
+                  {formatViews(activeVideo.views)} {t('videos.showcase.views')}
                 </span>
               )}
               {activeVideo.duration && (
@@ -261,12 +259,12 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
               {isPlaying ? (
                 <>
                   <Pause className="w-4 h-4" />
-                  עצור
+                  {t('videos.showcase.pause')}
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 ms-0.5" />
-                  נגן עכשיו
+                  {t('videos.showcase.playNow')}
                 </>
               )}
             </button>
@@ -276,8 +274,8 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
                 onClick={goNext}
                 className="inline-flex items-center gap-2 border border-white/10 text-white/60 px-5 py-3 text-sm font-medium rounded-lg hover:bg-white/5 hover:text-white hover:border-white/20 transition-all duration-300"
               >
-                הבא
-                <ChevronLeft className="w-4 h-4" />
+                {t('videos.showcase.nextLabel')}
+                {dir === 'rtl' ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </button>
             )}
           </div>
@@ -291,14 +289,14 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
         {/* Label */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-xs font-semibold text-white/30 uppercase tracking-widest">
-            עוד סרטונים
+            {t('videos.showcase.moreVideos')}
           </p>
           <Link
             href="/videos"
             className="inline-flex items-center gap-1.5 text-gold-400 text-xs font-semibold hover:text-gold-300 transition-colors"
           >
-            צפו בהכל
-            <ArrowLeft className="w-3 h-3" />
+            {t('videos.showcase.viewAll')}
+            <ArrowLeft className={`w-3 h-3 ${dir === 'rtl' ? '' : 'rotate-180'}`} />
           </Link>
         </div>
 
@@ -313,7 +311,9 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
                   ? 'ring-2 ring-[#c8a951] ring-offset-2 ring-offset-[#070b1e] scale-[1.02]'
                   : 'opacity-60 hover:opacity-90'
               }`}
-              aria-label={`${video.title}${idx === activeIndex ? ' (מתנגן כעת)' : ''}`}
+              aria-label={t('videos.showcase.thumbAria')
+                .replace('{title}', video.title)
+                .replace('{nowPlaying}', idx === activeIndex ? t('videos.showcase.nowPlayingSuffix') : '')}
             >
               <div className="relative aspect-video">
                 {(() => {
@@ -337,7 +337,7 @@ export function VideoShowcase({ videos }: { videos: VideoItem[] }) {
                 {/* Now playing indicator */}
                 {idx === activeIndex && (
                   <div className="absolute top-2 start-2 bg-[#c8a951] text-[#070b1e] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                    מתנגן
+                    {t('videos.showcase.nowPlaying')}
                   </div>
                 )}
 

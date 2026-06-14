@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 interface AutoScrollCarouselProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface AutoScrollCarouselProps {
 }
 
 export function AutoScrollCarousel({ children, speed = 30 }: AutoScrollCarouselProps) {
+  const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
@@ -128,14 +130,14 @@ export function AutoScrollCarousel({ children, speed = 30 }: AutoScrollCarouselP
         <button
           onClick={() => scrollByCard('prev')}
           className="w-12 h-12 flex items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white hover:border-[#c8a951]/50 hover:bg-white/5 transition-all duration-200"
-          aria-label="הקודם"
+          aria-label={t('misc.carousel.prev')}
         >
           <ChevronRight className="w-5 h-5" />
         </button>
         <button
           onClick={() => scrollByCard('next')}
           className="w-12 h-12 flex items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white hover:border-[#c8a951]/50 hover:bg-white/5 transition-all duration-200"
-          aria-label="הבא"
+          aria-label={t('misc.carousel.next')}
         >
           <ChevronLeft className="w-5 h-5" />
         </button>

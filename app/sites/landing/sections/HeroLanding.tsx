@@ -68,7 +68,7 @@ export default function HeroLanding() {
  className="z-[2]"
  />
 
- <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a951]/ to-transparent z-[3]" />
+ <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c8a951]/60 to-transparent z-[3]" />
 
  <div className="container-corporate relative z-10 py-20 sm:py-24 md:py-28">
  <div className="max-w-4xl mx-auto text-center">
@@ -91,7 +91,7 @@ export default function HeroLanding() {
  alt="WeCcelerate"
  width={500}
  height={140}
- className="relative h-24 sm:h-32 md:h-36 lg:h- w-auto object-contain drop-shadow-[0_0_50px_rgba(212,175,55,0.5)]"
+ className="relative h-24 sm:h-32 md:h-36 lg:h-40 w-auto object-contain drop-shadow-[0_0_50px_rgba(212,175,55,0.5)]"
  priority
  />
  </motion.div>
@@ -145,7 +145,7 @@ export default function HeroLanding() {
  animate={{ y: [0, -6, 0] }}
  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
  whileHover={{ scale: 1.05 }}
- className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] px-7 sm:px-10 py-4 sm:py-5 text-base sm:text-lg md:text-xl font-bold hover:shadow-2xl hover:shadow-[#c8a951]/ transition-all duration-300 rounded-xl shadow-xl shadow-[#c8a951]/20 mb-6 sm:mb-8 relative overflow-hidden mx-auto max-w-[90vw]"
+ className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] px-7 sm:px-10 py-4 sm:py-5 text-base sm:text-lg md:text-xl font-bold hover:shadow-2xl hover:shadow-[#c8a951]/40 transition-all duration-300 rounded-xl shadow-xl shadow-[#c8a951]/20 mb-6 sm:mb-8 relative overflow-hidden mx-auto max-w-[90vw]"
  style={{ textShadow: '0 1px 0 rgba(255,255,255,0.2)' }}
  >
  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />

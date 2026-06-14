@@ -2,6 +2,7 @@
 /* eslint-disable */
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useLanguage } from "@/lib/i18n";
 
 // ===== TYPES =====
 type Photo = { id: number; name: string; data: string; type: string; room: string };
@@ -152,23 +153,24 @@ async function processFieldNotes(rawText: string, defectType: string): Promise<s
 
 // Sidebar Navigation
 function Sidebar({ active, onNav, inspectionCount }: { active: string; onNav: (id: string) => void; inspectionCount: number }) {
+  const { t, dir } = useLanguage();
   const items = [
-    { id: "dashboard", icon: "📊", label: "לוח בקרה" },
-    { id: "new", icon: "➕", label: "ביקורת חדשה" },
-    { id: "annexes", icon: "📎", label: "מאגר נספחים" },
-    { id: "prices", icon: "💰", label: "מחירון" },
-    { id: "experts", icon: "👷", label: "מומחים" },
+    { id: "dashboard", icon: "📊", label: t("infratech.sidebar.dashboard") },
+    { id: "new", icon: "➕", label: t("infratech.sidebar.new") },
+    { id: "annexes", icon: "📎", label: t("infratech.sidebar.annexes") },
+    { id: "prices", icon: "💰", label: t("infratech.sidebar.prices") },
+    { id: "experts", icon: "👷", label: t("infratech.sidebar.experts") },
   ];
   return (
     <div style={{
       width: 220, minHeight: "100vh", background: "linear-gradient(180deg, #0a1628 0%, #132743 100%)",
       color: "#fff", display: "flex", flexDirection: "column", flexShrink: 0,
-      borderLeft: "1px solid rgba(255,255,255,0.06)",
+      [dir === "rtl" ? "borderLeft" : "borderRight"]: "1px solid rgba(255,255,255,0.06)",
       fontFamily: "'Noto Sans Hebrew', 'Segoe UI', sans-serif",
     }}>
       <div style={{ padding: "28px 20px 24px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: -0.5, color: "#5dade2" }}>INFRATECH</div>
-        <div style={{ fontSize: 11, color: "#7fb3d8", marginTop: 4, letterSpacing: 1.5 }}>AI REPORT SYSTEM</div>
+        <div style={{ fontSize: 11, color: "#7fb3d8", marginTop: 4, letterSpacing: 1.5 }}>{t("infratech.sidebar.tagline")}</div>
       </div>
       <nav style={{ padding: "16px 12px", flex: 1 }}>
         {items.map(it => (
@@ -178,7 +180,7 @@ function Sidebar({ active, onNav, inspectionCount }: { active: string; onNav: (i
             background: active === it.id ? "rgba(93,173,226,0.15)" : "transparent",
             color: active === it.id ? "#5dade2" : "#8eafc4",
             fontSize: 14, fontWeight: active === it.id ? 700 : 500,
-            direction: "rtl", textAlign: "right", transition: "all 0.2s",
+            direction: dir, textAlign: dir === "rtl" ? "right" : "left", transition: "all 0.2s",
             fontFamily: "inherit",
           }}
           onMouseEnter={e => { if (active !== it.id) (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)"; }}
@@ -188,7 +190,7 @@ function Sidebar({ active, onNav, inspectionCount }: { active: string; onNav: (i
             <span>{it.label}</span>
             {it.id === "dashboard" && inspectionCount > 0 && (
               <span style={{
-                marginRight: "auto", background: "#5dade2", color: "#0a1628",
+                marginInlineStart: "auto", background: "#5dade2", color: "#0a1628",
                 borderRadius: 10, padding: "1px 8px", fontSize: 11, fontWeight: 700,
               }}>{inspectionCount}</span>
             )}
@@ -196,7 +198,7 @@ function Sidebar({ active, onNav, inspectionCount }: { active: string; onNav: (i
         ))}
       </nav>
       <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 10, color: "#4a6580", textAlign: "center" }}>
-        v2.0 | INFRA-PRD-2026-001
+        {t("infratech.sidebar.version")}
       </div>
     </div>
   );
@@ -204,6 +206,7 @@ function Sidebar({ active, onNav, inspectionCount }: { active: string; onNav: (i
 
 // Voice Recorder
 function VoiceRecorder({ onTranscript }: { onTranscript: (t: string) => void }) {
+  const { t, dir } = useLanguage();
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [transcript, setTranscript] = useState("");
@@ -247,7 +250,7 @@ function VoiceRecorder({ onTranscript }: { onTranscript: (t: string) => void }) 
       transition: "all 0.3s",
     }}>
       <div style={{ fontSize: 13, color: recording ? "#e74c3c" : "#5b7a94", marginBottom: 12, fontWeight: 600 }}>
-        {recording ? "🔴 מקליט..." : "🎤 הקלטה קולית"}
+        {recording ? t("infratech.voice.recording") : t("infratech.voice.idle")}
       </div>
       {recording && (
         <div style={{ fontSize: 36, fontWeight: 300, color: "#e74c3c", fontFamily: "monospace", marginBottom: 16 }}>
@@ -261,15 +264,15 @@ function VoiceRecorder({ onTranscript }: { onTranscript: (t: string) => void }) 
         boxShadow: recording ? "0 0 20px rgba(231,76,60,0.3)" : "0 4px 15px rgba(26,82,118,0.3)",
         transition: "all 0.2s",
       }}>
-        {recording ? "⏹ עצור הקלטה" : "▶ התחל הקלטה"}
+        {recording ? t("infratech.voice.stop") : t("infratech.voice.start")}
       </button>
       {transcript && (
         <div style={{
           marginTop: 16, padding: 16, background: "rgba(255,255,255,0.9)", borderRadius: 12,
-          direction: "rtl", textAlign: "right", fontSize: 14, color: "#2c3e50",
+          direction: dir, textAlign: dir === "rtl" ? "right" : "left", fontSize: 14, color: "#2c3e50",
           border: "1px solid #e0e8ef", maxHeight: 120, overflow: "auto",
         }}>
-          <div style={{ fontSize: 11, color: "#7f8c8d", marginBottom: 6 }}>תמלול חי:</div>
+          <div style={{ fontSize: 11, color: "#7f8c8d", marginBottom: 6 }}>{t("infratech.voice.liveTranscript")}</div>
           {transcript}
         </div>
       )}
@@ -279,6 +282,7 @@ function VoiceRecorder({ onTranscript }: { onTranscript: (t: string) => void }) 
 
 // Photo Manager
 function PhotoManager({ photos, onAdd, onRemove }: { photos: Photo[]; onAdd: (p: Photo) => void; onRemove: (id: number) => void }) {
+  const { t } = useLanguage();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -299,7 +303,7 @@ function PhotoManager({ photos, onAdd, onRemove }: { photos: Photo[]; onAdd: (p:
           fontFamily: "inherit", transition: "all 0.2s",
         }}>
           <span style={{ fontSize: 28 }}>📷</span>
-          <span>הוסף תמונה</span>
+          <span>{t("infratech.photo.add")}</span>
         </button>
         {photos.map((ph: Photo, i: number) => (
           <div key={ph.id} style={{ position: "relative", width: 110, height: 110, borderRadius: 14, overflow: "hidden", border: "2px solid #d6e9f8" }}>
@@ -312,7 +316,7 @@ function PhotoManager({ photos, onAdd, onRemove }: { photos: Photo[]; onAdd: (p:
             <div style={{
               position: "absolute", bottom: 0, left: 0, right: 0, padding: "3px 6px",
               background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 10, textAlign: "center",
-            }}>{ph.type} | {ph.room || `תמונה ${i+1}`}</div>
+            }}>{ph.type === "דיגיטלי" ? t("infratech.photo.typeDigital") : ph.type} | {ph.room || `${t("infratech.photo.label")} ${i+1}`}</div>
           </div>
         ))}
       </div>
@@ -322,28 +326,34 @@ function PhotoManager({ photos, onAdd, onRemove }: { photos: Photo[]; onAdd: (p:
 
 // Dashboard
 function Dashboard({ inspections, onSelect, onNew }: { inspections: InspectionData[]; onSelect: (i: InspectionData) => void; onNew: () => void }) {
+  const { t } = useLanguage();
   const statusColors: Record<string, string> = { draft: "#f39c12", processing: "#3498db", ready: "#27ae60", approved: "#2c3e50" };
-  const statusLabels: Record<string, string> = { draft: "טיוטה", processing: "בעיבוד AI", ready: "מוכן לסקירה", approved: "מאושר" };
+  const statusLabels: Record<string, string> = {
+    draft: t("infratech.status.draft"),
+    processing: t("infratech.status.processing"),
+    ready: t("infratech.status.ready"),
+    approved: t("infratech.status.approved"),
+  };
 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a3c5e", margin: 0 }}>לוח בקרה</h1>
+        <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a3c5e", margin: 0 }}>{t("infratech.dashboard.title")}</h1>
         <button onClick={onNew} style={{
           padding: "12px 28px", borderRadius: 12, border: "none", cursor: "pointer",
           background: "linear-gradient(135deg, #1a5276, #2471a3)", color: "#fff",
           fontSize: 14, fontWeight: 700, fontFamily: "inherit",
           boxShadow: "0 4px 15px rgba(26,82,118,0.3)",
-        }}>➕ ביקורת חדשה</button>
+        }}>{t("infratech.dashboard.new")}</button>
       </div>
 
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
         {[
-          { label: "סה\"כ תיקים", value: inspections.length, icon: "📁", color: "#3498db" },
-          { label: "בעיבוד", value: inspections.filter((i: InspectionData) => i.status === "processing").length, icon: "⚙️", color: "#f39c12" },
-          { label: "מוכנים לסקירה", value: inspections.filter((i: InspectionData) => i.status === "ready").length, icon: "✅", color: "#27ae60" },
-          { label: "מאושרים", value: inspections.filter((i: InspectionData) => i.status === "approved").length, icon: "📋", color: "#2c3e50" },
+          { label: t("infratech.dashboard.stat.total"), value: inspections.length, icon: "📁", color: "#3498db" },
+          { label: t("infratech.dashboard.stat.processing"), value: inspections.filter((i: InspectionData) => i.status === "processing").length, icon: "⚙️", color: "#f39c12" },
+          { label: t("infratech.dashboard.stat.ready"), value: inspections.filter((i: InspectionData) => i.status === "ready").length, icon: "✅", color: "#27ae60" },
+          { label: t("infratech.dashboard.stat.approved"), value: inspections.filter((i: InspectionData) => i.status === "approved").length, icon: "📋", color: "#2c3e50" },
         ].map((s: { label: string; value: number; icon: string; color: string }, i: number) => (
           <div key={i} style={{
             background: "#fff", borderRadius: 16, padding: "20px 18px",
@@ -368,12 +378,12 @@ function Dashboard({ inspections, onSelect, onNew }: { inspections: InspectionDa
           border: "2px dashed #d6e9f8",
         }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🏗️</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "#1a3c5e", marginBottom: 8 }}>אין ביקורות עדיין</div>
-          <div style={{ fontSize: 14, color: "#7f8c8d", marginBottom: 20 }}>לחצו על "ביקורת חדשה" להתחלת תהליך הפקת דוח</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#1a3c5e", marginBottom: 8 }}>{t("infratech.dashboard.empty.title")}</div>
+          <div style={{ fontSize: 14, color: "#7f8c8d", marginBottom: 20 }}>{t("infratech.dashboard.empty.subtitle")}</div>
           <button onClick={onNew} style={{
             padding: "12px 32px", borderRadius: 12, border: "none", cursor: "pointer",
             background: "#1a5276", color: "#fff", fontSize: 14, fontWeight: 700, fontFamily: "inherit",
-          }}>➕ התחל ביקורת ראשונה</button>
+          }}>{t("infratech.dashboard.empty.cta")}</button>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -391,8 +401,8 @@ function Dashboard({ inspections, onSelect, onNew }: { inspections: InspectionDa
                 🏠
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, color: "#1a3c5e", fontSize: 15 }}>{insp.clientName || "לקוח לא ידוע"}</div>
-                <div style={{ fontSize: 12, color: "#7f8c8d" }}>{insp.address || "כתובת לא הוזנה"} | {insp.date}</div>
+                <div style={{ fontWeight: 700, color: "#1a3c5e", fontSize: 15 }}>{insp.clientName || t("infratech.dashboard.unknownClient")}</div>
+                <div style={{ fontSize: 12, color: "#7f8c8d" }}>{insp.address || t("infratech.dashboard.noAddress")} | {insp.date}</div>
               </div>
               <div style={{ fontSize: 12, color: "#7f8c8d" }}>{insp.expert}</div>
               <span style={{
@@ -410,6 +420,7 @@ function Dashboard({ inspections, onSelect, onNew }: { inspections: InspectionDa
 
 // New Inspection Wizard
 function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionData) => void; onCancel: () => void }) {
+  const { t, dir } = useLanguage();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<InspectionData>({
     clientName: "", address: "", callNumber: "", buildingType: "דירה",
@@ -424,18 +435,18 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
   // AI Processing
   const runAIProcessing = async () => {
     setProcessing(true);
-    setProcessLog(["🔄 מתחיל עיבוד AI..."]);
+    setProcessLog([t("infratech.process.start")]);
 
     await new Promise(r => setTimeout(r, 500));
-    setProcessLog(p => [...p, "📝 שולח טקסט גולמי למנוע NLP..."]);
+    setProcessLog(p => [...p, t("infratech.process.sendNlp")]);
 
     try {
       const result = await processFieldNotes(
-        data.notes || "בבדיקה שבוצעה בדירה נמצאה רטיבות בתקרת הלובי מתחת לחדר הרחצה. בסריקה תרמית ומד לחות זוהו כתמים רטובים. חשד לכשל באיטום תת רצפתי של חדר הרחצה. בנוסף נמצאה ירידת לחץ בצנרת מים קרים בחדר רחצה ילדים.",
+        data.notes || t("infratech.process.demoNotes"),
         "seal"
       );
 
-      setProcessLog(p => [...p, "✅ התקבלה תשובת AI"]);
+      setProcessLog(p => [...p, t("infratech.process.received")]);
       await new Promise(r => setTimeout(r, 300));
 
       let parsed;
@@ -443,15 +454,15 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
         parsed = JSON.parse(result);
       } catch {
         parsed = {
-          findings: [{ location: "חדר רחצה", description: result.substring(0, 200), severity: "בינוני", defect_type: "כשל איטום" }],
-          case_description: "בדיקת ליקויי רטיבות ואיטום",
+          findings: [{ location: t("infratech.process.fallback.location"), description: result.substring(0, 200), severity: t("infratech.process.fallback.severity"), defect_type: t("infratech.process.fallback.defectType") }],
+          case_description: t("infratech.process.fallback.caseDescription"),
           building_type: data.buildingType,
-          recommendations: [{ location: "חדר רחצה", action: "טיפול מערכתי", annex_needed: "טיפול מערכתי - מקלחון" }],
-          cost_items: [{ description: "טיפול מערכתי חדר רחצה", estimated_cost: 39000 }],
+          recommendations: [{ location: t("infratech.process.fallback.location"), action: t("infratech.process.fallback.recAction"), annex_needed: t("infratech.process.fallback.recAnnex") }],
+          cost_items: [{ description: t("infratech.process.fallback.costDescription"), estimated_cost: 39000 }],
         };
       }
 
-      setProcessLog(p => [...p, "🔍 מסווג ליקויים ומזהה נספחים רלוונטיים..."]);
+      setProcessLog(p => [...p, t("infratech.process.classify")]);
       await new Promise(r => setTimeout(r, 400));
 
       // Match annexes
@@ -461,10 +472,10 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
         if (a.keywords.some((k: string) => allText.includes(k))) matchedAnnexes.push(a);
       });
 
-      setProcessLog(p => [...p, `📎 נמצאו ${matchedAnnexes.length} נספחים רלוונטיים`]);
+      setProcessLog(p => [...p, `${t("infratech.process.annexesFoundPrefix")} ${matchedAnnexes.length} ${t("infratech.process.annexesFoundSuffix")}`]);
       await new Promise(r => setTimeout(r, 300));
 
-      setProcessLog(p => [...p, "💰 מחשב אומדן עלויות..."]);
+      setProcessLog(p => [...p, t("infratech.process.costEstimate")]);
       await new Promise(r => setTimeout(r, 300));
 
       const expertObj = EXPERTS.find(e => e.id === data.expert);
@@ -477,16 +488,16 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
         approver: approverObj,
       });
 
-      setProcessLog(p => [...p, "✅ עיבוד הושלם בהצלחה! הדוח מוכן לסקירה."]);
+      setProcessLog(p => [...p, t("infratech.process.done")]);
       await new Promise(r => setTimeout(r, 500));
       setStep(3);
     } catch (e) {
-      setProcessLog(p => [...p, "❌ שגיאה: " + (e instanceof Error ? e.message : String(e))]);
+      setProcessLog(p => [...p, t("infratech.process.errorPrefix") + (e instanceof Error ? e.message : String(e))]);
     }
     setProcessing(false);
   };
 
-  const steps = ["פרטי לקוח", "תיעוד שטח", "עיבוד AI", "דוח מוכן"];
+  const steps = [t("infratech.steps.client"), t("infratech.steps.field"), t("infratech.steps.ai"), t("infratech.steps.report")];
 
   return (
     <div>
@@ -499,7 +510,7 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
               background: i <= step ? "#1a5276" : "#e0e8ef", color: i <= step ? "#fff" : "#7f8c8d",
               fontSize: 14, fontWeight: 700, flexShrink: 0,
             }}>{i < step ? "✓" : i + 1}</div>
-            <div style={{ marginRight: 8, fontSize: 13, fontWeight: i === step ? 700 : 400, color: i <= step ? "#1a3c5e" : "#7f8c8d" }}>{s}</div>
+            <div style={{ marginInlineStart: 8, fontSize: 13, fontWeight: i === step ? 700 : 400, color: i <= step ? "#1a3c5e" : "#7f8c8d" }}>{s}</div>
             {i < steps.length - 1 && <div style={{ flex: 1, height: 2, background: i < step ? "#1a5276" : "#e0e8ef", margin: "0 12px" }} />}
           </div>
         ))}
@@ -508,13 +519,13 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
       {/* Step 0: Client Details */}
       {step === 0 && (
         <div style={{ background: "#fff", borderRadius: 20, padding: 32, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", marginBottom: 24, marginTop: 0 }}>📋 פרטי לקוח וביקורת</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", marginBottom: 24, marginTop: 0 }}>{t("infratech.client.heading")}</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
             {([
-              { label: "שם הלקוח", key: "clientName" as const, placeholder: "שם מלא" },
-              { label: "מספר קריאה", key: "callNumber" as const, placeholder: "מס' קריאה מ\"בינה\"" },
-              { label: "כתובת הנכס", key: "address" as const, placeholder: "רחוב, עיר" },
-              { label: "תאריך ביקורת", key: "date" as const, type: "date" },
+              { label: t("infratech.client.name"), key: "clientName" as const, placeholder: t("infratech.client.namePlaceholder") },
+              { label: t("infratech.client.callNumber"), key: "callNumber" as const, placeholder: t("infratech.client.callNumberPlaceholder") },
+              { label: t("infratech.client.address"), key: "address" as const, placeholder: t("infratech.client.addressPlaceholder") },
+              { label: t("infratech.client.date"), key: "date" as const, type: "date" },
             ]).map((f: { label: string; key: 'clientName' | 'callNumber' | 'address' | 'date'; placeholder?: string; type?: string }) => (
               <div key={f.key}>
                 <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 6 }}>{f.label}</label>
@@ -523,7 +534,7 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
                   value={data[f.key] as string} onChange={e => update(f.key, e.target.value)}
                   style={{
                     width: "100%", padding: "12px 14px", borderRadius: 10, border: "1.5px solid #d6e9f8",
-                    fontSize: 14, direction: "rtl", fontFamily: "inherit", outline: "none",
+                    fontSize: 14, direction: dir, fontFamily: "inherit", outline: "none",
                     boxSizing: "border-box", transition: "border 0.2s",
                   }}
                   onFocus={e => e.target.style.borderColor = "#1a5276"}
@@ -532,23 +543,30 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
               </div>
             ))}
             <div>
-              <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 6 }}>סוג מבנה</label>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 6 }}>{t("infratech.client.buildingType")}</label>
               <select value={data.buildingType} onChange={e => update("buildingType", e.target.value)} style={{
                 width: "100%", padding: "12px 14px", borderRadius: 10, border: "1.5px solid #d6e9f8",
-                fontSize: 14, direction: "rtl", fontFamily: "inherit", background: "#fff",
+                fontSize: 14, direction: dir, fontFamily: "inherit", background: "#fff",
               }}>
-                {["דירה", "בית פרטי", "דו-משפחתי", "קוטג' טורי", "פנטהאוז", "מבנה מסחרי"].map(t => (
-                  <option key={t} value={t}>{t}</option>
+                {[
+                  { value: "דירה", key: "infratech.buildingType.apartment" },
+                  { value: "בית פרטי", key: "infratech.buildingType.privateHouse" },
+                  { value: "דו-משפחתי", key: "infratech.buildingType.duplex" },
+                  { value: "קוטג' טורי", key: "infratech.buildingType.terraced" },
+                  { value: "פנטהאוז", key: "infratech.buildingType.penthouse" },
+                  { value: "מבנה מסחרי", key: "infratech.buildingType.commercial" },
+                ].map(bt => (
+                  <option key={bt.value} value={bt.value}>{t(bt.key)}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 6 }}>מומחה בודק</label>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 6 }}>{t("infratech.client.expert")}</label>
               <select value={data.expert} onChange={e => update("expert", e.target.value)} style={{
                 width: "100%", padding: "12px 14px", borderRadius: 10, border: "1.5px solid #d6e9f8",
-                fontSize: 14, direction: "rtl", fontFamily: "inherit", background: "#fff",
+                fontSize: 14, direction: dir, fontFamily: "inherit", background: "#fff",
               }}>
-                {EXPERTS.map(ex => <option key={ex.id} value={ex.id}>{ex.name} - {ex.role}</option>)}
+                {EXPERTS.map(ex => <option key={ex.id} value={ex.id}>{t(`infratech.expert.${ex.id}.name`)} - {t(`infratech.expert.${ex.id}.role`)}</option>)}
               </select>
             </div>
           </div>
@@ -556,11 +574,11 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
             <button onClick={onCancel} style={{
               padding: "11px 28px", borderRadius: 10, border: "1.5px solid #d6e9f8",
               background: "#fff", color: "#7f8c8d", fontSize: 14, cursor: "pointer", fontFamily: "inherit",
-            }}>ביטול</button>
+            }}>{t("infratech.client.cancel")}</button>
             <button onClick={() => setStep(1)} style={{
               padding: "11px 28px", borderRadius: 10, border: "none",
               background: "#1a5276", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-            }}>המשך ←</button>
+            }}>{t("infratech.client.continue")}</button>
           </div>
         </div>
       )}
@@ -568,21 +586,21 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
       {/* Step 1: Field Capture */}
       {step === 1 && (
         <div style={{ background: "#fff", borderRadius: 20, padding: 32, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", marginBottom: 24, marginTop: 0 }}>🎤 תיעוד שטח</h2>
-          
-          <VoiceRecorder onTranscript={(t: string) => update("notes", (data.notes ? data.notes + " " : "") + t)} />
-          
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", marginBottom: 24, marginTop: 0 }}>{t("infratech.field.heading")}</h2>
+
+          <VoiceRecorder onTranscript={(tx: string) => update("notes", (data.notes ? data.notes + " " : "") + tx)} />
+
           <div style={{ marginTop: 20 }}>
             <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 6 }}>
-              תיאור ממצאים (קלט טקסטואלי / תמלול הקלטה)
+              {t("infratech.field.notesLabel")}
             </label>
             <textarea
               value={data.notes}
               onChange={e => update("notes", e.target.value)}
-              placeholder="תארו את הממצאים בשטח בשפה חופשית. לדוגמה: &#10;'בבדיקה שבוצעה בדירה נמצאה רטיבות בתקרת הלובי מתחת לחדר הרחצה. בסריקה תרמית ומד לחות זוהו כתמים רטובים. חשד לכשל באיטום תת רצפתי של חדר הרחצה...'"
+              placeholder={t("infratech.field.notesPlaceholder")}
               style={{
                 width: "100%", minHeight: 140, padding: 16, borderRadius: 12,
-                border: "1.5px solid #d6e9f8", fontSize: 14, direction: "rtl",
+                border: "1.5px solid #d6e9f8", fontSize: 14, direction: dir,
                 fontFamily: "inherit", resize: "vertical", outline: "none",
                 boxSizing: "border-box", lineHeight: 1.7,
               }}
@@ -592,7 +610,7 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
           </div>
 
           <div style={{ marginTop: 20 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 10 }}>📷 תמונות ממצאים</label>
+            <label style={{ fontSize: 13, fontWeight: 600, color: "#5b7a94", display: "block", marginBottom: 10 }}>{t("infratech.field.photosLabel")}</label>
             <PhotoManager
               photos={data.photos}
               onAdd={(ph: Photo) => update("photos", [...data.photos, ph])}
@@ -604,12 +622,12 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
             <button onClick={() => setStep(0)} style={{
               padding: "11px 28px", borderRadius: 10, border: "1.5px solid #d6e9f8",
               background: "#fff", color: "#7f8c8d", fontSize: 14, cursor: "pointer", fontFamily: "inherit",
-            }}>→ חזרה</button>
+            }}>{t("infratech.field.back")}</button>
             <button onClick={() => { setStep(2); setTimeout(runAIProcessing, 300); }} disabled={!data.notes} style={{
               padding: "11px 28px", borderRadius: 10, border: "none",
               background: data.notes ? "#1a5276" : "#bdc3c7", color: "#fff",
               fontSize: 14, fontWeight: 700, cursor: data.notes ? "pointer" : "default", fontFamily: "inherit",
-            }}>🤖 שלח לעיבוד AI ←</button>
+            }}>{t("infratech.field.sendAi")}</button>
           </div>
         </div>
       )}
@@ -617,7 +635,7 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
       {/* Step 2: AI Processing */}
       {step === 2 && (
         <div style={{ background: "#fff", borderRadius: 20, padding: 32, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", marginBottom: 24, marginTop: 0 }}>⚙️ עיבוד בינה מלאכותית</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", marginBottom: 24, marginTop: 0 }}>{t("infratech.ai.heading")}</h2>
           <div style={{
             background: "#0a1628", borderRadius: 14, padding: 24, minHeight: 300,
             fontFamily: "'Courier New', monospace", fontSize: 13, color: "#5dade2",
@@ -651,27 +669,32 @@ function NewInspection({ onComplete, onCancel }: { onComplete: (d: InspectionDat
 
 // Report Preview & Editor
 function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onApprove: (d: InspectionData) => void; onBack: () => void }) {
+  const { t } = useLanguage();
   const findings = data.findings;
   const expert = findings?.expert || EXPERTS[0];
   const approver = findings?.approver || EXPERTS[0];
+  const expertName = expert?.id ? t(`infratech.expert.${expert.id}.name`) : expert?.name;
+  const approverName = approver?.id ? t(`infratech.expert.${approver.id}.name`) : approver?.name;
+  const expertEducation = expert?.id ? t(`infratech.expert.${expert.id}.education`) : expert?.education;
+  const expertExperience = expert?.id ? t(`infratech.expert.${expert.id}.experience`) : expert?.experience;
 
   const totalCost = (findings?.cost_items || []).reduce((s: number, i: CostItem) => s + (i.estimated_cost || 0), 0);
 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", margin: 0 }}>📄 תצוגה מקדימה של חוות הדעת</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a3c5e", margin: 0 }}>{t("infratech.report.heading")}</h2>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onBack} style={{
             padding: "10px 22px", borderRadius: 10, border: "1.5px solid #d6e9f8",
             background: "#fff", color: "#7f8c8d", fontSize: 13, cursor: "pointer", fontFamily: "inherit",
-          }}>← חזרה לעריכה</button>
+          }}>{t("infratech.report.backToEdit")}</button>
           <button onClick={() => onApprove(data)} style={{
             padding: "10px 22px", borderRadius: 10, border: "none",
             background: "linear-gradient(135deg, #27ae60, #2ecc71)", color: "#fff",
             fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
             boxShadow: "0 4px 15px rgba(39,174,96,0.3)",
-          }}>✅ אשר דוח ושמור</button>
+          }}>{t("infratech.report.approve")}</button>
         </div>
       </div>
 
@@ -684,20 +707,20 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
       }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 28, paddingBottom: 20, borderBottom: "3px solid #1a3c5e" }}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: "#1a3c5e" }}>חוות דעת מומחה</div>
-          <div style={{ fontSize: 12, color: "#7f8c8d", marginTop: 4 }}>אינפרטק טכנולוגיות מתקדמות בע"מ</div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "#1a3c5e" }}>{t("infratech.report.docTitle")}</div>
+          <div style={{ fontSize: 12, color: "#7f8c8d", marginTop: 4 }}>{t("infratech.report.companyName")}</div>
         </div>
 
         {/* Client Info Table */}
         <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 24 }}>
           <tbody>
             {[
-              ["לכבוד", data.clientName || "***"],
-              ["מס' קריאה", data.callNumber || "***"],
-              ["תאריך הביקורת", data.date],
-              ["כתובת האתר הנבדק", data.address || "***"],
-              ["שם המומחה", expert.name],
-              ["מאשר חוו\"ד והח\"מ", approver.name],
+              [t("infratech.report.to"), data.clientName || "***"],
+              [t("infratech.report.callNumber"), data.callNumber || "***"],
+              [t("infratech.report.inspectionDate"), data.date],
+              [t("infratech.report.siteAddress"), data.address || "***"],
+              [t("infratech.report.expertName"), expertName],
+              [t("infratech.report.approverName"), approverName],
             ].map(([k, v], i) => (
               <tr key={i}>
                 <td style={{ padding: "8px 12px", fontWeight: 700, fontSize: 13, color: "#2c3e50", width: 160, borderBottom: "1px solid #eee" }}>{k}</td>
@@ -709,18 +732,18 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
 
         {/* Equipment */}
         <div style={{ background: "#f8fafe", borderRadius: 8, padding: 16, marginBottom: 24, border: "1px solid #e8f0f8" }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#1a3c5e", marginBottom: 8 }}>מכשור מקצועי בשימוש:</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#1a3c5e", marginBottom: 8 }}>{t("infratech.report.equipmentTitle")}</div>
           <div style={{ fontSize: 12, color: "#5b7a94", lineHeight: 1.8 }}>
-            מצלמה תרמית, חברת FLUKE מדגם Ti400 | מד לחות דיגיטלי, חברת Protimeter דגם Surveymaster | מצלמת פנים צנרת, חברת RIDGID
+            {t("infratech.report.equipmentList")}
           </div>
         </div>
 
         {/* Expert Profile */}
         <div style={{ background: "#f8fafe", borderRadius: 8, padding: 16, marginBottom: 24, border: "1px solid #e8f0f8" }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#1a3c5e", marginBottom: 6 }}>השכלה: <span style={{ fontWeight: 400 }}>{expert.education}</span></div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#1a3c5e", marginBottom: 6 }}>ניסיון: <span style={{ fontWeight: 400 }}>{expert.experience}</span></div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#1a3c5e", marginBottom: 6 }}>{t("infratech.report.education")} <span style={{ fontWeight: 400 }}>{expertEducation}</span></div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#1a3c5e", marginBottom: 6 }}>{t("infratech.report.experience")} <span style={{ fontWeight: 400 }}>{expertExperience}</span></div>
           <div style={{ fontSize: 11, color: "#7f8c8d", marginTop: 10, lineHeight: 1.6, fontStyle: "italic" }}>
-            אני נותן חוות דעת זו במקום עדות בבית המשפט, ואני מצהיר בזאת כי ידוע לי היטב שלעניין הוראות החוק הפלילי, בדבר עדות שקר בשבועה בבית המשפט, דין עדות זו כשהיא חתומה על ידי כדין עדות בשבועה.
+            {t("infratech.report.declaration")}
           </div>
         </div>
 
@@ -730,33 +753,33 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
             fontSize: 16, fontWeight: 800, color: "#1a3c5e", padding: "8px 0",
             borderBottom: "2px solid #1a3c5e", marginBottom: 16,
           }}>
-            1. ממצאים
+            {t("infratech.report.section1")}
           </div>
 
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 8 }}>
             <tbody>
               <tr>
                 <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd", width: 40 }}>1.1</td>
-                <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd", width: 120 }}>תיאור המבנה</td>
+                <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd", width: 120 }}>{t("infratech.report.buildingDescription")}</td>
                 <td style={{ padding: "6px 10px", fontSize: 12, border: "1px solid #ddd" }}>{findings?.building_type || data.buildingType}</td>
               </tr>
               <tr>
                 <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd" }}>1.2</td>
-                <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd" }}>האלמנטים הנבדקים</td>
-                <td style={{ padding: "6px 10px", fontSize: 12, border: "1px solid #ddd" }}>מערכות אינסטלציה ואיטום</td>
+                <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd" }}>{t("infratech.report.inspectedElements")}</td>
+                <td style={{ padding: "6px 10px", fontSize: 12, border: "1px solid #ddd" }}>{t("infratech.report.inspectedElementsValue")}</td>
               </tr>
               <tr>
                 <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd" }}>1.3</td>
-                <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd" }}>נושא הביקורת</td>
-                <td style={{ padding: "6px 10px", fontSize: 12, border: "1px solid #ddd" }}>אבחון מוקדי רטיבות ונזילות</td>
+                <td style={{ padding: "6px 10px", fontWeight: 700, fontSize: 12, border: "1px solid #ddd" }}>{t("infratech.report.inspectionSubject")}</td>
+                <td style={{ padding: "6px 10px", fontSize: 12, border: "1px solid #ddd" }}>{t("infratech.report.inspectionSubjectValue")}</td>
               </tr>
             </tbody>
           </table>
 
           {/* Case Description */}
           <div style={{ fontSize: 13, color: "#2c3e50", lineHeight: 1.8, margin: "16px 0", padding: "12px 16px", background: "#fafbfc", borderRadius: 6, border: "1px solid #eee" }}>
-            <span style={{ fontWeight: 700 }}>תיאור המקרה: </span>
-            {findings?.case_description || "בדיקת ליקויי רטיבות ואיטום במבנה"}
+            <span style={{ fontWeight: 700 }}>{t("infratech.report.caseDescriptionLabel")}</span>
+            {findings?.case_description || t("infratech.report.caseDescriptionDefault")}
           </div>
 
           {/* Detailed Findings */}
@@ -783,15 +806,15 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
             fontSize: 16, fontWeight: 800, color: "#1a3c5e", padding: "8px 0",
             borderBottom: "2px solid #1a3c5e", marginBottom: 16,
           }}>
-            2. מסקנות והמלצות לביצוע
+            {t("infratech.report.section2")}
           </div>
 
           {(findings?.recommendations || []).map((r: Recommendation, i: number) => (
-            <div key={i} style={{ marginBottom: 14, padding: "10px 14px", background: "#f8fafe", borderRadius: 6, borderRight: "3px solid #2471a3" }}>
+            <div key={i} style={{ marginBottom: 14, padding: "10px 14px", background: "#f8fafe", borderRadius: 6, borderInlineEnd: "3px solid #2471a3" }}>
               <div style={{ fontWeight: 700, fontSize: 13, color: "#1a3c5e", marginBottom: 4 }}>2.2.{i + 1} {r.location}</div>
               <div style={{ fontSize: 12.5, color: "#2c3e50", lineHeight: 1.7 }}>{r.action}</div>
               {r.annex_needed && (
-                <div style={{ fontSize: 11, color: "#2471a3", marginTop: 6, fontWeight: 600 }}>📎 נספח מצורף: {r.annex_needed}</div>
+                <div style={{ fontSize: 11, color: "#2471a3", marginTop: 6, fontWeight: 600 }}>{t("infratech.report.annexAttached")}{r.annex_needed}</div>
               )}
             </div>
           ))}
@@ -799,11 +822,11 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
           {/* Standard notes */}
           <div style={{ marginTop: 16, padding: 14, background: "#fef9e7", borderRadius: 6, border: "1px solid #f9e79f" }}>
             <div style={{ fontSize: 12, color: "#7d6608", lineHeight: 1.7 }}>
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>הוראות כלליות:</div>
-              <div>א. יש לוודא כי תהליך השיקום ילווה ע"י מומחה לאיטום ולאינסטלציה.</div>
-              <div>ב. העבודות יבוצעו על ידי אנשי מקצוע מוסמכים. בגמר העבודה תינתן תעודת אחריות.</div>
-              <div>ג. בגמר עבודות האיטום יש לבצע בדיקות הרטבה והצפה לפי ת"י 1476.</div>
-              <div>ד. בגמר עבודות האינסטלציה יש לבצע בדיקות לחצים על פי התקן.</div>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>{t("infratech.report.generalInstructions")}</div>
+              <div>{t("infratech.report.instruction1")}</div>
+              <div>{t("infratech.report.instruction2")}</div>
+              <div>{t("infratech.report.instruction3")}</div>
+              <div>{t("infratech.report.instruction4")}</div>
             </div>
           </div>
         </div>
@@ -814,14 +837,14 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
             fontSize: 16, fontWeight: 800, color: "#1a3c5e", padding: "8px 0",
             borderBottom: "2px solid #1a3c5e", marginBottom: 16,
           }}>
-            אומדן עלויות
+            {t("infratech.report.costEstimateTitle")}
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1a3c5e" }}>
-                <td style={{ padding: "8px 12px", color: "#fff", fontSize: 12, fontWeight: 700, border: "1px solid #ccc" }}>סעיף</td>
-                <td style={{ padding: "8px 12px", color: "#fff", fontSize: 12, fontWeight: 700, border: "1px solid #ccc" }}>פירוט</td>
-                <td style={{ padding: "8px 12px", color: "#fff", fontSize: 12, fontWeight: 700, border: "1px solid #ccc", width: 100, textAlign: "center" }}>עלות בש"ח</td>
+                <td style={{ padding: "8px 12px", color: "#fff", fontSize: 12, fontWeight: 700, border: "1px solid #ccc" }}>{t("infratech.report.costCol.item")}</td>
+                <td style={{ padding: "8px 12px", color: "#fff", fontSize: 12, fontWeight: 700, border: "1px solid #ccc" }}>{t("infratech.report.costCol.detail")}</td>
+                <td style={{ padding: "8px 12px", color: "#fff", fontSize: 12, fontWeight: 700, border: "1px solid #ccc", width: 100, textAlign: "center" }}>{t("infratech.report.costCol.cost")}</td>
               </tr>
             </thead>
             <tbody>
@@ -835,7 +858,7 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
                 </tr>
               ))}
               <tr style={{ background: "#f0f6fb" }}>
-                <td colSpan={2} style={{ padding: "10px 12px", fontSize: 13, fontWeight: 800, border: "1px solid #ddd", color: "#1a3c5e" }}>סה"כ עלויות</td>
+                <td colSpan={2} style={{ padding: "10px 12px", fontSize: 13, fontWeight: 800, border: "1px solid #ddd", color: "#1a3c5e" }}>{t("infratech.report.costTotal")}</td>
                 <td style={{ padding: "10px 12px", fontSize: 14, fontWeight: 800, border: "1px solid #ddd", textAlign: "center", color: "#1a3c5e" }}>
                   {totalCost.toLocaleString()}
                 </td>
@@ -843,7 +866,7 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
             </tbody>
           </table>
           <div style={{ fontSize: 11, color: "#7f8c8d", marginTop: 10, lineHeight: 1.7 }}>
-            * המחירים אינם כוללים מע"מ. | * אינם כוללים עלות פיקוח הנדסי - תוספת של 10%. | * עלות קבלן מזדמן גבוהה ב-30% מעלות האומדן.
+            {t("infratech.report.costFootnote")}
           </div>
         </div>
 
@@ -854,12 +877,12 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
               fontSize: 16, fontWeight: 800, color: "#1a3c5e", padding: "8px 0",
               borderBottom: "2px solid #1a3c5e", marginBottom: 16,
             }}>
-              נספחים מצורפים
+              {t("infratech.report.annexesTitle")}
             </div>
             {(findings?.matchedAnnexes ?? []).map((a: Annex, i: number) => (
               <div key={i} style={{ padding: "10px 14px", background: "#f0f6fb", borderRadius: 6, marginBottom: 8, border: "1px solid #d6e9f8" }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#1a3c5e" }}>📎 נספח: {a.name}</div>
-                <div style={{ fontSize: 12, color: "#5b7a94", marginTop: 4 }}>{a.steps}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#1a3c5e" }}>{t("infratech.report.annexPrefix")}{a.id ? t(`infratech.annex.${a.id}.name`) : a.name}</div>
+                <div style={{ fontSize: 12, color: "#5b7a94", marginTop: 4 }}>{a.id ? t(`infratech.annex.${a.id}.steps`) : a.steps}</div>
               </div>
             ))}
           </div>
@@ -867,7 +890,7 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
 
         {/* Footer */}
         <div style={{ marginTop: 40, paddingTop: 16, borderTop: "1px solid #ddd", fontSize: 10, color: "#7f8c8d", textAlign: "center", lineHeight: 1.6 }}>
-          חוות דעת זו אשר נמסרה והוכנה ע"י חברת אינפרטק שייכת לה בלבד. הזכויות לבדיקה ו/או לאמור בחוות הדעת שמור לחברת אינפרטק טכנולוגיות מתקדמות בע"מ בלבד. ט.ל.ח
+          {t("infratech.report.footer")}
         </div>
       </div>
     </div>
@@ -876,19 +899,20 @@ function ReportPreview({ data, onApprove, onBack }: { data: InspectionData; onAp
 
 // Annex Library
 function AnnexLibrary() {
+  const { t, dir } = useLanguage();
   const [search, setSearch] = useState("");
   const filtered = ANNEXES.filter(a =>
     !search || a.name.includes(search) || a.keywords.some(k => k.includes(search)) || a.steps.includes(search)
   );
   return (
     <div>
-      <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a3c5e", marginBottom: 6, marginTop: 0 }}>📎 מאגר נספחים - "מאגר הזהב"</h1>
-      <p style={{ fontSize: 14, color: "#7f8c8d", marginBottom: 24 }}>מאגר הנספחים ההנדסיים של אינפרטק. לכל סוג תקלה ישנם נספחי תיקון מפורטים וסקיצות.</p>
+      <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a3c5e", marginBottom: 6, marginTop: 0 }}>{t("infratech.annexes.title")}</h1>
+      <p style={{ fontSize: 14, color: "#7f8c8d", marginBottom: 24 }}>{t("infratech.annexes.subtitle")}</p>
       <input
-        type="text" placeholder="🔍 חפש נספח..." value={search} onChange={e => setSearch(e.target.value)}
+        type="text" placeholder={t("infratech.annexes.searchPlaceholder")} value={search} onChange={e => setSearch(e.target.value)}
         style={{
           width: "100%", padding: "12px 16px", borderRadius: 12, border: "1.5px solid #d6e9f8",
-          fontSize: 14, direction: "rtl", fontFamily: "inherit", marginBottom: 20,
+          fontSize: 14, direction: dir, fontFamily: "inherit", marginBottom: 20,
           boxSizing: "border-box",
         }}
       />
@@ -898,9 +922,9 @@ function AnnexLibrary() {
             background: "#fff", borderRadius: 16, padding: 22, boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
             border: "1px solid #eef2f7", transition: "all 0.15s",
           }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#1a3c5e", marginBottom: 8 }}>📄 {a.name}</div>
-            <div style={{ fontSize: 12, color: "#5b7a94", lineHeight: 1.7, marginBottom: 12 }}>{a.steps}</div>
-            <div style={{ fontSize: 11, color: "#2471a3", fontWeight: 600 }}>🎯 טריגר: {a.trigger}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1a3c5e", marginBottom: 8 }}>📄 {t(`infratech.annex.${a.id}.name`)}</div>
+            <div style={{ fontSize: 12, color: "#5b7a94", lineHeight: 1.7, marginBottom: 12 }}>{t(`infratech.annex.${a.id}.steps`)}</div>
+            <div style={{ fontSize: 11, color: "#2471a3", fontWeight: 600 }}>{t("infratech.annexes.triggerLabel")}{t(`infratech.annex.${a.id}.trigger`)}</div>
             <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
               {a.keywords.map((k, i) => (
                 <span key={i} style={{
@@ -918,22 +942,37 @@ function AnnexLibrary() {
 
 // Price List
 function PriceList() {
+  const { t } = useLanguage();
+  const priceKeys: Record<string, string> = {
+    "טיפול מערכתי חדר רחצה ילדים": "infratech.price.childrenBathroom",
+    "טיפול מערכתי חדר רחצה הורים": "infratech.price.parentsBathroom",
+    "טיפול מערכתי חדר רחצה + כביסה": "infratech.price.bathroomLaundry",
+    "טיפול מערכתי גג": "infratech.price.roof",
+    "טיפול מערכתי מרפסת": "infratech.price.balcony",
+    "תיקוני טיח וצבע": "infratech.price.plasterPaint",
+    "תיקוני טיח וצבע (גרם מדרגות)": "infratech.price.plasterPaintStairs",
+    "החלפת צנרת מים קרים": "infratech.price.coldWaterPipes",
+    "החלפת צנרת מים חמים": "infratech.price.hotWaterPipes",
+    "תיקון ניקוז כפול": "infratech.price.doubleDrain",
+    "איטום קיר יסוד": "infratech.price.foundationWall",
+    "איטום סף דלת": "infratech.price.doorThreshold",
+  };
   return (
     <div>
-      <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a3c5e", marginBottom: 6, marginTop: 0 }}>💰 מחירון תיקונים</h1>
-      <p style={{ fontSize: 14, color: "#7f8c8d", marginBottom: 24 }}>מחירון אומדן עלויות לסוגי ליקויים שונים. המחירים אינם כוללים מע"מ.</p>
+      <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a3c5e", marginBottom: 6, marginTop: 0 }}>{t("infratech.prices.title")}</h1>
+      <p style={{ fontSize: 14, color: "#7f8c8d", marginBottom: 24 }}>{t("infratech.prices.subtitle")}</p>
       <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.03)", border: "1px solid #eef2f7" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "#1a3c5e" }}>
-              <td style={{ padding: "12px 18px", color: "#fff", fontSize: 13, fontWeight: 700 }}>סעיף תיקון</td>
-              <td style={{ padding: "12px 18px", color: "#fff", fontSize: 13, fontWeight: 700, width: 140, textAlign: "center" }}>עלות (ש"ח)</td>
+              <td style={{ padding: "12px 18px", color: "#fff", fontSize: 13, fontWeight: 700 }}>{t("infratech.prices.col.item")}</td>
+              <td style={{ padding: "12px 18px", color: "#fff", fontSize: 13, fontWeight: 700, width: 140, textAlign: "center" }}>{t("infratech.prices.col.cost")}</td>
             </tr>
           </thead>
           <tbody>
             {Object.entries(PRICE_LIST).map(([k, v], i) => (
               <tr key={k} style={{ background: i % 2 === 0 ? "#fff" : "#f8fafe" }}>
-                <td style={{ padding: "12px 18px", fontSize: 13, color: "#2c3e50", borderBottom: "1px solid #eef2f7" }}>{k}</td>
+                <td style={{ padding: "12px 18px", fontSize: 13, color: "#2c3e50", borderBottom: "1px solid #eef2f7" }}>{priceKeys[k] ? t(priceKeys[k]) : k}</td>
                 <td style={{ padding: "12px 18px", fontSize: 14, fontWeight: 700, color: "#1a3c5e", borderBottom: "1px solid #eef2f7", textAlign: "center" }}>
                   {v.toLocaleString()} ₪
                 </td>
@@ -943,7 +982,7 @@ function PriceList() {
         </table>
       </div>
       <div style={{ marginTop: 16, padding: 16, background: "#fef9e7", borderRadius: 12, border: "1px solid #f9e79f", fontSize: 12, color: "#7d6608", lineHeight: 1.7 }}>
-        <strong>הערות:</strong> המחירים אינם כוללים מע"מ | פיקוח הנדסי: +10% | קבלן מזדמן: +30% מעלות האומדן
+        <strong>{t("infratech.prices.notesLabel")}</strong> {t("infratech.prices.notes")}
       </div>
     </div>
   );
@@ -951,10 +990,11 @@ function PriceList() {
 
 // Expert Profiles
 function ExpertProfiles() {
+  const { t } = useLanguage();
   return (
     <div>
-      <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a3c5e", marginBottom: 6, marginTop: 0 }}>👷 פרופילי מומחים</h1>
-      <p style={{ fontSize: 14, color: "#7f8c8d", marginBottom: 24 }}>פרופילי המומחים שנשלפים אוטומטית לעמוד הפתיחה של כל חוות דעת.</p>
+      <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a3c5e", marginBottom: 6, marginTop: 0 }}>{t("infratech.experts.title")}</h1>
+      <p style={{ fontSize: 14, color: "#7f8c8d", marginBottom: 24 }}>{t("infratech.experts.subtitle")}</p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         {EXPERTS.map(ex => (
           <div key={ex.id} style={{
@@ -967,18 +1007,18 @@ function ExpertProfiles() {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 color: "#fff", fontSize: 20, fontWeight: 800,
               }}>
-                {ex.name.charAt(0)}
+                {t(`infratech.expert.${ex.id}.name`).charAt(0)}
               </div>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#1a3c5e" }}>{ex.name}</div>
-                <div style={{ fontSize: 12, color: "#2471a3", fontWeight: 600 }}>{ex.role}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#1a3c5e" }}>{t(`infratech.expert.${ex.id}.name`)}</div>
+                <div style={{ fontSize: 12, color: "#2471a3", fontWeight: 600 }}>{t(`infratech.expert.${ex.id}.role`)}</div>
               </div>
             </div>
             <div style={{ fontSize: 12, color: "#5b7a94", lineHeight: 1.7, marginBottom: 8 }}>
-              <strong>השכלה:</strong> {ex.education}
+              <strong>{t("infratech.experts.educationLabel")}</strong> {t(`infratech.expert.${ex.id}.education`)}
             </div>
             <div style={{ fontSize: 12, color: "#5b7a94", lineHeight: 1.7 }}>
-              <strong>ניסיון:</strong> {ex.experience}
+              <strong>{t("infratech.experts.experienceLabel")}</strong> {t(`infratech.expert.${ex.id}.experience`)}
             </div>
           </div>
         ))}
@@ -989,6 +1029,7 @@ function ExpertProfiles() {
 
 // ===== MAIN APP =====
 export default function InfratechContent() {
+  const { t, dir } = useLanguage();
   const [page, setPage] = useState("dashboard");
   const [inspections, setInspections] = useState<InspectionData[]>([]);
   const [selectedInspection, setSelectedInspection] = useState<InspectionData | null>(null);
@@ -1014,7 +1055,7 @@ export default function InfratechContent() {
       ...data,
       id: Date.now(),
       date: data.date || new Date().toISOString().split("T")[0],
-      expert: EXPERTS.find((e: Expert) => e.id === data.expert)?.name || "לא ידוע",
+      expert: EXPERTS.find((e: Expert) => e.id === data.expert)?.name || t("infratech.experts.unknown"),
     };
     saveInspections([newInsp, ...inspections]);
     setPage("dashboard");
@@ -1022,7 +1063,7 @@ export default function InfratechContent() {
 
   return (
     <div style={{
-      display: "flex", minHeight: "100vh", direction: "rtl",
+      display: "flex", minHeight: "100vh", direction: dir,
       fontFamily: "'Noto Sans Hebrew', 'Segoe UI', sans-serif",
       background: "#f2f5f9",
     }}>

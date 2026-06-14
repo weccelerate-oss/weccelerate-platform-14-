@@ -45,7 +45,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { TrackedLink } from '@/components/ui/TrackedLink';
-import { useLanguage } from '@/lib/i18n';
+import { useLanguage, useLangSwitch } from '@/lib/i18n';
 
 // =============================================================================
 // NAVIGATION DATA — built dynamically using translation keys
@@ -157,7 +157,8 @@ export function CorporateNavbar() {
   const pathname = usePathname();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
-  const { lang, dir, setLang, t } = useLanguage();
+  const { lang, dir, t } = useLanguage();
+  const { switchLang } = useLangSwitch();
   const navigation = useNavigation();
   const DirArrow = dir === 'rtl' ? ArrowLeft : ArrowRight;
 
@@ -272,7 +273,7 @@ export function CorporateNavbar() {
             <div className="flex items-center gap-4" role="group" aria-label={t('nav.langLabel')}>
               <Globe className="w-3.5 h-3.5 text-white/30" aria-hidden="true" />
               <button
-                onClick={() => setLang('he')}
+                onClick={() => switchLang('he')}
                 lang="he"
                 aria-label={`${t('nav.switchLang')} עברית`}
                 aria-current={lang === 'he' ? 'true' : undefined}
@@ -284,7 +285,7 @@ export function CorporateNavbar() {
               </button>
               <span className="text-white/20" aria-hidden="true">|</span>
               <button
-                onClick={() => setLang('en')}
+                onClick={() => switchLang('en')}
                 lang="en"
                 aria-label={`${t('nav.switchLang')} English`}
                 aria-current={lang === 'en' ? 'true' : undefined}

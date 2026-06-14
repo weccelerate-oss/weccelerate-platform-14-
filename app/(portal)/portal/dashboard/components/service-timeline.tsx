@@ -338,7 +338,7 @@ export function ServiceTimeline({ services, projectId, isAdmin = false, files = 
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-mono text-white/20 uppercase tracking-[0.15em] mb-1">Service Network</p>
+          <p className="text-[10px] font-mono text-white/20 uppercase tracking-[0.15em] mb-1">רשת השירותים</p>
           <h2 className="text-lg font-semibold text-white tracking-tight">השירותים שלך ב-WeCcelerate</h2>
           <p className="text-sm text-white/30 mt-0.5">{done} מתוך {total} שירותים הושלמו</p>
         </div>

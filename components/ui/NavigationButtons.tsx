@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { TrackedLink } from '@/components/ui/TrackedLink';
+import { useLanguage } from '@/lib/i18n';
 
 const GOOGLE_MAPS_URL =
   'https://www.google.com/maps/search/?api=1&query=%D7%A8%D7%97%D7%95%D7%91+%D7%94%D7%A8%D7%9B%D7%91%D7%AA+58+%D7%AA%D7%9C+%D7%90%D7%91%D7%99%D7%91';
@@ -66,6 +67,7 @@ export function NavigationButtons({
   variant = 'dark',
   size = 'md',
 }: NavigationButtonsProps) {
+  const { t } = useLanguage();
   const iconSize = size === 'sm' ? 16 : 20;
   const btnSize = size === 'sm' ? 'w-9 h-9' : 'w-11 h-11';
 
@@ -82,7 +84,7 @@ export function NavigationButtons({
         href={GOOGLE_MAPS_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="נווטו אלינו בגוגל מפות"
+        aria-label={t('chrome.nav.googleMaps')}
         className={`${btnClass} ${
           variant === 'dark'
             ? 'bg-white/10 hover:bg-white/20'
@@ -97,7 +99,7 @@ export function NavigationButtons({
         href={WAZE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="נווטו אלינו בוויז"
+        aria-label={t('chrome.nav.waze')}
         className={`${btnClass} ${
           variant === 'dark'
             ? 'bg-white/10 hover:bg-white/20'
@@ -125,6 +127,7 @@ export function LocationMap({
   height = '300px',
   className = '',
 }: LocationMapProps) {
+  const { t } = useLanguage();
   return (
     <div
       className={`relative rounded-xl overflow-hidden ${
@@ -140,7 +143,7 @@ export function LocationMap({
         allowFullScreen
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
-        title="מיקום WeCcelerate - רחוב הרכבת 58, תל אביב"
+        title={t('chrome.map.title')}
       />
     </div>
   );

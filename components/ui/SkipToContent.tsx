@@ -6,13 +6,18 @@
  * Styled with gold accent to match the dark luxury design system.
  */
 
+'use client';
+
+import { useLanguage } from '@/lib/i18n';
+
 export function SkipToContent() {
+  const { t } = useLanguage();
   return (
     <a
       href="#main-content"
       className="skip-to-content"
     >
-      דלג לתוכן הראשי
+      {t('chrome.skipToContent')}
     </a>
   );
 }
