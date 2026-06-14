@@ -3,7 +3,9 @@
  * All UI strings for the WeCcelerate platform in English.
  */
 
-export const en: Record<string, string> = {
+import { pagesEn } from './pages';
+
+const enCore: Record<string, string> = {
   // =========================================================================
   // NAVBAR
   // =========================================================================
@@ -21,6 +23,13 @@ export const en: Record<string, string> = {
   'nav.mobileNav': 'Mobile navigation',
   'nav.menuDialog': 'Navigation menu',
   'nav.langLabel': 'Language selection',
+
+  // Global chrome (skip link, floating buttons, navigation widgets)
+  'chrome.skipToContent': 'Skip to main content',
+  'chrome.whatsapp.aria': 'Message us on WhatsApp',
+  'chrome.nav.googleMaps': 'Navigate to us on Google Maps',
+  'chrome.nav.waze': 'Navigate to us on Waze',
+  'chrome.map.title': 'WeCcelerate location — 58 HaRakevet St, Tel Aviv',
   'nav.switchLang': 'Switch language to',
   'nav.callUs': 'Call us',
   'nav.sendWhatsApp': 'Send a WhatsApp message',
@@ -675,7 +684,8 @@ export const en: Record<string, string> = {
   'medtech.partnership.insured': 'Insured',
   'medtech.partnership.clinics': 'Clinics',
   'medtech.partnership.years': 'Years of Activity',
-  'medtech.partnership.employees': 'Employees',
+  'medtech.partnership.pharmacies': 'Pharmacies',
+  'medtech.partnership.doctors': 'Doctors',
   'medtech.diff.tag': 'Why WeCcelerate MedTech',
   'medtech.diff.title': 'What Makes Our Track Unique',
   'medtech.diff.text': 'Four key advantages unavailable at other accelerators in Israel — direct access to the medical world, clinical research and regulation under one roof.',
@@ -964,3 +974,6 @@ export const en: Record<string, string> = {
   'accessibility.disclaimer.title': 'Disclaimer',
   'accessibility.disclaimer.text': 'Despite our extensive efforts to make all pages and content on the site accessible, some content may not yet be fully accessible. We continue to work on improving accessibility and adapting the site to meet the latest accessibility standards.',
 };
+
+// Core dictionary + per-page modules (see lib/i18n/pages).
+export const en: Record<string, string> = { ...enCore, ...pagesEn };

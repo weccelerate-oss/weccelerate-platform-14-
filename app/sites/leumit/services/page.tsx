@@ -50,7 +50,7 @@ export const metadata: Metadata = {
  'אישור משרד הבריאות',
  ],
  openGraph: {
- title: 'שירותי MedTech - WeCcelerate x Leumit',
+ title: 'שירותי MedTech - WeCcelerate × Leumit',
  description: 'ייעוץ רגולטורי, ניסויים קליניים ואימות דאטה לסטארטאפים רפואיים',
  type: 'website',
  locale: 'he_IL',
@@ -205,7 +205,7 @@ const medtechServices: Service[] = [
  subtitle: 'HIPAA, GDPR, ISO 27001',
  description: 'סיוע בהטמעת תהליכי ציות לרגולציות פרטיות ואבטחת מידע. הכנה להסמכות ובניית מערכות ניהול אבטחת מידע.',
  features: [
- 'הטמעת HIPAA compliance',
+ 'הטמעת עמידה ברגולציית HIPAA',
  'התאמה ל-GDPR',
  'הכנה להסמכת ISO 27001',
  'בניית מדיניות אבטחת מידע',
@@ -385,7 +385,7 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
  <service.icon className="w-7 h-7 text-slate-700 group-hover:text-slate-900 transition-colors" />
  </div>
  {service.stats && (
- <div className="text-left">
+ <div className="text-start">
  <p className="text-2xl font-bold text-slate-900">{service.stats.value}</p>
  <p className="text-xs text-slate-500">{service.stats.label}</p>
  </div>
@@ -455,7 +455,7 @@ function ServiceFAQSection({ service }: { service: Service }) {
  >
  <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
  <h4
- className="text-lg font-medium text-slate-900 pl-4"
+ className="text-lg font-medium text-slate-900 pe-4"
  itemProp="name"
  >
  {faq.question}

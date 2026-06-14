@@ -16,6 +16,7 @@ import { GeoSchema } from "@/components/seo/GeoSchema";
 import { SkipToContent } from "@/components/ui/SkipToContent";
 import { LanguageProvider } from "@/lib/i18n";
 import { HtmlAttrs } from "@/components/providers/HtmlAttrs";
+import { LangRouteSync } from "@/components/providers/LangRouteSync";
 import {
   constructMetadata,
   viewport as viewportConfig,
@@ -221,6 +222,9 @@ export default function RootLayout({
         <LanguageProvider>
           {/* Dynamically sets <html lang/dir> based on selected language */}
           <HtmlAttrs />
+
+          {/* Forces English chrome on dedicated /en/* SEO routes */}
+          <LangRouteSync />
 
           {/* Skip to Content — first focusable element (WCAG 2.4.1) */}
           <SkipToContent />

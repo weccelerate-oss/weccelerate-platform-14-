@@ -9,7 +9,7 @@ import { SkipToContent } from '@/components/ui/SkipToContent';
 export const metadata: Metadata = constructMetadata({
   title: 'Venture Builder לארגונים · WeCcelerate Business',
   description:
-    'אנחנו ה-Venture Builder של תאגידים ישראלים — בונים יחידות חדשנות, מוצרים חדשים ומיזמי Spin-off מהאבחון ועד ההשקה. ליווי סטארטאפים בכל שלבי הפיתוחגיוסים.',
+    'אנחנו ה-Venture Builder של תאגידים ישראלים — בונים יחידות חדשנות, מוצרים חדשים ומיזמי Spin-off מהאבחון ועד ההשקה. ליווי סטארטאפים בכל שלבי הפיתוח והגיוס.',
   siteKey: 'biz',
   path: '/',
   locale: 'he_IL',
@@ -94,7 +94,7 @@ export default function BizLayout({ children }: BizLayoutProps) {
                   Business
                 </span>
               </div>
-              <p className="text-white/50 leading-relaxed max-w-lg text-sm"> — Venture Builder ומאיץ סטארטאפים בישראל לארגונים. אנחנו בונים לכם יחידות חדשנות עצמאיות, ממאבחון הזדמנות ועד השקה מוצלחת — בלי לסכן את הליבה.
+              <p className="text-white/50 leading-relaxed max-w-lg text-sm">Venture Builder ומאיץ סטארטאפים בישראל לארגונים. אנחנו בונים לכם יחידות חדשנות עצמאיות, מאבחון הזדמנות ועד השקה מוצלחת — בלי לסכן את הליבה.
               </p>
             </div>
 

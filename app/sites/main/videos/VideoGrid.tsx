@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Play, Clock, Eye, User } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 // =============================================================================
 // TYPES & HELPERS
@@ -18,19 +19,6 @@ interface VideoItem {
   speaker?: string;
   views?: number;
 }
-
-const categoryLabels: Record<string, string> = {
-  all: 'הכל',
-  podcast: 'פודקאסט',
-  testimonial: 'עדויות יזמים',
-  interview: 'ראיונות',
-  tv_interview: 'ראיונות טלוויזיה',
-  reels: 'Reels',
-  summary: 'סיכום',
-  webinar: 'וובינר',
-  tutorial: 'הדרכה',
-  highlight: 'היילייט',
-};
 
 function formatDuration(seconds: number): string {
   const hrs = Math.floor(seconds / 3600);
@@ -71,9 +59,13 @@ function getThumbnail(video: VideoItem): string {
 // =============================================================================
 
 export function VideoGrid({ videos }: { videos: VideoItem[] }) {
+  const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('all');
 
   const categories = ['all', ...Array.from(new Set(videos.map((v) => v.category)))];
+
+  const categoryLabel = (cat: string) =>
+    t(`videos.category.${cat}`) !== `videos.category.${cat}` ? t(`videos.category.${cat}`) : cat;
 
   const filtered =
     activeCategory === 'all'
@@ -94,14 +86,14 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
                 : 'bg-white/[0.05] text-white/60 hover:bg-white/[0.1] hover:text-white border border-white/[0.06]'
             }`}
           >
-            {categoryLabels[cat] ?? cat}
+            {categoryLabel(cat)}
           </button>
         ))}
       </div>
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <p className="text-center text-white/40 py-20">אין סרטונים בקטגוריה זו.</p>
+        <p className="text-center text-white/40 py-20">{t('videos.grid.empty')}</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((video) => (
@@ -118,9 +110,12 @@ export function VideoGrid({ videos }: { videos: VideoItem[] }) {
 // =============================================================================
 
 function VideoCard({ video }: { video: VideoItem }) {
+  const { t } = useLanguage();
   const [playing, setPlaying] = useState(false);
   const thumb = getThumbnail(video);
   const ytId = extractYouTubeId(video.videoUrl);
+  const categoryLabel = (cat: string) =>
+    t(`videos.category.${cat}`) !== `videos.category.${cat}` ? t(`videos.category.${cat}`) : cat;
 
   return (
     <div
@@ -147,7 +142,7 @@ function VideoCard({ video }: { video: VideoItem }) {
             <button
               onClick={() => ytId ? setPlaying(true) : window.open(video.videoUrl, '_blank')}
               className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors duration-300 cursor-pointer"
-              aria-label={`נגן ${video.title}`}
+              aria-label={t('videos.grid.playAria').replace('{title}', video.title)}
             >
               <div className="w-14 h-14 rounded-full bg-[#c8a951] flex items-center justify-center shadow-lg opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
                 <Play className="w-6 h-6 text-[#070b1e] fill-[#070b1e] mr-[-2px]" />
@@ -155,7 +150,7 @@ function VideoCard({ video }: { video: VideoItem }) {
             </button>
             {/* Duration Badge */}
             {video.duration && (
-              <span className="absolute bottom-3 left-3 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded" dir="ltr">
+              <span className="absolute bottom-3 end-3 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded" dir="ltr">
                 {formatDuration(video.duration)}
               </span>
             )}
@@ -163,8 +158,8 @@ function VideoCard({ video }: { video: VideoItem }) {
         )}
         {/* Category Badge */}
         {!playing && (
-          <span className="absolute top-3 right-3 bg-[#c8a951]/20 text-[#c8a951] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-[#c8a951]/30 backdrop-blur-sm">
-            {categoryLabels[video.category] ?? video.category}
+          <span className="absolute top-3 start-3 bg-[#c8a951]/20 text-[#c8a951] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-[#c8a951]/30 backdrop-blur-sm">
+            {categoryLabel(video.category)}
           </span>
         )}
       </div>

@@ -384,11 +384,11 @@ export interface ConstructMetadataParams {
 /**
  * Get a random Hebrew brand variation for SEO diversity
  */
-function getHebrewBrandVariation: string {
+function getHebrewBrandVariation(): string {
  const variations = BRAND.hebrew.variations;
  // Use a deterministic selection based on current date to ensure consistency
  // but still rotate through variations
- const index = new Date.getDate % variations.length;
+ const index = new Date().getDate() % variations.length;
  return variations[index];
 }
 

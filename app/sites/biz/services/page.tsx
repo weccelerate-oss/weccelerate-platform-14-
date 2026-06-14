@@ -96,7 +96,7 @@ const businessServices: Service[] = [
     icon: TrendingUp,
     title: 'אסטרטגיית גיוס הון',
     titleEn: 'Fundraising Strategy',
-    subtitle: 'Seed, Series A, VC Relations',
+    subtitle: 'Seed, Series A, וקשרי VC',
     description: 'ליווי מקצועי בכל שלבי גיוס ההון - מבניית המצגת והשווי, דרך פיתוח קשרים עם משקיעים, ועד סגירת הסבב בהצלחה.',
     features: [
       'בניית Pitch Deck מקצועי',
@@ -104,7 +104,7 @@ const businessServices: Service[] = [
       'גישה לרשת 500+ משקיעים',
       'הכנה לפגישות משקיעים',
       'ניהול משא ומתן וסגירה',
-      'Due Diligence support',
+      'ליווי בתהליך Due Diligence',
     ],
     faqs: [
       {
@@ -145,7 +145,7 @@ const businessServices: Service[] = [
       'ייעוץ ארכיטקטורה טכנית',
       'חיבור לצוותי פיתוח מומלצים',
       'בניית Roadmap מוצר',
-      'UX/UI Design review',
+      'בדיקת עיצוב UX/UI',
       'ליווי השקה ראשונית',
     ],
     faqs: [
@@ -230,7 +230,7 @@ const businessServices: Service[] = [
       'הגדרת Value Proposition',
       'אסטרטגיית תמחור',
       'תכנון צמיחה',
-      'Pivot consulting',
+      'ייעוץ Pivot',
     ],
     faqs: [
       {
@@ -488,7 +488,7 @@ function ServiceCard({ service }: { service: Service }) {
           <service.icon className="w-7 h-7 text-slate-700" />
         </div>
         {service.stats && (
-          <div className="text-left">
+          <div className="text-start">
             <p className="text-2xl font-bold text-slate-900">{service.stats.value}</p>
             <p className="text-xs text-slate-500">{service.stats.label}</p>
           </div>
@@ -560,7 +560,7 @@ function ServiceFAQSection({ service }: { service: Service }) {
           >
             <summary className="flex items-center justify-between p-5 cursor-pointer list-none hover:bg-slate-50 transition-colors">
               <h4
-                className="text-base font-medium text-slate-900 pl-4"
+                className="text-base font-medium text-slate-900 pe-4"
                 itemProp="name"
               >
                 {faq.question}

@@ -3,7 +3,9 @@
  * All UI strings for the WeCcelerate platform in Hebrew.
  */
 
-export const he: Record<string, string> = {
+import { pagesHe } from './pages';
+
+const heCore: Record<string, string> = {
   // =========================================================================
   // NAVBAR
   // =========================================================================
@@ -21,6 +23,13 @@ export const he: Record<string, string> = {
   'nav.mobileNav': 'ניווט מובייל',
   'nav.menuDialog': 'תפריט ניווט',
   'nav.langLabel': 'בחירת שפה',
+
+  // Global chrome (skip link, floating buttons, navigation widgets)
+  'chrome.skipToContent': 'דלג לתוכן הראשי',
+  'chrome.whatsapp.aria': 'שלחו לנו הודעה בוואטסאפ',
+  'chrome.nav.googleMaps': 'נווטו אלינו בגוגל מפות',
+  'chrome.nav.waze': 'נווטו אלינו בוויז',
+  'chrome.map.title': 'מיקום WeCcelerate - רחוב הרכבת 58, תל אביב',
   'nav.switchLang': 'החלף שפה ל',
   'nav.callUs': 'התקשרו אלינו',
   'nav.sendWhatsApp': 'שלחו הודעת WhatsApp',
@@ -965,3 +974,7 @@ export const he: Record<string, string> = {
   'accessibility.disclaimer.title': 'הצהרה',
   'accessibility.disclaimer.text': 'למרות מאמצינו הרבים להנגיש את כלל הדפים והתכנים באתר, ייתכן שחלק מהתכנים טרם הונגשו או טרם הונגשו באופן מלא. אנו ממשיכים לעבוד על שיפור הנגישות ולהתאים את האתר לעמידה בתקני הנגישות העדכניים ביותר.',
 };
+
+// Core dictionary + per-page modules (see lib/i18n/pages). Page keys override
+// core only if duplicated — keep page keys namespaced to avoid collisions.
+export const he: Record<string, string> = { ...heCore, ...pagesHe };

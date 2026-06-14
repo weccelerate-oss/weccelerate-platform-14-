@@ -1,8 +1,10 @@
 'use client';
 
 import { TrackedLink } from '@/components/ui/TrackedLink';
+import { useLanguage } from '@/lib/i18n';
 
 export function WhatsAppFloat() {
+  const { t } = useLanguage();
   return (
     <TrackedLink
       trackAction="click.whatsapp"
@@ -10,7 +12,7 @@ export function WhatsAppFloat() {
       href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '972555647538'}`}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="שלחו לנו הודעה בוואטסאפ"
+      aria-label={t('chrome.whatsapp.aria')}
       className="fixed bottom-6 left-6 z-[9998] w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1ebe5b] text-white shadow-lg shadow-black/25 hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center"
     >
       {/* Official WhatsApp SVG icon */}

@@ -66,13 +66,13 @@ export default function FAQBiz() {
  className="object-cover group-hover:scale-105 transition-transform duration-700"
  sizes="(max-width: 1024px) 100vw, 33vw"
  />
- <div className="absolute inset-0 bg-gradient-to-t from-[#070b1e] via-[#070b1e]/ to-transparent" />
+ <div className="absolute inset-0 bg-gradient-to-t from-[#070b1e] via-[#070b1e]/60 to-transparent" />
  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent" />
 
  <motion.div
  animate={{ y: [0, -6, 0] }}
  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
- className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/ backdrop-blur-md flex items-center justify-center shadow-xl shadow-emerald-500/20"
+ className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 backdrop-blur-md flex items-center justify-center shadow-xl shadow-emerald-500/20"
  >
  <MessageCircleQuestion className="w-7 h-7 text-emerald-300" />
  </motion.div>

@@ -72,7 +72,7 @@ export function PortalNavbar({ userName, userEmail }: PortalNavbarProps) {
 
           {/* User */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:block text-left">
+            <div className="hidden sm:block text-start">
               <p className="text-xs font-medium text-white/70">{userName}</p>
               <p className="text-[10px] text-white/30">{userEmail}</p>
             </div>

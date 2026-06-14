@@ -36,6 +36,7 @@ async function getEventsFromDB() {
       take: 6,
       select: {
         id: true, name: true, nameEn: true, slug: true, description: true,
+        descriptionEn: true,
         date: true, time: true, endTime: true, locationType: true,
         address: true, city: true, virtualLink: true, registrationLink: true,
         imageUrl: true, status: true, capacity: true, registeredCount: true,
