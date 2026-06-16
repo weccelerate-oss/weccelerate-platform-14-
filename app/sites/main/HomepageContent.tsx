@@ -6,6 +6,7 @@ import Image from 'next/image';
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
   Phone,
   Mail,
   MapPin,
@@ -108,6 +109,9 @@ const partnersLogos = [
 // Logos are normalized into uniform-height tiles; each tile links to the site.
 // =============================================================================
 
+// `imgH` is tuned per logo so that visually different shapes (tall shields,
+// long wordmarks, square app icons) read at a balanced optical size inside the
+// shared white plate. This hand-tuning is what makes the wall feel "uniform".
 const alumniCompanies = [
   {
     name: 'BlueHawkEye',
@@ -115,6 +119,7 @@ const alumniCompanies = [
     url: 'https://www.bluehawkeye.com/',
     category: 'ביטחון וסייבר',
     categoryEn: 'Defense & Security',
+    imgH: 'h-12 sm:h-16', // square shield → tall
   },
   {
     name: 'Symbiosis',
@@ -122,6 +127,7 @@ const alumniCompanies = [
     url: 'https://symbiosis-cm.com/',
     category: 'הלת׳-טק וביו-טק',
     categoryEn: 'HealthTech & BioTech',
+    imgH: 'h-7 sm:h-9', // wide single-line wordmark
   },
   {
     name: 'Nikita',
@@ -129,6 +135,7 @@ const alumniCompanies = [
     url: 'https://nikita.green/',
     category: 'גרין-טק',
     categoryEn: 'GreenTech',
+    imgH: 'h-6 sm:h-8', // very wide wordmark
   },
   {
     name: 'Job2Day',
@@ -136,6 +143,7 @@ const alumniCompanies = [
     url: 'https://job2day.co.il/',
     category: 'HR-טק',
     categoryEn: 'HRTech',
+    imgH: 'h-6 sm:h-8', // very wide wordmark
   },
   {
     name: '4Model',
@@ -143,6 +151,7 @@ const alumniCompanies = [
     url: 'https://4model.co.il/en/',
     category: 'נדל״ן-טק',
     categoryEn: 'PropTech',
+    imgH: 'h-11 sm:h-14', // two-line lockup
   },
   {
     name: 'Ububl',
@@ -150,6 +159,7 @@ const alumniCompanies = [
     url: 'https://ububl.co.il/',
     category: 'טכנולוגיית צרכן',
     categoryEn: 'Consumer Tech',
+    imgH: 'h-9 sm:h-12', // compact wordmark
   },
   {
     name: 'Paytag',
@@ -157,6 +167,7 @@ const alumniCompanies = [
     url: 'https://www.calcalistech.com/ctechnews/article/5i583v2fg',
     category: 'קמעונאות-טק',
     categoryEn: 'Retail Tech',
+    imgH: 'h-14 sm:h-[4.5rem]', // baked-in whitespace → scale up to compensate
   },
   {
     name: 'SafarWay',
@@ -164,6 +175,7 @@ const alumniCompanies = [
     url: 'https://play.google.com/store/apps/details?id=com.safarway.app',
     category: 'תיירות-טק',
     categoryEn: 'Travel Tech',
+    imgH: 'h-12 sm:h-14', // square app icon
   },
 ];
 
@@ -456,7 +468,7 @@ function AlumniSection() {
   const { t, lang } = useLanguage();
 
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden">
+    <section className="relative py-20 sm:py-32 overflow-hidden">
       {/* Background — same deep navy family as neighbouring sections */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e] via-[#0d1321] to-[#070b1e]" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
@@ -465,69 +477,70 @@ function AlumniSection() {
 
       <div className="container-corporate relative z-10">
         <ScrollReveal variant="blur">
-          <div className="text-center mb-14 sm:mb-16">
-            <p className="text-gold-500 text-sm font-semibold uppercase tracking-[0.2em] mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <p className="text-gold-500 text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] mb-3 sm:mb-4">
               {t('sections.portfolio.tag')}
             </p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-5">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 sm:mb-5 px-2">
               {t('sections.portfolio.title')}
             </h2>
-            <p className="text-base sm:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed px-2">
               {t('sections.portfolio.subtitle')}
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 max-w-6xl mx-auto">
           {alumniCompanies.map((company, i) => {
             const category = lang === 'en' ? company.categoryEn : company.category;
             return (
-              <ScrollReveal key={company.name} delay={i * 70} variant="scale">
+              <ScrollReveal key={company.name} delay={i * 60} variant="scale">
                 <a
                   href={company.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`${company.name} — ${t('sections.portfolio.visit')}`}
-                  className="group relative flex h-full flex-col items-center justify-between rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 sm:p-6 transition-all duration-500 hover:-translate-y-1 hover:border-[#c8a951]/40 hover:bg-white/[0.04]"
+                  className="group relative flex h-full flex-col gap-3 sm:gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-5 transition-all duration-500 hover:-translate-y-1.5 hover:border-[#c8a951]/50 hover:bg-white/[0.05] hover:shadow-[0_24px_60px_-20px_rgba(200,169,81,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c8a951]/60"
                 >
-                  {/* Hover glow */}
-                  <div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{ boxShadow: 'inset 0 0 40px rgba(200,169,81,0.06), 0 0 50px rgba(200,169,81,0.05)' }}
-                    aria-hidden="true"
-                  />
-
-                  {/* External-link affordance on hover */}
-                  <span className="absolute top-3 end-3 text-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true">
-                    <ExternalLink className="w-4 h-4" />
-                  </span>
-
-                  {/* Logo tile — white plate keeps every brand legible + uniform */}
-                  <div className="flex w-full items-center justify-center rounded-xl bg-white px-4 py-5 sm:py-6">
-                    <div className="relative flex h-12 sm:h-14 w-full items-center justify-center">
-                      <Image
+                  {/* Logo plate — uniform white chip; soft gold glow blooms on hover */}
+                  <div className="relative">
+                    <div
+                      className="absolute -inset-2 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 pointer-events-none"
+                      style={{ background: 'radial-gradient(circle, rgba(200,169,81,0.18), transparent 70%)' }}
+                      aria-hidden="true"
+                    />
+                    <div className="relative flex h-[4.5rem] sm:h-24 w-full items-center justify-center rounded-xl bg-white px-3 sm:px-4 ring-1 ring-black/[0.04] shadow-sm overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
                         src={company.logo}
                         alt={`${company.name} logo`}
-                        width={220}
-                        height={80}
-                        unoptimized={company.logo.endsWith('.svg')}
-                        className="max-h-12 sm:max-h-14 w-auto max-w-[150px] object-contain"
+                        loading="lazy"
+                        className={`${company.imgH} w-auto max-w-[90%] object-contain transition-transform duration-500 group-hover:scale-[1.06]`}
                       />
                     </div>
                   </div>
 
-                  {/* Company + category */}
-                  <div className="mt-4 text-center">
-                    <p className="text-white font-semibold text-sm sm:text-base group-hover:text-gold-300 transition-colors duration-300" dir="ltr">
-                      {company.name}
-                    </p>
-                    <span className="mt-1.5 inline-block text-[#c8a951]/80 text-xs font-medium tracking-wide">
-                      {category}
+                  {/* Company name + category + hover arrow */}
+                  <div className="flex items-center justify-between gap-2 px-0.5">
+                    <div className="min-w-0">
+                      <p className="truncate text-white font-bold text-sm sm:text-base leading-tight group-hover:text-gold-300 transition-colors duration-300" dir="ltr">
+                        {company.name}
+                      </p>
+                      <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-medium text-[#c8a951]/85">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#c8a951]/70 flex-shrink-0" aria-hidden="true" />
+                        <span className="truncate">{category}</span>
+                      </span>
+                    </div>
+                    <span
+                      className="flex-shrink-0 text-white/25 transition-all duration-300 opacity-60 sm:opacity-0 group-hover:opacity-100 group-hover:text-[#c8a951] rtl:rotate-[-90deg]"
+                      aria-hidden="true"
+                    >
+                      <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
                     </span>
                   </div>
 
                   {/* Bottom gold underline on hover */}
-                  <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true" />
+                  <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true" />
                 </a>
               </ScrollReveal>
             );
