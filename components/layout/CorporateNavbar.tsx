@@ -533,6 +533,38 @@ export function CorporateNavbar() {
                 </Link>
               </div>
 
+              {/* Mobile Language Switcher */}
+              <div
+                className="pt-4 mt-4 border-t border-white/5 flex items-center justify-center gap-4"
+                role="group"
+                aria-label={t('nav.langLabel')}
+              >
+                <Globe className="w-4 h-4 text-white/30" aria-hidden="true" />
+                <button
+                  onClick={() => switchLang('he')}
+                  lang="he"
+                  aria-label={`${t('nav.switchLang')} עברית`}
+                  aria-current={lang === 'he' ? 'true' : undefined}
+                  className={`text-sm transition-colors ${
+                    lang === 'he' ? 'text-gold-400 font-medium' : 'text-white/60 hover:text-gold-400'
+                  }`}
+                >
+                  עברית
+                </button>
+                <span className="text-white/20" aria-hidden="true">|</span>
+                <button
+                  onClick={() => switchLang('en')}
+                  lang="en"
+                  aria-label={`${t('nav.switchLang')} English`}
+                  aria-current={lang === 'en' ? 'true' : undefined}
+                  className={`text-sm transition-colors ${
+                    lang === 'en' ? 'text-gold-400 font-medium' : 'text-white/60 hover:text-gold-400'
+                  }`}
+                >
+                  English
+                </button>
+              </div>
+
               {/* Mobile Contact */}
               <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-center gap-6 text-sm text-white/60">
                 <TrackedLink
