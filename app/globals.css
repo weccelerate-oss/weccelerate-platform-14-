@@ -899,6 +899,73 @@ textarea:focus-visible,
 }
 
 /* =============================================================================
+   ALUMNI / PORTFOLIO LOGO WALL — premium hover + idle light-wave
+   ============================================================================= */
+
+/* Rotating gold gradient border, revealed on hover (reuses --border-angle).
+   Masked so only a ~1.5px edge of the conic gradient is visible. */
+.alumni-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem; /* matches rounded-2xl */
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 0deg,
+    rgba(232, 212, 139, 0.95) 70deg,
+    rgba(200, 169, 81, 0.95) 135deg,
+    transparent 210deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: rotateBorder 4s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+.alumni-card:hover::before {
+  opacity: 1;
+}
+
+/* Idle "light wave" — a glint sweeps across each white logo plate, staggered
+   per card via --sheen-delay so the whole wall ripples left-to-right. */
+.alumni-plate::after {
+  content: "";
+  position: absolute;
+  top: -10%;
+  left: -65%;
+  width: 45%;
+  height: 130%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.7) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  pointer-events: none;
+  z-index: 1;
+  animation: alumniSheen 6.5s ease-in-out infinite;
+  animation-delay: var(--sheen-delay, 0s);
+}
+/* Stronger, immediate glint on hover */
+.alumni-card:hover .alumni-plate::after {
+  animation: alumniSheen 0.9s ease;
+}
+
+@keyframes alumniSheen {
+  0%   { left: -65%; opacity: 0; }
+  6%   { opacity: 1; }
+  20%  { left: 130%; opacity: 0; }
+  100% { left: 130%; opacity: 0; }
+}
+
+/* =============================================================================
    ACCESSIBILITY — WCAG 2.1 AA Compliance
    ============================================================================= */
 

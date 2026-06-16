@@ -163,11 +163,11 @@ const alumniCompanies = [
   },
   {
     name: 'Paytag',
-    logo: '/images/portfolio/paytag.jpg',
+    logo: '/images/portfolio/paytag.png',
     url: 'https://www.calcalistech.com/ctechnews/article/5i583v2fg',
     category: 'קמעונאות-טק',
     categoryEn: 'Retail Tech',
-    imgH: 'h-14 sm:h-[4.5rem]', // baked-in whitespace → scale up to compensate
+    imgH: 'h-7 sm:h-9', // tight-cropped wordmark
   },
   {
     name: 'SafarWay',
@@ -500,7 +500,8 @@ function AlumniSection() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`${company.name} — ${t('sections.portfolio.visit')}`}
-                  className="group relative flex h-full flex-col gap-3 sm:gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-5 transition-all duration-500 hover:-translate-y-1.5 hover:border-[#c8a951]/50 hover:bg-white/[0.05] hover:shadow-[0_24px_60px_-20px_rgba(200,169,81,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c8a951]/60"
+                  style={{ ['--sheen-delay' as string]: `${i * 0.45}s` } as React.CSSProperties}
+                  className="alumni-card group relative flex h-full flex-col gap-3 sm:gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-5 transition-all duration-500 hover:-translate-y-1.5 hover:border-[#c8a951]/50 hover:bg-white/[0.05] hover:shadow-[0_24px_60px_-20px_rgba(200,169,81,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c8a951]/60"
                 >
                   {/* Logo plate — uniform white chip; soft gold glow blooms on hover */}
                   <div className="relative">
@@ -509,7 +510,7 @@ function AlumniSection() {
                       style={{ background: 'radial-gradient(circle, rgba(200,169,81,0.18), transparent 70%)' }}
                       aria-hidden="true"
                     />
-                    <div className="relative flex h-[4.5rem] sm:h-24 w-full items-center justify-center rounded-xl bg-white px-3 sm:px-4 ring-1 ring-black/[0.04] shadow-sm overflow-hidden">
+                    <div className="alumni-plate relative flex h-[4.5rem] sm:h-24 w-full items-center justify-center rounded-xl bg-white px-3 sm:px-4 ring-1 ring-black/[0.04] shadow-sm overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={company.logo}
