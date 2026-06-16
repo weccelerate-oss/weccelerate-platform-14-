@@ -87,6 +87,11 @@ const heCore: Record<string, string> = {
   'sections.testimonials.tag': 'סיפורי הצלחה',
   'sections.testimonials.title': 'מה היזמים אומרים',
 
+  'sections.portfolio.tag': 'הבוגרים שלנו',
+  'sections.portfolio.title': 'חברות שצמחו איתנו — והיום שם דבר בתעשייה',
+  'sections.portfolio.subtitle': 'מיזמים שעשו אצלנו את הצעדים הראשונים, והיום מובילים בתחומם בארץ ובעולם.',
+  'sections.portfolio.visit': 'לאתר החברה',
+
   'sections.press.tag': 'כתבו עלינו',
   'sections.press.title': 'סיקור תקשורתי',
   'sections.press.readMore': 'לכתבה המלאה',

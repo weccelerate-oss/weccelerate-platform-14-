@@ -103,6 +103,71 @@ const partnersLogos = [
 ];
 
 // =============================================================================
+// ALUMNI / PORTFOLIO DATA
+// Ventures that grew with WeCcelerate and are now established in their industry.
+// Logos are normalized into uniform-height tiles; each tile links to the site.
+// =============================================================================
+
+const alumniCompanies = [
+  {
+    name: 'BlueHawkEye',
+    logo: '/images/portfolio/bluehawkeye.png',
+    url: 'https://www.bluehawkeye.com/',
+    category: 'ביטחון וסייבר',
+    categoryEn: 'Defense & Security',
+  },
+  {
+    name: 'Symbiosis',
+    logo: '/images/portfolio/symbiosis.svg',
+    url: 'https://symbiosis-cm.com/',
+    category: 'הלת׳-טק וביו-טק',
+    categoryEn: 'HealthTech & BioTech',
+  },
+  {
+    name: 'Nikita',
+    logo: '/images/portfolio/nikita.png',
+    url: 'https://nikita.green/',
+    category: 'גרין-טק',
+    categoryEn: 'GreenTech',
+  },
+  {
+    name: 'Job2Day',
+    logo: '/images/portfolio/job2day.png',
+    url: 'https://job2day.co.il/',
+    category: 'HR-טק',
+    categoryEn: 'HRTech',
+  },
+  {
+    name: '4Model',
+    logo: '/images/portfolio/4model.png',
+    url: 'https://4model.co.il/en/',
+    category: 'נדל״ן-טק',
+    categoryEn: 'PropTech',
+  },
+  {
+    name: 'Ububl',
+    logo: '/images/portfolio/ububl.svg',
+    url: 'https://ububl.co.il/',
+    category: 'טכנולוגיית צרכן',
+    categoryEn: 'Consumer Tech',
+  },
+  {
+    name: 'Paytag',
+    logo: '/images/portfolio/paytag.jpg',
+    url: 'https://www.calcalistech.com/ctechnews/article/5i583v2fg',
+    category: 'קמעונאות-טק',
+    categoryEn: 'Retail Tech',
+  },
+  {
+    name: 'SafarWay',
+    logo: '/images/portfolio/safarway.webp',
+    url: 'https://play.google.com/store/apps/details?id=com.safarway.app',
+    category: 'תיירות-טק',
+    categoryEn: 'Travel Tech',
+  },
+];
+
+// =============================================================================
 // MAIN COMPONENT
 // =============================================================================
 
@@ -117,6 +182,7 @@ export function HomepageContent({ news, events, videos, stories }: HomepageConte
         <PartnersSection />
         <VideosSection videos={videos} />
         <TestimonialsSection stories={stories} />
+        <AlumniSection />
         <PressSection articles={news} />
         <NewsSection events={events} />
         <CTASection />
@@ -377,6 +443,96 @@ function TestimonialsSection({ stories }: { stories: StoryItem[] }) {
             );
           })}
         </AutoScrollCarousel>
+      </div>
+    </section>
+  );
+}
+
+// =============================================================================
+// ALUMNI / PORTFOLIO — companies that grew with us
+// =============================================================================
+
+function AlumniSection() {
+  const { t, lang } = useLanguage();
+
+  return (
+    <section className="relative py-24 sm:py-32 overflow-hidden">
+      {/* Background — same deep navy family as neighbouring sections */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e] via-[#0d1321] to-[#070b1e]" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
+      {/* Ambient gold glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#c8a951]/[0.04] rounded-full blur-[160px] pointer-events-none" aria-hidden="true" />
+
+      <div className="container-corporate relative z-10">
+        <ScrollReveal variant="blur">
+          <div className="text-center mb-14 sm:mb-16">
+            <p className="text-gold-500 text-sm font-semibold uppercase tracking-[0.2em] mb-4">
+              {t('sections.portfolio.tag')}
+            </p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-5">
+              {t('sections.portfolio.title')}
+            </h2>
+            <p className="text-base sm:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed">
+              {t('sections.portfolio.subtitle')}
+            </p>
+          </div>
+        </ScrollReveal>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 max-w-6xl mx-auto">
+          {alumniCompanies.map((company, i) => {
+            const category = lang === 'en' ? company.categoryEn : company.category;
+            return (
+              <ScrollReveal key={company.name} delay={i * 70} variant="scale">
+                <a
+                  href={company.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${company.name} — ${t('sections.portfolio.visit')}`}
+                  className="group relative flex h-full flex-col items-center justify-between rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 sm:p-6 transition-all duration-500 hover:-translate-y-1 hover:border-[#c8a951]/40 hover:bg-white/[0.04]"
+                >
+                  {/* Hover glow */}
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{ boxShadow: 'inset 0 0 40px rgba(200,169,81,0.06), 0 0 50px rgba(200,169,81,0.05)' }}
+                    aria-hidden="true"
+                  />
+
+                  {/* External-link affordance on hover */}
+                  <span className="absolute top-3 end-3 text-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true">
+                    <ExternalLink className="w-4 h-4" />
+                  </span>
+
+                  {/* Logo tile — white plate keeps every brand legible + uniform */}
+                  <div className="flex w-full items-center justify-center rounded-xl bg-white px-4 py-5 sm:py-6">
+                    <div className="relative flex h-12 sm:h-14 w-full items-center justify-center">
+                      <Image
+                        src={company.logo}
+                        alt={`${company.name} logo`}
+                        width={220}
+                        height={80}
+                        unoptimized={company.logo.endsWith('.svg')}
+                        className="max-h-12 sm:max-h-14 w-auto max-w-[150px] object-contain"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Company + category */}
+                  <div className="mt-4 text-center">
+                    <p className="text-white font-semibold text-sm sm:text-base group-hover:text-gold-300 transition-colors duration-300" dir="ltr">
+                      {company.name}
+                    </p>
+                    <span className="mt-1.5 inline-block text-[#c8a951]/80 text-xs font-medium tracking-wide">
+                      {category}
+                    </span>
+                  </div>
+
+                  {/* Bottom gold underline on hover */}
+                  <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true" />
+                </a>
+              </ScrollReveal>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

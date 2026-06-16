@@ -87,6 +87,11 @@ const enCore: Record<string, string> = {
   'sections.testimonials.tag': 'Success Stories',
   'sections.testimonials.title': 'What Founders Say',
 
+  'sections.portfolio.tag': 'Our Alumni',
+  'sections.portfolio.title': 'Companies That Grew With Us — Now Industry Names',
+  'sections.portfolio.subtitle': 'Ventures that took their first steps with us and are now leaders in their fields, in Israel and worldwide.',
+  'sections.portfolio.visit': 'Visit website',
+
   'sections.press.tag': 'In The Press',
   'sections.press.title': 'Media Coverage',
   'sections.press.readMore': 'Read Full Article',
