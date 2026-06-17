@@ -177,6 +177,14 @@ const alumniCompanies = [
     categoryEn: 'Travel Tech',
     imgH: 'h-12 sm:h-14', // square app icon
   },
+  {
+    name: 'Inhalimed',
+    logo: '/images/portfolio/inhalimed.png',
+    url: 'https://www.inhalimed.com/',
+    category: 'מד-טק',
+    categoryEn: 'MedTech',
+    imgH: 'h-11 sm:h-14', // wordmark + particle graphic
+  },
 ];
 
 // =============================================================================
@@ -490,7 +498,7 @@ function AlumniSection() {
           </div>
         </ScrollReveal>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 max-w-5xl mx-auto [&>*:last-child]:max-sm:col-span-2">
           {alumniCompanies.map((company, i) => {
             const category = lang === 'en' ? company.categoryEn : company.category;
             return (
