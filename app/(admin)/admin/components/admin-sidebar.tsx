@@ -17,6 +17,7 @@ import {
   Video,
   Users,
   BookOpen,
+  GraduationCap,
   Settings,
   LogOut,
   Shield,
@@ -48,6 +49,7 @@ const NAV_ITEMS = [
   {
     label: 'ניהול תוכן',
     items: [
+      { label: 'שיעורים (פורטל)', href: '/admin/learning', icon: GraduationCap },
       { label: 'עדכונים (טיקר)', href: '/admin/news', icon: Newspaper },
       { label: 'אירועים', href: '/admin/events', icon: Calendar },
       { label: 'סרטונים', href: '/admin/videos', icon: Video },

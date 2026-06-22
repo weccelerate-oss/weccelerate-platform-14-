@@ -29,10 +29,23 @@ import {
   RotateCcw,
   Flame,
   Timer,
+  Download,
+  Paperclip,
+  HelpCircle,
+  XCircle,
+  Award,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { COURSES_DATA, getTotalLessons } from '@/lib/courses-data';
 import type { CategoryData, SubcategoryData, LessonData } from '@/lib/courses-data';
+
+/** Total lessons across a catalog (replaces the static getTotalLessons). */
+function countLessons(catalog: CategoryData[]): number {
+  return catalog.reduce(
+    (total, cat) =>
+      total + cat.subcategories.reduce((sub, s) => sub + s.lessons.length, 0),
+    0,
+  );
+}
 
 // =============================================================================
 // TYPES
@@ -48,6 +61,8 @@ export interface LessonProgress {
 
 interface LearningContentProps {
   user: { id: string; name: string };
+  /** Admin-managed catalog from the DB (published lessons only). */
+  catalog: CategoryData[];
   initialProgress: LessonProgress[];
 }
 
@@ -101,9 +116,9 @@ type LessonIndex = {
   subcategory: SubcategoryData;
 };
 
-function buildLessonIndex(): Map<string, LessonIndex> {
+function buildLessonIndex(catalog: CategoryData[]): Map<string, LessonIndex> {
   const map = new Map<string, LessonIndex>();
-  for (const category of COURSES_DATA) {
+  for (const category of catalog) {
     for (const subcategory of category.subcategories) {
       for (const lesson of subcategory.lessons) {
         map.set(lesson.slug, { lesson, category, subcategory });
@@ -115,9 +130,9 @@ function buildLessonIndex(): Map<string, LessonIndex> {
 
 // Flat traversal order: every lesson in the order they appear on the page.
 // Powers "מומלץ הבא" + continuous autoplay across subcategory/category seams.
-function buildLessonOrder(): string[] {
+function buildLessonOrder(catalog: CategoryData[]): string[] {
   const order: string[] = [];
-  for (const category of COURSES_DATA) {
+  for (const category of catalog) {
     for (const subcategory of category.subcategories) {
       for (const lesson of subcategory.lessons) {
         order.push(lesson.slug);
@@ -214,7 +229,7 @@ const devLog = (...args: unknown[]) => {
   if (isDev) console.log(...args);
 };
 
-export function LearningContent({ user, initialProgress }: LearningContentProps) {
+export function LearningContent({ user, catalog, initialProgress }: LearningContentProps) {
   // The single source of truth for "what does the user know / where did
   // they stop." Keyed by slug for O(1) lookup from any render path.
   // On load, treat any lesson past the completion threshold as completed —
@@ -257,15 +272,15 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
   }, [user.id]);
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(COURSES_DATA.map((c) => c.slug)),
+    () => new Set(catalog.map((c) => c.slug)),
   );
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
   const [activeLesson, setActiveLesson] = useState<LessonData | null>(null);
   const [activeCategoryColor, setActiveCategoryColor] = useState<string>('blue');
 
-  const totalLessons = useMemo(() => getTotalLessons(), []);
-  const lessonIndex = useMemo(() => buildLessonIndex(), []);
-  const lessonOrder = useMemo(() => buildLessonOrder(), []);
+  const totalLessons = useMemo(() => countLessons(catalog), [catalog]);
+  const lessonIndex = useMemo(() => buildLessonIndex(catalog), [catalog]);
+  const lessonOrder = useMemo(() => buildLessonOrder(catalog), [catalog]);
 
   // Returns the next lesson after `slug` in display order, or null at end.
   const getNextLesson = useCallback(
@@ -702,11 +717,11 @@ export function LearningContent({ user, initialProgress }: LearningContentProps)
       )}
 
       {/* Quick-jump category nav — sticky-ish at the top of the courses block */}
-      <CategoryQuickJump categories={COURSES_DATA} progressMap={progressMap} />
+      <CategoryQuickJump categories={catalog} progressMap={progressMap} />
 
       {/* Course Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-5">
-        {COURSES_DATA.map((category, catIdx) => (
+        {catalog.map((category, catIdx) => (
           <CategoryCard
             key={category.slug}
             category={category}
@@ -2108,6 +2123,23 @@ function VideoModal({
             {lesson.description}
           </p>
 
+          {/* Rich body (admin-authored notes/transcript) */}
+          {lesson.content && (
+            <div className="mt-4 text-white/55 leading-relaxed text-sm whitespace-pre-wrap">
+              {lesson.content}
+            </div>
+          )}
+
+          {/* Downloadable resources */}
+          {lesson.attachments && lesson.attachments.length > 0 && (
+            <LessonAttachments attachments={lesson.attachments} />
+          )}
+
+          {/* End-of-lesson quiz */}
+          {lesson.quiz && lesson.quiz.questions.length > 0 && (
+            <LessonQuiz lessonSlug={lesson.slug} quiz={lesson.quiz} />
+          )}
+
           {/* "Up next" rail — always available so the user can jump ahead
               without waiting for the video to end. Hidden when there's no
               next lesson (end of curriculum). */}
@@ -2148,5 +2180,203 @@ function VideoModal({
         </div>
       </motion.div>
     </motion.div>
+  );
+}
+
+// =============================================================================
+// LESSON ATTACHMENTS — downloadable resources under the video
+// =============================================================================
+
+function formatBytes(bytes: number | null | undefined): string {
+  if (!bytes || bytes <= 0) return '';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let n = bytes;
+  let i = 0;
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024;
+    i++;
+  }
+  return `${n.toFixed(n >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function LessonAttachments({
+  attachments,
+}: {
+  attachments: NonNullable<LessonData['attachments']>;
+}) {
+  return (
+    <div className="mt-5">
+      <div className="flex items-center gap-2 mb-2">
+        <Paperclip className="w-4 h-4 text-white/40" />
+        <span className="text-xs font-semibold text-white/50 uppercase tracking-wider">
+          חומרים להורדה
+        </span>
+      </div>
+      <div className="space-y-2">
+        {attachments.map((a) => (
+          <a
+            key={a.id}
+            href={a.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-3 p-3 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.15] transition"
+          >
+            <div className="flex-shrink-0 grid place-items-center w-9 h-9 rounded-lg bg-[#c8a951]/15 text-[#c8a951]">
+              <Download className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white/85 truncate group-hover:text-white">
+                {a.name}
+              </p>
+              {a.size ? (
+                <p className="text-[11px] text-white/40">{formatBytes(a.size)}</p>
+              ) : null}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// LESSON QUIZ — end-of-lesson assessment, graded server-side
+// =============================================================================
+
+function LessonQuiz({
+  lessonSlug,
+  quiz,
+}: {
+  lessonSlug: string;
+  quiz: NonNullable<LessonData['quiz']>;
+}) {
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<{
+    score: number;
+    passed: boolean;
+    correct: Record<string, string>;
+  } | null>(null);
+
+  const allAnswered = quiz.questions.every((q) => answers[q.id]);
+
+  const submit = useCallback(async () => {
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/portal/lessons/quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonSlug, answers }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data) {
+        setResult({
+          score: data.score ?? 0,
+          passed: Boolean(data.passed),
+          correct: data.correct ?? {},
+        });
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }, [lessonSlug, answers]);
+
+  return (
+    <div className="mt-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="grid place-items-center w-8 h-8 rounded-lg bg-[#c8a951]/15 text-[#c8a951]">
+          <HelpCircle className="w-4 h-4" />
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-white">{quiz.title || 'בוחן קצר'}</h4>
+          <p className="text-[11px] text-white/40">ציון מעבר: {quiz.passScore}%</p>
+        </div>
+      </div>
+
+      <div className="space-y-5">
+        {quiz.questions.map((q, qi) => (
+          <div key={q.id}>
+            <p className="text-sm font-medium text-white/85 mb-2">
+              {qi + 1}. {q.prompt}
+            </p>
+            <div className="space-y-1.5">
+              {q.options.map((opt) => {
+                const chosen = answers[q.id] === opt.id;
+                const isCorrect = result?.correct[q.id] === opt.id;
+                const isWrongChoice = Boolean(result) && chosen && !isCorrect;
+                return (
+                  <button
+                    key={opt.id}
+                    disabled={Boolean(result) || submitting}
+                    onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: opt.id }))}
+                    className={cn(
+                      'w-full flex items-center gap-2.5 p-2.5 rounded-lg border text-right text-sm transition',
+                      !result && chosen && 'border-[#c8a951]/40 bg-[#c8a951]/10 text-white',
+                      !result && !chosen && 'border-white/[0.08] bg-white/[0.02] text-white/70 hover:bg-white/[0.05]',
+                      result && isCorrect && 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+                      isWrongChoice && 'border-red-500/40 bg-red-500/10 text-red-300',
+                      result && !isCorrect && !isWrongChoice && 'border-white/[0.06] bg-white/[0.01] text-white/40',
+                    )}
+                  >
+                    <span className="flex-shrink-0">
+                      {result && isCorrect ? (
+                        <CheckCircle2 className="w-4 h-4" />
+                      ) : isWrongChoice ? (
+                        <XCircle className="w-4 h-4" />
+                      ) : (
+                        <Circle className="w-4 h-4 opacity-50" />
+                      )}
+                    </span>
+                    <span className="flex-1">{opt.text}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {result ? (
+        <div
+          className={cn(
+            'mt-5 flex items-center gap-3 p-3 rounded-xl border',
+            result.passed
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+              : 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+          )}
+        >
+          <Award className="w-5 h-5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-bold">
+              {result.passed ? 'עברת בהצלחה!' : 'כמעט שם'} — ציון {result.score}%
+            </p>
+            {!result.passed && (
+              <button
+                onClick={() => {
+                  setResult(null);
+                  setAnswers({});
+                }}
+                className="text-xs underline underline-offset-2 hover:opacity-80"
+              >
+                נסה שוב
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={submit}
+          disabled={!allAnswered || submitting}
+          className={cn(
+            'mt-5 w-full py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2',
+            allAnswered && !submitting
+              ? 'bg-gradient-to-l from-[#e8d48b] to-[#c8a951] text-[#070b1e] hover:brightness-105'
+              : 'bg-white/[0.05] text-white/40 cursor-not-allowed',
+          )}
+        >
+          {submitting ? 'בודק...' : 'בדוק תשובות'}
+        </button>
+      )}
+    </div>
   );
 }

@@ -1,12 +1,27 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { LearningContent, type LessonProgress } from './learning-content';
+import { getPublishedCatalog } from '@/lib/learning/repository';
+import type { CategoryData } from '@/lib/courses-data';
+
+// The catalog now comes from the DB (admin-managed). Render dynamically so
+// admin edits show up immediately rather than being baked into a static build.
+export const dynamic = 'force-dynamic';
 
 export default async function LearningPage() {
   const session = await auth();
 
   if (!session?.user) {
     redirect('/login?callbackUrl=/portal/learning');
+  }
+
+  // Published catalog from the DB (falls back to the static catalog if the DB
+  // isn't seeded yet — see getPublishedCatalog).
+  let catalog: CategoryData[] = [];
+  try {
+    catalog = await getPublishedCatalog();
+  } catch {
+    catalog = [];
   }
 
   // Fetch user's lesson progress (completion + resume position).
@@ -46,6 +61,7 @@ export default async function LearningPage() {
         id: userId,
         name: session.user.name || 'יזם',
       }}
+      catalog={catalog}
       initialProgress={initialProgress}
     />
   );
