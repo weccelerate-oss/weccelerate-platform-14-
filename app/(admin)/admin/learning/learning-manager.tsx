@@ -28,7 +28,14 @@ import {
   Upload,
   GraduationCap,
   AlertTriangle,
+  Check,
+  TrendingUp,
+  Briefcase,
+  Rocket,
+  Clock,
+  BookOpen,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AdminCategory, AdminSubcategory, AdminLesson } from '@/lib/learning/repository';
 import {
@@ -57,6 +64,16 @@ const COLOR_DOT: Record<string, string> = {
   amber: 'bg-amber-500',
   rose: 'bg-rose-500',
   cyan: 'bg-cyan-500',
+};
+
+// Render the actual lucide icon in the picker (not the raw name string).
+const ICON_COMPONENTS: Record<string, LucideIcon> = {
+  TrendingUp,
+  Briefcase,
+  Rocket,
+  Clock,
+  BookOpen,
+  GraduationCap,
 };
 
 function reorderIds(ids: string[], index: number, dir: -1 | 1): string[] {
@@ -690,22 +707,58 @@ function CategoryDialog({
       <Field label="תיאור">
         <textarea rows={2} className={cn(inputCls, 'resize-none')} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
       </Field>
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="צבע">
-          <select className={inputCls} value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })}>
-            {COLORS.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="אייקון">
-          <select className={inputCls} value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })}>
-            {ICONS.map((i) => (
-              <option key={i} value={i}>{i}</option>
-            ))}
-          </select>
-        </Field>
-      </div>
+      <Field label="צבע">
+        <div className="flex flex-wrap gap-2.5">
+          {COLORS.map((c) => {
+            const active = form.color === c;
+            return (
+              <button
+                type="button"
+                key={c}
+                onClick={() => setForm({ ...form, color: c })}
+                title={c}
+                aria-label={c}
+                aria-pressed={active}
+                className={cn(
+                  'relative w-9 h-9 rounded-full transition ring-2 ring-offset-2',
+                  COLOR_DOT[c],
+                  active ? 'ring-slate-800' : 'ring-transparent hover:ring-slate-300',
+                )}
+              >
+                {active && (
+                  <Check className="w-4 h-4 text-white absolute inset-0 m-auto drop-shadow" strokeWidth={3} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </Field>
+      <Field label="אייקון">
+        <div className="flex flex-wrap gap-2">
+          {ICONS.map((name) => {
+            const Icon = ICON_COMPONENTS[name];
+            const active = form.icon === name;
+            return (
+              <button
+                type="button"
+                key={name}
+                onClick={() => setForm({ ...form, icon: name })}
+                title={name}
+                aria-label={name}
+                aria-pressed={active}
+                className={cn(
+                  'grid place-items-center w-11 h-11 rounded-xl border transition',
+                  active
+                    ? 'border-royal-500 bg-royal-50 text-royal-700 ring-2 ring-royal-500/20'
+                    : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50',
+                )}
+              >
+                {Icon ? <Icon className="w-5 h-5" /> : name}
+              </button>
+            );
+          })}
+        </div>
+      </Field>
       <label className="flex items-center gap-2 cursor-pointer">
         <input
           type="checkbox"
