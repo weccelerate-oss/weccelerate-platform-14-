@@ -83,6 +83,11 @@ enum FileType {
   OTHER
 }
 
+enum LessonStatus {
+  DRAFT       // Hidden from entrepreneurs — work in progress
+  PUBLISHED   // Live in the Learning Center
+}
+
 // =============================================================================
 // USER & AUTHENTICATION
 // =============================================================================
@@ -118,6 +123,7 @@ model User {
   notifications Notification[]
   activities    ActivityLog[]
   lessonProgress UserLessonProgress[]
+  quizAttempts  QuizAttempt[]
 
   // Onboarding / auto-provisioning
   // True for accounts created via the onboarding webhook with a temp password.
@@ -605,22 +611,107 @@ model CourseLesson {
   title         String         // e.g., "דוח P&L"
   slug          String         @unique
   description   String?        @db.Text
-  youtubeUrl    String         // YouTube URL
+  // Rich body shown under the video player (notes, transcript, links).
+  content       String?        @db.Text
+  // YouTube URL is now optional so a lesson can be saved as a draft before
+  // the video is ready. The portal only renders PUBLISHED lessons.
+  youtubeUrl    String?        // YouTube URL
   youtubeId     String?        // Extracted YouTube ID
   duration      Int?           // Duration in seconds
   displayOrder  Int            @default(0)
+  // Legacy flag kept for backwards-compat. `status` is the real publish gate.
   isActive      Boolean        @default(true)
+  status        LessonStatus   @default(DRAFT)
+  publishedAt   DateTime?
 
   subcategory   CourseSubcategory @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
   subcategoryId String
 
   progress      UserLessonProgress[]
+  attachments   LessonAttachment[]
+  quiz          Quiz?
 
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   @@index([subcategoryId, displayOrder])
+  @@index([status])
   @@map("course_lessons")
+}
+
+// Downloadable resources attached to a lesson (PDF, slides, templates).
+// Uploaded to Supabase Storage via /api/admin/learning/attachments — reuses
+// the same storage mechanism as the portal document vault.
+model LessonAttachment {
+  id           String       @id @default(cuid())
+
+  lesson       CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId     String
+
+  name         String       // Display name
+  url          String       // Public / signed Supabase URL
+  mimeType     String?
+  size         Int?         // Bytes
+  displayOrder Int          @default(0)
+
+  createdAt    DateTime     @default(now())
+
+  @@index([lessonId, displayOrder])
+  @@map("lesson_attachments")
+}
+
+// Optional end-of-lesson quiz (one per lesson).
+model Quiz {
+  id          String         @id @default(cuid())
+
+  lesson      CourseLesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId    String         @unique
+
+  title       String?
+  passScore   Int            @default(70) // % required to pass
+
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id           String   @id @default(cuid())
+
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId       String
+
+  prompt       String   @db.Text
+  options      Json     // [{ id: string, text: string }]
+  correctId    String   // id of the correct option
+  displayOrder Int      @default(0)
+
+  @@index([quizId, displayOrder])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId    String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  answers   Json     // { [questionId]: chosenOptionId }
+  score     Int      // %
+  passed    Boolean
+
+  createdAt DateTime @default(now())
+
+  @@index([quizId, userId])
+  @@index([userId])
+  @@map("quiz_attempts")
 }
 
 model UserLessonProgress {
