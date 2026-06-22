@@ -73,6 +73,16 @@ export async function writeGuidesForTick(opts?: {
   const results: WriteResult[] = [];
   let stoppedReason: MultiWriteResult['stoppedReason'] = 'cap';
 
+  // Reaper — reclaim any gap orphaned in `in_progress` by a previous run that
+  // died mid-write before its catch block could reset status→open. The most
+  // common cause is the Vercel function hitting its execution-time limit during
+  // the research call (the writer's first, slowest Anthropic round-trip), which
+  // hard-kills the process so neither `wrote-guide` nor `failed` is ever logged
+  // and the gap is stranded — invisible to the `status: 'open'` picker forever.
+  // The daily cron never overlaps itself, so anything still `in_progress` at the
+  // START of a tick is by definition a leftover and safe to release.
+  await reclaimOrphanedGaps();
+
   for (let i = 0; i < MAX_ARTICLES_PER_DAY; i++) {
     if (Date.now() - start >= BUDGET_MS) {
       stoppedReason = 'budget';
@@ -92,6 +102,39 @@ export async function writeGuidesForTick(opts?: {
   const published = results.filter((r) => r.ok).length;
   const drafts = results.filter((r) => !r.ok && r.guideId).length;
   return { attempted: results.length, published, drafts, results, stoppedReason };
+}
+
+/**
+ * Release gaps stranded in `in_progress` back to `open`. See the call site in
+ * writeGuidesForTick for why a run-start sweep is the correct, no-overlap-safe
+ * recovery. Returns the number reclaimed. Best-effort: a failure here must not
+ * abort the writing tick, so callers don't await-throw on it.
+ */
+async function reclaimOrphanedGaps(): Promise<number> {
+  try {
+    const res = await prisma.contentGap.updateMany({
+      where: { status: 'in_progress' },
+      data: {
+        status: 'open',
+        rejectReason: 'Reclaimed by reaper: previous run died before completing (likely function timeout mid-research).',
+      },
+    });
+    if (res.count > 0) {
+      await logDecision({
+        agent: 'content-writer',
+        action: 'reclaimed-orphans',
+        reasoning:
+          `שחררתי ${res.count} פערים שנתקעו ב-in_progress מריצה קודמת שמתה באמצע ` +
+          `(כנראה timeout של הפונקציה בשלב המחקר). הם חוזרים לתור כדי שלא ייעלמו לתמיד.`,
+        payload: { reclaimed: res.count },
+        success: true,
+      });
+    }
+    return res.count;
+  } catch (e) {
+    console.error('[reclaimOrphanedGaps] failed (non-fatal):', e);
+    return 0;
+  }
 }
 
 export async function writeNextGuide(opts?: { context?: DailyContext; journal?: JournalSummary }): Promise<WriteResult> {
