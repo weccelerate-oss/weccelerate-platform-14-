@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzeGaps } from '@/lib/agents/gap-analyzer';
-import { writeNextGuide } from '@/lib/agents/content-writer';
+import { startWritingJobs } from '@/lib/agents/content-writer';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -22,8 +22,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const analyze = await analyzeGaps();
-  const result = await writeNextGuide();
-  return NextResponse.json({ ok: true, analyze, write: result });
+  // Kicks off the split pipeline (research -> write -> finalize), each stage in
+  // its own invocation. Returns immediately with the WritingJob id(s); the
+  // article publishes asynchronously over the next few minutes.
+  const result = await startWritingJobs();
+  return NextResponse.json({
+    ok: true,
+    analyze,
+    write: result,
+    note: 'Article(s) finish asynchronously via the split pipeline. Track in writing_jobs / /admin/geo-plan.',
+  });
 }
 
 export async function GET(req: NextRequest) {
@@ -40,16 +48,12 @@ export async function GET(req: NextRequest) {
     },
     pipeline: [
       'analyze-gaps (geo_probes → content_gaps)',
-      'pick highest-severity open gap',
-      'research (Anthropic + web_search)',
-      'outline (Anthropic Opus)',
-      'write 1800-2500 words HE (Anthropic Opus)',
-      'pick internal links (deterministic)',
-      'fact-check (Anthropic Sonnet)',
-      'SEO lint (deterministic)',
-      'persist as GeneratedGuide',
-      'IndexNow push to Bing/Yandex',
+      'pick highest-severity open gap → create WritingJob',
+      '[stage research] Anthropic Sonnet + web_search',
+      '[stage write] outline + 1800-2500 words HE (Anthropic Sonnet)',
+      '[stage finalize] fact-check (Sonnet) → SEO/policy lint → persist GeneratedGuide → IndexNow → email Katrin',
+      'each stage runs in its own invocation, chained via after() — fits Hobby 60s limit',
     ],
-    cronSchedule: 'daily 07:00 UTC',
+    cronSchedule: 'daily 06:00 UTC',
   });
 }

@@ -16,12 +16,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runAllProbes } from '@/lib/seo/geo-probes';
 import { analyzeGaps } from '@/lib/agents/gap-analyzer';
-import { writeGuidesForTick } from '@/lib/agents/content-writer';
+import { startWritingJobs, resumeStalledWritingJobs } from '@/lib/agents/content-writer';
 import { runSelfImprover } from '@/lib/agents/self-improver';
 import { loadDailyContext, type DailyContext } from '@/lib/agents/daily-context';
 import { planForToday, planForTomorrow } from '@/lib/agents/daily-plan';
 import { logDecision } from '@/lib/agents/decision-log';
-import { loadJournal } from '@/lib/agents/journal';
 import { writeDailyJournalEntry } from '@/lib/agents/journal';
 import { runBiweeklyReplan, shouldRunReplan } from '@/lib/agents/biweekly-replanner';
 import { prisma } from '@/lib/db';
@@ -60,7 +59,6 @@ export async function GET(req: NextRequest) {
   const today = planForToday();
   const tomorrow = planForTomorrow();
   const ctx = await loadDailyContext();
-  const journal = await loadJournal();
 
   // Log the morning briefing so the operator (and David tomorrow) can see
   // what context shaped today's decisions.
@@ -89,10 +87,18 @@ export async function GET(req: NextRequest) {
   results.push(await runStage('probe', () => runAllProbes()));
   // Stage 2: Analyze — always runs.
   results.push(await runStage('analyze', () => analyzeGaps()));
-  // Stage 3: Write — only on writing days. Pass both context (recent guides
-  // dedupe) AND journal (avoid past mistakes / imitate past wins).
+  // Stage 2.5: Resume — re-dispatch any writing job whose stage chain was
+  // broken by a dropped dispatch. Runs EVERY day (even non-writing days) so a
+  // stalled article never waits more than ~24h to resume.
+  results.push(await runStage('resume-jobs', () => resumeStalledWritingJobs()));
+
+  // Stage 3: Write — only on writing days. Kicks off the split pipeline: claims
+  // a gap, creates a WritingJob, and dispatches its first stage. The article
+  // finishes asynchronously over the next few minutes (research -> write ->
+  // finalize), each stage in its own invocation, so this returns fast and the
+  // cron never times out mid-write. ctx drives recent-guide dedupe.
   if (today.plan.shouldWrite) {
-    results.push(await runStage('write', () => writeGuidesForTick({ context: ctx, journal })));
+    results.push(await runStage('write', () => startWritingJobs({ context: ctx })));
   } else {
     results.push({
       stage: 'write',

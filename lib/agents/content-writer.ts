@@ -30,6 +30,11 @@ import { sendArticlePublishedEmail } from './article-published-email';
 import { findCompetitorMentions } from '@/lib/seo/competitor-list';
 
 const MODEL_RESEARCH = 'claude-sonnet-4-6';
+// Opus is kept for the article writing (quality matters for SEO/GEO depth).
+// A full 1800-2500-word Opus generation takes 100-200s — far past Vercel's 60s
+// function limit — so the split pipeline writes the article ONE SECTION PER
+// INVOCATION (see the WritingJob "sections" stage at the bottom of this file).
+// Each section is ~300-450 words (~30-45s on Opus), which fits comfortably.
 const MODEL_WRITE = 'claude-opus-4-7';
 const MODEL_FACTCHECK = 'claude-sonnet-4-6';
 
@@ -977,4 +982,585 @@ async function notifyKatrinAboutArticle(opts: {
     payload: { slug: opts.slug, recipient: emailResult.recipient, error: emailResult.error },
     success: emailResult.ok,
   });
+}
+
+// =============================================================================
+// SPLIT PIPELINE — WritingJob state machine
+// =============================================================================
+// The monolithic writeNextGuide() above runs research -> outline -> write ->
+// fact-check -> persist in ONE invocation. That can never finish inside Vercel
+// Hobby's 60s function limit (the Opus write alone takes 100-200s), so a guide
+// was never actually published. This state machine splits the work so each
+// stage runs in its OWN fresh serverless invocation, with intermediate
+// artifacts persisted on a WritingJob row:
+//
+//   research -> gather sources (Sonnet + web_search)          [researchSummary/sources]
+//   plan     -> title + meta + intro + section blueprint (Opus) [titleHe/intro/sectionPlan]
+//   sections -> write ONE section per invocation (Opus), loops  [sectionContents/sectionIndex]
+//   finalize -> assemble + fact-check + lint + persist + mail   [contentHe/generatedGuideId]
+//
+// Writing one section at a time is what keeps Opus (kept for quality) under the
+// 60s limit. Each stage re-dispatches the next via an HTTP POST to
+// /api/agents/writer-step, which acknowledges with 202 immediately and does its
+// heavy work in `after()`. A daily reaper (resumeStalledWritingJobs) re-dispatches
+// any job whose chain was broken by a dropped dispatch.
+
+const STAGE_RETRY_CAP = 2; // dispatch attempts per stage before giving up
+
+/** Resolve the base URL for self-dispatching the worker route. */
+function writerBaseUrl(): string {
+  if (process.env.WRITER_BASE_URL) return process.env.WRITER_BASE_URL;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  return 'https://weccelerate.co.il';
+}
+
+/**
+ * Fire an HTTP request that advances the given job by one stage. The target
+ * route answers 202 immediately and runs the actual stage in its own `after()`,
+ * so this returns within milliseconds and never blocks the caller's budget.
+ * Best-effort: a dropped dispatch is recovered by resumeStalledWritingJobs.
+ */
+export async function dispatchWriterStep(jobId: string): Promise<void> {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) {
+    console.warn('[dispatchWriterStep] CRON_SECRET unset — cannot dispatch writer step.');
+    return;
+  }
+  try {
+    await fetch(`${writerBaseUrl()}/api/agents/writer-step`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${secret}` },
+      body: JSON.stringify({ jobId }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch (e) {
+    console.error('[dispatchWriterStep] dispatch failed (job will be retried by reaper):', e);
+  }
+}
+
+/**
+ * Claim the highest-priority open gap not already covered recently, mirroring
+ * writeNextGuide's selection but returning the gap instead of writing inline.
+ * Atomic claim via updateMany guarded on status:'open' so parallel ticks can't
+ * double-claim. Returns null (with diagnostics) when nothing is eligible.
+ */
+async function claimNextGap(ctx: DailyContext): Promise<
+  | { gap: { id: string; query: string; category: string | null; competitors: string[]; severity: number }; skippedDuplicates: number }
+  | { gap: null; skippedDuplicates: number; candidates: number }
+> {
+  const candidates = await prisma.contentGap.findMany({
+    where: { status: 'open', severity: { gte: 50 } },
+    orderBy: [{ severity: 'desc' }, { detectedAt: 'asc' }],
+    take: 50,
+  });
+  let skippedDuplicates = 0;
+  for (const candidate of candidates) {
+    if (isQueryAlreadyCovered(candidate.query, ctx)) { skippedDuplicates += 1; continue; }
+    const claim = await prisma.contentGap.updateMany({
+      where: { id: candidate.id, status: 'open' },
+      data: { status: 'in_progress' },
+    });
+    if (claim.count === 1) {
+      return { gap: candidate, skippedDuplicates };
+    }
+  }
+  return { gap: null, skippedDuplicates, candidates: candidates.length };
+}
+
+export interface StartJobsResult {
+  created: number;
+  jobIds: string[];
+  reason?: string;
+}
+
+/**
+ * Entry point for writing days. Reclaims orphans, claims up to `target` gaps,
+ * creates a WritingJob per claim, and kicks off each pipeline. Returns fast —
+ * the articles complete asynchronously over the following minutes.
+ *
+ * target defaults to 1: get ONE article reliably published per day first. Raise
+ * once the split pipeline has proven itself end-to-end in production.
+ */
+export async function startWritingJobs(opts?: { context?: DailyContext; target?: number }): Promise<StartJobsResult> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return { created: 0, jobIds: [], reason: 'ANTHROPIC_API_KEY not set — agent disabled' };
+  }
+  await reclaimOrphanedGaps();
+
+  const ctx = opts?.context ?? (await loadDailyContext());
+  const target = Math.max(1, opts?.target ?? 1);
+  const jobIds: string[] = [];
+
+  for (let i = 0; i < target; i++) {
+    const claim = await claimNextGap(ctx);
+    if (!claim.gap) {
+      if (jobIds.length === 0) {
+        const reason = claim.candidates === 0
+          ? 'אין ContentGap פתוח — כל השאילתות מצוטטות מספיק טוב. ממתין ל-Gap Analyzer הבא.'
+          : `דילגתי על ${claim.skippedDuplicates} פערים שכבר כתבתי עליהם ב-30 הימים האחרונים. אין נושא חדש היום.`;
+        await logDecision({
+          agent: 'content-writer',
+          action: claim.candidates === 0 ? 'idle' : 'idle-all-covered',
+          reasoning: reason,
+          payload: { openGaps: claim.candidates, skippedDuplicates: claim.skippedDuplicates },
+          success: true,
+        });
+        return { created: 0, jobIds: [], reason };
+      }
+      break; // claimed at least one already; queue exhausted for the rest
+    }
+
+    const gap = claim.gap;
+    const job = await prisma.writingJob.create({
+      data: {
+        gapId: gap.id,
+        query: gap.query,
+        category: gap.category ?? null,
+        competitors: gap.competitors,
+        stage: 'research',
+      },
+    });
+    jobIds.push(job.id);
+
+    await logDecision({
+      agent: 'content-writer',
+      action: 'picked-gap',
+      reasoning:
+        `בחרתי לכתוב על "${gap.query}" כי severity=${gap.severity}` +
+        (claim.skippedDuplicates > 0 ? ` (דילגתי על ${claim.skippedDuplicates} פערים שכבר כיסיתי)` : '') +
+        `. פתחתי WritingJob ${job.id} — הצנרת תרוץ בשלבים נפרדים (research -> plan -> sections -> finalize), סקציה בכל invocation, כדי לא להיחתך ב-timeout.`,
+      payload: { gapId: gap.id, jobId: job.id, query: gap.query, severity: gap.severity },
+      success: true,
+    });
+
+    await dispatchWriterStep(job.id);
+  }
+
+  return { created: jobIds.length, jobIds };
+}
+
+/**
+ * Re-dispatch any WritingJob stuck mid-pipeline (chain broken by a dropped
+ * dispatch). Runs daily from the cron regardless of writing-day so a job never
+ * stalls more than ~24h. A job idle for > STALL_MS in a non-terminal stage is
+ * assumed dropped and re-kicked at its current stage (idempotent — the stage
+ * recomputes from persisted artifacts).
+ */
+export async function resumeStalledWritingJobs(): Promise<{ resumed: number; jobIds: string[] }> {
+  const STALL_MS = 10 * 60 * 1000;
+  const cutoff = new Date(Date.now() - STALL_MS);
+  const stalled = await prisma.writingJob.findMany({
+    where: { stage: { notIn: ['done', 'failed'] }, updatedAt: { lt: cutoff } },
+    select: { id: true },
+  });
+  for (const j of stalled) await dispatchWriterStep(j.id);
+  if (stalled.length > 0) {
+    await logDecision({
+      agent: 'content-writer',
+      action: 'resumed-stalled-jobs',
+      reasoning: `החייתי ${stalled.length} עבודות כתיבה שנתקעו (כנראה dispatch שנפל). כל אחת תמשיך מהשלב ששמרה.`,
+      payload: { resumed: stalled.length, jobIds: stalled.map((j: { id: string }) => j.id) },
+      success: true,
+    });
+  }
+  return { resumed: stalled.length, jobIds: stalled.map((j: { id: string }) => j.id) };
+}
+
+/**
+ * Advance ONE job by one stage. Called from /api/agents/writer-step inside
+ * `after()`, so it owns a fresh 60s budget. On success it persists the stage
+ * artifacts and dispatches the next stage; on error it retries the same stage
+ * up to STAGE_RETRY_CAP, then fails the job and reopens the gap.
+ */
+export async function advanceWritingJob(jobId: string): Promise<void> {
+  const job = await prisma.writingJob.findUnique({ where: { id: jobId } });
+  if (!job) { console.warn(`[advanceWritingJob] job ${jobId} not found`); return; }
+  if (job.stage === 'done' || job.stage === 'failed') return;
+
+  try {
+    switch (job.stage) {
+      case 'research': {
+        const research = await runResearch(job.query, job.competitors);
+        await prisma.writingJob.update({
+          where: { id: job.id },
+          data: { researchSummary: research.summary, sources: research.sources, stage: 'plan', attempts: 0, error: null },
+        });
+        await dispatchWriterStep(job.id);
+        return;
+      }
+      case 'plan': {
+        // Opus, ONE call: title + meta + intro + the section blueprint. Small
+        // output (~800-1200 tokens) so it finishes well under 60s. The heavy
+        // body is written section-by-section in the next stage.
+        const ctx = await loadDailyContext();
+        const plan = await runArticlePlan(job.query, job.researchSummary ?? '', job.sources, ctx);
+        await prisma.writingJob.update({
+          where: { id: job.id },
+          data: {
+            titleHe: plan.titleHe,
+            titleEn: plan.titleEn ?? null,
+            metaDescription: plan.metaDescription,
+            intro: plan.intro,
+            sectionPlan: plan.sections,
+            sectionIndex: 0,
+            sectionContents: [],
+            stage: 'sections',
+            attempts: 0,
+            error: null,
+          },
+        });
+        await dispatchWriterStep(job.id);
+        return;
+      }
+      case 'sections': {
+        const plan = (job.sectionPlan ?? []) as SectionSpec[];
+        const written = (job.sectionContents ?? []) as string[];
+        const idx = job.sectionIndex ?? 0;
+
+        // All sections written -> assemble the full markdown body and finalize.
+        if (idx >= plan.length) {
+          const body = assembleArticle(job.titleHe ?? '', job.intro ?? '', written);
+          await prisma.writingJob.update({
+            where: { id: job.id },
+            data: { contentHe: body, stage: 'finalize', attempts: 0, error: null },
+          });
+          await dispatchWriterStep(job.id);
+          return;
+        }
+
+        // Write exactly ONE section this invocation (Opus, ~300-450 words).
+        const md = await runSection(job.query, job.titleHe ?? '', plan, idx, job.sources);
+        await prisma.writingJob.update({
+          where: { id: job.id },
+          data: { sectionContents: [...written, md], sectionIndex: idx + 1, attempts: 0, error: null },
+        });
+        await dispatchWriterStep(job.id); // loop: next section in a fresh 60s invocation
+        return;
+      }
+      case 'finalize': {
+        await finalizeWritingJob(job);
+        return;
+      }
+      default:
+        console.warn(`[advanceWritingJob] unknown stage '${job.stage}' for job ${job.id}`);
+    }
+  } catch (err) {
+    await handleStageError(job, err);
+  }
+}
+
+type WritingJobRow = NonNullable<Awaited<ReturnType<typeof prisma.writingJob.findUnique>>>;
+
+/** Fact-check + lint + persist the draft held on a finalize-stage job. */
+async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
+  // Sanitize the assembled body here — the section writers can still slip an
+  // em-dash through despite the system prompt, and the body was stitched from
+  // many calls without passing the per-article sanitizer.
+  const article: ArticlePayload = sanitizeArticleBody({
+    titleHe: job.titleHe ?? '',
+    titleEn: job.titleEn ?? null,
+    metaDescription: job.metaDescription ?? '',
+    contentHe: job.contentHe ?? '',
+    contentEn: null,
+  });
+  if (!article.titleHe || !article.contentHe) {
+    throw new Error('finalize: draft missing titleHe/contentHe (sections stage did not assemble).');
+  }
+
+  const sources = job.sources ?? [];
+  const internalLinks = pickInternalLinks(article.titleHe, article.contentHe);
+  const seoLint = lintSeo(article);
+  const policyLint = lintPolicy(article);
+
+  // Policy gate — hard reject.
+  if (!policyLint.passed) {
+    await prisma.writingJob.update({ where: { id: job.id }, data: { stage: 'failed', error: `Policy: ${policyLint.violations.join('; ')}` } });
+    await prisma.contentGap.update({
+      where: { id: job.gapId },
+      data: { status: 'open', rejectReason: `Policy violations: ${policyLint.violations.join('; ')}.` },
+    });
+    await logDecision({
+      agent: 'content-writer',
+      action: 'skipped-publish-policy',
+      reasoning: `דחיתי את המאמר על "${job.query}" — הפר כללי כתיבה: ${policyLint.violations.join('; ')}. הפער חוזר לתור.`,
+      payload: { jobId: job.id, gapId: job.gapId, violations: policyLint.violations },
+      success: false,
+    });
+    return;
+  }
+
+  const factCheck = await runFactCheck(article.contentHe, sources);
+
+  // Unparseable fact-check -> save as draft for manual review (don't auto-ship).
+  if (factCheck.unparsed) {
+    const slug = await deriveUniqueSlug(article.titleHe);
+    const draft = await prisma.generatedGuide.create({
+      data: {
+        slug,
+        titleHe: article.titleHe,
+        titleEn: article.titleEn ?? null,
+        metaDescription: article.metaDescription,
+        category: job.category ?? 'general',
+        contentHe: article.contentHe,
+        contentEn: null,
+        modelChain: [MODEL_RESEARCH, MODEL_WRITE, MODEL_FACTCHECK],
+        citedSources: sources.slice(0, 30),
+        internalLinks,
+        factCheckScore: null,
+        seoScore: seoLint.score,
+        wordCount: countWords(article.contentHe),
+        status: 'draft',
+        publishedAt: null,
+      },
+    });
+    await prisma.writingJob.update({ where: { id: job.id }, data: { stage: 'done', generatedGuideId: draft.id } });
+    await prisma.contentGap.update({
+      where: { id: job.gapId },
+      data: { generatedGuideId: draft.id, rejectReason: 'Fact-check unparseable; saved as draft for review.' },
+    });
+    await logDecision({
+      agent: 'content-writer',
+      action: 'saved-draft-unparsed-factcheck',
+      reasoning: `שמרתי את המאמר על "${job.query}" כטיוטה — fact-check לא החזיר JSON תקין. עבור עליו ב-/admin. slug: /guides/${slug}.`,
+      payload: { jobId: job.id, gapId: job.gapId, draftId: draft.id, slug },
+      success: false,
+    });
+    return;
+  }
+
+  // Quality gate.
+  const QUALITY_FLOOR = 60;
+  if (factCheck.score < QUALITY_FLOOR || seoLint.score < QUALITY_FLOOR) {
+    await prisma.writingJob.update({ where: { id: job.id }, data: { stage: 'failed', error: `Quality below ${QUALITY_FLOOR}` } });
+    await prisma.contentGap.update({ where: { id: job.gapId }, data: { status: 'open', rejectReason: `quality below ${QUALITY_FLOOR}` } });
+    await logDecision({
+      agent: 'content-writer',
+      action: 'skipped-publish',
+      reasoning: `דחיתי פרסום של "${job.query}". Fact-check ${factCheck.score}/100, SEO ${seoLint.score}/100 (סף ${QUALITY_FLOOR}). הפער חוזר לתור.`,
+      payload: { jobId: job.id, gapId: job.gapId, factCheck: factCheck.score, seo: seoLint.score },
+      success: false,
+    });
+    return;
+  }
+
+  // Publish.
+  const slug = await deriveUniqueSlug(article.titleHe);
+  const generated = await prisma.generatedGuide.create({
+    data: {
+      slug,
+      titleHe: article.titleHe,
+      titleEn: article.titleEn ?? null,
+      metaDescription: article.metaDescription,
+      category: job.category ?? 'general',
+      contentHe: article.contentHe,
+      contentEn: null,
+      modelChain: [MODEL_RESEARCH, MODEL_WRITE, MODEL_FACTCHECK],
+      citedSources: sources.slice(0, 30),
+      internalLinks,
+      factCheckScore: factCheck.score,
+      seoScore: seoLint.score,
+      wordCount: countWords(article.contentHe),
+      status: 'published',
+      publishedAt: new Date(),
+    },
+  });
+
+  await prisma.writingJob.update({ where: { id: job.id }, data: { stage: 'done', generatedGuideId: generated.id, error: null } });
+  await prisma.contentGap.update({
+    where: { id: job.gapId },
+    data: { status: 'published', generatedGuideId: generated.id, resolvedAt: new Date() },
+  });
+
+  pingIndexNow(`https://weccelerate.co.il/guides/${slug}`).catch(() => {});
+
+  notifyKatrinAboutArticle({
+    titleHe: article.titleHe,
+    slug,
+    bodyExcerpt: article.contentHe,
+    sourceQuery: job.query,
+    category: job.category,
+    wordCount: countWords(article.contentHe),
+  }).catch((e) => console.error('[notifyKatrinAboutArticle] failed:', e));
+
+  await logDecision({
+    agent: 'content-writer',
+    action: 'wrote-guide',
+    reasoning:
+      `פרסמתי "${article.titleHe}" -> /guides/${slug}. ` +
+      `${countWords(article.contentHe)} מילים, ${sources.length} מקורות, ` +
+      `Fact-check ${factCheck.score}/100, SEO ${seoLint.score}/100, ${internalLinks.length} קישורים פנימיים. דחפתי ל-IndexNow.`,
+    payload: { jobId: job.id, gapId: job.gapId, guideId: generated.id, slug, wordCount: countWords(article.contentHe) },
+    success: true,
+  });
+}
+
+/** Retry the current stage up to the cap, else fail the job and reopen the gap. */
+async function handleStageError(job: WritingJobRow, err: unknown): Promise<void> {
+  const reason = err instanceof Error ? err.message : String(err);
+  const attempts = (job.attempts ?? 0) + 1;
+
+  if (attempts <= STAGE_RETRY_CAP) {
+    await prisma.writingJob.update({ where: { id: job.id }, data: { attempts, error: reason.slice(0, 1_000) } });
+    await dispatchWriterStep(job.id); // retry same stage from persisted artifacts
+    return;
+  }
+
+  await prisma.writingJob.update({ where: { id: job.id }, data: { stage: 'failed', error: reason.slice(0, 1_000) } });
+  await prisma.contentGap.update({
+    where: { id: job.gapId },
+    data: { status: 'open', rejectReason: `Writer failed at ${job.stage}: ${reason.slice(0, 500)}` },
+  });
+  await logDecision({
+    agent: 'content-writer',
+    action: 'failed',
+    reasoning: `נכשל בשלב ${job.stage} על "${job.query}" אחרי ${attempts} נסיונות. סיבה: ${reason.slice(0, 200)}. הפער חוזר לתור.`,
+    payload: { jobId: job.id, gapId: job.gapId, stage: job.stage, error: reason },
+    success: false,
+  });
+}
+
+// --- Chunked-writing stage helpers (Opus, one section per invocation) --------
+
+interface SectionSpec { heading: string; brief: string }
+
+interface ArticlePlan {
+  titleHe: string;
+  titleEn?: string | null;
+  metaDescription: string;
+  intro: string;
+  sections: SectionSpec[];
+}
+
+/**
+ * Plan stage — Opus, ONE small call: produce title + meta + intro + the section
+ * blueprint (headings + one-line briefs). Deliberately does NOT write section
+ * bodies, so the output stays ~800-1200 tokens and finishes well under 60s.
+ */
+async function runArticlePlan(
+  query: string,
+  summary: string,
+  sources: string[],
+  ctx?: DailyContext,
+): Promise<ArticlePlan> {
+  const recentGuidesBlock = ctx
+    ? `\n\n---\n\n${summarizeRecentGuidesForPrompt(ctx)}\n\nאל תכתוב על נושא שכבר כוסה — אם כן, זווית שונה לחלוטין. אסור לחזור על אותו H1.\n`
+    : '';
+
+  const data = await callAnthropic({
+    model: MODEL_WRITE,
+    max_tokens: 2000,
+    messages: [
+      {
+        role: 'user',
+        content: `${DAVID_WRITING_RULES_HE}
+
+---
+
+עובדות מאומתות על WeCcelerate (אלה המספרים היחידים שמותר לציין):
+${JSON.stringify(VERIFIED_FACTS, null, 2)}${recentGuidesBlock}
+
+---
+
+תכנן מדריך SEO בעברית לשאילתה: "${query}"
+
+סיכום מחקר:
+${summary}
+
+מקורות:
+${sources.slice(0, 10).join('\n')}
+
+החזר JSON בלבד — תוכנית קצרה, בלי לכתוב את גוף הסקציות:
+{
+  "titleHe": "כותרת citation-bait, 25-65 תווים",
+  "titleEn": "אופציונלי",
+  "metaDescription": "150-160 תווים, value-prop לא הבטחה",
+  "intro": "פסקת פתיחה אחת בעברית (80-140 מילים), בלי כותרת H1, עם משפט citation-bait",
+  "sections": [{ "heading": "## כותרת סקציה", "brief": "במשפט-שניים: מה הסקציה מכסה" }]
+}
+
+חוקים לתוכנית:
+- 5-7 סקציות תוכן.
+- הסקציה לפני-האחרונה חייבת להיות בדיוק "## שאלות נפוצות" (הבריף יציין: 5-7 שאלות ותשובות).
+- הסקציה האחרונה חייבת להיות בדיוק "## איך WeCcelerate יכולה לעזור" (תיאור-שירות, לא הבטחה).
+- כל heading בעברית, ממוקד, בלי מספור.`,
+      },
+    ],
+  });
+
+  const parsed = safeParseJson<ArticlePlan>(extractText(data));
+  if (!parsed?.titleHe || !parsed.intro || !Array.isArray(parsed.sections) || parsed.sections.length === 0) {
+    throw new Error('Article plan returned malformed JSON');
+  }
+  parsed.sections = parsed.sections
+    .filter((s) => s && typeof s.heading === 'string')
+    .map((s) => ({ heading: s.heading.trim().startsWith('#') ? s.heading.trim() : `## ${s.heading.trim()}`, brief: s.brief ?? '' }));
+  if (parsed.sections.length === 0) throw new Error('Article plan produced no usable sections');
+  return parsed;
+}
+
+/**
+ * Sections stage — Opus writes EXACTLY ONE section (~300-450 words, ~30-45s)
+ * given the full blueprint for context. Called once per section by the state
+ * machine, each in its own fresh 60s invocation. Returns plain section markdown.
+ */
+async function runSection(
+  query: string,
+  titleHe: string,
+  plan: SectionSpec[],
+  idx: number,
+  sources: string[],
+): Promise<string> {
+  const section = plan[idx];
+  const blueprint = plan
+    .map((s, i) => `${i + 1}. ${s.heading}${i === idx ? '   <-- כתוב את זו עכשיו' : ''}`)
+    .join('\n');
+  const allowedSlugs = (GUIDES as readonly Guide[]).map((g) => g.slug).join(', ');
+  const isFaq = section.heading.includes('שאלות נפוצות');
+  const isHelp = section.heading.includes('WeCcelerate');
+
+  const data = await callAnthropic({
+    model: MODEL_WRITE,
+    max_tokens: 1600,
+    messages: [
+      {
+        role: 'user',
+        content: `${DAVID_WRITING_RULES_HE}
+
+---
+
+אתה כותב סקציה אחת בלבד מתוך מדריך SEO בעברית בשם "${titleHe}" (שאילתה: "${query}").
+
+מבנה המדריך המלא (להקשר ורצף — אל תכתוב את כולן, רק את המסומנת):
+${blueprint}
+
+כתוב עכשיו אך ורק את הסקציה:
+${section.heading}
+מה לכסות: ${section.brief}
+
+דרישות:
+- התחל בדיוק עם הכותרת "${section.heading}", ואז גוף הסקציה.
+- 250-450 מילים בעברית (RTL).
+- משפט אחד citation-bait (הגדרה/עובדה כללית מהתחום — לא על WeCcelerate ספציפית).
+- קישורים פנימיים מותר רק בפורמט [טקסט](/guides/SLUG) ל-slugs הבאים: ${allowedSlugs}
+${isFaq ? '- זו סקציית FAQ: 5-7 שאלות ותשובות. התשובות בלשון תיאור-שירות, לא הבטחה.' : ''}
+${isHelp ? '- תאר את הvalue שהיזם מקבל מהשירותים, בלשון "אנחנו מציעים", לא "אנחנו עושים/נביא".' : ''}
+- בלי מקפים ארוכים. בלי להמציא נתונים על WeCcelerate.
+
+מקורות (צטט כשרלוונטי, רק חיצוניים):
+${sources.slice(0, 8).join('\n')}
+
+החזר רק את ה-markdown של הסקציה. בלי JSON, בלי הקדמות, בלי הסברים.`,
+      },
+    ],
+  });
+
+  const md = extractText(data).trim();
+  if (!md) throw new Error(`Section ${idx} ("${section.heading}") came back empty`);
+  return md;
+}
+
+/** Stitch the H1, intro, and rendered sections into the final article markdown. */
+function assembleArticle(titleHe: string, intro: string, sections: string[]): string {
+  const body = sections.map((s) => s.trim()).filter(Boolean).join('\n\n');
+  return `# ${titleHe.trim()}\n\n${intro.trim()}\n\n${body}`;
 }

@@ -861,6 +861,64 @@ model GeneratedGuide {
 }
 
 // =============================================================================
+// WRITING JOB — durable state machine for the split, chunked writer pipeline
+// =============================================================================
+// The writer cannot complete inside a single serverless invocation: on Vercel
+// Hobby the 60s function limit kills the process mid-write, so a guide was NEVER
+// published. WritingJob persists intermediate artifacts between invocations so
+// each stage runs in its own fresh 60s budget, chained via Next.js `after()`.
+// One row per article attempt.
+//
+// The article is written with Opus (kept for quality), which would take
+// 100-200s to emit a full guide in one call — far past 60s. So the `sections`
+// stage writes the article ONE section per invocation, looping until done.
+//
+// stage advances: research -> plan -> sections (loops) -> finalize -> done
+//                                                                  (or -> failed).
+// A daily reaper (resumeStalledWritingJobs) re-dispatches jobs left mid-stage.
+
+model WritingJob {
+  id            String   @id @default(cuid())
+
+  // The gap this job is resolving (claimed in_progress on the ContentGap row).
+  gapId         String
+  query         String   @db.Text
+  category      String?
+  competitors   String[] @default([])
+
+  // State machine
+  stage         String   @default("research") // research | plan | sections | finalize | done | failed
+  attempts      Int      @default(0)           // dispatch attempts for the CURRENT stage/section (retry cap)
+  error         String?  @db.Text              // last failure reason, if any
+
+  // Stage: research — Sonnet + web_search
+  researchSummary String? @db.Text
+  sources         String[] @default([])
+
+  // Stage: plan — Opus, one call: title/meta/intro + the section blueprint
+  titleHe         String?
+  titleEn         String?
+  metaDescription String?
+  intro           String?  @db.Text
+  sectionPlan     Json?    // [{ heading: string, brief: string }]
+
+  // Stage: sections — Opus, ONE section per invocation (chunked to fit 60s)
+  sectionIndex    Int      @default(0)          // next section to write
+  sectionContents Json     @default("[]")       // string[] of rendered section markdown, in order
+
+  // Stage: finalize — assembled body + published result
+  contentHe        String?  @db.Text
+  generatedGuideId String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([stage, updatedAt])
+  @@index([gapId])
+  @@map("writing_jobs")
+}
+
+// =============================================================================
 // AGENT DECISION LOG — explainability of every autonomous action
 // =============================================================================
 // Every meaningful decision the agent makes is logged here so the operator
