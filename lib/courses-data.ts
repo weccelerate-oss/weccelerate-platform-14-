@@ -3,12 +3,45 @@
  * Static course content with YouTube links organized by categories
  */
 
+export interface LessonAttachmentData {
+  id: string;
+  name: string;
+  url: string;
+  mimeType?: string | null;
+  size?: number | null;
+}
+
+export interface QuizOption {
+  id: string;
+  text: string;
+}
+
+export interface QuizQuestionData {
+  id: string;
+  prompt: string;
+  options: QuizOption[];
+  /** Present only in admin contexts — the portal catalog strips it so the
+   *  answer never reaches the client. Grading happens server-side. */
+  correctId?: string;
+}
+
+export interface QuizData {
+  id: string;
+  title?: string | null;
+  passScore: number;
+  questions: QuizQuestionData[];
+}
+
 export interface LessonData {
   title: string;
   slug: string;
   youtubeUrl: string;
   youtubeId: string;
   description: string;
+  /** Rich body rendered under the video (optional, DB-sourced lessons only). */
+  content?: string | null;
+  attachments?: LessonAttachmentData[];
+  quiz?: QuizData | null;
 }
 
 export interface SubcategoryData {
