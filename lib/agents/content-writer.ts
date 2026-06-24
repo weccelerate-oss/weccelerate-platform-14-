@@ -1214,8 +1214,30 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
       }
       case 'sections': {
         const plan = (job.sectionPlan ?? []) as SectionSpec[];
-        const written = (job.sectionContents ?? []) as string[];
-        const idx = job.sectionIndex ?? 0;
+        let written = (job.sectionContents ?? []) as string[];
+        let idx = job.sectionIndex ?? 0;
+
+        // Write as MANY sections as fit in this invocation's time budget, not
+        // just one. Each article was 8+ sections = 8+ dispatch hops, and every
+        // hop is a chance for the `after()` dispatch to drop and stall the job
+        // until the once-daily reaper. Batching sections cuts the hop count
+        // (≈ N → ceil(N / sections-per-invocation)), shrinking the stall window.
+        //
+        // We persist after EACH section so a mid-batch crash never loses
+        // completed work (the stage retry / reaper resumes from sectionIndex).
+        // SECTIONS_BUDGET_MS leaves headroom under the route's 60s maxDuration
+        // for the final DB write + dispatch fetch.
+        const SECTIONS_BUDGET_MS = 42_000;
+        const batchStart = Date.now();
+        while (idx < plan.length && Date.now() - batchStart < SECTIONS_BUDGET_MS) {
+          const md = await runSection(job.query, job.titleHe ?? '', plan, idx, job.sources);
+          written = [...written, md];
+          idx += 1;
+          await prisma.writingJob.update({
+            where: { id: job.id },
+            data: { sectionContents: written, sectionIndex: idx, attempts: 0, error: null },
+          });
+        }
 
         // All sections written -> assemble the full markdown body and finalize.
         if (idx >= plan.length) {
@@ -1224,17 +1246,8 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
             where: { id: job.id },
             data: { contentHe: body, stage: 'finalize', attempts: 0, error: null },
           });
-          await dispatchWriterStep(job.id);
-          return;
         }
-
-        // Write exactly ONE section this invocation (Opus, ~300-450 words).
-        const md = await runSection(job.query, job.titleHe ?? '', plan, idx, job.sources);
-        await prisma.writingJob.update({
-          where: { id: job.id },
-          data: { sectionContents: [...written, md], sectionIndex: idx + 1, attempts: 0, error: null },
-        });
-        await dispatchWriterStep(job.id); // loop: next section in a fresh 60s invocation
+        await dispatchWriterStep(job.id); // next batch of sections, or finalize
         return;
       }
       case 'finalize': {
