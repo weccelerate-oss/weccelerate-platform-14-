@@ -117,11 +117,22 @@ export async function writeGuidesForTick(opts?: {
  */
 async function reclaimOrphanedGaps(): Promise<number> {
   try {
+    // Only release gaps that DON'T have a live WritingJob. A gap whose job is
+    // merely mid-flight (e.g. stalled between section batches) is NOT orphaned —
+    // releasing it lets the next tick re-pick the same topic and spawn a
+    // DUPLICATE job/article. Exclude any gap with a job not in done/failed.
+    const liveJobGapIds = (
+      await prisma.writingJob.findMany({
+        where: { stage: { notIn: ['done', 'failed'] } },
+        select: { gapId: true },
+      })
+    ).map((j: { gapId: string }) => j.gapId);
+
     const res = await prisma.contentGap.updateMany({
-      where: { status: 'in_progress' },
+      where: { status: 'in_progress', id: { notIn: liveJobGapIds } },
       data: {
         status: 'open',
-        rejectReason: 'Reclaimed by reaper: previous run died before completing (likely function timeout mid-research).',
+        rejectReason: 'Reclaimed by reaper: in_progress with no live writing job (previous run died).',
       },
     });
     if (res.count > 0) {
@@ -1132,38 +1143,72 @@ export async function startWritingJobs(opts?: { context?: DailyContext; target?:
       payload: { gapId: gap.id, jobId: job.id, query: gap.query, severity: gap.severity },
       success: true,
     });
-
-    await dispatchWriterStep(job.id);
+    // No self-dispatch. The external pinger (GET /api/cron/writer-pump, every
+    // ~3 min) is the SOLE reliable driver — Vercel's `after()` self-dispatch
+    // dropped too often and stalled jobs mid-pipeline. The pump advances this
+    // job one step per call until it publishes.
   }
 
   return { created: jobIds.length, jobIds };
 }
 
 /**
- * Re-dispatch any WritingJob stuck mid-pipeline (chain broken by a dropped
- * dispatch). Runs daily from the cron regardless of writing-day so a job never
- * stalls more than ~24h. A job idle for > STALL_MS in a non-terminal stage is
- * assumed dropped and re-kicked at its current stage (idempotent — the stage
- * recomputes from persisted artifacts).
+ * Pump — the reliable driver for the writer pipeline. Advances up to `maxJobs`
+ * non-terminal WritingJobs by ONE step each, picking the oldest first. Designed
+ * to be hit every ~3 min by an external pinger (cron-job.org → GET
+ * /api/cron/writer-pump), replacing the fragile `after()` self-dispatch that
+ * dropped and stalled jobs.
+ *
+ * Concurrency-safe: a job is only picked if it's been idle > STALE_MS, and we
+ * atomically "claim" it (bump updatedAt under a guard) before doing the slow
+ * stage work — so an overlapping ping can't grab the same job. Each step
+ * recomputes from persisted artifacts, so re-running a step is harmless.
+ */
+export async function pumpWritingJobs(maxJobs = 1): Promise<{ advanced: string[] }> {
+  const STALE_MS = 90 * 1000; // a job untouched this long is free to advance
+  const advanced: string[] = [];
+
+  for (let i = 0; i < maxJobs; i++) {
+    const cutoff = new Date(Date.now() - STALE_MS);
+    const job = await prisma.writingJob.findFirst({
+      where: { stage: { notIn: ['done', 'failed'] }, updatedAt: { lt: cutoff } },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+    });
+    if (!job) break;
+
+    // Atomic claim: bump updatedAt (via @updatedAt) only if still stale. If a
+    // parallel ping already claimed it, count !== 1 and we skip to avoid
+    // double-processing the same step.
+    const claim = await prisma.writingJob.updateMany({
+      where: { id: job.id, updatedAt: { lt: cutoff } },
+      data: { attempts: { increment: 0 } },
+    });
+    if (claim.count !== 1) continue;
+
+    await advanceWritingJob(job.id);
+    advanced.push(job.id);
+  }
+  return { advanced };
+}
+
+/**
+ * Daily backstop kept under the old name so the cron import is unchanged: a
+ * single pump pass advancing a few jobs. The frequent external pinger does the
+ * real work; this just guarantees forward progress even if the pinger is down.
  */
 export async function resumeStalledWritingJobs(): Promise<{ resumed: number; jobIds: string[] }> {
-  const STALL_MS = 10 * 60 * 1000;
-  const cutoff = new Date(Date.now() - STALL_MS);
-  const stalled = await prisma.writingJob.findMany({
-    where: { stage: { notIn: ['done', 'failed'] }, updatedAt: { lt: cutoff } },
-    select: { id: true },
-  });
-  for (const j of stalled) await dispatchWriterStep(j.id);
-  if (stalled.length > 0) {
+  const { advanced } = await pumpWritingJobs(3);
+  if (advanced.length > 0) {
     await logDecision({
       agent: 'content-writer',
       action: 'resumed-stalled-jobs',
-      reasoning: `החייתי ${stalled.length} עבודות כתיבה שנתקעו (כנראה dispatch שנפל). כל אחת תמשיך מהשלב ששמרה.`,
-      payload: { resumed: stalled.length, jobIds: stalled.map((j: { id: string }) => j.id) },
+      reasoning: `קידמתי ${advanced.length} עבודות כתיבה (pump יומי). ה-pinger החיצוני מקדם אותן כל כמה דקות.`,
+      payload: { resumed: advanced.length, jobIds: advanced },
       success: true,
     });
   }
-  return { resumed: stalled.length, jobIds: stalled.map((j: { id: string }) => j.id) };
+  return { resumed: advanced.length, jobIds: advanced };
 }
 
 /**
@@ -1185,8 +1230,7 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
           where: { id: job.id },
           data: { researchSummary: research.summary, sources: research.sources, stage: 'plan', attempts: 0, error: null },
         });
-        await dispatchWriterStep(job.id);
-        return;
+        return; // pump advances to the 'plan' stage on its next pass
       }
       case 'plan': {
         // Opus, ONE call: title + meta + intro + the section blueprint. Small
@@ -1209,8 +1253,7 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
             error: null,
           },
         });
-        await dispatchWriterStep(job.id);
-        return;
+        return; // pump advances to the 'sections' stage on its next pass
       }
       case 'sections': {
         const plan = (job.sectionPlan ?? []) as SectionSpec[];
@@ -1247,7 +1290,7 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
             data: { contentHe: body, stage: 'finalize', attempts: 0, error: null },
           });
         }
-        await dispatchWriterStep(job.id); // next batch of sections, or finalize
+        // pump re-picks this job for the next section batch, or for 'finalize'
         return;
       }
       case 'finalize': {
@@ -1413,8 +1456,10 @@ async function handleStageError(job: WritingJobRow, err: unknown): Promise<void>
   const attempts = (job.attempts ?? 0) + 1;
 
   if (attempts <= STAGE_RETRY_CAP) {
+    // Bump attempts + error and return. The error update refreshes updatedAt,
+    // so the pump waits out STALE_MS before re-picking this job and retrying
+    // the same stage from persisted artifacts (no self-dispatch).
     await prisma.writingJob.update({ where: { id: job.id }, data: { attempts, error: reason.slice(0, 1_000) } });
-    await dispatchWriterStep(job.id); // retry same stage from persisted artifacts
     return;
   }
 
