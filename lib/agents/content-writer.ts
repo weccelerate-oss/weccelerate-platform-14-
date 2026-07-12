@@ -274,7 +274,7 @@ export async function writeNextGuide(opts?: { context?: DailyContext; journal?: 
     // silently shipping unverified copy. We still ran the policy gate,
     // so anything obviously broken is already blocked above.
     if (factCheck.unparsed) {
-      const slug = await deriveUniqueSlug(article.titleHe);
+      const slug = await deriveUniqueSlug(article.titleHe, article.titleEn);
       const draft = await prisma.generatedGuide.create({
         data: {
           slug,
@@ -334,7 +334,7 @@ export async function writeNextGuide(opts?: { context?: DailyContext; journal?: 
       return { ok: false, reason: 'Quality below threshold' };
     }
 
-    const slug = await deriveUniqueSlug(article.titleHe);
+    const slug = await deriveUniqueSlug(article.titleHe, article.titleEn);
 
     const generated = await prisma.generatedGuide.create({
       data: {
@@ -849,16 +849,30 @@ function countWords(text: string): number {
   return text.trim().split(/\s+/).length;
 }
 
-async function deriveUniqueSlug(title: string): Promise<string> {
-  // Hebrew → simple ASCII-safe slug. Falls back to a timestamp if empty.
-  const ascii = title
+// Letter-level Hebrew → Latin transliteration for slugs. Not linguistic
+// perfection — just readable ASCII (the old hex-charcode fallback produced
+// slugs like '5d05d95da-...' which are useless for SEO and ugly to share).
+const HEBREW_TRANSLIT: Record<string, string> = {
+  'א': 'a', 'ב': 'b', 'ג': 'g', 'ד': 'd', 'ה': 'h', 'ו': 'v', 'ז': 'z',
+  'ח': 'ch', 'ט': 't', 'י': 'i', 'כ': 'k', 'ך': 'k', 'ל': 'l', 'מ': 'm',
+  'ם': 'm', 'נ': 'n', 'ן': 'n', 'ס': 's', 'ע': 'a', 'פ': 'p', 'ף': 'f',
+  'צ': 'tz', 'ץ': 'tz', 'ק': 'k', 'ר': 'r', 'ש': 'sh', 'ת': 't',
+};
+
+async function deriveUniqueSlug(titleHe: string, titleEn?: string | null): Promise<string> {
+  // Prefer the English title when the plan stage produced one — it slugifies
+  // into real words. Otherwise transliterate the Hebrew letter-by-letter.
+  const base = (titleEn && titleEn.trim()) || titleHe;
+  const ascii = base
     .normalize('NFKD')
-    .replace(/[^a-zA-Z0-9֐-׿\s-]/g, '')
+    .replace(/[֐-׿]/g, (c) => HEBREW_TRANSLIT[c] ?? '')
+    .replace(/[^a-zA-Z0-9\s-]/g, '')
     .trim()
-    .replace(/[֐-׿]/g, (c) => String(c.charCodeAt(0).toString(16)))
     .toLowerCase()
     .replace(/\s+/g, '-')
-    .slice(0, 80) || `guide-${Date.now()}`;
+    .replace(/-{2,}/g, '-')
+    .slice(0, 80)
+    .replace(/^-+|-+$/g, '') || `guide-${Date.now()}`;
 
   let candidate = ascii;
   let n = 1;
@@ -1328,7 +1342,7 @@ async function saveJobAsDraft(
     reasoningHe: string;
   },
 ): Promise<void> {
-  const slug = await deriveUniqueSlug(article.titleHe);
+  const slug = await deriveUniqueSlug(article.titleHe, article.titleEn);
   const draft = await prisma.generatedGuide.create({
     data: {
       slug,
@@ -1411,7 +1425,7 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
 
   // Unparseable fact-check -> save as draft for manual review (don't auto-ship).
   if (factCheck.unparsed) {
-    const slug = await deriveUniqueSlug(article.titleHe);
+    const slug = await deriveUniqueSlug(article.titleHe, article.titleEn);
     const draft = await prisma.generatedGuide.create({
       data: {
         slug,
@@ -1466,7 +1480,7 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
   }
 
   // Publish.
-  const slug = await deriveUniqueSlug(article.titleHe);
+  const slug = await deriveUniqueSlug(article.titleHe, article.titleEn);
   const generated = await prisma.generatedGuide.create({
     data: {
       slug,
