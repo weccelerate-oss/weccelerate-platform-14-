@@ -4,6 +4,43 @@ import bcrypt from 'bcryptjs';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
+    // Passwordless entry from re-engagement emails. The token is HMAC-signed
+    // (lib/auth/magic-link.ts) and maps to one user; ENTREPRENEUR only — an
+    // admin account can never be entered through an emailed link. The user's
+    // stored password is untouched and keeps working in the normal login.
+    Credentials({
+      id: 'magic-token',
+      credentials: { token: {} },
+      async authorize(credentials) {
+        if (!credentials?.token) return null;
+        const { verifyMagicToken } = await import('./magic-link');
+        const userId = verifyMagicToken(credentials.token as string);
+        if (!userId) return null;
+
+        const { PrismaClient } = await import('@prisma/client');
+        const { PrismaPg } = await import('@prisma/adapter-pg');
+        const pg = await import('pg');
+        const pool = new pg.default.Pool({ connectionString: process.env.DATABASE_URL });
+        const adapter = new PrismaPg(pool);
+        const prisma = new PrismaClient({ adapter });
+        try {
+          const user = await prisma.user.findUnique({ where: { id: userId } });
+          if (!user || !user.isActive || user.role !== 'ENTREPRENEUR') return null;
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            // Never force a password change on link entry — the whole point
+            // is zero friction; their existing credentials stay valid.
+            mustChangePassword: false,
+          };
+        } finally {
+          await prisma.$disconnect();
+          await pool.end();
+        }
+      },
+    }),
     Credentials({
       credentials: {
         email: {},

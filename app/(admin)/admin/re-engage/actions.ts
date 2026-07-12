@@ -1,19 +1,19 @@
 /**
- * Re-engagement batch: send every ENTREPRENEUR who never logged in a fresh
- * temp password + the "veteran" welcome email ("your course content moved
- * to the portal"). One-click from /admin/re-engage, admin-gated, idempotent:
- * a user who already got a re-engage email in the last 30 days is skipped,
- * so re-running after a partial failure never double-sends.
+ * Re-engagement batch: send every ENTREPRENEUR who never logged in a
+ * ONE-CLICK magic-link entry email. Owner directive: existing credentials
+ * stay untouched — no password resets, no forced changes; the email button
+ * signs them straight into the portal. Admin-gated, idempotent: a user who
+ * already got a re-engage email in the last 30 days is skipped, so
+ * re-running after a partial failure never double-sends.
  */
 
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import bcrypt from 'bcryptjs';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { generateTempPassword } from '@/lib/security/generate-password';
-import { sendWelcomeEmail } from '@/lib/onboarding/welcome-email';
+import { magicLinkUrl } from '@/lib/auth/magic-link';
+import { sendReEngageEmail } from '@/lib/onboarding/re-engage-email';
 
 const RE_ENGAGE_ACTION = 'admin.user.re_engaged';
 
@@ -64,20 +64,14 @@ export async function reEngageBatchAction(): Promise<ReEngageResult> {
 
   // Sequential on purpose: no Resend rate-limit bursts, and a mid-batch crash
   // leaves a clean audit trail of exactly who was reached (re-run skips them).
+  // NOTE: no password is touched — the magic link signs them in directly and
+  // their original credentials keep working at /login.
   for (const user of toSend) {
     try {
-      const tempPassword = generateTempPassword();
-      const hashedPassword = await bcrypt.hash(tempPassword, 12);
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { password: hashedPassword, mustChangePassword: true },
-      });
-
-      const result = await sendWelcomeEmail({
+      const result = await sendReEngageEmail({
         to: user.email,
         name: user.name,
-        tempPassword,
-        variant: 'veteran',
+        enterUrl: magicLinkUrl(user.id),
       });
       if (!result.ok) throw new Error(result.error ?? 'email send failed');
 
