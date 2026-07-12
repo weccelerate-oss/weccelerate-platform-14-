@@ -1,0 +1,42 @@
+# Writer-pump pinger — the external driver for David's writer pipeline.
+#
+# Vercel Hobby only allows daily crons, and the writer needs a ping every few
+# minutes to advance WritingJobs step-by-step (research → plan → sections →
+# finalize). GitHub Actions scheduled workflows are the free, in-house
+# replacement for cron-job.org.
+#
+# Notes:
+# - Requires the CRON_SECRET repo secret (Settings → Secrets and variables →
+#   Actions) matching the CRON_SECRET env var on Vercel.
+# - GitHub schedules are best-effort: */5 typically fires every 5-15 minutes
+#   under load. The endpoint is idempotent and concurrency-safe, so jitter
+#   and overlaps are harmless.
+# - The endpoint responds 200 immediately and pumps in the background
+#   (after()), so this job finishes in ~1s.
+
+name: writer-pump
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping writer-pump
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::warning::CRON_SECRET repo secret is not set — skipping ping. Add it in Settings → Secrets → Actions."
+            exit 0
+          fi
+          code=$(curl -s -o /tmp/body -w '%{http_code}' \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 25 --retry 2 --retry-delay 5 \
+            https://weccelerate.co.il/api/cron/writer-pump)
+          echo "HTTP $code: $(cat /tmp/body)"
+          [ "$code" = "200" ]
