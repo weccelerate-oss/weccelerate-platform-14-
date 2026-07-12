@@ -49,6 +49,7 @@ const NAV_ITEMS = [
   {
     label: 'ניהול תוכן',
     items: [
+      { label: 'טיוטות של דוד', href: '/admin/drafts', icon: BookOpen },
       { label: 'שיעורים (פורטל)', href: '/admin/learning', icon: GraduationCap },
       { label: 'עדכונים (טיקר)', href: '/admin/news', icon: Newspaper },
       { label: 'אירועים', href: '/admin/events', icon: Calendar },

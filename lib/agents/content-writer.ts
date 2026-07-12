@@ -881,7 +881,7 @@ async function slugTaken(slug: string): Promise<boolean> {
 }
 
 let _indexNowWarnedOnce = false;
-async function pingIndexNow(url: string): Promise<void> {
+export async function pingIndexNow(url: string): Promise<void> {
   // DA-16 — never ping with a hardcoded fallback key. The key MUST live in
   // INDEXNOW_KEY env (and a matching `${key}.txt` MUST be served from the
   // site root); without that the call is at best a no-op and at worst it
@@ -932,8 +932,10 @@ function sanitizeArticleBody(a: ArticlePayload): ArticlePayload {
  * Side-effect helper: generate a LinkedIn post draft + email it to Katrin.
  * Called fire-and-forget AFTER prisma.generatedGuide.create succeeds, so
  * any failure here is purely cosmetic — the guide is already live.
+ * Exported: the admin publish-draft action reuses it so a manually-approved
+ * draft gets the same Katrin email as an auto-published article.
  */
-async function notifyKatrinAboutArticle(opts: {
+export async function notifyKatrinAboutArticle(opts: {
   titleHe: string;
   slug: string;
   bodyExcerpt: string;
