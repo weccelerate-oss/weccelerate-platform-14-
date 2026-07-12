@@ -23,6 +23,8 @@ import { planForToday, planForTomorrow } from '@/lib/agents/daily-plan';
 import { logDecision } from '@/lib/agents/decision-log';
 import { writeDailyJournalEntry } from '@/lib/agents/journal';
 import { runBiweeklyReplan, shouldRunReplan } from '@/lib/agents/biweekly-replanner';
+import { writeGeoDailySnapshot, detectGeoRegression, geoSparklineDataUri } from '@/lib/agents/geo-snapshot';
+import { runSocialPoster } from '@/lib/agents/social-poster';
 import { prisma } from '@/lib/db';
 import { DAVID, DAVID_EMAIL_FROM, DAVID_EMAIL_TO } from '@/lib/agents/david';
 import { requireCron } from '@/lib/auth/require-cron';
@@ -87,6 +89,9 @@ export async function GET(req: NextRequest) {
   results.push(await runStage('probe', () => runAllProbes()));
   // Stage 2: Analyze — always runs.
   results.push(await runStage('analyze', () => analyzeGaps()));
+  // Stage 2.1: GEO snapshot — persist today's 0-100 score (rolling 14d window)
+  // so the admin graph + email sparkline have one point per day. Always runs.
+  results.push(await runStage('geo-snapshot', () => writeGeoDailySnapshot()));
   // Stage 2.5: Resume — re-dispatch any writing job whose stage chain was
   // broken by a dropped dispatch. Runs EVERY day (even non-writing days) so a
   // stalled article never waits more than ~24h to resume.
@@ -137,6 +142,11 @@ export async function GET(req: NextRequest) {
       skipReason: 'תוכנית שבועיים אחרונה עדיין טרייה (פחות מ-14 ימים).',
     });
   }
+
+  // Stage 5.5: Social drafts — LinkedIn/Facebook/Reels-hook drafts for guides
+  // published in the last 24h. Logged as decisions, so they render inside the
+  // report email automatically. Nothing is auto-published.
+  results.push(await runStage('social', () => runSocialPoster()));
 
   // Stage 6: Report.
   results.push(await runStage('report', () => sendDailyReport(ctx, today, tomorrow, results)));
@@ -252,6 +262,63 @@ async function sendDailyReport(
       </div>`
     : '';
 
+  // Pinger liveness — the writer pipeline's SOLE driver is the external
+  // pinger (cron-job.org → /api/cron/writer-pump every ~3 min). A stale (or
+  // absent) heartbeat means articles are crawling on the once-daily backstop.
+  // This replaces the old hardcoded "the pinger advances jobs" line that hid
+  // a pinger that was never configured. try/catch: table may not exist yet.
+  let pingerBanner = '';
+  try {
+    const hb = await prisma.agentHeartbeat.findUnique({ where: { name: 'writer-pump' } });
+    const staleMs = hb ? Date.now() - hb.lastSeenAt.getTime() : Infinity;
+    if (staleMs > 30 * 60 * 1000) {
+      const lastSeen = hb
+        ? `פעימה אחרונה: ${new Date(hb.lastSeenAt).toLocaleString('he-IL')}`
+        : 'לא נרשמה פעימה מעולם — כנראה שה-pinger לא הוגדר ב-cron-job.org';
+      pingerBanner = `<div style="background:#fef2f2;border:2px solid #dc2626;color:#991b1b;padding:14px 18px;border-radius:8px;margin-bottom:16px;font-weight:bold;">
+        🔌 ה-pinger החיצוני של צנרת הכתיבה לא פועם. ${escapeHtml(lastSeen)}.<br>
+        <span style="font-weight:normal;">בלעדיו מאמרים מתקדמים רק פעם ביום. הגדרה: GET https://weccelerate.co.il/api/cron/writer-pump כל 3 דקות עם Authorization: Bearer CRON_SECRET.</span>
+      </div>`;
+    }
+  } catch { /* heartbeat table not migrated yet — skip the banner */ }
+
+  // Publish watchdog — writing jobs older than 24h that still aren't done
+  // mean the pipeline is stuck; say so in red instead of failing silently.
+  let stuckJobsBanner = '';
+  try {
+    const stuck = await prisma.writingJob.count({
+      where: {
+        stage: { notIn: ['done', 'failed'] },
+        createdAt: { lt: new Date(Date.now() - 24 * 3600 * 1000) },
+      },
+    });
+    if (stuck > 0) {
+      stuckJobsBanner = `<div style="background:#fef2f2;border:2px solid #dc2626;color:#991b1b;padding:14px 18px;border-radius:8px;margin-bottom:16px;font-weight:bold;">
+        ⏳ ${stuck} עבודות כתיבה פתוחות מעל 24 שעות ולא פורסמו. בדוק את ה-pinger ואת טבלת writing_jobs (עמודות stage/error).
+      </div>`;
+    }
+  } catch { /* table missing — skip */ }
+
+  // GEO trend — sparkline of the last 30 daily snapshots + regression alert
+  // (7-day avg dropped 10+ points vs the previous 7 days).
+  let geoTrendHtml = '';
+  let geoRegressionBanner = '';
+  try {
+    const spark = await geoSparklineDataUri(30);
+    if (spark) {
+      geoTrendHtml = `<div style="background:#f1f5f9;padding:14px 16px;border-radius:8px;margin-bottom:24px;">
+        <div style="font-size:11px;color:#64748b;text-transform:uppercase;margin-bottom:6px;">📈 מדד GEO — ‏30 יום · היום: <strong style="color:#7c3aed;font-size:14px;">${spark.latest}</strong>/100</div>
+        <img src="${spark.uri}" width="260" height="48" alt="גרף מדד GEO" style="display:block;">
+      </div>`;
+    }
+    const reg = await detectGeoRegression();
+    if (reg?.regressed) {
+      geoRegressionBanner = `<div style="background:#fef2f2;border:2px solid #dc2626;color:#991b1b;padding:14px 18px;border-radius:8px;margin-bottom:16px;font-weight:bold;">
+        📉 נסיגת GEO: ממוצע השבוע ${reg.recentAvg} מול ${reg.previousAvg} בשבוע הקודם. מומלץ לתעדף רענון מאמרים קיימים על פני כתיבה חדשה.
+      </div>`;
+    }
+  } catch { /* snapshot table not migrated yet — skip */ }
+
   // Recent guides — David's "what did I do this week" memory, surfaced.
   const memoryHtml = ctx.recentGuides.length === 0
     ? '<p style="color:#94a3b8;">לא פרסמתי מאמרים ב-30 הימים האחרונים.</p>'
@@ -269,6 +336,10 @@ async function sendDailyReport(
   </div>
 
   ${allProbesFailedBanner}
+  ${pingerBanner}
+  ${stuckJobsBanner}
+  ${geoRegressionBanner}
+  ${geoTrendHtml}
 
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
     <div style="background:#f1f5f9;padding:14px;border-radius:8px;text-align:center;">

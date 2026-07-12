@@ -7,8 +7,42 @@ import {
   GUIDE_CATEGORIES,
   type GuideCategory,
 } from '@/lib/seo/guides-catalog';
+import { prisma } from '@/lib/db';
 
 export const revalidate = 86400;
+
+interface AgentGuide {
+  slug: string;
+  titleHe: string;
+  metaDescription: string;
+  category: string;
+  publishedAt: Date | null;
+  wordCount: number | null;
+}
+
+/**
+ * David's agent-written guides. This listing is what gives them internal
+ * links — without it every generated article is an orphan page no crawler
+ * discovers. Safe against a missing table (pre-migration deploys).
+ */
+async function getAgentGuides(): Promise<AgentGuide[]> {
+  try {
+    return await prisma.generatedGuide.findMany({
+      where: { status: 'published' },
+      orderBy: { publishedAt: 'desc' },
+      select: {
+        slug: true,
+        titleHe: true,
+        metaDescription: true,
+        category: true,
+        publishedAt: true,
+        wordCount: true,
+      },
+    });
+  } catch {
+    return [];
+  }
+}
 
 export const metadata: Metadata = constructMetadata({
   title: 'מדריכי סטארטאפ מלאים | WeCcelerate — כל מה שצריך לדעת לפני שמקימים',
@@ -27,7 +61,7 @@ export const metadata: Metadata = constructMetadata({
   locale: 'he',
 });
 
-function buildCollectionPageSchema() {
+function buildCollectionPageSchema(agentGuides: AgentGuide[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -39,22 +73,33 @@ function buildCollectionPageSchema() {
     inLanguage: 'he-IL',
     isPartOf: { '@id': `${SITE_CONFIG.url}/#website` },
     publisher: { '@id': `${SITE_CONFIG.url}/#organization` },
-    hasPart: GUIDES.map((g) => ({
-      '@type': 'Article',
-      '@id': `${SITE_CONFIG.url}/guides/${g.slug}`,
-      headline: g.h1,
-      description: g.metaDescription,
-      url: `${SITE_CONFIG.url}/guides/${g.slug}`,
-      keywords: [g.targetKeyword, ...g.relatedKeywords].join(', '),
-      datePublished: g.lastUpdated,
-      dateModified: g.lastUpdated,
-      timeRequired: `PT${g.readingTimeMinutes}M`,
-    })),
+    hasPart: [
+      ...GUIDES.map((g) => ({
+        '@type': 'Article',
+        '@id': `${SITE_CONFIG.url}/guides/${g.slug}`,
+        headline: g.h1,
+        description: g.metaDescription,
+        url: `${SITE_CONFIG.url}/guides/${g.slug}`,
+        keywords: [g.targetKeyword, ...g.relatedKeywords].join(', '),
+        datePublished: g.lastUpdated,
+        dateModified: g.lastUpdated,
+        timeRequired: `PT${g.readingTimeMinutes}M`,
+      })),
+      ...agentGuides.map((g) => ({
+        '@type': 'Article',
+        '@id': `${SITE_CONFIG.url}/guides/${g.slug}`,
+        headline: g.titleHe,
+        description: g.metaDescription,
+        url: `${SITE_CONFIG.url}/guides/${g.slug}`,
+        ...(g.publishedAt ? { datePublished: g.publishedAt.toISOString().slice(0, 10) } : {}),
+      })),
+    ],
   };
 }
 
-export default function GuidesHubPage() {
-  const schema = buildCollectionPageSchema();
+export default async function GuidesHubPage() {
+  const agentGuides = await getAgentGuides();
+  const schema = buildCollectionPageSchema(agentGuides);
 
   const grouped = (Object.keys(GUIDE_CATEGORIES) as GuideCategory[]).map((cat) => ({
     category: cat,
@@ -147,6 +192,45 @@ export default function GuidesHubPage() {
               </section>
             ))}
           </div>
+
+          {agentGuides.length > 0 && (
+            <section id="new-articles" className="mt-16 scroll-mt-24">
+              <div className="mb-8 flex items-end justify-between gap-4 border-b border-white/10 pb-4">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold tracking-tight">מאמרים חדשים</h2>
+                  <p className="mt-2 text-white/55">
+                    תוכן מקצועי שמתעדכן באופן שוטף — תשובות לשאלות שיזמים באמת שואלים.
+                  </p>
+                </div>
+                <div className="hidden md:block h-px w-24 self-end bg-gradient-to-l from-[#c8a951] to-transparent" />
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {agentGuides.map((g) => (
+                  <Link
+                    key={g.slug}
+                    href={`/guides/${g.slug}`}
+                    className="group flex flex-col rounded-2xl border border-white/8 bg-gradient-to-b from-white/[0.03] to-transparent p-5 transition-all duration-300 hover:border-[#c8a951]/40 hover:from-[#c8a951]/[0.06]"
+                  >
+                    <h3 className="mb-2 text-lg font-semibold text-white group-hover:text-[#e8d48b] transition-colors">
+                      {g.titleHe}
+                    </h3>
+                    <p className="mb-4 flex-1 text-sm leading-relaxed text-white/55">
+                      {g.metaDescription}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-white/40">
+                      <span className="rounded-full bg-[#c8a951]/10 border border-[#c8a951]/20 px-2.5 py-1 font-medium text-[#e8d48b]">
+                        {g.category}
+                      </span>
+                      {g.publishedAt && (
+                        <span>{new Date(g.publishedAt).toLocaleDateString('he-IL')}</span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section className="mt-16 relative overflow-hidden rounded-2xl border border-[#c8a951]/30 bg-gradient-to-br from-[#c8a951]/[0.08] via-transparent to-[#c8a951]/[0.04] p-10 text-center">
             <div

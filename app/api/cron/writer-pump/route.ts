@@ -22,6 +22,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireCron } from '@/lib/auth/require-cron';
 import { pumpWritingJobs } from '@/lib/agents/content-writer';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -30,6 +31,19 @@ export const maxDuration = 60;
 export async function GET(req: NextRequest) {
   const unauth = requireCron(req);
   if (unauth) return unauth;
+
+  // Liveness proof for the daily report: a stale heartbeat means the external
+  // pinger stopped (or was never configured) and jobs are crawling on the
+  // once-daily backstop. Best-effort — a missing table must not break pumping.
+  await prisma.agentHeartbeat
+    .upsert({
+      where: { name: 'writer-pump' },
+      create: { name: 'writer-pump' },
+      // Writing name-to-same-value forces a real UPDATE so @updatedAt bumps
+      // (an empty update object can skip the write entirely).
+      update: { name: 'writer-pump' },
+    })
+    .catch(() => {});
 
   const result = await pumpWritingJobs(1);
   return NextResponse.json({ ok: true, ...result });

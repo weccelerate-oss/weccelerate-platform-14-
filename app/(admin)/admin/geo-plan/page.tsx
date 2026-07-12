@@ -105,6 +105,73 @@ async function getHealth(): Promise<Health> {
   };
 }
 
+interface TrendPoint {
+  date: string;
+  geoScore: number;
+  citedRate: number;
+  mentionedRate: number;
+  probesInWindow: number;
+}
+
+async function getGeoTrend(): Promise<TrendPoint[]> {
+  // Safe against a not-yet-migrated table, like the health counters above.
+  try {
+    const rows = await prisma.geoDailySnapshot.findMany({
+      orderBy: { date: 'asc' },
+      take: 90,
+      select: { date: true, geoScore: true, citedRate: true, mentionedRate: true, probesInWindow: true },
+    });
+    type SnapshotRow = { date: Date; geoScore: number; citedRate: number; mentionedRate: number; probesInWindow: number };
+    return rows.map((r: SnapshotRow) => ({
+      date: r.date.toISOString().slice(0, 10),
+      geoScore: r.geoScore,
+      citedRate: r.citedRate,
+      mentionedRate: r.mentionedRate,
+      probesInWindow: r.probesInWindow,
+    }));
+  } catch { return []; }
+}
+
+/**
+ * Server-rendered SVG line chart — no client JS, no chart lib. GEO score is
+ * the bold line; cited rate is the thin one under it.
+ */
+function GeoTrendChart({ points }: { points: TrendPoint[] }) {
+  const W = 860;
+  const H = 220;
+  const PAD = { top: 16, right: 16, bottom: 28, left: 34 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+
+  const x = (i: number) =>
+    PAD.left + (points.length === 1 ? innerW / 2 : (i * innerW) / (points.length - 1));
+  const y = (v: number) => PAD.top + innerH - (v / 100) * innerH;
+  const line = (get: (p: TrendPoint) => number) =>
+    points.map((p, i) => `${x(i).toFixed(1)},${y(get(p)).toFixed(1)}`).join(' ');
+
+  const last = points[points.length - 1];
+  const gridLines = [0, 25, 50, 75, 100];
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="מדד GEO לאורך זמן">
+      {gridLines.map((v) => (
+        <g key={v}>
+          <line x1={PAD.left} y1={y(v)} x2={W - PAD.right} y2={y(v)} stroke="#e2e8f0" strokeWidth={v === 0 ? 1.5 : 0.75} />
+          <text x={PAD.left - 8} y={y(v) + 4} fontSize={11} fill="#94a3b8" textAnchor="end">{v}</text>
+        </g>
+      ))}
+      <polyline fill="none" stroke="#c4b5fd" strokeWidth={1.5} strokeDasharray="4 3" points={line((p) => p.citedRate)} />
+      <polyline fill="none" stroke="#7c3aed" strokeWidth={2.5} strokeLinecap="round" points={line((p) => p.geoScore)} />
+      <circle cx={x(points.length - 1)} cy={y(last.geoScore)} r={4} fill="#7c3aed" />
+      <text x={x(points.length - 1)} y={y(last.geoScore) - 10} fontSize={13} fontWeight="bold" fill="#7c3aed" textAnchor="middle">
+        {last.geoScore}
+      </text>
+      <text x={PAD.left} y={H - 8} fontSize={11} fill="#94a3b8">{points[0].date}</text>
+      <text x={W - PAD.right} y={H - 8} fontSize={11} fill="#94a3b8" textAnchor="end">{last.date}</text>
+    </svg>
+  );
+}
+
 const STATUS_PILL = {
   ok: 'bg-emerald-100 text-emerald-800 border-emerald-200',
   warn: 'bg-amber-100 text-amber-800 border-amber-200',
@@ -120,7 +187,7 @@ function Pill({ kind, children }: { kind: keyof typeof STATUS_PILL; children: Re
 }
 
 export default async function GeoPlanPage() {
-  const h = await getHealth();
+  const [h, trend] = await Promise.all([getHealth(), getGeoTrend()]);
   const allTablesOk = h.geoProbeInstalled && h.contentGapsInstalled && h.generatedGuidesInstalled;
 
   return (
@@ -185,6 +252,32 @@ export default async function GeoPlanPage() {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+      </section>
+
+      {/* ============================================================== */}
+      {/* GEO TREND — the day-over-day improvement graph                  */}
+      {/* ============================================================== */}
+      <section className="mb-10 rounded-xl border-2 border-slate-300 bg-white p-6">
+        <div className="mb-1 flex items-baseline justify-between">
+          <h2 className="text-xl font-bold text-slate-900">📈 מדד GEO — מגמה יומית</h2>
+          {trend.length > 0 && (
+            <span className="text-sm text-slate-500">
+              היום: <strong className="text-violet-700">{trend[trend.length - 1].geoScore}</strong>/100
+              {' · '}שיעור ציטוט {trend[trend.length - 1].citedRate}%
+              {' · '}מדגם {trend[trend.length - 1].probesInWindow} בדיקות (14 יום)
+            </span>
+          )}
+        </div>
+        <p className="mb-4 text-xs text-slate-500">
+          קו עבה = מדד GEO משוקלל (60% ציטוט · 25% אזכור · 15% מיקום) על חלון מגולגל של 14 יום. קו מקווקו = שיעור ציטוט. נקודה אחת נכתבת כל בוקר בריצת דוד.
+        </p>
+        {trend.length >= 2 ? (
+          <GeoTrendChart points={trend} />
+        ) : (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+            עדיין אין מספיק נקודות מדידה — הגרף יתחיל להצטייר אחרי יומיים של ריצות בוקר (טבלת geo_daily_snapshots דורשת <code className="rounded bg-slate-100 px-1">npm run db:push</code>).
           </div>
         )}
       </section>

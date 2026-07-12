@@ -952,6 +952,52 @@ model GeneratedGuide {
 }
 
 // =============================================================================
+// GEO DAILY SNAPSHOT — one row per day, the "is GEO improving?" time series
+// =============================================================================
+// Written every morning at the end of the analyze stage. All rates are
+// computed over a ROLLING 14-DAY window of geo_probes (not just today's
+// probes) so the sparse per-query cadence doesn't make the graph jumpy.
+// The admin dashboard and the daily-email sparkline read straight from here —
+// no recomputation at render time.
+
+model GeoDailySnapshot {
+  id             String   @id @default(cuid())
+  date           DateTime @unique @db.Date
+
+  // Composite 0-100 score: 60% cited rate + 25% mentioned rate + 15% position
+  // (position component = share of cited answers where we were source #1-3).
+  geoScore       Int
+  citedRate      Int      // % of window probes with cited=true
+  mentionedRate  Int      // % with mentioned=true
+  probesInWindow Int      // sample size behind the rates (confidence indicator)
+
+  // Per-dimension breakdowns for the dashboard drill-down.
+  byCategory     Json     @default("{}") // { "brand-he": {cited, total}, ... }
+  byProvider     Json     @default("{}") // { "perplexity-sonar": {cited, total}, ... }
+
+  createdAt      DateTime @default(now())
+
+  @@index([date])
+  @@map("geo_daily_snapshots")
+}
+
+// =============================================================================
+// AGENT HEARTBEAT — liveness of external drivers (one row per component)
+// =============================================================================
+// The writer pipeline's sole driver is an EXTERNAL pinger (cron-job.org →
+// /api/cron/writer-pump every ~3 min). A hardcoded "the pinger advances jobs"
+// line in the daily report once hid a pinger that was never configured — so
+// the pump now upserts its heartbeat here, and the daily report renders a red
+// banner when lastSeenAt is stale instead of assuming liveness.
+
+model AgentHeartbeat {
+  name       String   @id            // 'writer-pump'
+  lastSeenAt DateTime @updatedAt
+
+  @@map("agent_heartbeats")
+}
+
+// =============================================================================
 // WRITING JOB — durable state machine for the split, chunked writer pipeline
 // =============================================================================
 // The writer cannot complete inside a single serverless invocation: on Vercel

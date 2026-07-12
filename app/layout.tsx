@@ -13,6 +13,7 @@ import { Inter, Heebo } from "next/font/google";
 import Script from "next/script";
 
 import { GeoSchema } from "@/components/seo/GeoSchema";
+import { Clarity } from "@/components/analytics/Clarity";
 import { SkipToContent } from "@/components/ui/SkipToContent";
 import { LanguageProvider } from "@/lib/i18n";
 import { HtmlAttrs } from "@/components/providers/HtmlAttrs";
@@ -217,6 +218,10 @@ export default function RootLayout({
           gtag('config', 'G-BQDD91KSJG');
         `}
       </Script>
+
+      {/* Microsoft Clarity — recordings/heatmaps + traffic-source tags.
+          No-op until NEXT_PUBLIC_CLARITY_PROJECT_ID is set. */}
+      <Clarity />
 
       <body className={`font-heebo antialiased bg-white text-slate-900`}>
         <LanguageProvider>

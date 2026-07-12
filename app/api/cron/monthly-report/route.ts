@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
           lte: prevMonthEnd,
         },
       },
-      select: { action: true },
+      select: { action: true, metadata: true },
     });
 
     // Aggregate by action
@@ -52,6 +52,47 @@ export async function GET(request: NextRequest) {
     }
 
     const totalContacts = logs.length;
+
+    // Aggregate by traffic channel (lib/analytics/attribution.ts adds a
+    // 'channel' key to every tracked click). Older events have no channel —
+    // they're grouped as 'לא ידוע' so the totals still add up.
+    const CHANNEL_LABELS: Record<string, string> = {
+      'llm-chatgpt': 'ChatGPT',
+      'llm-claude': 'Claude',
+      'llm-gemini': 'Gemini',
+      'llm-perplexity': 'Perplexity',
+      'llm-copilot': 'Copilot',
+      'google-organic': 'גוגל — אורגני',
+      'google-ads': 'גוגל — ממומן',
+      'bing-organic': 'Bing',
+      facebook: 'פייסבוק',
+      'facebook-ads': 'פייסבוק — ממומן',
+      instagram: 'אינסטגרם',
+      tiktok: 'טיקטוק',
+      linkedin: 'לינקדאין',
+      youtube: 'יוטיוב',
+      'twitter-x': 'טוויטר/X',
+      whatsapp: 'וואטסאפ (שיתוף)',
+      campaign: 'קמפיין אחר',
+      referral: 'אתר מפנה',
+      direct: 'ישיר',
+    };
+    const byChannel: Record<string, number> = {};
+    for (const log of logs) {
+      const channel =
+        (log.metadata as { channel?: string } | null)?.channel ?? 'לא ידוע';
+      const label = CHANNEL_LABELS[channel] ?? channel;
+      byChannel[label] = (byChannel[label] || 0) + 1;
+    }
+    const channelRows = Object.entries(byChannel)
+      .sort((a, b) => b[1] - a[1])
+      .map(
+        ([label, count]) => `<tr>
+          <td style="padding: 10px 16px; border-bottom: 1px solid #e2e8f0; text-align: right;">${label}</td>
+          <td style="padding: 10px 16px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: bold;">${count}</td>
+        </tr>`,
+      )
+      .join('');
 
     // Build HTML email
     const rows = TRACKED_ACTIONS
@@ -91,6 +132,19 @@ export async function GET(request: NextRequest) {
                 ${rows}
               </tbody>
             </table>
+            ${channelRows ? `
+            <h3 style="color: #1e293b; margin: 28px 0 12px;">מאיפה הגיעו הפונים</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f1f5f9;">
+                  <th style="padding: 10px 16px; text-align: right; font-size: 14px; color: #64748b;">מקור הגעה</th>
+                  <th style="padding: 10px 16px; text-align: center; font-size: 14px; color: #64748b;">פניות</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${channelRows}
+              </tbody>
+            </table>` : ''}
             <p style="color: #94a3b8; font-size: 12px; margin-top: 24px; text-align: center;">
               דוח זה נוצר אוטומטית ממערכת WeCcelerate
             </p>

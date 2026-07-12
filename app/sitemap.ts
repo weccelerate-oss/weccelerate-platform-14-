@@ -72,25 +72,31 @@ async function getDynamicContent() {
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient();
     try {
-      const [events, videos] = await Promise.all([
+      const [events, videos, generatedGuides] = await Promise.all([
         prisma.event.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
         prisma.video.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
+        // David's agent-written guides. Without these entries the articles are
+        // invisible to Google/LLM crawlers — no other page links to them.
+        prisma.generatedGuide.findMany({
+          where: { status: 'published' },
+          select: { slug: true, updatedAt: true },
+        }),
       ]);
-      return { events, videos };
+      return { events, videos, generatedGuides };
     } catch {
-      return { events: [], videos: [] };
+      return { events: [], videos: [], generatedGuides: [] };
     } finally {
       await prisma.$disconnect();
     }
   } catch {
-    return { events: [], videos: [] };
+    return { events: [], videos: [], generatedGuides: [] };
   }
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_CONFIG.url;
   const now = new Date();
-  const { events, videos } = await getDynamicContent();
+  const { events, videos, generatedGuides } = await getDynamicContent();
   
   const entries: MetadataRoute.Sitemap = [];
   
@@ -126,6 +132,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic content
   events.forEach((e) => entries.push({ url: `${baseUrl}/events/${e.slug}`, lastModified: e.updatedAt, changeFrequency: 'weekly', priority: 0.7 }));
   videos.forEach((v) => entries.push({ url: `${baseUrl}/videos/${v.slug}`, lastModified: v.updatedAt, changeFrequency: 'monthly', priority: 0.6 }));
+
+  // Agent-written guides (David) — same /guides/[slug] namespace as the
+  // static catalog, slightly lower priority until they earn citations.
+  generatedGuides.forEach((g) =>
+    entries.push({
+      url: `${baseUrl}/guides/${g.slug}`,
+      lastModified: g.updatedAt,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    }),
+  );
 
   // SEO guides — each targets a high-intent Hebrew commercial keyword
   GUIDES.forEach((g) =>
