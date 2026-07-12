@@ -20,7 +20,11 @@ import { useEffect } from 'react';
 import Script from 'next/script';
 import { getAttribution } from '@/lib/analytics/attribution';
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
+// Sanitize hard: a BOM + trailing CRLF once snuck into the Vercel env value
+// (piped through PowerShell) and the raw newline inside the inline-script
+// string threw a SyntaxError that silently killed Clarity site-wide.
+const PROJECT_ID = (process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID || '')
+  .replace(/[^a-z0-9]/gi, '');
 
 declare global {
   interface Window {

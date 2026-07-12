@@ -26,7 +26,11 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+// 300 (not 60): the self-revision stage rewrites a full ~2,500-word article
+// in one Sonnet call (~90-150s). The plan honors 300s — david-daily's
+// resume-jobs stage has run 184s+ in production. The pinger isn't affected:
+// it gets its 200 immediately (see after() below).
+export const maxDuration = 300;
 
 export async function GET(req: NextRequest) {
   const unauth = requireCron(req);

@@ -1309,6 +1309,32 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
         // pump re-picks this job for the next section batch, or for 'finalize'
         return;
       }
+      case 'revise': {
+        // Self-correction round: the fix-list the gate produced rides in the
+        // error column. One Sonnet call returns a minimally-edited article,
+        // then finalize re-runs the gates on it.
+        const notes = job.error ?? '';
+        const revised = await runRevision(
+          {
+            titleHe: job.titleHe ?? '',
+            metaDescription: job.metaDescription ?? '',
+            contentHe: job.contentHe ?? '',
+          },
+          notes,
+        );
+        await prisma.writingJob.update({
+          where: { id: job.id },
+          data: {
+            titleHe: revised.titleHe,
+            metaDescription: revised.metaDescription,
+            contentHe: revised.contentHe,
+            stage: 'finalize',
+            attempts: 0,
+            error: null,
+          },
+        });
+        return;
+      }
       case 'finalize': {
         await finalizeWritingJob(job);
         return;
@@ -1322,6 +1348,45 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
 }
 
 type WritingJobRow = NonNullable<Awaited<ReturnType<typeof prisma.writingJob.findUnique>>>;
+
+// Self-revision: how many fix-rounds David gets before an article is parked
+// as a draft for human review. Each round is one Sonnet call that receives
+// the exact gate findings and returns a minimally-edited article.
+const REVISION_CAP = 2;
+
+/** Revisions already spent on this job — counted from the decision log so no
+ *  schema change is needed and the daily email doubles as the audit trail. */
+async function countRevisions(jobId: string): Promise<number> {
+  try {
+    return await prisma.agentDecision.count({
+      where: {
+        agent: 'content-writer',
+        action: 'self-revision',
+        payload: { path: ['jobId'], equals: jobId },
+      },
+    });
+  } catch {
+    return REVISION_CAP; // counting broken → fail safe to draft, never loop forever
+  }
+}
+
+/** Send a gated article back to David with the fix-list. The notes ride in
+ *  the job's error column; the 'revise' stage consumes them. */
+async function dispatchRevision(job: WritingJobRow, round: number, notes: string): Promise<void> {
+  await prisma.writingJob.update({
+    where: { id: job.id },
+    data: { stage: 'revise', error: notes.slice(0, 950), attempts: 0 },
+  });
+  await logDecision({
+    agent: 'content-writer',
+    action: 'self-revision',
+    reasoning:
+      `המאמר על "${job.query}" נעצר בשער האיכות/מדיניות. מתקן את עצמי (סבב ${round}/${REVISION_CAP}) ` +
+      `לפי הממצאים המדויקים, ואפרסם אוטומטית אם התיקון יעבור.`,
+    payload: { jobId: job.id, gapId: job.gapId, round, notes: notes.slice(0, 500) },
+    success: true,
+  });
+}
 
 /**
  * Persist a finished-but-gated article as a DRAFT GeneratedGuide instead of
@@ -1400,24 +1465,29 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
   const seoLint = lintSeo(article);
   const policyLint = lintPolicy(article);
 
-  // Policy gate — save as DRAFT for human review, don't discard.
-  // These violations are usually one fixable sentence (e.g. a specific NIS
-  // price the model invented). Failing the job threw away a complete 8-9
-  // section article AND reopened the gap, so David rewrote the same topic
-  // and hit the same wall — three articles died in that loop before this
-  // was changed. A draft costs nothing and keeps the work.
+  // Policy gate — SELF-REVISE, don't hold. The owner's directive: David must
+  // deliver policy-clean articles himself, not a review queue. A violation
+  // (invented NIS price, competitor name…) sends the article to the 'revise'
+  // stage with the exact violation list; after REVISION_CAP failed rounds it
+  // falls back to a hidden draft (rare).
   if (!policyLint.passed) {
-    await saveJobAsDraft(job, article, {
-      seoScore: seoLint.score,
-      factCheckScore: null,
-      internalLinks,
-      sources,
-      reason: `Policy: ${policyLint.violations.join('; ')}`,
-      action: 'saved-draft-policy',
-      reasoningHe:
-        `שמרתי את המאמר על "${job.query}" כטיוטה (לא פורסם) — הפר כללי כתיבה: ${policyLint.violations.join('; ')}. ` +
-        `בדרך כלל זה משפט אחד לתיקון. עבור עליו ופרסם ידנית.`,
-    });
+    const revisions = await countRevisions(job.id);
+    if (revisions >= REVISION_CAP) {
+      await saveJobAsDraft(job, article, {
+        seoScore: seoLint.score,
+        factCheckScore: null,
+        internalLinks,
+        sources,
+        reason: `Policy after ${revisions} revisions: ${policyLint.violations.join('; ')}`,
+        action: 'saved-draft-policy',
+        reasoningHe:
+          `גם אחרי ${revisions} סבבי תיקון עצמי, המאמר על "${job.query}" עדיין מפר כללים: ${policyLint.violations.join('; ')}. ` +
+          `שמרתי כטיוטה — עבור עליו ב-/admin/drafts.`,
+      });
+      return;
+    }
+    await dispatchRevision(job, revisions + 1,
+      `הפרות מדיניות שחובה להסיר (בלי לשנות שום דבר אחר במאמר):\n- ${policyLint.violations.join('\n- ')}`);
     return;
   }
 
@@ -1460,22 +1530,35 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
     return;
   }
 
-  // Quality gate — below the floor the article is saved as DRAFT, not
-  // discarded (same rationale as the policy gate above: a 55/100 article is
-  // an edit away from publishable, not garbage).
+  // Quality gate — same self-revise loop: the fact-checker's notes name the
+  // unsupported claims, the SEO lint names the structural issues; David gets
+  // both as a fix-list and republishes himself. Draft only after the cap.
   const QUALITY_FLOOR = 60;
   if (factCheck.score < QUALITY_FLOOR || seoLint.score < QUALITY_FLOOR) {
-    await saveJobAsDraft(job, article, {
-      seoScore: seoLint.score,
-      factCheckScore: factCheck.score,
-      internalLinks,
-      sources,
-      reason: `Quality below ${QUALITY_FLOOR} (fact ${factCheck.score}, seo ${seoLint.score})`,
-      action: 'saved-draft-quality',
-      reasoningHe:
-        `שמרתי את המאמר על "${job.query}" כטיוטה (לא פורסם). ` +
-        `Fact-check ${factCheck.score}/100, SEO ${seoLint.score}/100 (סף ${QUALITY_FLOOR}). עבור עליו ופרסם ידנית.`,
-    });
+    const revisions = await countRevisions(job.id);
+    if (revisions >= REVISION_CAP) {
+      await saveJobAsDraft(job, article, {
+        seoScore: seoLint.score,
+        factCheckScore: factCheck.score,
+        internalLinks,
+        sources,
+        reason: `Quality below ${QUALITY_FLOOR} after ${revisions} revisions (fact ${factCheck.score}, seo ${seoLint.score})`,
+        action: 'saved-draft-quality',
+        reasoningHe:
+          `גם אחרי ${revisions} סבבי תיקון עצמי, המאמר על "${job.query}" מתחת לסף האיכות ` +
+          `(Fact-check ${factCheck.score}/100, SEO ${seoLint.score}/100). שמרתי כטיוטה — עבור עליו ב-/admin/drafts.`,
+      });
+      return;
+    }
+    const qualityNotes = [
+      factCheck.score < QUALITY_FLOOR && factCheck.notes
+        ? `טענות לא מבוססות שצריך לרכך או להסיר (fact-check ${factCheck.score}/100): ${factCheck.notes}`
+        : null,
+      seoLint.score < QUALITY_FLOOR && seoLint.issues.length > 0
+        ? `בעיות מבנה/SEO לתיקון (ציון ${seoLint.score}/100):\n- ${seoLint.issues.join('\n- ')}`
+        : null,
+    ].filter(Boolean).join('\n\n');
+    await dispatchRevision(job, revisions + 1, qualityNotes || `ציון איכות מתחת ל-${QUALITY_FLOOR} — חזק ביסוס טענות והסר כל נתון לא מאומת.`);
     return;
   }
 
@@ -1555,6 +1638,77 @@ async function handleStageError(job: WritingJobRow, err: unknown): Promise<void>
     payload: { jobId: job.id, gapId: job.gapId, stage: job.stage, error: reason },
     success: false,
   });
+}
+
+// --- Self-revision (Sonnet, one call, minimal edits) --------------------------
+
+interface RevisionResult {
+  titleHe: string;
+  metaDescription: string;
+  contentHe: string;
+}
+
+/**
+ * Fix EXACTLY the gate findings and nothing else. Sonnet (not Opus): editing
+ * against an explicit fix-list is a much easier task than writing, and it
+ * keeps the round inside the pump invocation's time budget.
+ */
+async function runRevision(
+  article: { titleHe: string; metaDescription: string; contentHe: string },
+  notes: string,
+): Promise<RevisionResult> {
+  const data = await callAnthropic({
+    model: MODEL_FACTCHECK,
+    max_tokens: 9000,
+    messages: [
+      {
+        role: 'user',
+        content: `${DAVID_WRITING_RULES_HE}
+
+---
+
+עובדות מאומתות על WeCcelerate (המספרים היחידים שמותר לציין):
+${JSON.stringify(VERIFIED_FACTS, null, 2)}
+
+---
+
+אתה עורך תיקונים. המאמר הבא נעצר בבקרת איכות. תקן אך ורק את הממצאים שברשימה — אל תשכתב, אל תקצר, אל תשנה מבנה או כותרות סקציות. שמור על אורך דומה.
+
+הממצאים לתיקון:
+${notes}
+
+כללי תיקון:
+- מחיר/סכום ספציפי → החלף בניסוח כמו "היקף בהתאמה אישית, פרטים בשיחת היכרות".
+- אחוז אקוויטי / לוח זמנים ספציפי → "מבנה ההתקשרות ולוחות הזמנים נקבעים פר-מיזם".
+- שם מתחרה → "אקסלרטורים אחרים" / "Venture Builders אחרים" בלי שם.
+- טענה לא מבוססת → רכך לתיאור-שירות או השמט.
+- בעיית מבנה/SEO → תקן לפי ההערה.
+
+המאמר:
+כותרת: ${article.titleHe}
+meta: ${article.metaDescription}
+
+${article.contentHe}
+
+---
+
+החזר JSON בלבד (בלי גדרות קוד, בלי טקסט מסביב):
+{"titleHe": "...", "metaDescription": "...", "contentHe": "המאמר המלא המתוקן ב-markdown"}`,
+      },
+    ],
+  });
+
+  const parsed = safeParseJson<RevisionResult>(extractText(data));
+  if (!parsed?.contentHe || parsed.contentHe.length < article.contentHe.length * 0.6) {
+    // A malformed or suspiciously short result must NOT overwrite a complete
+    // article. Throw → handleStageError retries the revise stage.
+    throw new Error('runRevision returned malformed or truncated article');
+  }
+  return {
+    titleHe: parsed.titleHe?.trim() || article.titleHe,
+    metaDescription: parsed.metaDescription?.trim() || article.metaDescription,
+    contentHe: parsed.contentHe,
+  };
 }
 
 // --- Chunked-writing stage helpers (Opus, one section per invocation) --------

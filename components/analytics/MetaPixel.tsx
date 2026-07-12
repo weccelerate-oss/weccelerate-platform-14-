@@ -16,7 +16,10 @@ import { useEffect, useRef } from 'react';
 import Script from 'next/script';
 import { usePathname } from 'next/navigation';
 
-const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+// Sanitized like Clarity's PROJECT_ID: env values pasted/piped with a BOM or
+// trailing newline break the inline script with a SyntaxError.
+const PIXEL_ID = (process.env.NEXT_PUBLIC_META_PIXEL_ID || '')
+  .replace(/[^a-z0-9]/gi, '');
 
 declare global {
   interface Window {
