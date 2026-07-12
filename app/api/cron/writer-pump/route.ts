@@ -19,7 +19,7 @@
  *   Every:  3 minutes
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { requireCron } from '@/lib/auth/require-cron';
 import { pumpWritingJobs } from '@/lib/agents/content-writer';
 import { prisma } from '@/lib/db';
@@ -45,6 +45,23 @@ export async function GET(req: NextRequest) {
     })
     .catch(() => {});
 
-  const result = await pumpWritingJobs(1);
-  return NextResponse.json({ ok: true, ...result });
+  // Respond IMMEDIATELY and do the slow pump work post-response. A single
+  // pump step (an Opus section batch) runs 30-50s, but cron-job.org's free
+  // tier stops waiting at 30s and logs "Failed (timeout)" — and repeatedly
+  // "failing" jobs get auto-disabled there, which would silently kill the
+  // writer again. after() keeps the invocation alive to maxDuration while
+  // the pinger already got its 200. This is same-invocation after() (safe),
+  // NOT the dropped-dispatch fetch chaining that stalled jobs before.
+  after(async () => {
+    try {
+      const result = await pumpWritingJobs(1);
+      if (result.advanced.length > 0) {
+        console.log(JSON.stringify({ event: 'writer-pump-advanced', jobIds: result.advanced }));
+      }
+    } catch (e) {
+      console.error(JSON.stringify({ event: 'writer-pump-error', error: e instanceof Error ? e.message : String(e) }));
+    }
+  });
+
+  return NextResponse.json({ ok: true, accepted: true });
 }
