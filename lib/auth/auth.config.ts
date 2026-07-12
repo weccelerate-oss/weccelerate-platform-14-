@@ -26,6 +26,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           const user = await prisma.user.findUnique({ where: { id: userId } });
           if (!user || !user.isActive || user.role !== 'ENTREPRENEUR') return null;
+          // Track the login — this field powers the /admin/users funnel and
+          // was previously never written anywhere (stats showed 0 forever).
+          await prisma.user
+            .update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
+            .catch(() => {});
           return {
             id: user.id,
             email: user.email,
@@ -66,6 +71,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           const isValid = await bcrypt.compare(credentials.password as string, user.password);
           if (!isValid) return null;
+
+          // Track the login — powers the /admin/users engagement funnel.
+          // Never written before this fix, so the funnel showed 0 logins
+          // even for users who were actively learning in the portal.
+          await prisma.user
+            .update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
+            .catch(() => {});
 
           return {
             id: user.id,
