@@ -1307,6 +1307,62 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
 
 type WritingJobRow = NonNullable<Awaited<ReturnType<typeof prisma.writingJob.findUnique>>>;
 
+/**
+ * Persist a finished-but-gated article as a DRAFT GeneratedGuide instead of
+ * discarding it. Marks the job done (so the pump stops churning on it) and
+ * records the reject reason on the gap WITHOUT reopening it — reopening made
+ * David rewrite the same topic into the same gate over and over.
+ */
+async function saveJobAsDraft(
+  job: WritingJobRow,
+  article: ArticlePayload,
+  opts: {
+    seoScore: number;
+    factCheckScore: number | null;
+    internalLinks: string[];
+    sources: string[];
+    reason: string;
+    action: string;
+    reasoningHe: string;
+  },
+): Promise<void> {
+  const slug = await deriveUniqueSlug(article.titleHe);
+  const draft = await prisma.generatedGuide.create({
+    data: {
+      slug,
+      titleHe: article.titleHe,
+      titleEn: article.titleEn ?? null,
+      metaDescription: article.metaDescription,
+      category: job.category ?? 'general',
+      contentHe: article.contentHe,
+      contentEn: null,
+      modelChain: [MODEL_RESEARCH, MODEL_WRITE, MODEL_FACTCHECK],
+      citedSources: opts.sources.slice(0, 30),
+      internalLinks: opts.internalLinks,
+      factCheckScore: opts.factCheckScore,
+      seoScore: opts.seoScore,
+      wordCount: countWords(article.contentHe),
+      status: 'draft',
+      publishedAt: null,
+    },
+  });
+  await prisma.writingJob.update({
+    where: { id: job.id },
+    data: { stage: 'done', generatedGuideId: draft.id, error: opts.reason },
+  });
+  await prisma.contentGap.update({
+    where: { id: job.gapId },
+    data: { generatedGuideId: draft.id, rejectReason: opts.reason },
+  });
+  await logDecision({
+    agent: 'content-writer',
+    action: opts.action,
+    reasoning: `${opts.reasoningHe} slug: /guides/${slug} (draft).`,
+    payload: { jobId: job.id, gapId: job.gapId, draftId: draft.id, slug, reason: opts.reason },
+    success: false,
+  });
+}
+
 /** Fact-check + lint + persist the draft held on a finalize-stage job. */
 async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
   // Sanitize the assembled body here — the section writers can still slip an
@@ -1328,19 +1384,23 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
   const seoLint = lintSeo(article);
   const policyLint = lintPolicy(article);
 
-  // Policy gate — hard reject.
+  // Policy gate — save as DRAFT for human review, don't discard.
+  // These violations are usually one fixable sentence (e.g. a specific NIS
+  // price the model invented). Failing the job threw away a complete 8-9
+  // section article AND reopened the gap, so David rewrote the same topic
+  // and hit the same wall — three articles died in that loop before this
+  // was changed. A draft costs nothing and keeps the work.
   if (!policyLint.passed) {
-    await prisma.writingJob.update({ where: { id: job.id }, data: { stage: 'failed', error: `Policy: ${policyLint.violations.join('; ')}` } });
-    await prisma.contentGap.update({
-      where: { id: job.gapId },
-      data: { status: 'open', rejectReason: `Policy violations: ${policyLint.violations.join('; ')}.` },
-    });
-    await logDecision({
-      agent: 'content-writer',
-      action: 'skipped-publish-policy',
-      reasoning: `דחיתי את המאמר על "${job.query}" — הפר כללי כתיבה: ${policyLint.violations.join('; ')}. הפער חוזר לתור.`,
-      payload: { jobId: job.id, gapId: job.gapId, violations: policyLint.violations },
-      success: false,
+    await saveJobAsDraft(job, article, {
+      seoScore: seoLint.score,
+      factCheckScore: null,
+      internalLinks,
+      sources,
+      reason: `Policy: ${policyLint.violations.join('; ')}`,
+      action: 'saved-draft-policy',
+      reasoningHe:
+        `שמרתי את המאמר על "${job.query}" כטיוטה (לא פורסם) — הפר כללי כתיבה: ${policyLint.violations.join('; ')}. ` +
+        `בדרך כלל זה משפט אחד לתיקון. עבור עליו ופרסם ידנית.`,
     });
     return;
   }
@@ -1384,17 +1444,21 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
     return;
   }
 
-  // Quality gate.
+  // Quality gate — below the floor the article is saved as DRAFT, not
+  // discarded (same rationale as the policy gate above: a 55/100 article is
+  // an edit away from publishable, not garbage).
   const QUALITY_FLOOR = 60;
   if (factCheck.score < QUALITY_FLOOR || seoLint.score < QUALITY_FLOOR) {
-    await prisma.writingJob.update({ where: { id: job.id }, data: { stage: 'failed', error: `Quality below ${QUALITY_FLOOR}` } });
-    await prisma.contentGap.update({ where: { id: job.gapId }, data: { status: 'open', rejectReason: `quality below ${QUALITY_FLOOR}` } });
-    await logDecision({
-      agent: 'content-writer',
-      action: 'skipped-publish',
-      reasoning: `דחיתי פרסום של "${job.query}". Fact-check ${factCheck.score}/100, SEO ${seoLint.score}/100 (סף ${QUALITY_FLOOR}). הפער חוזר לתור.`,
-      payload: { jobId: job.id, gapId: job.gapId, factCheck: factCheck.score, seo: seoLint.score },
-      success: false,
+    await saveJobAsDraft(job, article, {
+      seoScore: seoLint.score,
+      factCheckScore: factCheck.score,
+      internalLinks,
+      sources,
+      reason: `Quality below ${QUALITY_FLOOR} (fact ${factCheck.score}, seo ${seoLint.score})`,
+      action: 'saved-draft-quality',
+      reasoningHe:
+        `שמרתי את המאמר על "${job.query}" כטיוטה (לא פורסם). ` +
+        `Fact-check ${factCheck.score}/100, SEO ${seoLint.score}/100 (סף ${QUALITY_FLOOR}). עבור עליו ופרסם ידנית.`,
     });
     return;
   }
