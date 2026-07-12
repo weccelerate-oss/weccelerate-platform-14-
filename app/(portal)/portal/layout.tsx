@@ -1,6 +1,13 @@
+import type { Metadata } from 'next';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { PortalNavbar } from './components/portal-navbar';
+
+// Defense-in-depth alongside the robots.txt disallow — a stray link to a
+// portal URL must not get it indexed.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function PortalLayout({
   children,

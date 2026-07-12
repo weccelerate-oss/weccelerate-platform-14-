@@ -16,6 +16,7 @@
 import { useActionState, useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { submitContactForm, type FormState } from '@/app/actions/leads';
+import { trackLead } from '@/lib/analytics/meta-pixel';
 import { HoneypotFields } from '@/components/forms/HoneypotFields';
 import { useLanguage } from '@/lib/i18n';
 import { z } from 'zod';
@@ -155,13 +156,15 @@ export function ContactForm() {
     setCurrentUrl(window.location.href);
   }, []);
 
-  // Reset form on success
+  // Reset form on success + report the Lead conversion (Meta Pixel / GA4)
   useEffect(() => {
     if (state.success && formRef.current) {
       formRef.current.reset();
       setFieldErrors({});
       setTouched(new Set());
+      trackLead(serviceParam || 'contact-form');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.success]);
 
   // Build schema with translations

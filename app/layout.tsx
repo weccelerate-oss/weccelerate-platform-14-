@@ -14,6 +14,7 @@ import Script from "next/script";
 
 import { GeoSchema } from "@/components/seo/GeoSchema";
 import { Clarity } from "@/components/analytics/Clarity";
+import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { SkipToContent } from "@/components/ui/SkipToContent";
 import { LanguageProvider } from "@/lib/i18n";
 import { HtmlAttrs } from "@/components/providers/HtmlAttrs";
@@ -222,6 +223,10 @@ export default function RootLayout({
       {/* Microsoft Clarity — recordings/heatmaps + traffic-source tags.
           No-op until NEXT_PUBLIC_CLARITY_PROJECT_ID is set. */}
       <Clarity />
+
+      {/* Meta Pixel — paid-campaign conversion tracking.
+          No-op until NEXT_PUBLIC_META_PIXEL_ID is set. */}
+      <MetaPixel />
 
       <body className={`font-heebo antialiased bg-white text-slate-900`}>
         <LanguageProvider>

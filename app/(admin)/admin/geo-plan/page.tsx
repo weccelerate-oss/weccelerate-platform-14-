@@ -80,14 +80,14 @@ async function getHealth(): Promise<Health> {
   if (recentGap) {
     recentRuns.push({
       ts: recentGap.detectedAt.toISOString(),
-      event: 'gap-detected',
-      detail: `${recentGap.query} (severity ${recentGap.severity})`,
+      event: 'זוהה פער תוכן',
+      detail: `${recentGap.query} (חומרה ${recentGap.severity})`,
     });
   }
   if (recentGuide) {
     recentRuns.push({
       ts: (recentGuide.publishedAt ?? recentGuide.createdAt).toISOString(),
-      event: 'guide-published',
+      event: 'פורסם מדריך',
       detail: `${recentGuide.titleHe} → /guides/${recentGuide.slug}`,
     });
   }
@@ -205,36 +205,30 @@ export default async function GeoPlanPage() {
       <section className="mb-10 rounded-xl border-2 border-slate-300 bg-white p-6">
         <h2 className="mb-4 text-xl font-bold text-slate-900">🩺 בריאות המערכת — חי</h2>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <HealthCard
-            label="geo_probes"
+            label="בדיקות LLM"
             value={h.totalProbes}
             installed={h.geoProbeInstalled}
-            sublabel="בדיקות LLM שבוצעו"
+            sublabel="בדיקות שבוצעו עד כה"
           />
           <HealthCard
-            label="content_gaps"
+            label="פערי תוכן"
             value={h.totalGaps}
             installed={h.contentGapsInstalled}
-            sublabel={`פתוחים: ${h.openGaps}`}
+            sublabel={`פתוחים כרגע: ${h.openGaps}`}
           />
           <HealthCard
-            label="published guides"
+            label="מדריכים שפורסמו"
             value={h.publishedGuides}
             installed={h.generatedGuidesInstalled}
-            sublabel="מאמרים שהאייג'נט פרסם"
-          />
-          <HealthCard
-            label="DB schema"
-            value={allTablesOk ? '✅' : '⚠️'}
-            installed
-            sublabel={allTablesOk ? 'כל 3 הטבלאות מותקנות' : 'הרץ npm run db:push'}
+            sublabel="מאמרים שהמערכת פרסמה"
           />
         </div>
 
         {!allTablesOk && (
           <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-            ⚠️ אחת או יותר מטבלאות ה-agent עדיין לא קיימות ב-DB. הרץ <code className="rounded bg-amber-100 px-1">npm run db:push</code> בטרמינל המקומי כדי להחיל את הסכמה.
+            ⚠️ חלק מרכיבי המערכת עדיין לא הותקנו — חלק מהנתונים בעמוד לא יוצגו עד שהמפתח ישלים את ההתקנה.
           </div>
         )}
 
@@ -277,7 +271,7 @@ export default async function GeoPlanPage() {
           <GeoTrendChart points={trend} />
         ) : (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-            עדיין אין מספיק נקודות מדידה — הגרף יתחיל להצטייר אחרי יומיים של ריצות בוקר (טבלת geo_daily_snapshots דורשת <code className="rounded bg-slate-100 px-1">npm run db:push</code>).
+            עדיין אין מספיק נקודות מדידה — הגרף יתחיל להצטייר אחרי יומיים של ריצות בוקר.
           </div>
         )}
       </section>
@@ -288,41 +282,29 @@ export default async function GeoPlanPage() {
       <section className="mb-10 rounded-xl border-2 border-violet-200 bg-violet-50/40 p-6">
         <h2 className="mb-4 text-xl font-bold text-violet-900">🔄 הלולאה היומית האוטונומית</h2>
         <p className="mb-5 text-sm text-violet-900">
-          כל בוקר רצים 3 cron jobs ב-Vercel ברצף. בלי התערבות ידנית. כל יום עוד מאמר אוטומטי שסוגר פער.
+          כל בוקר המערכת מריצה שלושה שלבים ברצף, אוטומטית ובלי התערבות ידנית — וכל יום נסגר עוד פער עם מאמר חדש.
         </p>
 
         <ol className="space-y-3">
           {[
             {
-              time: '06:00 UTC',
-              path: '/api/cron/geo-probe',
-              what: 'GEO Probe — שואל את 3 ה-LLMs (Anthropic + OpenAI + Perplexity לפי מה שמוגדר) 8 שאילתות אסטרטגיות, שומר תשובות + citations',
-              writes: 'geo_probes',
+              step: 'שלב 1 · מדידה',
+              what: 'בדיקת LLMs — המערכת שואלת את ChatGPT, Claude ו-Perplexity שמונה שאלות אסטרטגיות על התחום, ובודקת אם WeCcelerate מוזכרת ומצוטטת בתשובות',
             },
             {
-              time: '06:30 UTC',
-              path: '/api/cron/gap-analyze',
-              what: 'Gap Analyzer — אוסף 14 ימי probes, פותח ContentGap לכל שאילתה עם <60% citation, סוגר gaps שכבר עברו',
-              writes: 'content_gaps',
+              step: 'שלב 2 · ניתוח',
+              what: 'זיהוי פערים — המערכת מנתחת את תוצאות שבועיים האחרונים, ומסמנת כל שאלה שבה WeCcelerate כמעט לא מצוטטת כפער תוכן שדורש טיפול',
             },
             {
-              time: '07:00 UTC',
-              path: '/api/cron/content-publish',
-              what: 'Content Writer — לוקח את הפער עם severity הכי גבוה, עושה research (web_search), כותב 1800-2500 מילים בעברית, fact-check, ופרסום ל-/guides/[slug]. דוחף ל-IndexNow.',
-              writes: 'generated_guides + IndexNow ping',
+              step: 'שלב 3 · כתיבה ופרסום',
+              what: 'סגירת הפער — המערכת בוחרת את הפער הדחוף ביותר, חוקרת את הנושא, כותבת מדריך מלא בעברית (1,800–2,500 מילים) עם בדיקת עובדות, מפרסמת אותו במרכז המדריכים באתר ומעדכנת את מנועי החיפוש',
             },
           ].map((step, i) => (
             <li key={i} className="rounded-lg border border-violet-200 bg-white p-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-bold text-violet-900">
-                  {step.time}
-                </span>
-                <code className="font-mono text-xs text-slate-700">{step.path}</code>
-              </div>
+              <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-bold text-violet-900">
+                {step.step}
+              </span>
               <p className="mt-2 text-sm text-slate-700">{step.what}</p>
-              <div className="mt-1 text-xs text-slate-500">
-                כותב ל: <code className="rounded bg-slate-100 px-1">{step.writes}</code>
-              </div>
             </li>
           ))}
         </ol>
@@ -459,7 +441,7 @@ function HealthCard({
         {installed ? value : '—'}
       </div>
       <div className="mt-1 text-xs text-slate-500">
-        {installed ? sublabel : 'טבלה חסרה — db:push'}
+        {installed ? sublabel : 'בהמתנה להשלמת התקנה'}
       </div>
     </div>
   );

@@ -5,16 +5,17 @@
  */
 
 import { Metadata } from 'next';
+import { constructMetadata } from '@/lib/seo';
 import AboutContent from './AboutContent';
 
 // =============================================================================
 // METADATA
 // =============================================================================
 
-export const metadata: Metadata = {
- // title.absolute bypasses the parent layout's title.template so the brand
- // suffix isn't appended again to a title that already names WeCcelerate.
- title: { absolute: 'אודות WeCcelerate | וויסלרייט — בונה מיזמים ומאיץ סטארטאפים בישראל' },
+// constructMetadata (rather than an inline object) so this page ships with
+// alternates.canonical + hreflang like every other indexable marketing page.
+export const metadata: Metadata = constructMetadata({
+ title: 'אודות WeCcelerate | וויסלרייט — בונה מיזמים ומאיץ סטארטאפים בישראל',
  description:
  'WeCcelerate (וויסלרייט) — בונה המיזמים (Venture Builder) ומאיץ סטארטאפים בישראל. מלווים יזמים מרעיון ועד הצלחה גלובלית: ייעוץ עסקי, פיתוח מוצר, גיוס הון, ומסלול MedTech בלעדי עם לאומית. ליווי סטארטאפים בכל שלבי הפיתוח.',
  keywords: [
@@ -35,20 +36,9 @@ export const metadata: Metadata = {
  'מיזם הזנק',
  'חברת הזנק',
  ],
- openGraph: {
- title: 'אודות WeCcelerate — בונה מיזמים בישראל',
- description:
- 'הכירו את השותפים וההנהלה מאחורי בונה המיזמים (Venture Builder) ומאיץ סטארטאפים בישראל. ליווי סטארטאפים בכל שלבי הפיתוח.',
- type: 'website',
- locale: 'he_IL',
- },
- twitter: {
- card: 'summary_large_image',
- title: 'אודות WeCcelerate — הצוות והחזון',
- description:
- 'הכירו את השותפים וההנהלה מאחורי מאיץ סטארטאפים בישראל.',
- },
-};
+ path: '/about',
+ locale: 'he',
+});
 
 // =============================================================================
 // TEAM DATA (for JSON-LD only)
