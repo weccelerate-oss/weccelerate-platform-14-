@@ -126,7 +126,7 @@ export async function runBiweeklyReplan(): Promise<ReplanResult> {
       WHERE timestamp >= ${last14d} AND error IS NULL
       GROUP BY provider
     `;
-    citationStats = stats.map((r) => ({
+    citationStats = stats.map((r: { provider: string; total: bigint; cited: bigint }) => ({
       provider: r.provider,
       total: Number(r.total),
       rate: Number(r.total) > 0 ? Math.round((Number(r.cited) / Number(r.total)) * 100) : 0,
@@ -212,7 +212,7 @@ ${journal.insights.length ? journal.insights.map((i) => `- ${i}`).join('\n') : '
   "theme": "משפט אחד שמסכם את הפוקוס של השבועיים הקרובים",
   "invest": ["3-5 פריטים — כיוונים שכדאי להעמיק בהם בגלל מה שעבד"],
   "deprioritize": ["1-3 פריטים — כיוונים שכדאי להאט בגללם"],
-  "newQueries": ["1-3 שאילתות חדשות לpool ה-probe שכדאי להוסיף, על בסיס מגמות חדשות"],
+  "newQueries": ["1-3 שאילתות חדשות לpool ה-probe שכדאי להוסיף, על בסיס מגמות חדשות. חובה: כל שאילתה מנוסחת כמו שאדם אמיתי מקליד בגוגל או שואל ChatGPT — קצרה, מדויקת וישירה. בלי תוספות כמו 'תן רשימה', 'עם מקורות', 'List 5 with sources'"],
   "warnings": ["1-3 דפוסים מסוכנים שזיהית — לדוגמה הפרת policy חוזרת על אותו נושא"],
   "rawMemo": "פסקה אחת בעברית בולטת שמסבירה את ההיגיון מאחורי ההחלטות"
 }

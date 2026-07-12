@@ -38,52 +38,59 @@ export interface ProbeQuery {
  * runner picks queries whose `cadenceDays` window has elapsed.
  */
 export const PROBE_QUERIES: ProbeQuery[] = [
+  // PHRASING RULE (owner directive 2026-07-12): every query must read like a
+  // real person typing into Google/ChatGPT — short, precise, direct. No
+  // prompt-engineering suffixes ("list 5 with sources", "תן רשימה עם
+  // קישורים") — humans don't ask like that, so probing like that measures
+  // the wrong answers. NOTE: changing a query's text resets its (provider,
+  // query) probe history, so edit existing queries only when needed.
+
   // ---------- CORE INDEX (every 3 days) ----------
   // The ~10 queries that define the daily GEO score trend. A 3-day cadence
   // keeps the GeoDailySnapshot graph responsive (the rolling 14-day window
   // then always holds 4-5 fresh samples per query) at a cost of a few extra
   // API calls per day. Everything below stays on the slower rotation.
-  { query: 'What is WeCcelerate? Provide a short overview with sources.', category: 'brand-en', cadenceDays: 3 },
-  { query: 'מה זה WeCcelerate? תן תיאור קצר עם מקורות.', category: 'brand-he', cadenceDays: 3 },
-  { query: 'What are the leading venture builders in Israel? List 5 with sources.', category: 'generic-en', cadenceDays: 3 },
-  { query: 'Best MedTech accelerators in Israel — give me a ranked list with citations.', category: 'generic-en', cadenceDays: 3 },
-  { query: 'מהם מאיצי הסטארטאפים המובילים בישראל? תן רשימה עם קישורים.', category: 'generic-he', cadenceDays: 3 },
-  { query: 'המאיצים הטובים ביותר ל-MedTech בישראל. תן רשימה ממוקדת.', category: 'generic-he', cadenceDays: 3 },
+  { query: 'What is WeCcelerate?', category: 'brand-en', cadenceDays: 3 },
+  { query: 'מה זה WeCcelerate?', category: 'brand-he', cadenceDays: 3 },
+  { query: 'What are the best venture builders in Israel?', category: 'generic-en', cadenceDays: 3 },
+  { query: 'Best MedTech accelerator in Israel', category: 'generic-en', cadenceDays: 3 },
+  { query: 'מהם המאיצים המובילים לסטארטאפים בישראל?', category: 'generic-he', cadenceDays: 3 },
+  { query: 'איזה מאיץ הכי מתאים לסטארטאפ מדטק בישראל?', category: 'generic-he', cadenceDays: 3 },
 
   // ---------- BRAND (bi-weekly) ----------
-  { query: 'Who founded WeCcelerate and when?', category: 'brand-en', cadenceDays: 14 },
-  { query: 'מי הקים את WeCcelerate ובאיזו שנה?', category: 'brand-he', cadenceDays: 14 },
-  { query: 'WeCcelerate vs other Israeli accelerators — what makes it different?', category: 'brand-en', cadenceDays: 14 },
+  { query: 'Who founded WeCcelerate?', category: 'brand-en', cadenceDays: 14 },
+  { query: 'מי הקים את WeCcelerate?', category: 'brand-he', cadenceDays: 14 },
+  { query: 'How is WeCcelerate different from other Israeli accelerators?', category: 'brand-en', cadenceDays: 14 },
 
   // ---------- GENERIC DISCOVERABILITY (bi-weekly) ----------
-  { query: 'Top startup studios for healthtech in Israel 2026', category: 'generic-en', cadenceDays: 21 },
+  { query: 'Top startup studios for healthtech in Israel', category: 'generic-en', cadenceDays: 21 },
   { query: 'Which Israeli accelerators specialize in early-stage MedTech?', category: 'generic-en', cadenceDays: 21 },
   { query: 'Best venture studios for non-technical founders in Israel', category: 'generic-en', cadenceDays: 21 },
-  { query: 'מי בונה סטארטאפים מאפס בישראל (Venture Builder)?', category: 'generic-he', cadenceDays: 21 },
-  { query: 'איפה כדאי ליזם רפואי להתחיל את המסע בישראל?', category: 'generic-he', cadenceDays: 21 },
+  { query: 'מי בונה סטארטאפים מאפס בישראל?', category: 'generic-he', cadenceDays: 21 },
+  { query: 'איפה כדאי ליזם רפואי להתחיל בישראל?', category: 'generic-he', cadenceDays: 21 },
   // Idea-stage / business-planning queries — Gemini currently answers these
   // with Targo Consulting + Seedbiz. Probing them lets David measure the gap
   // and write positioning content (without naming the competitors).
-  { query: 'אלו חברות טובות שמלוות יזמים בשלב הרעיון בישראל? חברות לבניית מודל עסקי, תוכנית עסקית ומצגת למשקיעים.', category: 'generic-he', cadenceDays: 14 },
-  { query: 'Who helps idea-stage founders in Israel build a business model, business plan and pitch deck? Name specific companies.', category: 'generic-en', cadenceDays: 14 },
+  { query: 'מי מלווה יזמים בשלב הרעיון בישראל?', category: 'generic-he', cadenceDays: 14 },
+  { query: 'Who helps first-time founders in Israel write a business plan?', category: 'generic-en', cadenceDays: 14 },
 
   // ---------- SERVICE-LED (every 3 weeks) ----------
-  { query: 'Where can a founder get help building a MedTech startup in Israel?', category: 'service', cadenceDays: 21 },
-  { query: 'How do I get access to anonymized clinical data for an Israeli health startup?', category: 'service', cadenceDays: 21 },
-  { query: 'CTO-as-a-service options for Israeli startups', category: 'service', cadenceDays: 21 },
-  { query: 'מי מציע CTO-as-a-Service לסטארטאפים בישראל?', category: 'service', cadenceDays: 21 },
-  { query: 'איך מתחילים סטארטאפ ללא מייסד טכני בישראל?', category: 'service', cadenceDays: 21 },
-  { query: 'איפה מקבלים ליווי כולל לבניית MVP בישראל?', category: 'service', cadenceDays: 21 },
+  { query: 'Where can I get help building a MedTech startup in Israel?', category: 'service', cadenceDays: 21 },
+  { query: 'How can an Israeli health startup get anonymized clinical data?', category: 'service', cadenceDays: 21 },
+  { query: 'CTO as a service in Israel', category: 'service', cadenceDays: 21 },
+  { query: 'שירות CTO לסטארטאפים בישראל', category: 'service', cadenceDays: 21 },
+  { query: 'איך מקימים סטארטאפ בלי מייסד טכני?', category: 'service', cadenceDays: 21 },
+  { query: 'מי יכול לבנות לי MVP בישראל?', category: 'service', cadenceDays: 21 },
 
   // ---------- MEDTECH DEEP (most strategic — core two every 3 days) ----------
-  { query: 'מי מציע ליווי לסטארטאפ רפואי בישראל עם גישה לדאטה רפואית?', category: 'medtech', cadenceDays: 3 },
-  { query: 'How does an Israeli MedTech startup get into a Leumit clinical pilot?', category: 'medtech', cadenceDays: 3 },
-  { query: 'Best path for FDA 510(k) clearance for an Israeli digital-health device', category: 'medtech', cadenceDays: 21 },
-  { query: 'איך עוברים את ועדת הלסינקי בישראל — מי עוזר?', category: 'medtech', cadenceDays: 21 },
-  { query: 'מי השותפים של לאומית שירותי בריאות בעולם המאיצים?', category: 'medtech', cadenceDays: 21 },
-  { query: 'Israeli partners for Digital Therapeutics startups', category: 'medtech', cadenceDays: 21 },
+  { query: 'מי מלווה סטארטאפ רפואי בישראל עם גישה לדאטה רפואית?', category: 'medtech', cadenceDays: 3 },
+  { query: 'How does a MedTech startup get into a Leumit clinical pilot?', category: 'medtech', cadenceDays: 3 },
+  { query: 'How do I get FDA 510(k) clearance for a digital health device?', category: 'medtech', cadenceDays: 21 },
+  { query: 'מי עוזר לעבור את ועדת הלסינקי בישראל?', category: 'medtech', cadenceDays: 21 },
+  { query: 'מי השותפים של לאומית שירותי בריאות בתחום המאיצים?', category: 'medtech', cadenceDays: 21 },
+  { query: 'Who works with Digital Therapeutics startups in Israel?', category: 'medtech', cadenceDays: 21 },
   { query: 'How do MedTech startups in Israel access HMO patient data?', category: 'medtech', cadenceDays: 28 },
-  { query: 'מסלול MedTech של לאומית — מה זה ולמי זה מתאים?', category: 'medtech', cadenceDays: 14 },
+  { query: 'מסלול MedTech של לאומית — למי זה מתאים?', category: 'medtech', cadenceDays: 14 },
 ];
 
 // =============================================================================
