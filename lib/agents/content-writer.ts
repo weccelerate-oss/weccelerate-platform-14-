@@ -768,11 +768,13 @@ async function callAnthropic(req: AnthropicCall): Promise<unknown> {
           'content-type': 'application/json',
         },
         body: JSON.stringify(req),
-        // 120s is well above the longest legitimate Claude call we've
-        // seen (~90s for an 8000-token Hebrew article). Beyond that
-        // we'd rather fail fast and let the cron's outer timeout
-        // surface a clean error in the email.
-        signal: AbortSignal.timeout(120_000),
+        // 280s: the self-revision stage rewrites a full ~2,500-word article
+        // in ONE call that legitimately runs 90-150s+ — the old 120s cap
+        // aborted every revise attempt, and the stuck job (oldest in queue)
+        // was re-picked on every ping, starving the entire pipeline for a
+        // full day (2026-07-13). 280s leaves margin inside writer-pump's
+        // maxDuration=300 while still failing before the platform kills us.
+        signal: AbortSignal.timeout(280_000),
       });
       if (res.ok) return res.json();
       const bodyText = await res.text();
