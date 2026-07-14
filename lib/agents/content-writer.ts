@@ -1661,7 +1661,12 @@ async function runRevision(
 ): Promise<RevisionResult> {
   const data = await callAnthropic({
     model: MODEL_FACTCHECK,
-    max_tokens: 9000,
+    // 20000 (was 9000): the revised article comes back as ONE JSON string —
+    // a full ~2,500-word Hebrew article tokenizes to well over 9k output
+    // tokens (Hebrew is token-heavy + JSON escaping), so 9000 truncated
+    // mid-JSON and every revise round died with "malformed or truncated"
+    // (6 jobs failed overnight 2026-07-13→14).
+    max_tokens: 20000,
     messages: [
       {
         role: 'user',
