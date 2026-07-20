@@ -142,8 +142,8 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
               <p className="text-[11px] sm:text-xs text-white/55 mt-1 tracking-wide">שיעורי וידאו</p>
             </div>
             <div className="bg-[#070b1e]/60 backdrop-blur-sm p-4 sm:p-5 text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-[#c8a951] tabular-nums">{totalCategories}</p>
-              <p className="text-[11px] sm:text-xs text-white/55 mt-1 tracking-wide">קטגוריות לימוד</p>
+              <p className="text-2xl sm:text-3xl font-bold text-[#c8a951] tabular-nums">100</p>
+              <p className="text-[11px] sm:text-xs text-white/55 mt-1 tracking-wide">שאלות שמשקיעים באמת שואלים · ב-7 תחנות</p>
             </div>
             <div className="bg-[#070b1e]/60 backdrop-blur-sm p-4 sm:p-5 text-center">
               <p className="text-2xl sm:text-3xl font-bold text-[#c8a951]">∞</p>
