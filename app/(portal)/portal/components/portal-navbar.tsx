@@ -14,6 +14,7 @@ import {
   FolderOpen,
   GraduationCap,
   TrendingUp,
+  Compass,
   LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,7 @@ interface PortalNavbarProps {
 
 const NAV_LINKS = [
   { href: '/portal/dashboard', label: 'לוח בקרה', icon: LayoutDashboard },
+  { href: '/portal/journey', label: 'מסע היזם', icon: Compass },
   { href: '/portal/learning', label: 'מרכז למידה', icon: GraduationCap },
 ];
 

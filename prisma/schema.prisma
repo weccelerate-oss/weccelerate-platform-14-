@@ -88,6 +88,11 @@ enum LessonStatus {
   PUBLISHED   // Live in the Learning Center
 }
 
+enum JourneyAnswerStatus {
+  DRAFT   // טיוטה — the entrepreneur is still working on it
+  READY   // מוכן להצגה — polished enough to show an investor
+}
+
 // =============================================================================
 // USER & AUTHENTICATION
 // =============================================================================
@@ -124,6 +129,7 @@ model User {
   activities    ActivityLog[]
   lessonProgress UserLessonProgress[]
   quizAttempts  QuizAttempt[]
+  journeyAnswers UserJourneyAnswer[]
 
   // Onboarding / auto-provisioning
   // True for accounts created via the onboarding webhook with a temp password.
@@ -741,6 +747,86 @@ model UserLessonProgress {
   @@index([lessonId])
   @@index([userId, lastWatchedAt])
   @@map("user_lesson_progress")
+}
+
+// =============================================================================
+// FOUNDER JOURNEY — "מרעיון למיזם" interactive investor-questions program
+// =============================================================================
+// Digitizes the "מרעיון למיזם" workbook: 7 chapters of investor questions the
+// entrepreneur answers over time. Mirrors the Learning CMS pattern:
+//   JourneyChapter  ≈ CourseCategory   (admin-managed content)
+//   JourneyQuestion ≈ CourseLesson     (admin-managed content)
+//   UserJourneyAnswer ≈ UserLessonProgress (per-user state, unique per pair)
+// Answers are PRIVATE to the entrepreneur; admins get read-only access for
+// meeting prep. The portal computes the "מד מוכנות למשקיעים" (readiness score)
+// from answer coverage + READY status.
+
+model JourneyChapter {
+  id           String   @id @default(cuid())
+
+  name         String        // e.g. "הבעיה והשוק"
+  slug         String   @unique
+  description  String?  @db.Text  // one-liner shown on the chapter card
+  // "מה משקיע מחפש כאן" — shown at the top of the chapter, sets the bar.
+  investorLook String?  @db.Text
+  icon         String?       // lucide icon name (visual-first chapter identity)
+  displayOrder Int      @default(0)
+  status       LessonStatus @default(PUBLISHED)
+
+  questions    JourneyQuestion[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status, displayOrder])
+  @@map("journey_chapters")
+}
+
+model JourneyQuestion {
+  id           String   @id @default(cuid())
+
+  chapter      JourneyChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId    String
+
+  prompt       String   @db.Text  // the investor question itself
+  // Helper line under the question: what a strong answer looks like.
+  helper       String?  @db.Text
+  displayOrder Int      @default(0)
+  isRequired   Boolean  @default(true)
+
+  answers      UserJourneyAnswer[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([chapterId, displayOrder])
+  @@map("journey_questions")
+}
+
+model UserJourneyAnswer {
+  id           String   @id @default(cuid())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+
+  question     JourneyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId   String
+
+  content      String   @db.Text @default("")
+  status       JourneyAnswerStatus @default(DRAFT)
+
+  // Last AI mentor feedback on this answer (Anthropic). Cached so the
+  // entrepreneur can re-read it without paying for another call.
+  aiFeedback   String?  @db.Text
+  aiFeedbackAt DateTime?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([questionId])
+  @@map("user_journey_answers")
 }
 
 // =============================================================================

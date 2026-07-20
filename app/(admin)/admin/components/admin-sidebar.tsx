@@ -26,6 +26,7 @@ import {
   Bot,
   FileText,
   FolderKanban,
+  Compass,
   Menu,
   X,
 } from 'lucide-react';
@@ -51,6 +52,7 @@ const NAV_ITEMS = [
     items: [
       { label: 'טיוטות של דוד', href: '/admin/drafts', icon: BookOpen },
       { label: 'שיעורים (פורטל)', href: '/admin/learning', icon: GraduationCap },
+      { label: 'מסע היזם (פורטל)', href: '/admin/journey', icon: Compass },
       { label: 'עדכונים (טיקר)', href: '/admin/news', icon: Newspaper },
       { label: 'אירועים', href: '/admin/events', icon: Calendar },
       { label: 'סרטונים', href: '/admin/videos', icon: Video },
