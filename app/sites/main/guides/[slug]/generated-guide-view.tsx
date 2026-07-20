@@ -273,7 +273,9 @@ function renderInline(text: string): React.ReactNode {
     if (m[1]) {
       parts.push(<a key={key++} href={m[3]} className="text-[#e8d48b] hover:text-[#c8a951] hover:underline">{m[2]}</a>);
     } else if (m[4]) {
-      parts.push(<strong key={key++} className="font-semibold">{m[5]}</strong>);
+      // Recurse so links nested inside bold — David's favorite CTA pattern
+      // **[text](url)** — render as links instead of raw markdown.
+      parts.push(<strong key={key++} className="font-semibold">{renderInline(m[5])}</strong>);
     }
     lastIndex = m.index + m[0].length;
   }

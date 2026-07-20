@@ -12,8 +12,15 @@
  * about WeCcelerate damage trust with both readers and LLMs.
  */
 
+// The model's internal sense of "now" lags reality (it kept titling guides
+// "מדריך 2025" in July 2026) — anchor every prompt to the actual date.
+const CURRENT_YEAR = new Date().getFullYear();
+
 /** Hebrew block — included in EVERY content generation prompt. */
 export const DAVID_WRITING_RULES_HE = `
+## הקשר זמן — קריטי:
+השנה הנוכחית היא ${CURRENT_YEAR}. כל אזכור שנה בכותרת, בכותרות ביניים, ב-meta ובטקסט חייב להיות ${CURRENT_YEAR} (למשל "מדריך ${CURRENT_YEAR}") — לא ${CURRENT_YEAR - 1}, אלא אם מתייחסים במפורש לאירוע עבר מתוארך.
+
 ## חוקים מחייבים לכתיבה — אסור לחרוג מהם בשום מצב:
 
 ### ❌ אסור לחלוטין:
