@@ -45,7 +45,18 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { JourneyChapterView, JourneyAnswerView } from '@/lib/journey/repository';
-import { Kochavi } from '../components/kochavi';
+import { Kochavi, type KochaviScene } from '../components/kochavi';
+
+/** Kochavi acts out each chapter's theme in the focus screen. */
+const SCENE_BY_SLUG: Record<string, KochaviScene> = {
+  'problem-market': 'telescope',
+  'business-model': 'coins',
+  marketing: 'megaphone',
+  financials: 'scale',
+  validation: 'flask',
+  'story-team': 'mic',
+  'investor-room': 'briefcase',
+};
 
 // ---------------------------------------------------------------------------
 // Types & constants
@@ -884,6 +895,10 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
             ref={focusBoxRef}
             className="relative overflow-hidden rounded-3xl border border-[#c8a951]/25 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 sm:p-9 shadow-[0_40px_90px_-50px_rgba(0,0,0,.9)]"
           >
+            {/* כוכבי מציג את נושא הפרק — טלסקופ בשוק, מגפון בשיווק, מאזניים בפיננסים... */}
+            <div className="absolute left-3 bottom-1 hidden xl:block opacity-95 pointer-events-none">
+              <Kochavi size={92} scene={SCENE_BY_SLUG[chapter.slug] ?? 'none'} />
+            </div>
             {/* progress inside chapter */}
             <div className="flex items-center gap-3 mb-4">
               <div className="flex-1 h-1.5 rounded-full bg-white/[0.07] overflow-hidden">
@@ -1082,7 +1097,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
             transition={{ type: 'spring', stiffness: 220, damping: 20 }}
             className="fixed bottom-8 right-1/2 translate-x-1/2 z-50 flex w-[calc(100vw-2rem)] max-w-md sm:w-auto items-center gap-3 rounded-2xl border border-[#c8a951]/50 bg-[#0a1030]/95 backdrop-blur-xl px-5 sm:px-6 py-4 shadow-[0_20px_60px_-20px_rgba(200,169,81,.5)]"
           >
-            <Kochavi size={64} anim="party" className="shrink-0 -my-2" />
+            <Kochavi size={64} anim="party" className="shrink-0" />
             <div>
               <div className="font-black text-[#f5e9c0]">הפרק "{celebration}" הושלם!</div>
               <div className="text-xs text-white/50">תחנה נוספת נחתמה בזהב במפת המסע שלך</div>

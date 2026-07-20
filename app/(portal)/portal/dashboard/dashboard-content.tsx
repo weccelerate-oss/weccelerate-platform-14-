@@ -149,7 +149,7 @@ export function DashboardContent({
                 transition={{ delay: 0.2 }}
                 className="wc-glass wc-shine wc-glass-lift block relative overflow-hidden rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.10] to-white/[0.02] p-5 text-white group hover:border-[#c8a951]/45 transition-all"
               >
-                <div className="absolute -left-1 -bottom-3 hidden md:block opacity-90 pointer-events-none">
+                <div className="absolute left-2 bottom-1 hidden md:block opacity-90 pointer-events-none">
                   <Kochavi size={72} anim={journey.answered === 0 ? 'wave' : 'idle'} />
                 </div>
                 <div className="relative flex flex-wrap items-center gap-5">

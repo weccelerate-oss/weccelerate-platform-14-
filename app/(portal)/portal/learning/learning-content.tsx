@@ -1289,6 +1289,21 @@ function CategoryCard({
             <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#0d1321]/80" />
           </div>
         )}
+        {/* כוכבי מציג את נושא הקטגוריה: מאזניים בפיננסים, מזוודה בעסקים, ז'ונגלר השקעות, שעון בניהול זמן */}
+        <div className="absolute left-6 bottom-1 hidden lg:block opacity-90 pointer-events-none z-10">
+          <Kochavi
+            size={64}
+            scene={
+              category.color === 'blue'
+                ? 'scale'
+                : category.color === 'emerald'
+                  ? 'briefcase'
+                  : category.color === 'violet'
+                    ? 'coins'
+                    : 'clock'
+            }
+          />
+        </div>
         {/* Icon framed by an animated circular progress ring + soft glow halo */}
         <div className="relative z-10 flex-shrink-0 grid place-items-center w-16 h-16 sm:w-[68px] sm:h-[68px]">
           <CircularProgress
