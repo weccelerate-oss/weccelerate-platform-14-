@@ -19,6 +19,10 @@ import {
   Clock,
   PlayCircle,
   ChevronLeft,
+  Compass,
+  Sparkles,
+  FolderOpen,
+  Wand2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { COURSES_DATA, getTotalLessons } from '@/lib/courses-data';
@@ -115,13 +119,13 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
             className="mb-10 text-center sm:text-right"
           >
             <p className="text-[11px] font-semibold tracking-[0.3em] text-[#c8a951] uppercase mb-3">
-              מרכז הלמידה · WeCcelerate
+              פורטל היזמים · WeCcelerate
             </p>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">
               {getGreeting()}, {firstName}.
             </h1>
             <p className="text-white/65 text-base sm:text-lg max-w-2xl leading-relaxed sm:mx-0 mx-auto">
-              הצוות שלנו כבר עובד על הפרויקט שלך. בזמן הזה — כל הידע שיזם צריך מחכה לך כאן.
+              הצוות שלנו כבר עובד על הפרויקט שלך. בזמן הזה — צא למסע ההכנה למשקיעים ולמד מכל שיעורי הווידאו שלנו.
             </p>
           </motion.div>
 
@@ -143,6 +147,68 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
             <div className="bg-[#070b1e]/60 backdrop-blur-sm p-4 sm:p-5 text-center">
               <p className="text-2xl sm:text-3xl font-bold text-[#c8a951]">∞</p>
               <p className="text-[11px] sm:text-xs text-white/55 mt-1 tracking-wide">גישה בלתי מוגבלת</p>
+            </div>
+          </motion.div>
+
+          {/* Founder Journey card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.13 }}
+            className="relative overflow-hidden rounded-3xl border border-[#c8a951]/30 bg-gradient-to-bl from-[#141126] via-[#0c0f26] to-[#070b1e] p-6 sm:p-10 mb-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+          >
+            <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#c8a951]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#c8a951] to-[#8b7330] flex items-center justify-center shadow-[0_4px_16px_rgba(200,169,81,0.4)]">
+                  <Compass className="w-6 h-6 text-[#070b1e]" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">מסע מרעיון למיזם</h2>
+                  <p className="text-xs text-white/45 mt-0.5">7 תחנות · 100 שאלות משקיעים · שמירה אוטומטית</p>
+                </div>
+              </div>
+
+              <p className="text-white/70 mb-6 max-w-2xl leading-relaxed text-sm sm:text-base">
+                המסע שמכין אותך לחדר המשקיעים: ענה בקצב שלך על השאלות שמשקיעים באמת
+                שואלים, קבל משוב אישי מהמנטור, וצפה בתשובות הסופיות שלך נאספות לתיק
+                מוכנות מסודר — מוכן להדפסה לפני כל פגישה.
+              </p>
+
+              <div className="grid sm:grid-cols-3 gap-3 mb-7">
+                <div className="rounded-xl border border-[#c8a951]/20 bg-white/[0.03] p-4 flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-[#e8d48b] shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-white text-sm mb-0.5">מפת כוכבים אישית</h3>
+                    <p className="text-xs text-white/55 leading-relaxed">כל תחנה שתסיים נחתמת בזהב</p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-[#c8a951]/20 bg-white/[0.03] p-4 flex items-start gap-3">
+                  <Wand2 className="w-5 h-5 text-[#e8d48b] shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-white text-sm mb-0.5">משוב מהמנטור</h3>
+                    <p className="text-xs text-white/55 leading-relaxed">ביקורת מקצועית על כל תשובה</p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-[#c8a951]/20 bg-white/[0.03] p-4 flex items-start gap-3">
+                  <FolderOpen className="w-5 h-5 text-[#e8d48b] shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-white text-sm mb-0.5">תיק מוכנות</h3>
+                    <p className="text-xs text-white/55 leading-relaxed">התשובות הסופיות במקום אחד</p>
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href="/portal/journey"
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-[#c8a951] via-[#e8d48b] to-[#c8a951] text-[#070b1e] font-bold rounded-xl hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(200,169,81,0.45)] transition-all text-sm sm:text-base shadow-[0_4px_20px_rgba(200,169,81,0.25)]"
+              >
+                <Compass className="w-5 h-5" />
+                <span>צא למסע</span>
+                <ChevronLeft className="w-4 h-4" />
+              </a>
             </div>
           </motion.div>
 
