@@ -163,9 +163,10 @@ const COLOR_HEX: Record<string, string> = {
   amber: '#fbbf24',
 };
 
-const COLOR_MAP: Record<string, { bg: string; text: string; border: string; light: string; progress: string; ring: string; gradient: string }> = {
+const COLOR_MAP: Record<string, { bg: string; glassChip: string; text: string; border: string; light: string; progress: string; ring: string; gradient: string }> = {
   blue: {
     bg: 'bg-blue-500',
+    glassChip: 'bg-blue-400/15 border border-blue-300/35 text-blue-300 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,.25),0_4px_14px_-4px_rgba(96,165,250,.5)]',
     text: 'text-blue-400',
     border: 'border-blue-200',
     light: 'bg-blue-500/10',
@@ -175,6 +176,7 @@ const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ligh
   },
   emerald: {
     bg: 'bg-emerald-500',
+    glassChip: 'bg-emerald-400/15 border border-emerald-300/35 text-emerald-300 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,.25),0_4px_14px_-4px_rgba(52,211,153,.5)]',
     text: 'text-emerald-400',
     border: 'border-emerald-200',
     light: 'bg-emerald-500/10',
@@ -184,6 +186,7 @@ const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ligh
   },
   violet: {
     bg: 'bg-violet-500',
+    glassChip: 'bg-violet-400/15 border border-violet-300/35 text-violet-300 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,.25),0_4px_14px_-4px_rgba(167,139,250,.5)]',
     text: 'text-violet-400',
     border: 'border-violet-200',
     light: 'bg-violet-500/10',
@@ -193,6 +196,7 @@ const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ligh
   },
   amber: {
     bg: 'bg-amber-500',
+    glassChip: 'bg-amber-400/15 border border-amber-300/35 text-amber-300 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,.25),0_4px_14px_-4px_rgba(251,191,36,.5)]',
     text: 'text-amber-400',
     border: 'border-amber-200',
     light: 'bg-amber-500/10',
@@ -1157,7 +1161,7 @@ function CategoryQuickJump({
                 'transition-all',
               )}
             >
-              <div className={cn('p-1.5 rounded-lg text-white shadow-md', colors.bg)}>
+              <div className={cn('p-1.5 rounded-lg', colors.glassChip)}>
                 {ICON_MAP[cat.icon] ?? <BookOpen className="w-4 h-4" />}
               </div>
               <div className="text-right">
@@ -1302,7 +1306,7 @@ function CategoryCard({
             className="absolute inset-0 sm:hidden"
           />
           <div className={cn('absolute inset-2 rounded-full blur-md opacity-50', colors.light)} aria-hidden />
-          <div className={cn('relative p-2.5 rounded-xl text-white shadow-lg', colors.bg)}>
+          <div className={cn('relative p-2.5 rounded-xl', colors.glassChip)}>
             {ICON_MAP[category.icon] || <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />}
           </div>
         </div>

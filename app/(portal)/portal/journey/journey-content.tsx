@@ -510,8 +510,18 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
 
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-20">
+        {/* Hero image — the golden path (anchors to the full-width wrapper) */}
+        <div className="absolute inset-x-0 top-0 h-[420px] sm:h-[520px] overflow-hidden pointer-events-none" aria-hidden="true">
+          <img
+            src="/images/portal/welcome-hero.webp"
+            alt=""
+            className="w-full h-full object-cover object-center opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/55 via-[#070b1e]/35 to-[#070b1e]" />
+        </div>
+
         {/* Hero */}
-        <div className="pt-10 pb-6 text-center">
+        <div className="pt-10 pb-6 text-center relative">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
