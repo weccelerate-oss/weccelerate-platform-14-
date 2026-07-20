@@ -546,11 +546,16 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, delay: 0.08 }}
-            className="mt-5 text-4xl sm:text-5xl font-black leading-tight"
+            className="mt-5 text-4xl sm:text-5xl font-black leading-tight flex items-center justify-center gap-4 flex-wrap"
           >
-            שלום {firstName},{' '}
-            <span className="bg-gradient-to-l from-[#c8a951] via-[#f5e9c0] to-[#c8a951] bg-clip-text text-transparent">
-              המסע שלך מחכה
+            <span>
+              שלום {firstName},{' '}
+              <span className="bg-gradient-to-l from-[#c8a951] via-[#f5e9c0] to-[#c8a951] bg-clip-text text-transparent">
+                המסע שלך מחכה
+              </span>
+            </span>
+            <span className="hidden sm:inline-block pointer-events-none">
+              <Kochavi size={72} anim={answeredCount === 0 ? 'wave' : 'idle'} />
             </span>
           </motion.h1>
           <motion.p
@@ -571,9 +576,6 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
           transition={{ duration: 0.6, delay: 0.25 }}
           className="wc-glass wc-shine flex flex-wrap items-center justify-center gap-6 sm:gap-10 rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md px-6 py-6 mb-4 relative"
         >
-          <div className="absolute right-2 -bottom-2 hidden lg:block opacity-95 pointer-events-none">
-            <Kochavi size={84} anim={answeredCount === 0 ? 'wave' : 'idle'} />
-          </div>
           <div className="text-center">
             <ReadinessRing percent={readiness} />
             <div className="mt-1 text-[11px] tracking-wider text-white/40">מד מוכנות למשקיעים</div>
@@ -845,6 +847,10 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
                 {p.done}/{p.total} נענו בפרק
               </div>
             </div>
+            {/* כוכבי מציג את נושא הפרק — צמוד לכותרת, לא מסתיר דבר */}
+            <div className="hidden lg:block shrink-0 pointer-events-none">
+              <Kochavi size={62} scene={SCENE_BY_SLUG[chapter.slug] ?? 'none'} />
+            </div>
           </div>
         </div>
 
@@ -895,10 +901,6 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
             ref={focusBoxRef}
             className="relative overflow-hidden rounded-3xl border border-[#c8a951]/25 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 sm:p-9 shadow-[0_40px_90px_-50px_rgba(0,0,0,.9)]"
           >
-            {/* כוכבי מציג את נושא הפרק — טלסקופ בשוק, מגפון בשיווק, מאזניים בפיננסים... */}
-            <div className="absolute left-3 bottom-1 hidden xl:block opacity-95 pointer-events-none">
-              <Kochavi size={92} scene={SCENE_BY_SLUG[chapter.slug] ?? 'none'} />
-            </div>
             {/* progress inside chapter */}
             <div className="flex items-center gap-3 mb-4">
               <div className="flex-1 h-1.5 rounded-full bg-white/[0.07] overflow-hidden">

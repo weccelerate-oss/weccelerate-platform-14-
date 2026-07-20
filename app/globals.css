@@ -1171,7 +1171,7 @@ textarea:focus-visible,
 /* ---- Kochavi mascot ---- */
 .wc-kochavi { position: relative; }
 /* v3 pseudo-3D: slow depth yaw of the whole star (parent sets perspective) */
-.wc-k-yaw { animation: wc-k-yaw 7s ease-in-out infinite alternate; will-change: transform; }
+.wc-k-yaw { animation: wc-k-yaw var(--kyaw, 7s) ease-in-out var(--kdelay, 0s) infinite alternate; will-change: transform; }
 @keyframes wc-k-yaw { from { transform: rotateY(-12deg); } to { transform: rotateY(12deg); } }
 /* breathing ground shadow — shrinks when he hops */
 .wc-k-shadow { transform-origin: 100px 208px; animation: wc-k-shadowpulse 6s ease-in-out infinite; }
@@ -1201,7 +1201,7 @@ textarea:focus-visible,
 @keyframes wc-k-beam { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
 /* Idle: gentle bob with a tiny tilt, and every cycle ends with a happy hop
    + squash-and-stretch landing — keeps him feeling alive, not looping. */
-.wc-k-body { animation: wc-k-bob 6s ease-in-out infinite; transform-origin: 100px 150px; }
+.wc-k-body { animation: wc-k-bob var(--kbob, 6s) ease-in-out var(--kdelay, 0s) infinite; transform-origin: 100px 150px; }
 @keyframes wc-k-bob {
   0%, 100% { transform: translateY(0) rotate(0); }
   16% { transform: translateY(-8px) rotate(-2.5deg); }
@@ -1224,8 +1224,8 @@ textarea:focus-visible,
   66% { transform: translate(0, 0); }
 }
 /* Arms are the star's own side points */
-.wc-k-armR { transform-origin: 127px 96px; animation: wc-k-swayR 3.4s ease-in-out infinite; }
-.wc-k-armL { transform-origin: 73px 96px; animation: wc-k-swayL 3.4s ease-in-out infinite; }
+.wc-k-armR { transform-origin: 127px 96px; animation: wc-k-swayR var(--ksway, 3.4s) ease-in-out var(--kdelay, 0s) infinite; }
+.wc-k-armL { transform-origin: 73px 96px; animation: wc-k-swayL var(--ksway, 3.4s) ease-in-out var(--kdelay, 0s) infinite; }
 @keyframes wc-k-swayR { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(7deg); } }
 @keyframes wc-k-swayL { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-7deg); } }
 .wc-k-wave .wc-k-armR { animation: wc-k-wave 1.5s ease-in-out infinite; }

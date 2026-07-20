@@ -29,7 +29,12 @@
  *   clock     — time management juggling                 · ניהול זמן
  */
 
+import { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+
+// Real-3D version (three.js) — loaded lazily, client-only.
+const Kochavi3D = dynamic(() => import('./kochavi3d').then((m) => m.Kochavi3D), { ssr: false });
 
 export type KochaviAnim = 'idle' | 'wave' | 'party' | 'nod' | 'sleep';
 export type KochaviScene =
@@ -59,10 +64,34 @@ export function Kochavi({
   className,
 }: KochaviProps) {
   const sleeping = anim === 'sleep';
+
+  // Per-instance randomized timings: no two Kochavis move in sync, and each
+  // one's own loop drifts (durations + phase offsets picked once per mount).
+  const quirkStyle = useMemo(
+    () =>
+      ({
+        '--kbob': `${(5.2 + Math.random() * 2.4).toFixed(2)}s`,
+        '--kyaw': `${(6 + Math.random() * 3.5).toFixed(2)}s`,
+        '--ksway': `${(2.9 + Math.random() * 1.6).toFixed(2)}s`,
+        '--kdelay': `${(-Math.random() * 6).toFixed(2)}s`,
+      }) as React.CSSProperties,
+    [],
+  );
+
+  // The plain character (no scene props, no hat) is the true-3D WebGL star.
+  // Scene performances + the graduation cap stay hand-drawn SVG.
+  if (scene === 'none' && hat === 'none') {
+    return (
+      <div className={cn('select-none pointer-events-none', className)} aria-hidden="true">
+        <Kochavi3D size={size} anim={anim} />
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn('wc-kochavi select-none pointer-events-none', `wc-k-${anim}`, className)}
-      style={{ width: size, height: size * 1.12, perspective: 520 }}
+      style={{ width: size, height: size * 1.12, perspective: 520, ...quirkStyle }}
       aria-hidden="true"
     >
       <svg
@@ -73,18 +102,16 @@ export function Kochavi({
         style={{ transformStyle: 'preserve-3d', overflow: 'visible' }}
       >
         <defs>
-          <linearGradient id="wcKGoldLight" x1="0" y1="0" x2="1" y2="1">
+          {/* userSpaceOnUse: arms + body sample ONE continuous color field, so
+              the joint has zero color step — he reads as a single solid star */}
+          <linearGradient id="wcKGoldLight" gradientUnits="userSpaceOnUse" x1="30" y1="20" x2="175" y2="185">
             <stop offset="0" stopColor="#fdf6dc" />
             <stop offset="0.5" stopColor="#f0dfa0" />
             <stop offset="1" stopColor="#cfae57" />
           </linearGradient>
-          <linearGradient id="wcKGoldDark" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#d9bc6a" />
-            <stop offset="1" stopColor="#9a7b2e" />
-          </linearGradient>
-          <radialGradient id="wcKSheen" cx="0.35" cy="0.28" r="0.7">
-            <stop offset="0" stopColor="rgba(255,255,255,.55)" />
-            <stop offset="0.4" stopColor="rgba(255,255,255,.12)" />
+          <radialGradient id="wcKSheen" gradientUnits="userSpaceOnUse" cx="72" cy="62" r="120">
+            <stop offset="0" stopColor="rgba(255,255,255,.5)" />
+            <stop offset="0.4" stopColor="rgba(255,255,255,.1)" />
             <stop offset="1" stopColor="rgba(255,255,255,0)" />
           </radialGradient>
         </defs>
@@ -95,8 +122,16 @@ export function Kochavi({
               outline drawn ONLY on the outer edges — so at rest he reads as
               one seamless star, not parts glued together. */}
           <g className="wc-k-armR">
-            <path d="M116 78 L181 79 L131 113 Z" fill="url(#wcKGoldLight)" />
-            <path d="M131 113 L181 79 L116 78" fill="none" stroke="#8a7434" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            {/* closed shape with a curved base tucked deep inside the body:
+                at rest the base is hidden; mid-wave the emerging limb is a
+                fully-outlined rounded point — never a flat cut edge */}
+            <path
+              d="M121 76 L181 79 L134 116 Q118 100 121 76 Z"
+              fill="url(#wcKGoldLight)"
+              stroke="#8a7434"
+              strokeWidth="3"
+              strokeLinejoin="round"
+            />
 
             {/* held items ride the arm */}
             {scene === 'megaphone' && (
@@ -154,8 +189,13 @@ export function Kochavi({
           </g>
 
           <g className="wc-k-armL">
-            <path d="M84 78 L19 79 L69 113 Z" fill="url(#wcKGoldLight)" />
-            <path d="M69 113 L19 79 L84 78" fill="none" stroke="#8a7434" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M79 76 L19 79 L66 116 Q82 100 79 76 Z"
+              fill="url(#wcKGoldLight)"
+              stroke="#8a7434"
+              strokeWidth="3"
+              strokeLinejoin="round"
+            />
           </g>
 
           {/* star body — fill covers the arm joints; outline drawn only on the
@@ -166,9 +206,8 @@ export function Kochavi({
           />
           <path d="M79 76 L100 20 L121 76" fill="none" stroke="#8a7434" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M134 116 L150 174 L100 141 L50 174 L66 116" fill="none" stroke="#8a7434" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          {/* gentle depth: right-side tone + soft ridge hints (no hard split) */}
-          <path d="M100 20 L121 76 L134 116 L150 174 L100 141 Z" fill="url(#wcKGoldDark)" opacity="0.2" />
-          <g stroke="#8a7434" strokeWidth="1" opacity="0.18">
+          {/* soft ridge hints only — no tonal split across the star */}
+          <g stroke="#8a7434" strokeWidth="1" opacity="0.14">
             <path d="M100 24 L100 106" />
             <path d="M147 170 L104 112" />
             <path d="M53 170 L96 112" />
