@@ -23,7 +23,9 @@ export function RouteCinematic() {
       first.current = false;
     }
     setPlayKey((k) => k + 1);
-    const t = setTimeout(() => setPlayKey(0), 950);
+    // Safety net: even if animationend never fires (heavy page hydration),
+    // the overlay is removed shortly after the flight duration.
+    const t = setTimeout(() => setPlayKey(0), 1100);
     return () => clearTimeout(t);
   }, [pathname]);
 
@@ -32,7 +34,13 @@ export function RouteCinematic() {
   return (
     <div key={playKey} aria-hidden="true">
       <div className="wc-cine-sweep" />
-      <svg className="wc-cine-star" width="64" height="64" viewBox="0 0 200 200">
+      <svg
+        className="wc-cine-star"
+        width="64"
+        height="64"
+        viewBox="0 0 200 200"
+        onAnimationEnd={() => setPlayKey(0)}
+      >
         <defs>
           <linearGradient id="wcCineGold" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#f5e9c0" />

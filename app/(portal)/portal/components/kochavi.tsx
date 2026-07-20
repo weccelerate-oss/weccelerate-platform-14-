@@ -45,9 +45,29 @@ export function Kochavi({ size = 120, anim = 'idle', hat = 'none', className }: 
           </linearGradient>
         </defs>
 
-        {/* star body */}
+        {/* arms — the star's own side points, behind the body so joints hide */}
+        <g className="wc-k-armR">
+          <path
+            d="M121 76 L181 79 L134 116 Z"
+            fill="url(#wcKochaviGold)"
+            stroke="#8a7434"
+            strokeWidth="3"
+            strokeLinejoin="round"
+          />
+        </g>
+        <g className="wc-k-armL">
+          <path
+            d="M79 76 L19 79 L66 116 Z"
+            fill="url(#wcKochaviGold)"
+            stroke="#8a7434"
+            strokeWidth="3"
+            strokeLinejoin="round"
+          />
+        </g>
+
+        {/* star body — top point, two legs, core (no side points: they are the arms) */}
         <path
-          d="M100 28 L122 82 L180 86 L136 124 L150 182 L100 150 L50 182 L64 124 L20 86 L78 82 Z"
+          d="M100 20 L121 76 L134 116 L150 174 L100 141 L50 174 L66 116 L79 76 Z"
           fill="url(#wcKochaviGold)"
           stroke="#8a7434"
           strokeWidth="3"
@@ -57,18 +77,12 @@ export function Kochavi({ size = 120, anim = 'idle', hat = 'none', className }: 
         {/* graduation cap */}
         {hat === 'grad' && (
           <g>
-            <rect x="82" y="24" width="36" height="12" rx="3" fill="#0b1130" stroke="#8a7434" strokeWidth="2" />
-            <path d="M60 26 L100 8 L140 26 L100 40 Z" fill="#0b1130" stroke="#8a7434" strokeWidth="2" strokeLinejoin="round" />
-            <path d="M138 28 q 4 14 -2 22" fill="none" stroke="#c8a951" strokeWidth="3" strokeLinecap="round" />
-            <circle cx="136" cy="52" r="4" fill="#e8d48b" />
+            <rect x="82" y="18" width="36" height="12" rx="3" fill="#0b1130" stroke="#8a7434" strokeWidth="2" />
+            <path d="M60 20 L100 2 L140 20 L100 34 Z" fill="#0b1130" stroke="#8a7434" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M138 22 q 4 14 -2 22" fill="none" stroke="#c8a951" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="136" cy="46" r="4" fill="#e8d48b" />
           </g>
         )}
-
-        {/* arms */}
-        <g className="wc-k-armR">
-          <path d="M132 118 q 22 -6 30 -22" fill="none" stroke="#8a7434" strokeWidth="6" strokeLinecap="round" />
-        </g>
-        <path d="M68 118 q -22 6 -28 24" fill="none" stroke="#8a7434" strokeWidth="6" strokeLinecap="round" />
 
         {/* face */}
         <g className="wc-k-head">
@@ -82,8 +96,8 @@ export function Kochavi({ size = 120, anim = 'idle', hat = 'none', className }: 
             <g>
               <circle cx="84" cy="98" r="10" fill="#fff" />
               <circle cx="116" cy="98" r="10" fill="#fff" />
-              <circle cx="86" cy="100" r="4.5" fill="#1d1704" />
-              <circle cx="114" cy="100" r="4.5" fill="#1d1704" />
+              <circle className="wc-k-pupil" cx="86" cy="100" r="4.5" fill="#1d1704" />
+              <circle className="wc-k-pupil" cx="114" cy="100" r="4.5" fill="#1d1704" />
               <rect className="wc-k-lid" x="72" y="88" width="24" height="20" rx="10" fill="url(#wcKochaviGold)" />
               <rect className="wc-k-lid" x="104" y="88" width="24" height="20" rx="10" fill="url(#wcKochaviGold)" />
               <path d="M86 118 q 14 12 28 0" fill="none" stroke="#1d1704" strokeWidth="4" strokeLinecap="round" />

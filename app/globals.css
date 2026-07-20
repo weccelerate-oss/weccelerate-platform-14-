@@ -1152,28 +1152,60 @@ textarea:focus-visible,
 .wc-cine-star {
   position: fixed;
   top: 38%;
+  right: -80px;
   z-index: 91;
   pointer-events: none;
+  will-change: transform;
+  /* transform-only flight — animating `right` reflows layout every frame and
+     visibly stutters ("gets stuck") on mobile GPUs */
   animation: wc-cine-fly 0.85s cubic-bezier(0.6, 0, 0.2, 1) forwards;
   filter: drop-shadow(0 0 12px rgba(232, 212, 139, 0.9));
 }
 @keyframes wc-cine-fly {
-  from { right: -80px; transform: rotate(0deg) scale(0.9); opacity: 1; }
-  to { right: 110%; transform: rotate(-28deg) scale(1.05); opacity: 0.9; }
+  from { transform: translateX(0) rotate(0deg) scale(0.9); opacity: 1; }
+  to { transform: translateX(calc(-100vw - 180px)) rotate(-28deg) scale(1.05); opacity: 0.9; }
 }
 .wc-cine-rise { animation: wc-rise 0.7s cubic-bezier(0.22, 1.2, 0.36, 1) both; }
 @keyframes wc-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
 
 /* ---- Kochavi mascot ---- */
 .wc-kochavi { position: relative; }
-.wc-k-body { animation: wc-k-bob 3s ease-in-out infinite; transform-origin: center; }
-@keyframes wc-k-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+/* Idle: gentle bob with a tiny tilt, and every cycle ends with a happy hop
+   + squash-and-stretch landing — keeps him feeling alive, not looping. */
+.wc-k-body { animation: wc-k-bob 6s ease-in-out infinite; transform-origin: 100px 150px; }
+@keyframes wc-k-bob {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  16% { transform: translateY(-8px) rotate(-2.5deg); }
+  32% { transform: translateY(0) rotate(0); }
+  48% { transform: translateY(-8px) rotate(2.5deg); }
+  62% { transform: translateY(0) rotate(0); }
+  74% { transform: translateY(-24px) scale(1.04) rotate(-3deg); }
+  82% { transform: translateY(0) scaleY(0.92) scaleX(1.06); }
+  88% { transform: translateY(-6px) scaleY(1.02); }
+  93% { transform: translateY(0) scale(1); }
+}
 .wc-k-lid { transform-origin: center; transform: scaleY(0); animation: wc-k-blink 4.4s infinite; }
 @keyframes wc-k-blink { 0%, 93%, 100% { transform: scaleY(0); } 95%, 98% { transform: scaleY(1); } }
-.wc-k-armR { transform-origin: 132px 118px; }
+/* Pupils glance around now and then */
+.wc-k-pupil { animation: wc-k-look 7.5s ease-in-out infinite; }
+@keyframes wc-k-look {
+  0%, 30%, 100% { transform: translate(0, 0); }
+  36%, 48% { transform: translate(-3px, 0.5px); }
+  54%, 60% { transform: translate(2.5px, -0.5px); }
+  66% { transform: translate(0, 0); }
+}
+/* Arms are the star's own side points */
+.wc-k-armR { transform-origin: 127px 96px; animation: wc-k-swayR 3.4s ease-in-out infinite; }
+.wc-k-armL { transform-origin: 73px 96px; animation: wc-k-swayL 3.4s ease-in-out infinite; }
+@keyframes wc-k-swayR { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(7deg); } }
+@keyframes wc-k-swayL { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-7deg); } }
 .wc-k-wave .wc-k-armR { animation: wc-k-wave 1.5s ease-in-out infinite; }
-@keyframes wc-k-wave { 0%, 100% { transform: rotate(0); } 25%, 75% { transform: rotate(-45deg); } 50% { transform: rotate(-18deg); } }
+@keyframes wc-k-wave { 0%, 100% { transform: rotate(0); } 25%, 75% { transform: rotate(-55deg); } 50% { transform: rotate(-25deg); } }
 .wc-k-party .wc-k-body { animation: wc-k-party 0.9s cubic-bezier(0.22, 1.2, 0.36, 1) infinite; }
+.wc-k-party .wc-k-armR { animation: wc-k-cheerR 0.9s ease-in-out infinite; }
+.wc-k-party .wc-k-armL { animation: wc-k-cheerL 0.9s ease-in-out infinite; }
+@keyframes wc-k-cheerR { 0%, 100% { transform: rotate(-10deg); } 45% { transform: rotate(-60deg); } }
+@keyframes wc-k-cheerL { 0%, 100% { transform: rotate(10deg); } 45% { transform: rotate(60deg); } }
 @keyframes wc-k-party {
   0%, 100% { transform: translateY(0) rotate(0); }
   40% { transform: translateY(-30px) rotate(-12deg); }
@@ -1189,7 +1221,7 @@ textarea:focus-visible,
 
 @media (prefers-reduced-motion: reduce) {
   .wc-aurora, .wc-cine-sweep, .wc-cine-star,
-  .wc-k-body, .wc-k-lid, .wc-k-armR, .wc-k-head, .wc-k-zzz text { animation: none !important; }
+  .wc-k-body, .wc-k-lid, .wc-k-armR, .wc-k-armL, .wc-k-pupil, .wc-k-head, .wc-k-zzz text { animation: none !important; }
   .wc-cine-sweep, .wc-cine-star { display: none; }
   .wc-cine-rise { animation: none; }
   .wc-glass, .wc-glass-lift { transition: none; }
