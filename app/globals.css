@@ -1093,3 +1093,105 @@ textarea:focus-visible,
 .safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+/* =============================================================================
+   PORTAL DESIGN SYSTEM — "Deep Glass" (direction A) + cinematic moments (B)
+   + כוכבי (Kochavi) mascot animations.
+   Owner-approved 2026-07-20: glass layers with light sweeps, cinema entrances,
+   and the star mascot living across the portal.
+   ============================================================================= */
+
+/* ---- Deep glass card: crystal layer + inner top highlight + hover lift ---- */
+.wc-glass {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 22px 50px -26px rgba(0, 0, 0, 0.85);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.22, 1.2, 0.36, 1), border-color 0.3s, box-shadow 0.3s;
+}
+.wc-glass:hover {
+  border-color: rgba(200, 169, 81, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 26px 60px -26px rgba(200, 169, 81, 0.35);
+}
+.wc-glass-lift:hover { transform: translateY(-5px); }
+
+/* Shine sweep that crosses the glass on hover */
+.wc-shine::after {
+  content: "";
+  position: absolute;
+  inset: -60% auto auto -60%;
+  width: 55%;
+  height: 240%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: rotate(18deg) translateX(-180%);
+  transition: transform 0.9s ease;
+  pointer-events: none;
+}
+.wc-shine:hover::after { transform: rotate(18deg) translateX(440%); }
+
+/* Breathing aurora blobs (page background layer) */
+.wc-aurora { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; pointer-events: none; animation: wc-aurora-drift 22s ease-in-out infinite alternate; }
+@keyframes wc-aurora-drift { to { transform: translate(50px, 34px) scale(1.18); } }
+
+/* ---- Cinematic entrance (B moments): gold light sweep on route change ---- */
+.wc-cine-sweep {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(232, 212, 139, 0.16) 50%, transparent 70%);
+  transform: translateX(110%);
+  animation: wc-cine 0.85s cubic-bezier(0.6, 0, 0.2, 1) forwards;
+}
+@keyframes wc-cine {
+  from { transform: translateX(110%); }
+  to { transform: translateX(-110%); }
+}
+.wc-cine-star {
+  position: fixed;
+  top: 38%;
+  z-index: 91;
+  pointer-events: none;
+  animation: wc-cine-fly 0.85s cubic-bezier(0.6, 0, 0.2, 1) forwards;
+  filter: drop-shadow(0 0 12px rgba(232, 212, 139, 0.9));
+}
+@keyframes wc-cine-fly {
+  from { right: -80px; transform: rotate(0deg) scale(0.9); opacity: 1; }
+  to { right: 110%; transform: rotate(-28deg) scale(1.05); opacity: 0.9; }
+}
+.wc-cine-rise { animation: wc-rise 0.7s cubic-bezier(0.22, 1.2, 0.36, 1) both; }
+@keyframes wc-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+/* ---- Kochavi mascot ---- */
+.wc-kochavi { position: relative; }
+.wc-k-body { animation: wc-k-bob 3s ease-in-out infinite; transform-origin: center; }
+@keyframes wc-k-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.wc-k-lid { transform-origin: center; transform: scaleY(0); animation: wc-k-blink 4.4s infinite; }
+@keyframes wc-k-blink { 0%, 93%, 100% { transform: scaleY(0); } 95%, 98% { transform: scaleY(1); } }
+.wc-k-armR { transform-origin: 132px 118px; }
+.wc-k-wave .wc-k-armR { animation: wc-k-wave 1.5s ease-in-out infinite; }
+@keyframes wc-k-wave { 0%, 100% { transform: rotate(0); } 25%, 75% { transform: rotate(-45deg); } 50% { transform: rotate(-18deg); } }
+.wc-k-party .wc-k-body { animation: wc-k-party 0.9s cubic-bezier(0.22, 1.2, 0.36, 1) infinite; }
+@keyframes wc-k-party {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  40% { transform: translateY(-30px) rotate(-12deg); }
+  70% { transform: translateY(-8px) rotate(9deg); }
+}
+.wc-k-nod .wc-k-head { transform-origin: 100px 110px; animation: wc-k-nod 2.4s ease-in-out infinite; }
+@keyframes wc-k-nod { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(6deg) translateY(3px); } 60% { transform: rotate(-2deg); } }
+.wc-k-sleep .wc-k-body { animation: wc-k-bob 4.5s ease-in-out infinite; }
+.wc-k-zzz text { animation: wc-k-zzz 2.6s ease-in-out infinite; opacity: 0; }
+.wc-k-zzz text:nth-child(2) { animation-delay: 0.5s; }
+.wc-k-zzz text:nth-child(3) { animation-delay: 1s; }
+@keyframes wc-k-zzz { 0% { opacity: 0; transform: translateY(6px); } 30%, 60% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-aurora, .wc-cine-sweep, .wc-cine-star,
+  .wc-k-body, .wc-k-lid, .wc-k-armR, .wc-k-head, .wc-k-zzz text { animation: none !important; }
+  .wc-cine-sweep, .wc-cine-star { display: none; }
+  .wc-cine-rise { animation: none; }
+  .wc-glass, .wc-glass-lift { transition: none; }
+  .wc-shine::after { display: none; }
+}

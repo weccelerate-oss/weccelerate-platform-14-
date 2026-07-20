@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { JourneyChapterView, JourneyAnswerView } from '@/lib/journey/repository';
+import { Kochavi } from '../components/kochavi';
 
 // ---------------------------------------------------------------------------
 // Types & constants
@@ -547,8 +548,11 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.25 }}
-          className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md px-6 py-6 mb-4"
+          className="wc-glass wc-shine flex flex-wrap items-center justify-center gap-6 sm:gap-10 rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md px-6 py-6 mb-4 relative"
         >
+          <div className="absolute right-2 -bottom-2 hidden lg:block opacity-95 pointer-events-none">
+            <Kochavi size={84} anim={answeredCount === 0 ? 'wave' : 'idle'} />
+          </div>
           <div className="text-center">
             <ReadinessRing percent={readiness} />
             <div className="mt-1 text-[11px] tracking-wider text-white/40">מד מוכנות למשקיעים</div>
@@ -736,7 +740,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
                 transition={{ delay: 0.15 + i * 0.06 }}
                 onClick={() => openChapter(i)}
                 className={cn(
-                  'text-right rounded-2xl border p-5 backdrop-blur-md transition-all cursor-pointer group',
+                  'wc-glass wc-shine wc-glass-lift text-right rounded-2xl border p-5 backdrop-blur-md transition-all cursor-pointer group',
                   complete
                     ? 'border-[#c8a951]/50 bg-[#c8a951]/[0.08] hover:bg-[#c8a951]/[0.12]'
                     : 'border-white/[0.08] bg-white/[0.03] hover:border-[#c8a951]/40 hover:bg-white/[0.05]',
@@ -1068,9 +1072,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
             transition={{ type: 'spring', stiffness: 220, damping: 20 }}
             className="fixed bottom-8 right-1/2 translate-x-1/2 z-50 flex w-[calc(100vw-2rem)] max-w-md sm:w-auto items-center gap-3 rounded-2xl border border-[#c8a951]/50 bg-[#0a1030]/95 backdrop-blur-xl px-5 sm:px-6 py-4 shadow-[0_20px_60px_-20px_rgba(200,169,81,.5)]"
           >
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#c8a951] to-[#f5e9c0] grid place-items-center">
-              <Award className="w-5 h-5 text-[#1d1704]" />
-            </div>
+            <Kochavi size={64} anim="party" className="shrink-0 -my-2" />
             <div>
               <div className="font-black text-[#f5e9c0]">הפרק "{celebration}" הושלם!</div>
               <div className="text-xs text-white/50">תחנה נוספת נחתמה בזהב במפת המסע שלך</div>

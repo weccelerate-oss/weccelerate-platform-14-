@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { CategoryData, SubcategoryData, LessonData } from '@/lib/courses-data';
+import { Kochavi } from '../components/kochavi';
 
 /** Total lessons across a catalog (replaces the static getTotalLessons). */
 function countLessons(catalog: CategoryData[]): number {
@@ -632,6 +633,10 @@ export function LearningContent({ user, catalog, initialProgress }: LearningCont
         />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-7 sm:py-10 relative z-10">
+          {/* כוכבי הסטודנט — יושב בפינת מרכז הלמידה ומהנהן */}
+          <div className="absolute left-4 sm:left-8 top-6 hidden md:block opacity-95 pointer-events-none">
+            <Kochavi size={92} anim="nod" hat="grad" />
+          </div>
           {/* Greeting + icon */}
           <motion.div
             initial={{ opacity: 0, y: -8 }}

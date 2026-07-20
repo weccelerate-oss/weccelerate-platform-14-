@@ -16,11 +16,11 @@ import {
   ArrowRight,
   Award,
   BadgeCheck,
-  FileText,
   FolderOpen,
   Printer,
 } from 'lucide-react';
 import type { JourneyChapterView, JourneyAnswerView } from '@/lib/journey/repository';
+import { Kochavi } from '../../components/kochavi';
 
 interface KitContentProps {
   userName: string;
@@ -141,7 +141,9 @@ export function KitContent({ userName, chapters, answers }: KitContentProps) {
             transition={{ delay: 0.1 }}
             className="mt-6 rounded-3xl border border-dashed border-white/[0.15] bg-white/[0.02] px-8 py-14 text-center"
           >
-            <FileText className="w-10 h-10 text-[#c8a951]/60 mx-auto mb-4" />
+            <div className="flex justify-center mb-2">
+              <Kochavi size={110} anim="sleep" />
+            </div>
             <h2 className="text-lg font-bold text-white/80 mb-2">התיק שלך עדיין ריק</h2>
             <p className="text-sm text-white/45 max-w-md mx-auto mb-6">
               בכל שאלה במסע, אחרי שכתבת תשובה שאתה שלם איתה — לחץ על{' '}

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { COURSES_DATA, getTotalLessons } from '@/lib/courses-data';
+import { Kochavi } from '../../components/kochavi';
 
 interface WelcomeOnboardingProps {
   user: {
@@ -155,10 +156,14 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.13 }}
-            className="relative overflow-hidden rounded-3xl border border-[#c8a951]/30 bg-gradient-to-bl from-[#141126] via-[#0c0f26] to-[#070b1e] p-6 sm:p-10 mb-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+            className="wc-shine relative overflow-hidden rounded-3xl border border-[#c8a951]/30 bg-gradient-to-bl from-[#141126] via-[#0c0f26] to-[#070b1e] p-6 sm:p-10 mb-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
           >
             <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#c8a951]/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+            {/* כוכבי מנופף לשלום מפינת הכרטיס */}
+            <div className="absolute left-3 bottom-2 hidden sm:block opacity-95 pointer-events-none">
+              <Kochavi size={96} anim="wave" />
+            </div>
 
             <div className="relative">
               <div className="flex items-start gap-3 mb-4">
@@ -251,7 +256,7 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.25 + index * 0.07 }}
                       className={cn(
-                        'group relative overflow-hidden rounded-xl border bg-white/[0.03] backdrop-blur-sm p-4 sm:p-5',
+                        'wc-shine group relative overflow-hidden rounded-xl border bg-white/[0.03] backdrop-blur-sm p-4 sm:p-5',
                         'hover:bg-white/[0.06] hover:scale-[1.02] hover:shadow-lg transition-all duration-200',
                         cat.borderColor,
                       )}

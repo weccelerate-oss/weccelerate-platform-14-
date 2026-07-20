@@ -10,6 +10,7 @@
 import { motion } from 'framer-motion';
 import { GraduationCap, ChevronLeft, Compass, FolderOpen } from 'lucide-react';
 import { WhatsAppButton } from './components/whatsapp-button';
+import { Kochavi } from '../components/kochavi';
 import { WelcomeOnboarding } from './components/welcome-onboarding';
 import { StatsCards } from './components/stats-cards';
 import { RecentActivity } from './components/recent-activity';
@@ -146,8 +147,11 @@ export function DashboardContent({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="block relative overflow-hidden rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.10] to-white/[0.02] p-5 text-white group hover:border-[#c8a951]/45 transition-all"
+                className="wc-glass wc-shine wc-glass-lift block relative overflow-hidden rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.10] to-white/[0.02] p-5 text-white group hover:border-[#c8a951]/45 transition-all"
               >
+                <div className="absolute -left-1 -bottom-3 hidden md:block opacity-90 pointer-events-none">
+                  <Kochavi size={72} anim={journey.answered === 0 ? 'wave' : 'idle'} />
+                </div>
                 <div className="relative flex flex-wrap items-center gap-5">
                   {/* mini readiness ring */}
                   <div className="relative w-[74px] h-[74px] shrink-0">
@@ -218,7 +222,7 @@ export function DashboardContent({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="block relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.08] p-5 text-white group hover:border-[#c8a951]/20 transition-all"
+              className="wc-glass wc-shine wc-glass-lift block relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.08] p-5 text-white group hover:border-[#c8a951]/20 transition-all"
             >
               <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
                 <img src="/images/portal/learning-hero.png" alt="" className="w-full h-full object-cover opacity-25" />
