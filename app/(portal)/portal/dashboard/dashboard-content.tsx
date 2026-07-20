@@ -8,7 +8,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { GraduationCap, ChevronLeft } from 'lucide-react';
+import { GraduationCap, ChevronLeft, Compass, FolderOpen } from 'lucide-react';
 import { WhatsAppButton } from './components/whatsapp-button';
 import { WelcomeOnboarding } from './components/welcome-onboarding';
 import { StatsCards } from './components/stats-cards';
@@ -55,6 +55,8 @@ interface DashboardContentProps {
   dealStatus?: string;
   matchedServices?: MatchedService[];
   driveFiles?: { id: string; name: string; mimeType: string; size: string; webViewLink: string; webContentLink: string | null; downloadLink: string; modifiedTime: string }[];
+  /** Founder Journey summary — null hides the widget (e.g. DB unavailable). */
+  journey?: { total: number; answered: number; ready: number } | null;
 }
 
 // =============================================================================
@@ -72,6 +74,7 @@ export function DashboardContent({
   dealStatus,
   matchedServices = [],
   driveFiles = [],
+  journey = null,
 }: DashboardContentProps) {
   // Error state
   if (dbError && !project) {
@@ -136,6 +139,78 @@ export function DashboardContent({
             <DashboardCard title="פעילות אחרונה">
               <RecentActivity activities={activities} />
             </DashboardCard>
+
+            {/* Founder Journey Widget */}
+            {journey && journey.total > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="block relative overflow-hidden rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.10] to-white/[0.02] p-5 text-white group hover:border-[#c8a951]/45 transition-all"
+              >
+                <div className="relative flex flex-wrap items-center gap-5">
+                  {/* mini readiness ring */}
+                  <div className="relative w-[74px] h-[74px] shrink-0">
+                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                      <circle cx="50" cy="50" r="42" fill="none" strokeWidth="9" className="stroke-white/[0.08]" />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="42"
+                        fill="none"
+                        strokeWidth="9"
+                        strokeLinecap="round"
+                        stroke="#c8a951"
+                        strokeDasharray={2 * Math.PI * 42}
+                        strokeDashoffset={
+                          2 * Math.PI * 42 * (1 - (journey.total ? journey.answered / journey.total : 0))
+                        }
+                        style={{ filter: 'drop-shadow(0 0 5px rgba(200,169,81,.5))' }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 grid place-items-center text-sm font-black text-[#e8d48b] tabular-nums">
+                      {journey.total ? Math.round((journey.answered / journey.total) * 100) : 0}%
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-[180px]">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Compass className="w-4 h-4 text-[#c8a951]" />
+                      <span className="text-xs font-medium text-[#c8a951]">מסע מרעיון למיזם</span>
+                    </div>
+                    <h3 className="text-base font-semibold mb-1">
+                      {journey.answered === 0
+                        ? 'צא למסע — הכנה לפגישת משקיעים'
+                        : `ענית על ${journey.answered} מתוך ${journey.total} שאלות משקיעים`}
+                    </h3>
+                    <p className="text-sm text-white/50 leading-relaxed mb-0">
+                      {journey.ready > 0
+                        ? `${journey.ready} תשובות כבר בתיק המוכנות שלך`
+                        : 'ענה על השאלות שמשקיעים באמת שואלים, וקבל משוב מהמנטור'}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2 shrink-0">
+                    <a
+                      href="/portal/journey"
+                      className="flex items-center gap-2 text-sm font-medium text-[#c8a951] hover:gap-3 transition-all"
+                    >
+                      <span>{journey.answered === 0 ? 'התחל את המסע' : 'המשך במסע'}</span>
+                      <ChevronLeft className="w-4 h-4" />
+                    </a>
+                    {journey.ready > 0 && (
+                      <a
+                        href="/portal/journey/kit"
+                        className="flex items-center gap-1.5 text-xs text-white/45 hover:text-[#e8d48b] transition-colors"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5" />
+                        לתיק המוכנות ({journey.ready})
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Learning Center Widget */}
             <motion.a

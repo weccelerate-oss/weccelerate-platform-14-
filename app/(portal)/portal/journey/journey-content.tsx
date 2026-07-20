@@ -22,6 +22,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -32,6 +33,7 @@ import {
   ChevronRight,
   Eraser,
   FlaskConical,
+  FolderOpen,
   Gem,
   Landmark,
   LineChart,
@@ -325,6 +327,14 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
   );
   const readiness = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
+  // Answers marked "מוכן להצגה למשקיע" — these live in the readiness kit.
+  const readyCount = useMemo(
+    () =>
+      Object.values(answers).filter((a) => a.status === 'READY' && a.content.trim().length > 0)
+        .length,
+    [answers],
+  );
+
   const chapterProgress = useCallback(
     (c: JourneyChapterView) => {
       const done = c.questions.filter((q) => isAnswered(q.id)).length;
@@ -564,16 +574,40 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
           {resumeTarget && (
             <>
               <div className="h-14 w-px bg-white/[0.08] hidden sm:block" />
-              <button
-                onClick={() => openChapter(resumeTarget.ci, resumeTarget.qi)}
-                className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] font-bold px-5 py-3 text-sm shadow-[0_8px_26px_-10px_rgba(200,169,81,.6)] hover:brightness-105 transition cursor-pointer"
-              >
-                המשך מהמקום שעצרת
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              </button>
+              <div className="flex flex-col gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => openChapter(resumeTarget.ci, resumeTarget.qi)}
+                  className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] font-bold px-5 py-3 text-sm shadow-[0_8px_26px_-10px_rgba(200,169,81,.6)] hover:brightness-105 transition cursor-pointer"
+                >
+                  המשך מהמקום שעצרת
+                  <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                </button>
+                <Link
+                  href="/portal/journey/kit"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-5 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  תיק המוכנות שלי
+                  <span className="tabular-nums text-[11px] bg-[#c8a951]/15 border border-[#c8a951]/30 rounded-full px-2 py-0.5">
+                    {readyCount}
+                  </span>
+                </Link>
+              </div>
             </>
           )}
         </motion.div>
+
+        {!resumeTarget && readyCount > 0 && (
+          <div className="flex justify-center mb-4">
+            <Link
+              href="/portal/journey/kit"
+              className="flex items-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-5 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
+            >
+              <FolderOpen className="w-4 h-4" />
+              תיק המוכנות שלי ({readyCount})
+            </Link>
+          </div>
+        )}
 
         {isStatic && (
           <div className="text-center text-xs text-amber-400/80 mb-4">
@@ -940,6 +974,16 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
                     </button>
                   )}
                 </div>
+
+                {ready && (
+                  <Link
+                    href="/portal/journey/kit"
+                    className="mt-3 flex items-center gap-1.5 text-[12.5px] text-[#c8a951] hover:text-[#f5e9c0] transition-colors w-fit"
+                  >
+                    <FolderOpen className="w-3.5 h-3.5" />
+                    התשובה נאספה לתיק המוכנות שלך — לצפייה בתיק
+                  </Link>
+                )}
 
                 {feedbackError && (
                   <p className="mt-3 text-[13px] text-amber-400/90">{feedbackError}</p>

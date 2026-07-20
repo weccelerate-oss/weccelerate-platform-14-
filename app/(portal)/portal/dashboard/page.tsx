@@ -395,6 +395,29 @@ export default async function DashboardPage() {
     );
   }
 
+  // Founder Journey summary for the dashboard widget (readiness at a glance).
+  let journeySummary: { total: number; answered: number; ready: number } | null = null;
+  try {
+    const { prisma } = await import('@/lib/db');
+    const [total, rows] = await Promise.all([
+      prisma.journeyQuestion.count({
+        where: { chapter: { status: 'PUBLISHED' } },
+      }),
+      prisma.userJourneyAnswer.findMany({
+        where: { userId: session.user.id },
+        select: { content: true, status: true },
+      }),
+    ]);
+    const nonEmpty = rows.filter((r: { content: string }) => r.content.trim().length > 0);
+    journeySummary = {
+      total,
+      answered: nonEmpty.length,
+      ready: nonEmpty.filter((r: { status: string }) => r.status === 'READY').length,
+    };
+  } catch {
+    journeySummary = null; // widget simply hides itself
+  }
+
   return (
     <Suspense fallback={<DashboardSkeleton />}>
       <DashboardContent
@@ -414,6 +437,7 @@ export default async function DashboardPage() {
           dealStatus={dealStatus}
           matchedServices={matchedServices}
           driveFiles={driveFiles}
+          journey={journeySummary}
         />
       </Suspense>
   );
