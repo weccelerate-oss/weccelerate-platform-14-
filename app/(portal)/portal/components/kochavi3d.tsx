@@ -39,21 +39,32 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
       const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js');
       if (disposed || !hostRef.current) return;
 
-      const W = size;
-      const H = size * 1.12;
+      // The canvas is much larger than the layout footprint, with transparent
+      // margins all around — so a raised waving arm or a hop NEVER gets cut
+      // by the canvas edge. The host div keeps the requested layout size.
+      const CANVAS = Math.round(size * 1.8);
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(W, H);
+      renderer.setSize(CANVAS, CANVAS);
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      Object.assign(renderer.domElement.style, {
+        position: 'absolute',
+        width: `${CANVAS}px`,
+        height: `${CANVAS}px`,
+        left: '50%',
+        top: '52%',
+        transform: 'translate(-50%, -50%)',
+        pointerEvents: 'none',
+      });
       host.appendChild(renderer.domElement);
 
       const scene = new THREE.Scene();
       const pmrem = new THREE.PMREMGenerator(renderer);
       scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-      const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 20);
+      const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 20);
       camera.position.set(0, 0.1, 4.8);
 
       const key = new THREE.DirectionalLight(0xfff3d0, 2.2);
@@ -129,12 +140,18 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
       star.add(face);
       const white = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const black = new THREE.MeshBasicMaterial({ color: 0x1d1704 });
+      // Cute recipe: big flat oval whites (not bulging spheres), oversized
+      // pupils with a sparkle highlight — friendly cartoon eyes, not fish eyes
       const mkEye = (x: number) => {
         const eye = new THREE.Group();
-        const ball = new THREE.Mesh(new THREE.SphereGeometry(0.145, 20, 16), white);
-        ball.scale.z = 0.45;
-        const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.062, 16, 12), black);
-        pupil.position.z = 0.075;
+        const ball = new THREE.Mesh(new THREE.SphereGeometry(0.155, 20, 16), white);
+        ball.scale.set(0.92, 1.05, 0.2);
+        const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.085, 16, 12), black);
+        pupil.scale.z = 0.4;
+        pupil.position.z = 0.035;
+        const sparkle = new THREE.Mesh(new THREE.SphereGeometry(0.028, 10, 8), white);
+        sparkle.position.set(0.032, 0.034, 0.07);
+        pupil.add(sparkle);
         eye.add(ball, pupil);
         eye.position.set(x, 0.1, 0);
         face.add(eye);
@@ -142,7 +159,7 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
       };
       const eyeL = mkEye(-0.27);
       const eyeR = mkEye(0.27);
-      const smile = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.035, 10, 28, Math.PI * 0.75), black);
+      const smile = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.045, 10, 28, Math.PI * 0.75), black);
       smile.position.set(0, -0.13, 0.02);
       smile.rotation.z = Math.PI + (Math.PI * 0.25) / 2 + Math.PI * 0.0;
       face.add(smile);
@@ -153,9 +170,9 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
       face.add(oMouth);
       // eyebrows — the soul of the face
       const mkBrow = (x: number) => {
-        const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.022, 0.13, 3, 8), black);
+        const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.017, 0.085, 3, 8), black);
         b.rotation.z = Math.PI / 2;
-        b.position.set(x, 0.31, 0.02);
+        b.position.set(x, 0.29, 0.02);
         face.add(b);
         return b;
       };
@@ -163,12 +180,12 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
       const browR = mkBrow(0.27);
       const cheekMat = new THREE.MeshBasicMaterial({ color: 0xd98a6a, transparent: true, opacity: 0.5 });
       const mkCheek = (x: number) => {
-        const c = new THREE.Mesh(new THREE.CircleGeometry(0.06, 16), cheekMat);
-        c.position.set(x, -0.08, 0.01);
+        const c = new THREE.Mesh(new THREE.CircleGeometry(0.075, 16), cheekMat);
+        c.position.set(x, -0.09, 0.01);
         face.add(c);
       };
-      mkCheek(-0.42);
-      mkCheek(0.42);
+      mkCheek(-0.43);
+      mkCheek(0.43);
 
       // ---- soft ground shadow (radial gradient sprite) ----
       const shadowCanvas = document.createElement('canvas');
@@ -190,7 +207,8 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
       shadow.position.y = -1.42;
       root.add(shadow);
 
-      root.scale.setScalar(0.92);
+      // Star fills ~the layout footprint; the rest of the canvas is headroom.
+      root.scale.setScalar(0.58);
 
       // ---- organic motion brain: layered noise + randomly-timed impulses ----
       const rnd = (a: number, b: number) => a + Math.random() * (b - a);
@@ -359,7 +377,7 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
     <div
       ref={hostRef}
       className={className}
-      style={{ width: size, height: size * 1.12 }}
+      style={{ width: size, height: size * 1.12, position: 'relative', overflow: 'visible' }}
       aria-hidden="true"
     />
   );
