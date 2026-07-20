@@ -46,6 +46,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { JourneyChapterView, JourneyAnswerView } from '@/lib/journey/repository';
 import { Kochavi, type KochaviScene } from '../components/kochavi';
+import { KochaviWalker } from '../components/kochavi-walker';
 
 /** Kochavi acts out each chapter's theme in the focus screen. */
 const SCENE_BY_SLUG: Record<string, KochaviScene> = {
@@ -847,10 +848,6 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
                 {p.done}/{p.total} נענו בפרק
               </div>
             </div>
-            {/* כוכבי מציג את נושא הפרק — צמוד לכותרת, לא מסתיר דבר */}
-            <div className="hidden lg:block shrink-0 pointer-events-none">
-              <Kochavi size={62} scene={SCENE_BY_SLUG[chapter.slug] ?? 'none'} />
-            </div>
           </div>
         </div>
 
@@ -896,7 +893,14 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
             })}
           </div>
 
-          {/* Focus card */}
+          {/* Focus card — כוכבי מטייל על הקצה העליון שלו (ובפיננסים: על חבל!) */}
+          <div>
+            <KochaviWalker
+              size={58}
+              scene={SCENE_BY_SLUG[chapter.slug] ?? 'none'}
+              rope={chapter.slug === 'financials'}
+              className="hidden lg:block mx-10 -mb-1"
+            />
           <div
             ref={focusBoxRef}
             className="relative overflow-hidden rounded-3xl border border-[#c8a951]/25 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 sm:p-9 shadow-[0_40px_90px_-50px_rgba(0,0,0,.9)]"
@@ -1066,6 +1070,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
                 </button>
               )}
             </div>
+          </div>
           </div>
         </div>
       </div>
