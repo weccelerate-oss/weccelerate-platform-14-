@@ -986,7 +986,12 @@ export async function notifyKatrinAboutArticle(opts: {
       payload: { slug: opts.slug, error: postResult.error },
       success: false,
     });
-    return;
+    // Do NOT skip the email — Katrin must hear about every published
+    // article even when post generation hiccups (on 2026-07-19 a 30s
+    // generation timeout silently swallowed the whole notification).
+    postResult.post =
+      `(ניסוח הפוסט האוטומטי נכשל הפעם — המאמר עצמו פורסם כרגיל.\n` +
+      `אפשר לנסח ידנית על בסיס המאמר: ${articleUrl})`;
   }
 
   const emailResult = await sendArticlePublishedEmail({

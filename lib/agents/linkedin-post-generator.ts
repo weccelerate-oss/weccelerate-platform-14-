@@ -67,7 +67,9 @@ export async function generateLinkedInPost(input: LinkedInPostInput): Promise<Li
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }],
       }),
-      signal: AbortSignal.timeout(30_000),
+      // 120s (was 30s): occasional slow generations aborted post creation,
+      // which used to silently skip Katrin's whole email (2026-07-19).
+      signal: AbortSignal.timeout(120_000),
     });
     if (!res.ok) {
       return { ok: false, error: `Claude ${res.status}: ${await res.text()}` };
