@@ -115,8 +115,25 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
         createdAt: true,
         description: true,
         metadata: true,
+        userId: true,
       },
     });
+
+    // A failed welcome email that was later RE-SENT successfully to the same
+    // user is history, not an open problem — without this, a transient
+    // failure keeps the status card red forever even though every user got
+    // their email two minutes later.
+    const latestSentAt = new Map<string, number>();
+    for (const row of rows) {
+      if (row.action === 'user.welcome_email_sent' && row.userId) {
+        const t = row.createdAt.getTime();
+        if ((latestSentAt.get(row.userId) ?? 0) < t) latestSentAt.set(row.userId, t);
+      }
+    }
+    const isSupersededFailure = (row: { action: string; userId: string | null; createdAt: Date }) =>
+      row.action === 'user.welcome_email_failed' &&
+      !!row.userId &&
+      (latestSentAt.get(row.userId) ?? 0) > row.createdAt.getTime();
 
     // Count actual total of spam-blocks in the window so we can warn about
     // truncation independently of the page-bound row list above.
@@ -181,14 +198,15 @@ async function getOnboardingActivity(): Promise<OnboardingActivity> {
           counts.emailSent++;
           break;
         case 'user.welcome_email_failed':
-          counts.emailFailed++;
+          if (!isSupersededFailure(row)) counts.emailFailed++;
           break;
       }
       if (
         !lastFailure &&
         ['onboarding.unauthorized', 'onboarding.validation_failed', 'user.welcome_email_failed'].includes(
           row.action,
-        )
+        ) &&
+        !isSupersededFailure(row)
       ) {
         lastFailure = {
           at: row.createdAt.toISOString(),
