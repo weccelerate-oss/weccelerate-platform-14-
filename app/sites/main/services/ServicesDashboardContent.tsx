@@ -35,6 +35,19 @@ export default function ServicesDashboardContent() {
       <section className="relative py-16 md:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-[#070b1e]" />
 
+        {/* Hero image — dark product studio with gold sketches, fading into the page */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <Image
+            src="/images/A_sleek_dark_2k_202602220953.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center opacity-45"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/60 via-[#070b1e]/45 to-[#070b1e]" />
+        </div>
+
         {/* Background pattern */}
         <div
           className="absolute inset-0 opacity-[0.03]"
