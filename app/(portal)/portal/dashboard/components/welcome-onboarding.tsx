@@ -178,7 +178,7 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
 
               <p className="text-white/70 mb-6 max-w-2xl leading-relaxed text-sm sm:text-base">
                 המסע שמכין אותך לחדר המשקיעים: ענה בקצב שלך על השאלות שמשקיעים באמת
-                שואלים, קבל משוב אישי מהמנטור, וצפה בתשובות הסופיות שלך נאספות לתיק
+                שואלים, קבל משוב אישי מכוכבי, וצפה בתשובות הסופיות שלך נאספות לתיק
                 מוכנות מסודר — מוכן להדפסה לפני כל פגישה.
               </p>
 
@@ -193,7 +193,7 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
                 <div className="rounded-xl border border-[#c8a951]/20 bg-white/[0.03] p-4 flex items-start gap-3">
                   <Wand2 className="w-5 h-5 text-[#e8d48b] shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-white text-sm mb-0.5">משוב מהמנטור</h3>
+                    <h3 className="font-semibold text-white text-sm mb-0.5">משוב מכוכבי</h3>
                     <p className="text-xs text-white/55 leading-relaxed">ביקורת מקצועית על כל תשובה</p>
                   </div>
                 </div>

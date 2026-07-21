@@ -1018,7 +1018,7 @@ export function JourneyContent({
                     className="flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] px-4 py-2.5 text-[13px] font-semibold text-white/70 hover:border-[#c8a951]/40 hover:text-[#e8d48b] transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
                   >
                     <Wand2 className={cn('w-4 h-4', feedbackLoading && 'animate-pulse')} />
-                    {feedbackLoading ? 'המנטור קורא...' : 'משוב מהמנטור'}
+                    {feedbackLoading ? 'כוכבי קורא...' : 'משוב מכוכבי'}
                     {mentorQuota.limit > 0 && (
                       <span
                         className={cn(
@@ -1069,7 +1069,7 @@ export function JourneyContent({
                   >
                     <div className="flex items-center gap-2 text-[11px] tracking-[0.18em] text-[#e8d48b] font-bold mb-2">
                       <Sparkles className="w-3.5 h-3.5" />
-                      מנטור הזהב
+                      כוכבי · המנטור האישי שלך
                     </div>
                     <p className="text-[13.5px] text-white/75 leading-relaxed whitespace-pre-line m-0">
                       {answer.aiFeedback}

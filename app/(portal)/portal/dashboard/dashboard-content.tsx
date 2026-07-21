@@ -190,7 +190,7 @@ export function DashboardContent({
                     <p className="text-sm text-white/50 leading-relaxed mb-0">
                       {journey.ready > 0
                         ? `${journey.ready} תשובות כבר בתיק המוכנות שלך`
-                        : 'ענה על השאלות שמשקיעים באמת שואלים, וקבל משוב מהמנטור'}
+                        : 'ענה על השאלות שמשקיעים באמת שואלים, וקבל משוב מכוכבי'}
                     </p>
                   </div>
 
