@@ -7,17 +7,19 @@
  *   it the way an Israeli investor would, caches the feedback on the answer
  *   row (aiFeedback / aiFeedbackAt) and returns it.
  *
- * Cost control: 10 feedback calls per user per day (in-memory limiter — the
- * same tradeoff every other portal route makes on serverless).
+ * Cost control: a DB-backed monthly pool per user (default 30, tunable via
+ * SiteSetting `ai.mentor_feedback_monthly_limit` — see lib/ai-quota.ts),
+ * plus a small in-memory burst limiter against rapid-fire clicking.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
+import { tryConsume, refund } from '@/lib/ai-quota';
 
 const FEEDBACK_MODEL = 'claude-sonnet-4-6';
-const DAILY_LIMIT = 10;
+const QUOTA_FEATURE = 'mentor_feedback';
 
 function isSameOrigin(req: NextRequest): boolean {
   const origin = req.headers.get('origin');
@@ -57,13 +59,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const limit = rateLimit(`journey-feedback:${userId}`, {
-      limit: DAILY_LIMIT,
-      windowSeconds: 24 * 60 * 60,
-    });
-    if (!limit.allowed) {
+    // Burst guard only — the real cap is the DB-backed monthly pool below.
+    const burst = rateLimit(`journey-feedback:${userId}`, { limit: 5, windowSeconds: 60 });
+    if (!burst.allowed) {
       return NextResponse.json(
-        { error: `הגעת למכסת ${DAILY_LIMIT} המשובים היומית — נסה שוב מחר` },
+        { error: 'רגע, המנטור עוד קורא... נסה שוב בעוד דקה' },
         { status: 429 },
       );
     }
@@ -91,6 +91,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'כתוב תשובה (לפחות כמה מילים) לפני בקשת משוב' },
         { status: 400 },
+      );
+    }
+
+    // Monthly pool — consume one slot atomically before paying for the call.
+    const quota = await tryConsume(userId, QUOTA_FEATURE);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            quota.limit <= 0
+              ? 'משוב המנטור כבוי כרגע במערכת'
+              : `ניצלת את כל ${quota.limit} המשובים לחודש הזה — המכסה מתחדשת ב-1 בחודש הבא. צריך יותר? דבר עם המלווה שלך.`,
+          remaining: 0,
+          limit: quota.limit,
+        },
+        { status: 429 },
       );
     }
 
@@ -135,6 +151,8 @@ export async function POST(req: NextRequest) {
     if (!res.ok) {
       const detail = await res.text();
       console.error('[journey/feedback] Anthropic error:', res.status, detail.slice(0, 300));
+      // Our failure, not the entrepreneur's — give the slot back.
+      await refund(userId, QUOTA_FEATURE);
       return NextResponse.json(
         { error: 'המנטור עמוס כרגע — נסה שוב בעוד רגע' },
         { status: 502 },
@@ -149,6 +167,7 @@ export async function POST(req: NextRequest) {
       .trim();
 
     if (!feedback) {
+      await refund(userId, QUOTA_FEATURE);
       return NextResponse.json(
         { error: 'המנטור לא הצליח לנסח משוב — נסה שוב' },
         { status: 502 },
@@ -160,7 +179,12 @@ export async function POST(req: NextRequest) {
       data: { aiFeedback: feedback, aiFeedbackAt: new Date() },
     });
 
-    return NextResponse.json({ success: true, feedback, remaining: limit.remaining });
+    return NextResponse.json({
+      success: true,
+      feedback,
+      remaining: quota.remaining,
+      limit: quota.limit,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('[journey/feedback] failed:', message);

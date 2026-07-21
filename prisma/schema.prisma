@@ -130,6 +130,7 @@ model User {
   lessonProgress UserLessonProgress[]
   quizAttempts  QuizAttempt[]
   journeyAnswers UserJourneyAnswer[]
+  aiUsage       AiUsage[]
 
   // Onboarding / auto-provisioning
   // True for accounts created via the onboarding webhook with a temp password.
@@ -827,6 +828,31 @@ model UserJourneyAnswer {
   @@index([userId])
   @@index([questionId])
   @@map("user_journey_answers")
+}
+
+// =============================================================================
+// AI USAGE QUOTA — per-user monthly generation caps
+// =============================================================================
+// One row per (user, feature, calendar month). `used` is incremented
+// atomically with a guarded updateMany (used < limit) so concurrent requests
+// can never overshoot. Limits live in SiteSetting (`ai.<feature>_monthly_limit`)
+// so the team can tune them without a deploy; lib/ai-quota.ts holds defaults.
+
+model AiUsage {
+  id        String   @id @default(cuid())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  feature   String   // 'mentor_feedback' (future: 'investor_room', ...)
+  period    String   // calendar month, 'YYYY-MM'
+  used      Int      @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, feature, period])
+  @@index([feature, period])
+  @@map("ai_usage")
 }
 
 // =============================================================================

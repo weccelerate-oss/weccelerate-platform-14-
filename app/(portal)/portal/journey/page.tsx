@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { JourneyContent } from './journey-content';
 import { getPublishedJourney, getUserJourneyAnswers } from '@/lib/journey/repository';
+import { getQuota } from '@/lib/ai-quota';
 
 // Content is admin-managed and answers are per-user — always render fresh.
 export const dynamic = 'force-dynamic';
@@ -16,9 +17,10 @@ export default async function JourneyPage() {
     redirect('/login?callbackUrl=/portal/journey');
   }
 
-  const [chapters, answers] = await Promise.all([
+  const [chapters, answers, mentorQuota] = await Promise.all([
     getPublishedJourney(),
     getUserJourneyAnswers(userId),
+    getQuota(userId, 'mentor_feedback'),
   ]);
 
   return (
@@ -26,6 +28,7 @@ export default async function JourneyPage() {
       userName={session.user.name || 'יזם'}
       chapters={chapters}
       initialAnswers={answers}
+      initialMentorQuota={{ remaining: mentorQuota.remaining, limit: mentorQuota.limit }}
     />
   );
 }

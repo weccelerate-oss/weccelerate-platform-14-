@@ -73,6 +73,8 @@ interface JourneyContentProps {
   userName: string;
   chapters: JourneyChapterView[];
   initialAnswers: JourneyAnswerView[];
+  /** Monthly mentor-feedback pool state at page load. */
+  initialMentorQuota?: { remaining: number; limit: number };
 }
 
 const AUTOSAVE_DELAY_MS = 10_000;
@@ -232,7 +234,12 @@ function burstGold(container: HTMLElement) {
 // Main component
 // ---------------------------------------------------------------------------
 
-export function JourneyContent({ userName, chapters, initialAnswers }: JourneyContentProps) {
+export function JourneyContent({
+  userName,
+  chapters,
+  initialAnswers,
+  initialMentorQuota,
+}: JourneyContentProps) {
   const firstName = userName.split(' ')[0] || 'יזם';
   const isStatic = chapters[0]?.id.startsWith('static:');
 
@@ -394,6 +401,9 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
   // ----- mentor feedback ----------------------------------------------------
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [mentorQuota, setMentorQuota] = useState(
+    initialMentorQuota ?? { remaining: 30, limit: 30 },
+  );
 
   const requestFeedback = useCallback(
     async (questionId: string) => {
@@ -408,6 +418,9 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
           body: JSON.stringify({ questionId }),
         });
         const data = await res.json().catch(() => ({}));
+        if (typeof data?.remaining === 'number' && typeof data?.limit === 'number') {
+          setMentorQuota({ remaining: data.remaining, limit: data.limit });
+        }
         if (!res.ok) {
           setFeedbackError(data?.error || 'משהו השתבש — נסה שוב');
           return;
@@ -991,11 +1004,35 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
 
                   <button
                     onClick={() => requestFeedback(question.id)}
-                    disabled={feedbackLoading || content.trim().length < 10 || isStatic}
+                    disabled={
+                      feedbackLoading ||
+                      content.trim().length < 10 ||
+                      isStatic ||
+                      mentorQuota.remaining <= 0
+                    }
+                    title={
+                      mentorQuota.remaining <= 0
+                        ? 'המכסה החודשית נוצלה — מתחדשת ב-1 בחודש'
+                        : undefined
+                    }
                     className="flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] px-4 py-2.5 text-[13px] font-semibold text-white/70 hover:border-[#c8a951]/40 hover:text-[#e8d48b] transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
                   >
                     <Wand2 className={cn('w-4 h-4', feedbackLoading && 'animate-pulse')} />
                     {feedbackLoading ? 'המנטור קורא...' : 'משוב מהמנטור'}
+                    {mentorQuota.limit > 0 && (
+                      <span
+                        className={cn(
+                          'tabular-nums text-[11px] rounded-full px-1.5 py-px border',
+                          mentorQuota.remaining <= 0
+                            ? 'border-red-400/30 text-red-300/70'
+                            : mentorQuota.remaining <= 5
+                              ? 'border-amber-400/30 text-amber-300/80'
+                              : 'border-white/[0.15] text-white/40',
+                        )}
+                      >
+                        {mentorQuota.remaining}/{mentorQuota.limit}
+                      </span>
+                    )}
                   </button>
 
                   {hasText && (
