@@ -29,7 +29,7 @@
  *   clock     — time management juggling                 · ניהול זמן
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 
@@ -78,9 +78,18 @@ export function Kochavi({
     [],
   );
 
-  // The plain character (no scene props, no hat) is the true-3D WebGL star.
-  // Scene performances + the graduation cap stay hand-drawn SVG.
-  if (scene === 'none' && hat === 'none') {
+  // The plain character (no scene props, no hat) upgrades to the true-3D
+  // WebGL star — but only on desktop: on phones a per-instance WebGL render
+  // loop is exactly the "portal feels heavy" weight, so mobile keeps the
+  // full-featured SVG version. SSR also renders SVG (no hydration flicker).
+  const [use3D, setUse3D] = useState(false);
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 901px)').matches;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setUse3D(desktop && !reduced);
+  }, []);
+
+  if (scene === 'none' && hat === 'none' && use3D) {
     return (
       <div className={cn('select-none pointer-events-none', className)} aria-hidden="true">
         <Kochavi3D size={size} anim={anim} />

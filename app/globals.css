@@ -1248,6 +1248,22 @@ textarea:focus-visible,
 .wc-k-zzz text:nth-child(3) { animation-delay: 1s; }
 @keyframes wc-k-zzz { 0% { opacity: 0; transform: translateY(6px); } 30%, 60% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
 
+/* iOS Safari compositing bug: giant fixed blurred layers (aurora blobs) +
+   large backdrop-filter surfaces smear into diagonal white washes that cover
+   half the viewport. Mobile gets flat translucency instead — visually close,
+   artifact-free, and much cheaper on the GPU. */
+@media (max-width: 900px) {
+  .wc-aurora { display: none !important; }
+  .wc-cine-sweep { display: none !important; }
+  .wc-glass,
+  .backdrop-blur-sm, .backdrop-blur, .backdrop-blur-md, .backdrop-blur-lg, .backdrop-blur-xl {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .wc-glass { background: rgba(16, 22, 54, 0.75); }
+  .wc-shine::after { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wc-aurora, .wc-cine-sweep, .wc-cine-star,
   .wc-k-body, .wc-k-lid, .wc-k-armR, .wc-k-armL, .wc-k-pupil, .wc-k-head, .wc-k-zzz text,

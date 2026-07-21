@@ -125,10 +125,13 @@ function Starfield() {
     if (!ctx) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Static sky on phones — an endless canvas loop is real battery/CPU drag.
+    const isMobile = window.matchMedia('(max-width: 900px)').matches;
     let stars: { x: number; y: number; r: number; gold: boolean; ph: number; sp: number }[] = [];
     let W = 0;
     let H = 0;
     let raf = 0;
+    let lastFrame = 0;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -148,7 +151,7 @@ function Starfield() {
       }));
     };
 
-    const draw = (t: number) => {
+    const paintStars = (t: number) => {
       ctx.clearRect(0, 0, W, H);
       for (const s of stars) {
         const a = 0.22 + 0.5 * (0.5 + 0.5 * Math.sin(s.ph + t * 0.001 * s.sp));
@@ -159,11 +162,21 @@ function Starfield() {
           : `rgba(190,205,255,${a * 0.75})`;
         ctx.fill();
       }
-      if (!reduced) raf = requestAnimationFrame(draw);
+    };
+
+    const draw = (t: number) => {
+      // 30fps is indistinguishable for twinkling and halves the work; skip
+      // entirely while the tab is hidden.
+      if (!document.hidden && t - lastFrame >= 33) {
+        lastFrame = t;
+        paintStars(t);
+      }
+      raf = requestAnimationFrame(draw);
     };
 
     resize();
-    draw(0);
+    paintStars(0);
+    if (!reduced && !isMobile) raf = requestAnimationFrame(draw);
     window.addEventListener('resize', resize);
     return () => {
       window.removeEventListener('resize', resize);

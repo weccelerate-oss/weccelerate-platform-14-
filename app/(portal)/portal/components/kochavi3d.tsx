@@ -249,7 +249,31 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
       const clock = new THREE.Clock();
       let t = 0;
 
+      // Perf: render at ~30fps, and stop entirely while offscreen or when the
+      // tab is hidden — a mascot must never be the reason the portal drags.
+      let visible = true;
+      const vio = new IntersectionObserver(
+        (entries) => {
+          visible = entries[0]?.isIntersecting ?? true;
+        },
+        { threshold: 0.01 },
+      );
+      vio.observe(host);
+      const FRAME_MS = 1000 / 30;
+      let lastRender = 0;
+
       const frame = () => {
+        if (!visible || document.hidden) {
+          clock.getDelta(); // keep dt sane across the pause
+          raf = requestAnimationFrame(frame);
+          return;
+        }
+        const now = performance.now();
+        if (now - lastRender < FRAME_MS) {
+          raf = requestAnimationFrame(frame);
+          return;
+        }
+        lastRender = now;
         const dt = Math.min(clock.getDelta(), 0.05);
         t += dt;
         const mode = animRef.current;
@@ -359,6 +383,7 @@ export function Kochavi3D({ size = 120, anim = 'idle', className }: Kochavi3DPro
 
       cleanup = () => {
         cancelAnimationFrame(raf);
+        vio.disconnect();
         pmrem.dispose();
         renderer.dispose();
         renderer.domElement.remove();
