@@ -830,7 +830,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
         {/* Chapter header */}
-        <div className="pt-6 pb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="pt-3 sm:pt-6 pb-3 sm:pb-4 flex flex-wrap items-center justify-between gap-3">
           <button
             onClick={backToMap}
             className="flex items-center gap-1.5 text-sm text-white/50 hover:text-[#e8d48b] transition-colors cursor-pointer"
@@ -856,10 +856,10 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 flex items-start gap-3 rounded-2xl border border-[#c8a951]/25 bg-[#c8a951]/[0.06] px-5 py-4"
+            className="mb-3 sm:mb-4 flex items-start gap-2.5 sm:gap-3 rounded-xl sm:rounded-2xl border border-[#c8a951]/25 bg-[#c8a951]/[0.06] px-3.5 py-3 sm:px-5 sm:py-4"
           >
-            <Gem className="w-5 h-5 text-[#c8a951] shrink-0 mt-0.5" />
-            <p className="text-sm text-white/70 leading-relaxed m-0">{chapter.investorLook}</p>
+            <Gem className="w-4 h-4 sm:w-5 sm:h-5 text-[#c8a951] shrink-0 mt-0.5" />
+            <p className="text-[13px] sm:text-sm text-white/70 leading-relaxed m-0">{chapter.investorLook}</p>
           </motion.div>
         )}
 
@@ -903,7 +903,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
             />
           <div
             ref={focusBoxRef}
-            className="relative overflow-hidden rounded-3xl border border-[#c8a951]/25 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 sm:p-9 shadow-[0_40px_90px_-50px_rgba(0,0,0,.9)]"
+            className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#c8a951]/25 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-4 sm:p-9 shadow-[0_40px_90px_-50px_rgba(0,0,0,.9)]"
           >
             {/* progress inside chapter */}
             <div className="flex items-center gap-3 mb-4">
@@ -969,7 +969,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
                   value={content}
                   onChange={(e) => setContent(question.id, e.target.value)}
                   placeholder="כתוב את התשובה שלך כאן..."
-                  rows={7}
+                  rows={6}
                   className="w-full resize-y rounded-2xl bg-[#03061a]/60 border border-white/[0.1] focus:border-[#c8a951] focus:ring-[3px] focus:ring-[#c8a951]/15 outline-none px-4 sm:px-5 py-4 text-[16px] sm:text-[15px] leading-relaxed text-white/90 placeholder:text-white/25 transition-colors"
                 />
 
@@ -979,7 +979,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
                     onClick={() => toggleReady(question.id)}
                     disabled={!hasText}
                     className={cn(
-                      'flex items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed',
+                      'flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed',
                       ready
                         ? 'bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] shadow-[0_6px_20px_-8px_rgba(200,169,81,.6)]'
                         : 'border border-[#c8a951]/40 text-[#e8d48b] hover:bg-[#c8a951]/10',
@@ -992,7 +992,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
                   <button
                     onClick={() => requestFeedback(question.id)}
                     disabled={feedbackLoading || content.trim().length < 10 || isStatic}
-                    className="flex items-center gap-1.5 rounded-xl border border-white/[0.12] px-4 py-2 text-[13px] font-semibold text-white/70 hover:border-[#c8a951]/40 hover:text-[#e8d48b] transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
+                    className="flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] px-4 py-2.5 text-[13px] font-semibold text-white/70 hover:border-[#c8a951]/40 hover:text-[#e8d48b] transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
                   >
                     <Wand2 className={cn('w-4 h-4', feedbackLoading && 'animate-pulse')} />
                     {feedbackLoading ? 'המנטור קורא...' : 'משוב מהמנטור'}
@@ -1042,12 +1042,12 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
               </motion.div>
             </AnimatePresence>
 
-            {/* prev / next */}
-            <div className="mt-7 flex items-center justify-between">
+            {/* prev / next — on mobile the primary action stretches for the thumb */}
+            <div className="mt-5 sm:mt-7 flex items-center justify-between gap-3">
               <button
                 onClick={() => goToQuestion(questionIdx - 1, -1)}
                 disabled={questionIdx === 0}
-                className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm text-white/50 hover:text-white/85 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 sm:px-4 py-3 text-sm text-white/50 hover:text-white/85 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
               >
                 <ArrowRight className="w-4 h-4" />
                 הקודמת
@@ -1055,7 +1055,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
               {questionIdx < chapter.questions.length - 1 ? (
                 <button
                   onClick={() => goToQuestion(questionIdx + 1, 1)}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] font-bold px-6 py-2.5 text-sm shadow-[0_8px_26px_-10px_rgba(200,169,81,.6)] hover:brightness-105 active:scale-[0.97] transition cursor-pointer"
+                  className="flex flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] font-bold px-6 py-3 text-sm shadow-[0_8px_26px_-10px_rgba(200,169,81,.6)] hover:brightness-105 active:scale-[0.97] transition cursor-pointer"
                 >
                   לשאלה הבאה
                   <ArrowLeft className="w-4 h-4" />
@@ -1063,7 +1063,7 @@ export function JourneyContent({ userName, chapters, initialAnswers }: JourneyCo
               ) : (
                 <button
                   onClick={backToMap}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] font-bold px-6 py-2.5 text-sm shadow-[0_8px_26px_-10px_rgba(200,169,81,.6)] hover:brightness-105 active:scale-[0.97] transition cursor-pointer"
+                  className="flex flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] font-bold px-6 py-3 text-sm shadow-[0_8px_26px_-10px_rgba(200,169,81,.6)] hover:brightness-105 active:scale-[0.97] transition cursor-pointer"
                 >
                   סיום הפרק — למפה
                   <ArrowLeft className="w-4 h-4" />
