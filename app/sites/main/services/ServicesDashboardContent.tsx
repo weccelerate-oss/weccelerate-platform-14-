@@ -43,9 +43,9 @@ export default function ServicesDashboardContent() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-45"
+            className="object-cover object-center opacity-90"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/60 via-[#070b1e]/45 to-[#070b1e]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b1e]/35 via-[#070b1e]/15 to-[#070b1e]" />
         </div>
 
         {/* Background pattern */}
