@@ -93,6 +93,14 @@ enum JourneyAnswerStatus {
   READY   // מוכן להצגה — polished enough to show an investor
 }
 
+// Which portal package the entrepreneur is on. Controls feature access via
+// lib/entitlements.ts (per-user overrides live in User.featureOverrides).
+enum UserPlan {
+  WECCELERATE    // house client — provisioned by the team / form automation
+  INVESTOR_PREP  // purchased the investor-prep service: + human mentor thread
+  FREE           // future open self-signup (registration page TBD)
+}
+
 // =============================================================================
 // USER & AUTHENTICATION
 // =============================================================================
@@ -131,6 +139,16 @@ model User {
   quizAttempts  QuizAttempt[]
   journeyAnswers UserJourneyAnswer[]
   aiUsage       AiUsage[]
+
+  // Plan & entitlements. Everyone provisioned so far is a WeCcelerate house
+  // client; FREE arrives with the future self-signup page. featureOverrides
+  // lets the admin open/close specific portal parts per entrepreneur:
+  // { "journey": true, "mentorAi": false, ... } — overrides the plan default.
+  plan             UserPlan @default(WECCELERATE)
+  featureOverrides Json?
+  // The advisor who opened this entrepreneur (from the form's "שם משתמש").
+  // Powers the human-mentor thread: this address gets the review emails.
+  advisorEmail     String?
 
   // Onboarding / auto-provisioning
   // True for accounts created via the onboarding webhook with a temp password.
@@ -821,6 +839,12 @@ model UserJourneyAnswer {
   aiFeedback   String?  @db.Text
   aiFeedbackAt DateTime?
 
+  // Human-mentor thread (INVESTOR_PREP plan): when the entrepreneur sends the
+  // answer to their advisor we stamp the request and the conversation lives
+  // in AnswerComment rows.
+  advisorRequestedAt DateTime?
+  comments     AnswerComment[]
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -828,6 +852,25 @@ model UserJourneyAnswer {
   @@index([userId])
   @@index([questionId])
   @@map("user_journey_answers")
+}
+
+// One message in the human-mentor conversation on a specific answer.
+// The advisor replies via a signed email link (no portal login needed);
+// the entrepreneur replies from the question screen.
+model AnswerComment {
+  id         String   @id @default(cuid())
+
+  answer     UserJourneyAnswer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  answerId   String
+
+  authorType String   // 'ENTREPRENEUR' | 'ADVISOR'
+  authorName String
+  body       String   @db.Text
+
+  createdAt  DateTime @default(now())
+
+  @@index([answerId, createdAt])
+  @@map("answer_comments")
 }
 
 // =============================================================================

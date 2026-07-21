@@ -31,6 +31,30 @@ export const OnboardingBodySchema = z.object({
 
 export type OnboardingBody = z.infer<typeof OnboardingBodySchema>;
 
+const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Pull the advisor's email out of the raw form payload. The Google Form
+ * auto-collects the submitter as "שם משתמש"; we also accept an explicit
+ * `_advisorEmail` key for future senders.
+ */
+function extractAdvisorEmail(raw?: Record<string, unknown> | null): string | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const direct = raw['_advisorEmail'] ?? raw['advisorEmail'];
+  if (typeof direct === 'string' && EMAIL_SHAPE.test(direct.trim())) {
+    return direct.trim().toLowerCase();
+  }
+  for (const [key, value] of Object.entries(raw)) {
+    if (typeof value !== 'string') continue;
+    const v = value.trim();
+    if (!EMAIL_SHAPE.test(v)) continue;
+    if (key.includes('שם משתמש') || key.toLowerCase().includes('username')) {
+      return v.toLowerCase();
+    }
+  }
+  return null;
+}
+
 export interface ProvisionInput {
   name: string;
   email: string;
@@ -117,6 +141,11 @@ export async function provisionEntrepreneur(input: ProvisionInput): Promise<Prov
     ...(input.mustReview ? { _mustReview: true, _flaggedAt: new Date().toISOString() } : {}),
   };
 
+  // Advisor attribution: the form's "שם משתמש" field carries the advisor's
+  // email. Anyone arriving through the automation is a WeCcelerate client —
+  // that's what plan=WECCELERATE marks (vs the future FREE self-signup).
+  const advisorEmail = extractAdvisorEmail(input.rawFormData);
+
   let userId: string;
   try {
     const user = await prisma.user.create({
@@ -128,6 +157,8 @@ export async function provisionEntrepreneur(input: ProvisionInput): Promise<Prov
         company: input.company || null,
         role: 'ENTREPRENEUR',
         isActive: true,
+        plan: 'WECCELERATE',
+        advisorEmail,
         mustChangePassword: true,
         provisionedAt: new Date(),
         provisionedSource: input.source ?? 'webhook',

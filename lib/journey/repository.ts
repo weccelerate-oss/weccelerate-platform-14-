@@ -38,6 +38,14 @@ export interface AdminJourneyChapter extends JourneyChapterView {
   status: 'DRAFT' | 'PUBLISHED';
 }
 
+export interface AnswerCommentView {
+  id: string;
+  authorType: 'ENTREPRENEUR' | 'ADVISOR';
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
 export interface JourneyAnswerView {
   questionId: string;
   content: string;
@@ -45,6 +53,9 @@ export interface JourneyAnswerView {
   aiFeedback: string | null;
   aiFeedbackAt: string | null;
   updatedAt: string;
+  /** Human-mentor thread (INVESTOR_PREP): advisor request stamp + messages. */
+  advisorRequestedAt: string | null;
+  comments: AnswerCommentView[];
 }
 
 // ---------------------------------------------------------------------------
@@ -112,6 +123,7 @@ export async function getUserJourneyAnswers(userId: string): Promise<JourneyAnsw
     const rows = await prisma.userJourneyAnswer.findMany({
       where: { userId },
       orderBy: { updatedAt: 'desc' },
+      include: { comments: { orderBy: { createdAt: 'asc' } } },
     });
     return (rows ?? []).map((a: any) => ({
       questionId: a.questionId,
@@ -120,6 +132,14 @@ export async function getUserJourneyAnswers(userId: string): Promise<JourneyAnsw
       aiFeedback: a.aiFeedback ?? null,
       aiFeedbackAt: a.aiFeedbackAt ? a.aiFeedbackAt.toISOString() : null,
       updatedAt: a.updatedAt ? a.updatedAt.toISOString() : new Date(0).toISOString(),
+      advisorRequestedAt: a.advisorRequestedAt ? a.advisorRequestedAt.toISOString() : null,
+      comments: (a.comments ?? []).map((c: any) => ({
+        id: c.id,
+        authorType: c.authorType,
+        authorName: c.authorName,
+        body: c.body,
+        createdAt: c.createdAt?.toISOString?.() ?? '',
+      })),
     }));
   } catch (err) {
     console.error('[journey] getUserJourneyAnswers failed:', err);

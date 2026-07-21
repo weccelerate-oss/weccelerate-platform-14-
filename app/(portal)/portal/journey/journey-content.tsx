@@ -35,6 +35,9 @@ import {
   FlaskConical,
   FolderOpen,
   Gem,
+  MessagesSquare,
+  Send,
+  UserRound,
   Landmark,
   LineChart,
   Megaphone,
@@ -63,10 +66,20 @@ const SCENE_BY_SLUG: Record<string, KochaviScene> = {
 // Types & constants
 // ---------------------------------------------------------------------------
 
+interface ThreadComment {
+  id: string;
+  authorType: 'ENTREPRENEUR' | 'ADVISOR';
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
 interface AnswerState {
   content: string;
   status: 'DRAFT' | 'READY';
   aiFeedback: string | null;
+  advisorRequestedAt?: string | null;
+  comments?: ThreadComment[];
 }
 
 interface JourneyContentProps {
@@ -75,6 +88,10 @@ interface JourneyContentProps {
   initialAnswers: JourneyAnswerView[];
   /** Monthly mentor-feedback pool state at page load. */
   initialMentorQuota?: { remaining: number; limit: number };
+  /** Plan-derived feature switches (see lib/entitlements.ts). */
+  features?: { mentorAi: boolean; humanMentor: boolean };
+  /** Whether an advisor email is assigned (required for the human thread). */
+  hasAdvisor?: boolean;
 }
 
 const AUTOSAVE_DELAY_MS = 10_000;
@@ -239,6 +256,8 @@ export function JourneyContent({
   chapters,
   initialAnswers,
   initialMentorQuota,
+  features = { mentorAi: true, humanMentor: false },
+  hasAdvisor = false,
 }: JourneyContentProps) {
   const firstName = userName.split(' ')[0] || 'יזם';
   const isStatic = chapters[0]?.id.startsWith('static:');
@@ -251,6 +270,8 @@ export function JourneyContent({
         content: a.content,
         status: a.status,
         aiFeedback: a.aiFeedback,
+        advisorRequestedAt: a.advisorRequestedAt ?? null,
+        comments: a.comments ?? [],
       };
     }
     return map;
@@ -439,6 +460,85 @@ export function JourneyContent({
       }
     },
     [flushDirty],
+  );
+
+  // ----- human-mentor thread (INVESTOR_PREP) --------------------------------
+  const [advisorSending, setAdvisorSending] = useState(false);
+  const [threadDraft, setThreadDraft] = useState('');
+  const [threadSending, setThreadSending] = useState(false);
+  const [threadError, setThreadError] = useState<string | null>(null);
+
+  const requestAdvisor = useCallback(
+    async (questionId: string) => {
+      setAdvisorSending(true);
+      setThreadError(null);
+      flushDirty();
+      try {
+        const res = await fetch('/api/portal/journey/advisor-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionId, note: threadDraft.trim() || undefined }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setThreadError(data?.error || 'השליחה נכשלה — נסה שוב');
+          return;
+        }
+        setThreadDraft('');
+        setAnswers((prev) => {
+          const cur = prev[questionId];
+          if (!cur) return prev;
+          return {
+            ...prev,
+            [questionId]: {
+              ...cur,
+              advisorRequestedAt: data.advisorRequestedAt,
+              comments: data.comment ? [...(cur.comments ?? []), data.comment] : cur.comments,
+            },
+          };
+        });
+      } catch {
+        setThreadError('בעיית תקשורת — נסה שוב');
+      } finally {
+        setAdvisorSending(false);
+      }
+    },
+    [flushDirty, threadDraft],
+  );
+
+  const sendThreadMessage = useCallback(
+    async (questionId: string) => {
+      const text = threadDraft.trim();
+      if (text.length < 2) return;
+      setThreadSending(true);
+      setThreadError(null);
+      try {
+        const res = await fetch('/api/portal/journey/comment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionId, body: text }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setThreadError(data?.error || 'השליחה נכשלה — נסה שוב');
+          return;
+        }
+        setThreadDraft('');
+        setAnswers((prev) => {
+          const cur = prev[questionId];
+          if (!cur) return prev;
+          return {
+            ...prev,
+            [questionId]: { ...cur, comments: [...(cur.comments ?? []), data.comment] },
+          };
+        });
+      } catch {
+        setThreadError('בעיית תקשורת — נסה שוב');
+      } finally {
+        setThreadSending(false);
+      }
+    },
+    [threadDraft],
   );
 
   // ----- edit handlers ------------------------------------------------------
@@ -1002,6 +1102,7 @@ export function JourneyContent({
                     {ready ? 'מוכן להצגה למשקיע' : 'סמן כמוכן להצגה'}
                   </button>
 
+                  {features.mentorAi && (
                   <button
                     onClick={() => requestFeedback(question.id)}
                     disabled={
@@ -1034,6 +1135,7 @@ export function JourneyContent({
                       </span>
                     )}
                   </button>
+                  )}
 
                   {hasText && (
                     <button
@@ -1075,6 +1177,94 @@ export function JourneyContent({
                       {answer.aiFeedback}
                     </p>
                   </motion.div>
+                )}
+
+                {/* Human-mentor thread — INVESTOR_PREP plan */}
+                {features.humanMentor && (
+                  <div className="mt-4 rounded-2xl border border-white/[0.1] bg-white/[0.03] px-4 sm:px-5 py-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2 text-[11px] tracking-[0.14em] text-white/50 font-bold">
+                        <MessagesSquare className="w-3.5 h-3.5 text-[#c8a951]" />
+                        שיחה עם המלווה האישי
+                      </div>
+                      {answer?.advisorRequestedAt && (
+                        <span className="text-[11px] text-emerald-400/80">
+                          נשלח למלווה ב-{new Date(answer.advisorRequestedAt).toLocaleDateString('he-IL')} ✓
+                        </span>
+                      )}
+                    </div>
+
+                    {(answer?.comments ?? []).map((c) => (
+                      <div
+                        key={c.id}
+                        className={cn(
+                          'rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed mb-2 max-w-[92%]',
+                          c.authorType === 'ADVISOR'
+                            ? 'bg-[#c8a951]/[0.12] border border-[#c8a951]/30'
+                            : 'bg-white/[0.05] border border-white/[0.09] mr-auto',
+                        )}
+                      >
+                        <div className={cn('text-[10.5px] font-bold mb-0.5', c.authorType === 'ADVISOR' ? 'text-[#e8d48b]' : 'text-white/45')}>
+                          {c.authorType === 'ADVISOR' ? `${c.authorName} · המלווה שלך` : 'אתה'}
+                        </div>
+                        <div className="text-white/80 whitespace-pre-line">{c.body}</div>
+                      </div>
+                    ))}
+
+                    {!hasAdvisor ? (
+                      <p className="text-[12.5px] text-white/40 m-0">
+                        עדיין לא שויך לך מלווה אישי — פנה לצוות ונחבר אותך.
+                      </p>
+                    ) : (
+                      <>
+                        <textarea
+                          dir="rtl"
+                          value={threadDraft}
+                          onChange={(e) => setThreadDraft(e.target.value)}
+                          placeholder={
+                            answer?.advisorRequestedAt
+                              ? 'כתוב הודעה למלווה...'
+                              : 'הודעה אישית למלווה (לא חובה) — ואז שלח את התשובה לעיונו'
+                          }
+                          rows={2}
+                          className="w-full resize-y rounded-xl bg-[#03061a]/50 border border-white/[0.1] focus:border-[#c8a951] focus:ring-[3px] focus:ring-[#c8a951]/15 outline-none px-3.5 py-2.5 text-[14px] leading-relaxed text-white/90 placeholder:text-white/25 transition-colors"
+                        />
+                        {threadError && <p className="text-[12.5px] text-amber-400/90 mt-1.5 mb-0">{threadError}</p>}
+                        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                          {!answer?.advisorRequestedAt ? (
+                            <button
+                              onClick={() => requestAdvisor(question.id)}
+                              disabled={advisorSending || !hasText}
+                              className="flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] font-bold px-4 py-2.5 text-[13px] shadow-[0_6px_20px_-8px_rgba(200,169,81,.6)] hover:brightness-105 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              <UserRound className="w-4 h-4" />
+                              {advisorSending ? 'שולח למלווה...' : 'שלח את התשובה למלווה שלי'}
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => sendThreadMessage(question.id)}
+                                disabled={threadSending || threadDraft.trim().length < 2}
+                                className="flex items-center gap-1.5 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-4 py-2 text-[13px] hover:bg-[#c8a951]/10 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                <Send className="w-3.5 h-3.5" />
+                                {threadSending ? 'שולח...' : 'שלח הודעה'}
+                              </button>
+                              <button
+                                onClick={() => requestAdvisor(question.id)}
+                                disabled={advisorSending}
+                                className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] text-white/40 hover:text-[#e8d48b] transition-colors cursor-pointer disabled:opacity-40"
+                                title="שולח למלווה מייל נוסף עם התשובה המעודכנת"
+                              >
+                                <UserRound className="w-3.5 h-3.5" />
+                                {advisorSending ? 'שולח...' : 'עדכן את המלווה שוב'}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
               </motion.div>
             </AnimatePresence>

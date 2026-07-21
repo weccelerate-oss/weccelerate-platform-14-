@@ -1386,3 +1386,71 @@ export async function deleteProjectFileAction(fileId: string) {
 }
 
 // generateTempPassword moved to lib/security/generate-password.ts (crypto-secure RNG).
+
+// ---------------------------------------------------------------------------
+// USER PLAN — which portal package the entrepreneur is on (lib/entitlements)
+// ---------------------------------------------------------------------------
+
+export async function setUserPlanAction(
+  id: string,
+  plan: 'WECCELERATE' | 'INVESTOR_PREP' | 'FREE',
+) {
+  try {
+    const actor = await verifyAdmin();
+    if (!['WECCELERATE', 'INVESTOR_PREP', 'FREE'].includes(plan)) {
+      return { success: false, error: 'תוכנית לא מוכרת' };
+    }
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { plan },
+      select: { id: true, email: true },
+    });
+    await prisma.activityLog
+      .create({
+        data: {
+          action: 'admin.user.set_plan',
+          description: `Admin ${(actor as any).email ?? '?'} set plan of ${updated.email} → ${plan}`,
+          userId: updated.id,
+          metadata: { actorEmail: (actor as any).email ?? null, plan },
+        },
+      })
+      .catch(() => {});
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[Admin] setUserPlanAction failed:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+export async function setUserAdvisorAction(id: string, advisorEmail: string | null) {
+  try {
+    const actor = await verifyAdmin();
+    const clean = advisorEmail?.trim().toLowerCase() || null;
+    if (clean && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+      return { success: false, error: 'כתובת מייל לא תקינה' };
+    }
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { advisorEmail: clean },
+      select: { id: true, email: true },
+    });
+    await prisma.activityLog
+      .create({
+        data: {
+          action: 'admin.user.set_advisor',
+          description: `Admin ${(actor as any).email ?? '?'} set advisor of ${updated.email} → ${clean ?? '(none)'}`,
+          userId: updated.id,
+          metadata: { actorEmail: (actor as any).email ?? null, advisorEmail: clean },
+        },
+      })
+      .catch(() => {});
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[Admin] setUserAdvisorAction failed:', msg);
+    return { success: false, error: msg };
+  }
+}

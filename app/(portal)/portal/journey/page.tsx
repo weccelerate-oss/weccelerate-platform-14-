@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { JourneyContent } from './journey-content';
 import { getPublishedJourney, getUserJourneyAnswers } from '@/lib/journey/repository';
 import { getQuota } from '@/lib/ai-quota';
+import { prisma } from '@/lib/db';
+import { featuresFor } from '@/lib/entitlements';
 
 // Content is admin-managed and answers are per-user — always render fresh.
 export const dynamic = 'force-dynamic';
@@ -17,11 +19,22 @@ export default async function JourneyPage() {
     redirect('/login?callbackUrl=/portal/journey');
   }
 
-  const [chapters, answers, mentorQuota] = await Promise.all([
+  const [chapters, answers, mentorQuota, dbUser] = await Promise.all([
     getPublishedJourney(),
     getUserJourneyAnswers(userId),
     getQuota(userId, 'mentor_feedback'),
+    prisma.user
+      .findUnique({
+        where: { id: userId },
+        select: { plan: true, featureOverrides: true, advisorEmail: true },
+      })
+      .catch(() => null),
   ]);
+
+  const features = featuresFor(dbUser);
+  if (!features.journey) {
+    redirect('/portal/dashboard');
+  }
 
   return (
     <JourneyContent
@@ -29,6 +42,8 @@ export default async function JourneyPage() {
       chapters={chapters}
       initialAnswers={answers}
       initialMentorQuota={{ remaining: mentorQuota.remaining, limit: mentorQuota.limit }}
+      features={{ mentorAi: features.mentorAi, humanMentor: features.humanMentor }}
+      hasAdvisor={Boolean(dbUser?.advisorEmail)}
     />
   );
 }

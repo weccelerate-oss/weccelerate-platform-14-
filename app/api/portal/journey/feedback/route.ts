@@ -17,6 +17,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
 import { tryConsume, refund } from '@/lib/ai-quota';
+import { hasFeature } from '@/lib/entitlements';
 
 const FEEDBACK_MODEL = 'claude-sonnet-4-6';
 const QUOTA_FEATURE = 'mentor_feedback';
@@ -56,6 +57,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'המשוב של כוכבי אינו זמין כרגע' },
         { status: 503 },
+      );
+    }
+
+    // Plan gate — FREE (future self-signup) doesn't include the AI mentor.
+    const planUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true, featureOverrides: true },
+    });
+    if (!hasFeature(planUser, 'mentorAi')) {
+      return NextResponse.json(
+        { error: 'המשוב של כוכבי זמין בחבילות הליווי שלנו — דבר איתנו לשדרוג' },
+        { status: 403 },
       );
     }
 

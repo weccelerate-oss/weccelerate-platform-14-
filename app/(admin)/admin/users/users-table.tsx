@@ -26,7 +26,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toggleUserActiveAction, resetUserPasswordAction, deleteUserAction } from '../actions';
+import { toggleUserActiveAction, resetUserPasswordAction, deleteUserAction, setUserPlanAction } from '../actions';
 // AO-16: WelcomeEmailStatus is re-exported from page.tsx — single source of truth.
 import type { WelcomeEmailStatus } from './page';
 import type { User, Project, UserRole } from '@prisma/client';
@@ -363,6 +363,32 @@ export function UsersTable({ users }: UsersTableProps) {
                       >
                         🤖 auto · {user.provisionedSource}
                       </span>
+                    )}
+                    {user.role === 'ENTREPRENEUR' && (
+                      <select
+                        value={(user as any).plan ?? 'WECCELERATE'}
+                        onChange={(e) => {
+                          const plan = e.target.value as 'WECCELERATE' | 'INVESTOR_PREP' | 'FREE';
+                          startTransition(async () => {
+                            await setUserPlanAction(user.id, plan);
+                            router.refresh();
+                          });
+                        }}
+                        disabled={isPending}
+                        title="תוכנית הפורטל — קובעת אילו פיצ'רים פתוחים ליזם"
+                        className={cn(
+                          'px-1.5 py-0.5 text-xs font-medium rounded-full border cursor-pointer outline-none',
+                          (user as any).plan === 'INVESTOR_PREP'
+                            ? 'bg-amber-50 text-amber-800 border-amber-300'
+                            : (user as any).plan === 'FREE'
+                              ? 'bg-slate-50 text-slate-600 border-slate-300'
+                              : 'bg-yellow-50 text-yellow-800 border-yellow-200',
+                        )}
+                      >
+                        <option value="WECCELERATE">יזם וויסלרייט</option>
+                        <option value="INVESTOR_PREP">הכנה למשקיעים ⭐</option>
+                        <option value="FREE">הרשמה חופשית</option>
+                      </select>
                     )}
                     {user.role === 'ENTREPRENEUR' && (() => {
                       const email = user.welcomeEmail;

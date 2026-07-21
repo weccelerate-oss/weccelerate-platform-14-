@@ -221,6 +221,7 @@ export function middleware(request: NextRequest) {
       pathname.startsWith('/admin') ||
       pathname.startsWith('/portal') ||
       pathname.startsWith('/onboarding') ||
+      pathname.startsWith('/advisor') ||
       pathname === '/og' || pathname.startsWith('/og/') ||
       pathname.startsWith('/login') ||
       pathname.startsWith('/forgot-password') ||
