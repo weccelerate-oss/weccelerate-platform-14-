@@ -17,7 +17,7 @@ export function HeroBackground() {
     return (
       <div className="absolute inset-0 bg-[#050810]">
         <img
-          src="/hero-bg-poster6.jpeg"
+          src="/hero-bg-poster.jpeg"
           alt="WeCcelerate — Venture Builder & Startup Accelerator Israel"
           className="w-full h-full object-cover"
         />
