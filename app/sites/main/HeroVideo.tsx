@@ -17,7 +17,7 @@ export function HeroBackground() {
     return (
       <div className="absolute inset-0 bg-[#050810]">
         <img
-          src="/hero-bg-poster.jpeg"
+          src="/hero-bg-poster6.jpeg"
           alt="WeCcelerate — Venture Builder & Startup Accelerator Israel"
           className="w-full h-full object-cover"
         />
@@ -43,8 +43,8 @@ export function HeroBackground() {
         loop
         muted
         playsInline
-        src="/hero-bg4.mp4"
-        poster="/hero-bg-poster.jpeg"
+        src="/hero-bg6.mp4"
+        poster="/hero-bg-poster6.jpeg"
         style={{
           display: 'block',
           position: 'absolute',
