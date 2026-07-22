@@ -414,6 +414,16 @@ export function JourneyContent({
     return latest;
   }, [chapters, initialAnswers]);
 
+  // ----- mobile jumper: keep the active circle in view ----------------------
+  // RTL + overflow-x-auto opens scrolled to the wrong end on iOS Safari, so
+  // in long chapters the current question's circle starts off-screen and the
+  // whole screen reads as broken. Center it on every mount/question change.
+  const jumperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = jumperRef.current?.querySelector<HTMLElement>(`[data-qidx="${questionIdx}"]`);
+    el?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }, [questionIdx, chapterIdx]);
+
   // ----- chapter celebration ------------------------------------------------
   const celebratedRef = useRef<Set<string>>(new Set());
   const focusBoxRef = useRef<HTMLDivElement>(null);
@@ -1047,7 +1057,10 @@ export function JourneyContent({
             </div>
 
             {/* mobile question jumper — the desktop rail is hidden below lg */}
-            <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-3 mb-3 -mx-1 px-1 [scrollbar-width:none]">
+            <div
+              ref={jumperRef}
+              className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-3 mb-3 -mx-1 px-1 [scrollbar-width:none]"
+            >
               <span className="sm:hidden shrink-0 text-[11px] font-bold text-[#c8a951] tabular-nums whitespace-nowrap pl-1.5">
                 {questionIdx + 1}/{chapter.questions.length}
               </span>
@@ -1057,6 +1070,7 @@ export function JourneyContent({
                 return (
                   <button
                     key={q.id}
+                    data-qidx={qi}
                     onClick={() => goToQuestion(qi, qi > questionIdx ? 1 : -1)}
                     aria-label={`שאלה ${qi + 1}${done ? ' — נענתה' : ''}`}
                     className={cn(
