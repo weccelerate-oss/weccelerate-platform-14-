@@ -1031,8 +1031,9 @@ export function JourneyContent({
             ref={focusBoxRef}
             className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#c8a951]/25 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-4 sm:p-9 shadow-[0_40px_90px_-50px_rgba(0,0,0,.9)]"
           >
-            {/* progress inside chapter */}
-            <div className="flex items-center gap-3 mb-4">
+            {/* progress inside chapter — on mobile the numbered jumper below
+                already shows position; the extra bar row just eats screen */}
+            <div className="hidden sm:flex items-center gap-3 mb-4">
               <div className="flex-1 h-1.5 rounded-full bg-white/[0.07] overflow-hidden">
                 <motion.div
                   className="h-full rounded-full bg-gradient-to-l from-[#c8a951] to-[#f5e9c0]"
@@ -1046,7 +1047,10 @@ export function JourneyContent({
             </div>
 
             {/* mobile question jumper — the desktop rail is hidden below lg */}
-            <div className="lg:hidden flex gap-1.5 overflow-x-auto pb-3 mb-3 -mx-1 px-1 [scrollbar-width:none]">
+            <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-3 mb-3 -mx-1 px-1 [scrollbar-width:none]">
+              <span className="sm:hidden shrink-0 text-[11px] font-bold text-[#c8a951] tabular-nums whitespace-nowrap pl-1.5">
+                {questionIdx + 1}/{chapter.questions.length}
+              </span>
               {chapter.questions.map((q, qi) => {
                 const done = isAnswered(q.id);
                 const isReadyQ = answers[q.id]?.status === 'READY' && done;
@@ -1081,7 +1085,7 @@ export function JourneyContent({
                 exit={{ opacity: 0, x: direction * -26 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                <h2 className="text-xl sm:text-2xl font-black leading-snug text-white/95 mb-2">
+                <h2 className="text-lg sm:text-2xl font-black leading-snug text-white/95 mb-2 break-words">
                   {question.prompt}
                 </h2>
                 {question.helper && (
@@ -1099,13 +1103,13 @@ export function JourneyContent({
                   className="w-full resize-y rounded-2xl bg-[#03061a]/60 border border-white/[0.1] focus:border-[#c8a951] focus:ring-[3px] focus:ring-[#c8a951]/15 outline-none px-4 sm:px-5 py-4 text-[16px] sm:text-[15px] leading-relaxed text-white/90 placeholder:text-white/25 transition-colors"
                 />
 
-                {/* actions */}
-                <div className="mt-4 flex flex-wrap items-center gap-2.5">
+                {/* actions — stacked full-width on phones, row on larger screens */}
+                <div className="mt-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-2.5">
                   <button
                     onClick={() => toggleReady(question.id)}
                     disabled={!hasText}
                     className={cn(
-                      'flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed',
+                      'flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed',
                       ready
                         ? 'bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] shadow-[0_6px_20px_-8px_rgba(200,169,81,.6)]'
                         : 'border border-[#c8a951]/40 text-[#e8d48b] hover:bg-[#c8a951]/10',
@@ -1129,7 +1133,7 @@ export function JourneyContent({
                         ? 'המכסה החודשית נוצלה — מתחדשת ב-1 בחודש'
                         : undefined
                     }
-                    className="flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] px-4 py-2.5 text-[13px] font-semibold text-white/70 hover:border-[#c8a951]/40 hover:text-[#e8d48b] transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
+                    className="flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] px-4 py-2.5 text-[13px] font-semibold text-white/70 hover:border-[#c8a951]/40 hover:text-[#e8d48b] transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
                   >
                     <Wand2 className={cn('w-4 h-4', feedbackLoading && 'animate-pulse')} />
                     {feedbackLoading ? 'כוכבי קורא...' : 'משוב מכוכבי'}
@@ -1153,7 +1157,7 @@ export function JourneyContent({
                   {hasText && (
                     <button
                       onClick={() => clearAnswer(question.id)}
-                      className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-[12.5px] text-white/35 hover:text-red-400/80 transition-colors cursor-pointer"
+                      className="flex self-start sm:self-auto items-center gap-1.5 rounded-xl px-3 py-2 text-[12.5px] text-white/35 hover:text-red-400/80 transition-colors cursor-pointer"
                       title="נקה את התשובה"
                     >
                       <Eraser className="w-3.5 h-3.5" />
