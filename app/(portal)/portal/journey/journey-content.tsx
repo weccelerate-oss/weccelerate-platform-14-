@@ -999,7 +999,7 @@ export function JourneyContent({
           </motion.div>
         )}
 
-        <div className="grid lg:grid-cols-[260px_1fr] gap-5 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-5 items-start">
           {/* Question rail (free navigation) */}
           <div className="hidden lg:block rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur p-3 max-h-[70vh] overflow-y-auto sticky top-24">
             {chapter.questions.map((q, qi) => {
@@ -1029,8 +1029,11 @@ export function JourneyContent({
             })}
           </div>
 
-          {/* Focus card — כוכבי מטייל על הקצה העליון שלו (ובפיננסים: על חבל!) */}
-          <div>
+          {/* Focus card — כוכבי מטייל על הקצה העליון שלו (ובפיננסים: על חבל!).
+              min-w-0 is CRITICAL: without it the grid track grows to the
+              jumper row's intrinsic width (28 circles ≈ 1,200px) and the
+              whole screen blows out sideways on long chapters. */}
+          <div className="min-w-0">
             <KochaviWalker
               size={58}
               scene={SCENE_BY_SLUG[chapter.slug] ?? 'none'}
@@ -1059,7 +1062,7 @@ export function JourneyContent({
             {/* mobile question jumper — the desktop rail is hidden below lg */}
             <div
               ref={jumperRef}
-              className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-3 mb-3 -mx-1 px-1 [scrollbar-width:none]"
+              className="lg:hidden flex items-center gap-1.5 overflow-x-auto max-w-full pb-3 mb-3 -mx-1 px-1 [scrollbar-width:none]"
             >
               <span className="sm:hidden shrink-0 text-[11px] font-bold text-[#c8a951] tabular-nums whitespace-nowrap pl-1.5">
                 {questionIdx + 1}/{chapter.questions.length}
