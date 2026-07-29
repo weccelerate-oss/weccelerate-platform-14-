@@ -93,7 +93,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: { strategy: 'jwt' },
+  // Stay-signed-in. Without an explicit maxAge the session silently rode on
+  // library defaults, so entrepreneurs were being dropped back to /login after
+  // closing the tab or coming back a while later. Now:
+  //   maxAge    — the JWT *and* the cookie live 90 days, so the cookie is
+  //               persistent (survives browser restarts) rather than a
+  //               session cookie that dies with the window.
+  //   updateAge — every 24h of actual use the expiry rolls forward, so an
+  //               entrepreneur who keeps working is never signed out at all.
+  // The only way out is the explicit "התנתק" button (signOut).
+  session: {
+    strategy: 'jwt',
+    maxAge: 90 * 24 * 60 * 60, // 90 days
+    updateAge: 24 * 60 * 60, // refresh the window once a day of activity
+  },
   pages: { signIn: '/login' },
 callbacks: {
   jwt({ token, user, trigger, session }) {

@@ -139,10 +139,6 @@ function useNavigation() {
       },
       { name: t('nav.contact'), href: '/contact' },
     ],
-    cta: {
-      name: t('nav.portal'),
-      href: '/contact',
-    },
   };
 }
 
@@ -416,14 +412,10 @@ export function CorporateNavbar() {
 
             {/* CTA & Mobile Toggle */}
             <div className="flex items-center gap-4">
-              {/* Desktop CTA */}
-              <Link
-                href={navigation.cta.href}
-                className="hidden lg:inline-flex items-center gap-2 border border-gold-500/50 text-gold-400 px-6 py-2.5 text-sm font-semibold hover:bg-gold-500/10 hover:border-gold-400 transition-all rounded-sm"
-              >
-                {navigation.cta.name}
-                <DirArrow className="w-4 h-4" aria-hidden="true" />
-              </Link>
+              {/* The gold "פורטל יזמים" CTA used to sit here. It was removed:
+                  it pointed at /contact, so visitors expecting the portal
+                  landed on a contact form — and the real entrance ("כניסה
+                  לפורטל") is right next to it. */}
 
               {/* Portal Link */}
               <Link
@@ -516,20 +508,21 @@ export function CorporateNavbar() {
                 </div>
               ))}
 
-              {/* Mobile CTA */}
+              {/* Mobile CTA — the portal entrance is now the single primary
+                  action (the old "פורטל יזמים" button pointed at /contact). */}
               <div className="pt-4 space-y-3">
                 <Link
-                  href={navigation.cta.href}
+                  href="/login"
                   className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-gold-500 to-gold-600 text-[#0a0e27] py-3 font-semibold rounded-sm"
                 >
-                  {navigation.cta.name}
+                  {t('nav.portalLogin')}
                   <DirArrow className="w-4 h-4" aria-hidden="true" />
                 </Link>
                 <Link
-                  href="/login"
+                  href="/contact"
                   className="flex items-center justify-center gap-2 w-full border border-white/20 text-white/70 py-3 font-medium rounded-sm"
                 >
-                  {t('nav.portalLogin')}
+                  {t('nav.contact')}
                 </Link>
               </div>
 

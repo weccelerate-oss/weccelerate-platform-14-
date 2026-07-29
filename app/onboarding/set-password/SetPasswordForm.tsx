@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
-import { signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { Lock, Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { setNewPassword, type SetPasswordState } from './actions';
 
@@ -11,21 +11,29 @@ export function SetPasswordForm({ userEmail }: { userEmail: string }) {
   const [state, formAction, isPending] = useActionState(setNewPassword, INITIAL);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const { update } = useSession();
 
   useEffect(() => {
     if (state.success) {
-      // JWTs don't refresh from the DB automatically. Sign the user out
-      // so the next /login generates a fresh token without the
-      // mustChangePassword flag. The login page shows a success banner
-      // when ?reset=true is present.
+      // JWTs don't refresh from the DB on their own, so the token still
+      // carries mustChangePassword=true and the portal layout would bounce
+      // the user straight back here. We used to solve that by signing them
+      // out — which meant a brand-new entrepreneur was kicked to /login
+      // seconds after arriving. Instead we clear the flag *inside* the live
+      // session (the jwt callback handles trigger==='update') and walk them
+      // into the portal still signed in.
       const t = setTimeout(() => {
-        signOut({ callbackUrl: '/login?reset=true' }).catch(() => {
-          window.location.href = '/login?reset=true';
-        });
+        update({ mustChangePassword: false })
+          .then(() => {
+            window.location.href = '/portal/dashboard';
+          })
+          .catch(() => {
+            window.location.href = '/portal/dashboard';
+          });
       }, 800);
       return () => clearTimeout(t);
     }
-  }, [state.success]);
+  }, [state.success, update]);
 
   return (
     <form
