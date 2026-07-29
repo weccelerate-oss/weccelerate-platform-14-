@@ -1,5 +1,5 @@
 /**
- * API Route: Founder Journey — AI mentor feedback ("כוכבי")
+ * API Route: Founder Journey — AI answer review ("חוות דעת")
  *
  * POST /api/portal/journey/feedback
  *   Body: { questionId }
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: 'המשוב של כוכבי אינו זמין כרגע' },
+        { error: 'חוות דעת אינה זמינה כרגע' },
         { status: 503 },
       );
     }
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     });
     if (!hasFeature(planUser, 'mentorAi')) {
       return NextResponse.json(
-        { error: 'המשוב של כוכבי זמין בחבילות הליווי שלנו — דבר איתנו לשדרוג' },
+        { error: 'חוות דעת זמינה בחבילות הליווי שלנו — דבר איתנו לשדרוג' },
         { status: 403 },
       );
     }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     const burst = rateLimit(`journey-feedback:${userId}`, { limit: 5, windowSeconds: 60 });
     if (!burst.allowed) {
       return NextResponse.json(
-        { error: 'רגע, כוכבי עוד קורא... נסה שוב בעוד דקה' },
+        { error: 'רגע, התשובה עוד נקראת... נסה שוב בעוד דקה' },
         { status: 429 },
       );
     }
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
         {
           error:
             quota.limit <= 0
-              ? 'המשוב של כוכבי כבוי כרגע במערכת'
+              ? 'חוות דעת כבויה כרגע במערכת'
               : `ניצלת את כל ${quota.limit} המשובים לחודש הזה — המכסה מתחדשת ב-1 בחודש הבא. צריך יותר? דבר עם המלווה שלך.`,
           remaining: 0,
           limit: quota.limit,
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = [
-      'אתה "כוכבי" — הכוכב המלווה של פורטל היזמים של WeCcelerate, ומנטור השקעות ישראלי ותיק.',
+      'אתה בוחן תשובות בפורטל היזמים של WeCcelerate — מנתח מנוסה שקורא תשובות של יזמים בעיניים של משקיע.',
       'יזם עונה על שאלות הכנה לפגישת משקיעים. תן משוב על התשובה שלו — ישיר, חם ומקצועי, בעברית, בגוף שני.',
       '',
       `הפרק: ${question.chapter?.name ?? ''}`,
@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
       // Our failure, not the entrepreneur's — give the slot back.
       await refund(userId, QUOTA_FEATURE);
       return NextResponse.json(
-        { error: 'כוכבי עמוס כרגע — נסה שוב בעוד רגע' },
+        { error: 'השירות עמוס כרגע — נסה שוב בעוד רגע' },
         { status: 502 },
       );
     }
@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
     if (!feedback) {
       await refund(userId, QUOTA_FEATURE);
       return NextResponse.json(
-        { error: 'כוכבי לא הצליח לנסח משוב — נסה שוב' },
+        { error: 'לא הצלחנו לנסח חוות דעת — נסה שוב' },
         { status: 502 },
       );
     }

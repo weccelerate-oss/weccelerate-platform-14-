@@ -17,7 +17,7 @@
 export type PortalFeature =
   | 'journey'      // the מסע מרעיון למיזם program
   | 'learning'     // the learning center
-  | 'mentorAi'     // AI feedback from כוכבי
+  | 'mentorAi'     // AI answer review ("חוות דעת")
   | 'kit'          // תיק המוכנות (readiness kit)
   | 'humanMentor'; // send answers to the human advisor + thread
 

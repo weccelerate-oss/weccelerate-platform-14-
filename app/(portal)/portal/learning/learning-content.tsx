@@ -37,7 +37,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { CategoryData, SubcategoryData, LessonData } from '@/lib/courses-data';
-import { Kochavi } from '../components/kochavi';
 
 /** Total lessons across a catalog (replaces the static getTotalLessons). */
 function countLessons(catalog: CategoryData[]): number {
@@ -637,10 +636,6 @@ export function LearningContent({ user, catalog, initialProgress }: LearningCont
         />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-7 sm:py-10 relative z-10">
-          {/* כוכבי הסטודנט — יושב בפינת מרכז הלמידה ומהנהן */}
-          <div className="absolute left-4 sm:left-8 top-6 hidden md:block opacity-95 pointer-events-none">
-            <Kochavi size={92} anim="nod" hat="grad" />
-          </div>
           {/* Greeting + icon */}
           <motion.div
             initial={{ opacity: 0, y: -8 }}
@@ -1289,21 +1284,6 @@ function CategoryCard({
             <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#0d1321]/80" />
           </div>
         )}
-        {/* כוכבי מציג את נושא הקטגוריה: מאזניים בפיננסים, מזוודה בעסקים, ז'ונגלר השקעות, שעון בניהול זמן */}
-        <div className="absolute left-6 bottom-1 hidden lg:block opacity-90 pointer-events-none z-10">
-          <Kochavi
-            size={64}
-            scene={
-              category.color === 'blue'
-                ? 'scale'
-                : category.color === 'emerald'
-                  ? 'briefcase'
-                  : category.color === 'violet'
-                    ? 'coins'
-                    : 'clock'
-            }
-          />
-        </div>
         {/* Icon framed by an animated circular progress ring + soft glow halo */}
         <div className="relative z-10 flex-shrink-0 grid place-items-center w-16 h-16 sm:w-[68px] sm:h-[68px]">
           <CircularProgress

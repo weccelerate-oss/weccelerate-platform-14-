@@ -32,6 +32,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Eraser,
+  Eye,
   FlaskConical,
   FolderOpen,
   Gem,
@@ -48,19 +49,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { JourneyChapterView, JourneyAnswerView } from '@/lib/journey/repository';
-import { Kochavi, type KochaviScene } from '../components/kochavi';
-import { KochaviWalker } from '../components/kochavi-walker';
 
-/** Kochavi acts out each chapter's theme in the focus screen. */
-const SCENE_BY_SLUG: Record<string, KochaviScene> = {
-  'problem-market': 'telescope',
-  'business-model': 'coins',
-  marketing: 'megaphone',
-  financials: 'scale',
-  validation: 'flask',
-  'story-team': 'mic',
-  'investor-room': 'briefcase',
-};
 
 // ---------------------------------------------------------------------------
 // Types & constants
@@ -109,88 +98,6 @@ const CHAPTER_ICONS: Record<string, React.ComponentType<{ className?: string }>>
 function ChapterIcon({ icon, className }: { icon: string | null; className?: string }) {
   const Icon = (icon && CHAPTER_ICONS[icon]) || Sparkles;
   return <Icon className={className} />;
-}
-
-// ---------------------------------------------------------------------------
-// Starfield background (canvas, respects reduced motion)
-// ---------------------------------------------------------------------------
-
-function Starfield() {
-  const ref = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // Static sky on phones — an endless canvas loop is real battery/CPU drag.
-    const isMobile = window.matchMedia('(max-width: 900px)').matches;
-    let stars: { x: number; y: number; r: number; gold: boolean; ph: number; sp: number }[] = [];
-    let W = 0;
-    let H = 0;
-    let raf = 0;
-    let lastFrame = 0;
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = W * dpr;
-      canvas.height = H * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const n = Math.min(140, Math.floor((W * H) / 11000));
-      stars = Array.from({ length: n }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: Math.random() * 1.2 + 0.3,
-        gold: Math.random() < 0.18,
-        ph: Math.random() * Math.PI * 2,
-        sp: 0.4 + Math.random() * 1.1,
-      }));
-    };
-
-    const paintStars = (t: number) => {
-      ctx.clearRect(0, 0, W, H);
-      for (const s of stars) {
-        const a = 0.22 + 0.5 * (0.5 + 0.5 * Math.sin(s.ph + t * 0.001 * s.sp));
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = s.gold
-          ? `rgba(232,212,139,${a})`
-          : `rgba(190,205,255,${a * 0.75})`;
-        ctx.fill();
-      }
-    };
-
-    const draw = (t: number) => {
-      // 30fps is indistinguishable for twinkling and halves the work; skip
-      // entirely while the tab is hidden.
-      if (!document.hidden && t - lastFrame >= 33) {
-        lastFrame = t;
-        paintStars(t);
-      }
-      raf = requestAnimationFrame(draw);
-    };
-
-    resize();
-    paintStars(0);
-    if (!reduced && !isMobile) raf = requestAnimationFrame(draw);
-    window.addEventListener('resize', resize);
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={ref}
-      className="fixed inset-0 pointer-events-none"
-      aria-hidden="true"
-    />
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -691,9 +598,6 @@ export function JourneyContent({
                 המסע שלך מחכה
               </span>
             </span>
-            <span className="hidden sm:inline-block pointer-events-none">
-              <Kochavi size={72} anim={answeredCount === 0 ? 'wave' : 'idle'} />
-            </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -1029,17 +933,10 @@ export function JourneyContent({
             })}
           </div>
 
-          {/* Focus card — כוכבי מטייל על הקצה העליון שלו (ובפיננסים: על חבל!).
-              min-w-0 is CRITICAL: without it the grid track grows to the
-              jumper row's intrinsic width (28 circles ≈ 1,200px) and the
+          {/* Focus card. min-w-0 is CRITICAL: without it the grid track grows
+              to the jumper row's intrinsic width (28 circles ≈ 1,200px) and the
               whole screen blows out sideways on long chapters. */}
           <div className="min-w-0">
-            <KochaviWalker
-              size={58}
-              scene={SCENE_BY_SLUG[chapter.slug] ?? 'none'}
-              rope={chapter.slug === 'financials'}
-              className="hidden lg:block mx-10 -mb-1"
-            />
           <div
             ref={focusBoxRef}
             className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#c8a951]/25 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-4 sm:p-9 shadow-[0_40px_90px_-50px_rgba(0,0,0,.9)]"
@@ -1153,7 +1050,7 @@ export function JourneyContent({
                     className="flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] px-4 py-2.5 text-[13px] font-semibold text-white/70 hover:border-[#c8a951]/40 hover:text-[#e8d48b] transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
                   >
                     <Wand2 className={cn('w-4 h-4', feedbackLoading && 'animate-pulse')} />
-                    {feedbackLoading ? 'כוכבי קורא...' : 'משוב מכוכבי'}
+                    {feedbackLoading ? 'קורא את התשובה...' : 'קבל חוות דעת'}
                     {mentorQuota.limit > 0 && (
                       <span
                         className={cn(
@@ -1204,8 +1101,8 @@ export function JourneyContent({
                     className="mt-4 rounded-2xl border border-[#c8a951]/30 bg-gradient-to-br from-[#c8a951]/[0.12] to-[#c8a951]/[0.04] px-5 py-4"
                   >
                     <div className="flex items-center gap-2 text-[11px] tracking-[0.18em] text-[#e8d48b] font-bold mb-2">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      כוכבי · המנטור האישי שלך
+                      <Eye className="w-3.5 h-3.5" />
+                      חוות דעת · מבט משקיע
                     </div>
                     <p className="text-[13.5px] text-white/75 leading-relaxed whitespace-pre-line m-0">
                       {answer.aiFeedback}
@@ -1342,7 +1239,6 @@ export function JourneyContent({
 
   return (
     <div className="min-h-screen text-white relative" dir="rtl">
-      <Starfield />
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
@@ -1365,7 +1261,9 @@ export function JourneyContent({
             transition={{ type: 'spring', stiffness: 220, damping: 20 }}
             className="fixed bottom-8 right-1/2 translate-x-1/2 z-50 flex w-[calc(100vw-2rem)] max-w-md sm:w-auto items-center gap-3 rounded-2xl border border-[#c8a951]/50 bg-[#0a1030]/95 backdrop-blur-xl px-5 sm:px-6 py-4 shadow-[0_20px_60px_-20px_rgba(200,169,81,.5)]"
           >
-            <Kochavi size={64} anim="party" className="shrink-0" />
+            <div className="shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-[#c8a951] to-[#f5e9c0] grid place-items-center">
+              <Award className="w-5 h-5 text-[#1d1704]" />
+            </div>
             <div>
               <div className="font-black text-[#f5e9c0]">הפרק "{celebration}" הושלם!</div>
               <div className="text-xs text-white/50">תחנה נוספת נחתמה בזהב במפת המסע שלך</div>

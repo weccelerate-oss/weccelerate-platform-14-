@@ -1,6 +1,6 @@
 /**
  * Advisor review page — opened from the signed email link, no login needed.
- * Shows the entrepreneur's answer + כוכבי's AI feedback + the conversation
+ * Shows the entrepreneur's answer + the AI review + the conversation
  * thread, with a reply box. Token-gated (30-day HMAC link bound to the
  * advisor's email and the specific answer).
  */

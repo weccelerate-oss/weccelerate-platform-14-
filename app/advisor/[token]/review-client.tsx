@@ -102,12 +102,12 @@ export function AdvisorReviewClient(props: Props) {
         </div>
       </div>
 
-      {/* Kochavi feedback */}
+      {/* AI review */}
       {props.aiFeedback && (
         <div className="rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.10] to-[#c8a951]/[0.03] px-5 py-4">
           <div className="flex items-center gap-2 text-[11px] tracking-[0.16em] text-[#e8d48b] font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5" />
-            המשוב של כוכבי (AI) — לעיונך
+            חוות הדעת האוטומטית — לעיונך
           </div>
           <p className="text-[13.5px] text-white/70 leading-relaxed whitespace-pre-line m-0">{props.aiFeedback}</p>
         </div>

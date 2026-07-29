@@ -1,7 +1,7 @@
 /**
  * Email to the advisor when their entrepreneur asks for human feedback on a
  * journey answer (INVESTOR_PREP plan). Contains the question, the answer,
- * כוכבי's AI feedback (if any) and a signed reply link that works without a
+ * the AI review (if any) and a signed reply link that works without a
  * portal login (see lib/journey/advisor-token.ts).
  */
 
@@ -60,7 +60,7 @@ export async function sendAdvisorReviewEmail(
   </td></tr>` : ''}
 
   ${input.aiFeedback ? `<tr><td style="padding:14px 28px 0;">
-    <div style="font-size:11px;color:#94a3b8;font-weight:700;margin-bottom:6px;">המשוב של כוכבי (ה-AI) — לעיונך:</div>
+    <div style="font-size:11px;color:#94a3b8;font-weight:700;margin-bottom:6px;">חוות הדעת האוטומטית — לעיונך:</div>
     <div style="background:#faf7ee;border:1px solid #ead9a8;border-radius:8px;padding:12px 16px;font-size:13px;color:#5b4a18;line-height:1.6;white-space:pre-line;">${esc(truncate(input.aiFeedback, 800))}</div>
   </td></tr>` : ''}
 

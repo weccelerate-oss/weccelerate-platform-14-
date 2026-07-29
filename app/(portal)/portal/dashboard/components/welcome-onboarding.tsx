@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { COURSES_DATA, getTotalLessons } from '@/lib/courses-data';
-import { Kochavi } from '../../components/kochavi';
 
 interface WelcomeOnboardingProps {
   user: {
@@ -160,10 +159,6 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
           >
             <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#c8a951]/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-            {/* כוכבי מנופף לשלום מפינת הכרטיס */}
-            <div className="absolute left-3 bottom-2 hidden sm:block opacity-95 pointer-events-none">
-              <Kochavi size={96} anim="wave" />
-            </div>
 
             <div className="relative">
               <div className="flex items-start gap-3 mb-4">
@@ -178,7 +173,7 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
 
               <p className="text-white/70 mb-6 max-w-2xl leading-relaxed text-sm sm:text-base">
                 המסע שמכין אותך לחדר המשקיעים: ענה בקצב שלך על השאלות שמשקיעים באמת
-                שואלים, קבל משוב אישי מכוכבי, וצפה בתשובות הסופיות שלך נאספות לתיק
+                שואלים, קבל חוות דעת במבט של משקיע, וצפה בתשובות הסופיות שלך נאספות לתיק
                 מוכנות מסודר — מוכן להדפסה לפני כל פגישה.
               </p>
 
@@ -186,14 +181,14 @@ export function WelcomeOnboarding({ user }: WelcomeOnboardingProps) {
                 <div className="rounded-xl border border-[#c8a951]/20 bg-white/[0.03] p-4 flex items-start gap-3">
                   <Sparkles className="w-5 h-5 text-[#e8d48b] shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-white text-sm mb-0.5">מפת כוכבים אישית</h3>
+                    <h3 className="font-semibold text-white text-sm mb-0.5">מפת מסע אישית</h3>
                     <p className="text-xs text-white/55 leading-relaxed">כל תחנה שתסיים נחתמת בזהב</p>
                   </div>
                 </div>
                 <div className="rounded-xl border border-[#c8a951]/20 bg-white/[0.03] p-4 flex items-start gap-3">
                   <Wand2 className="w-5 h-5 text-[#e8d48b] shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-white text-sm mb-0.5">משוב מכוכבי</h3>
+                    <h3 className="font-semibold text-white text-sm mb-0.5">חוות דעת</h3>
                     <p className="text-xs text-white/55 leading-relaxed">ביקורת מקצועית על כל תשובה</p>
                   </div>
                 </div>

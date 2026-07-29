@@ -10,7 +10,6 @@
 import { motion } from 'framer-motion';
 import { GraduationCap, ChevronLeft, Compass, FolderOpen } from 'lucide-react';
 import { WhatsAppButton } from './components/whatsapp-button';
-import { Kochavi } from '../components/kochavi';
 import { WelcomeOnboarding } from './components/welcome-onboarding';
 import { StatsCards } from './components/stats-cards';
 import { RecentActivity } from './components/recent-activity';
@@ -149,9 +148,6 @@ export function DashboardContent({
                 transition={{ delay: 0.2 }}
                 className="wc-glass wc-shine wc-glass-lift block relative overflow-hidden rounded-2xl border border-[#c8a951]/25 bg-gradient-to-br from-[#c8a951]/[0.10] to-white/[0.02] p-5 text-white group hover:border-[#c8a951]/45 transition-all"
               >
-                <div className="absolute left-2 bottom-1 hidden md:block opacity-90 pointer-events-none">
-                  <Kochavi size={72} anim={journey.answered === 0 ? 'wave' : 'idle'} />
-                </div>
                 <div className="relative flex flex-wrap items-center gap-5">
                   {/* mini readiness ring */}
                   <div className="relative w-[74px] h-[74px] shrink-0">
@@ -190,7 +186,7 @@ export function DashboardContent({
                     <p className="text-sm text-white/50 leading-relaxed mb-0">
                       {journey.ready > 0
                         ? `${journey.ready} תשובות כבר בתיק המוכנות שלך`
-                        : 'ענה על השאלות שמשקיעים באמת שואלים, וקבל משוב מכוכבי'}
+                        : 'ענה על השאלות שמשקיעים באמת שואלים, וקבל חוות דעת במבט של משקיע'}
                     </p>
                   </div>
 
