@@ -25,6 +25,7 @@ import {
   type DailyContext,
 } from './daily-context';
 import { loadJournal, summarizeJournalForWriter, type JournalSummary } from './journal';
+import { DAVID_TOPIC_DOCTRINE_HE, type ArticleBrief } from './topic-strategy';
 import { generateLinkedInPost } from './linkedin-post-generator';
 import { sendArticlePublishedEmail } from './article-published-email';
 import { findCompetitorMentions } from '@/lib/seo/competitor-list';
@@ -577,18 +578,58 @@ interface FactCheckResult {
 }
 
 async function runFactCheck(content: string, sources: string[]): Promise<FactCheckResult> {
-  const basePrompt = `Fact-check this Hebrew article against the listed sources. For each numerical claim, date, or named entity, verify it appears in (or is reasonably consistent with) the sources.
+  // SCORING RUBRIC — read this before touching the prompt.
+  //
+  // The original wording ("verify each numerical claim, date, or named entity")
+  // graded a Hebrew how-to guide as if it were investigative journalism. A
+  // guide that is 90% correct, standard, uncontroversial professional advice
+  // scores ~42 under that rubric simply because advice is not "verifiable
+  // against a source URL" — and 42 is below QUALITY_FLOOR, so complete and
+  // publishable articles were sent into the revise loop and eventually parked
+  // as hidden drafts. That is exactly what happened to 3 of the last 9 guides.
+  //
+  // What we actually need this gate to catch is FABRICATION: invented figures,
+  // fake citations, made-up regulations, unearned specificity. So the rubric is
+  // now explicitly scoped to falsifiable assertions, and an article that simply
+  // contains few checkable facts is correctly treated as low-risk, not as
+  // unsupported.
+  const basePrompt = `You are the hallucination gate for a Hebrew guide published by WeCcelerate, an Israeli venture builder.
+
+Your ONE job is to catch FABRICATION. You are not grading writing quality, depth, citation density, or how well-sourced the advice is.
+
+Score ONLY falsifiable factual assertions:
+  - specific numbers, percentages, dates, prices, durations
+  - named laws, regulations, regulatory bodies, government programs
+  - named organizations, people, products, or events
+  - claims attributed to a source ("according to X")
+
+EXPLICITLY IGNORE (these are NOT unsupported claims and must not lower the score):
+  - general professional advice, best practices, and process explanations
+  - descriptions of WeCcelerate's own services written as offers ("אנחנו מציעים")
+  - opinion, framing, analogies, rhetorical questions
+  - widely-known domain background that any practitioner would state unaided
+  - the absence of an inline citation — sourcing style is not your concern
+
+Scoring:
+  100 = every falsifiable assertion is accurate or consistent with the sources
+   85 = minor imprecision, nothing misleading
+   60 = at least one assertion that is specific, checkable, and NOT supported
+   30 = an invented statistic, fake regulation, or fabricated attribution
+    0 = pervasive fabrication
+
+IMPORTANT: an article containing FEW checkable assertions is LOW RISK. If there
+is little to verify and nothing looks invented, the correct score is 90+, not 50.
 
 Article (Hebrew, may be long):
 ${content.slice(0, 12_000)}
 
-Sources:
+Sources the writer researched:
 ${sources.slice(0, 12).join('\n')}
 
 Return JSON only:
 {
-  "score": 0-100 (100 = every claim verified, 0 = mostly unsupported),
-  "notes": "1-3 sentences on the worst offenders, English ok"
+  "score": 0-100 per the rubric above,
+  "notes": "name the specific fabricated or unsupported assertions, verbatim. If none, say 'no fabrication found'. English ok"
 }`;
 
   const firstTry = extractText(await callAnthropic({
@@ -636,7 +677,7 @@ interface SeoLintResult {
   issues: string[];
 }
 
-function lintSeo(a: ArticlePayload): SeoLintResult {
+function lintSeo(a: ArticlePayload, brief?: ArticleBrief | null): SeoLintResult {
   const issues: string[] = [];
   let score = 100;
   if (a.titleHe.length > 65) { issues.push('titleHe > 65 chars'); score -= 10; }
@@ -647,6 +688,53 @@ function lintSeo(a: ArticlePayload): SeoLintResult {
   if (wc < 1200) { issues.push(`only ${wc} words`); score -= 20; }
   const hasFaq = /##\s*שאלות נפוצות/i.test(a.contentHe);
   if (!hasFaq) { issues.push('missing FAQ section'); score -= 15; }
+
+  // The FAQ block only becomes FAQPage JSON-LD if each question is a `###`
+  // heading — that is literally what extractFaqs() scans for in
+  // app/sites/main/guides/[slug]/generated-guide-view.tsx. An FAQ written as a
+  // bold list renders fine to a human and emits NO schema, so the page loses
+  // its rich result and its answer-engine extraction with nothing in the logs
+  // to say so. Lint it like the structural requirement it is.
+  if (hasFaq) {
+    const faqBody = a.contentHe.slice(a.contentHe.search(/##\s*שאלות נפוצות/));
+    const questionHeadings = (faqBody.match(/^###\s+.+$/gm) ?? []).length;
+    if (questionHeadings < 3) {
+      issues.push(`FAQ has ${questionHeadings} "### question" headings — FAQPage schema needs each Q as its own ### heading`);
+      score -= 20;
+    }
+  }
+
+  if (brief) {
+    // Exact-match H1 is the strongest single on-page ranking signal for a
+    // Hebrew long-tail phrase, and it is the whole point of commissioning the
+    // article. If it's missing, the article targets nothing.
+    if (!a.titleHe.includes(brief.primaryKeyword)) {
+      issues.push(`titleHe missing exact primary keyword "${brief.primaryKeyword}"`);
+      score -= 25;
+    }
+    if (!a.metaDescription.includes(brief.primaryKeyword)) {
+      issues.push(`metaDescription missing primary keyword "${brief.primaryKeyword}"`);
+      score -= 5;
+    }
+    // Secondary coverage: the cluster only consolidates if the sibling phrases
+    // actually appear. We require a third of them rather than all — forcing
+    // every phrase in would produce keyword-stuffed Hebrew.
+    const present = brief.secondaryKeywords.filter((k) => a.contentHe.includes(k)).length;
+    const wanted = Math.ceil(Math.min(brief.secondaryKeywords.length, 9) / 3);
+    if (brief.secondaryKeywords.length > 0 && present < wanted) {
+      issues.push(`only ${present}/${brief.secondaryKeywords.length} secondary keywords appear in the body (wanted >= ${wanted})`);
+      score -= 10;
+    }
+    // Answering the researched questions verbatim is the AEO mechanism. Allow
+    // paraphrase slack by matching on the question minus its trailing mark.
+    const answered = brief.targetQuestions.filter((q) => a.contentHe.includes(q.replace(/\?+$/, ''))).length;
+    const wantedQ = Math.ceil(brief.targetQuestions.length / 2);
+    if (answered < wantedQ) {
+      issues.push(`only ${answered}/${brief.targetQuestions.length} target questions answered verbatim (wanted >= ${wantedQ})`);
+      score -= 10;
+    }
+  }
+
   return { score: Math.max(0, score), issues };
 }
 
@@ -1079,7 +1167,7 @@ export async function dispatchWriterStep(jobId: string): Promise<void> {
  * double-claim. Returns null (with diagnostics) when nothing is eligible.
  */
 async function claimNextGap(ctx: DailyContext): Promise<
-  | { gap: { id: string; query: string; category: string | null; competitors: string[]; severity: number }; skippedDuplicates: number }
+  | { gap: { id: string; query: string; category: string | null; competitors: string[]; severity: number; brief?: unknown }; skippedDuplicates: number }
   | { gap: null; skippedDuplicates: number; candidates: number }
 > {
   const candidates = await prisma.contentGap.findMany({
@@ -1151,6 +1239,11 @@ export async function startWritingJobs(opts?: { context?: DailyContext; target?:
         query: gap.query,
         category: gap.category ?? null,
         competitors: gap.competitors,
+        // Snapshot the keyword brief onto the job. Copying (rather than joining
+        // back to the gap each stage) keeps every stage self-contained and means
+        // a re-seed that rewrites the gap's brief can't change the targeting of
+        // an article that is already half-written.
+        brief: (gap.brief ?? null) as object | null,
         stage: 'research',
       },
     });
@@ -1260,7 +1353,7 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
         // output (~800-1200 tokens) so it finishes well under 60s. The heavy
         // body is written section-by-section in the next stage.
         const ctx = await loadDailyContext();
-        const plan = await runArticlePlan(job.query, job.researchSummary ?? '', job.sources, ctx);
+        const plan = await runArticlePlan(job.query, job.researchSummary ?? '', job.sources, ctx, jobBrief(job));
         await prisma.writingJob.update({
           where: { id: job.id },
           data: {
@@ -1296,7 +1389,7 @@ export async function advanceWritingJob(jobId: string): Promise<void> {
         const SECTIONS_BUDGET_MS = 42_000;
         const batchStart = Date.now();
         while (idx < plan.length && Date.now() - batchStart < SECTIONS_BUDGET_MS) {
-          const md = await runSection(job.query, job.titleHe ?? '', plan, idx, job.sources);
+          const md = await runSection(job.query, job.titleHe ?? '', plan, idx, job.sources, jobBrief(job));
           written = [...written, md];
           idx += 1;
           await prisma.writingJob.update({
@@ -1469,7 +1562,7 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
 
   const sources = job.sources ?? [];
   const internalLinks = pickInternalLinks(article.titleHe, article.contentHe);
-  const seoLint = lintSeo(article);
+  const seoLint = lintSeo(article, jobBrief(job));
   const policyLint = lintPolicy(article);
 
   // Policy gate — SELF-REVISE, don't hold. The owner's directive: David must
@@ -1570,6 +1663,7 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
   }
 
   // Publish.
+  const brief = jobBrief(job);
   const slug = await deriveUniqueSlug(article.titleHe, article.titleEn);
   const generated = await prisma.generatedGuide.create({
     data: {
@@ -1583,6 +1677,11 @@ async function finalizeWritingJob(job: WritingJobRow): Promise<void> {
       modelChain: [MODEL_RESEARCH, MODEL_WRITE, MODEL_FACTCHECK],
       citedSources: sources.slice(0, 30),
       internalLinks,
+      // Carried onto the guide so the page renderer can emit `keywords` and
+      // `about` in its Article JSON-LD, matching what the static catalog pages
+      // have always emitted.
+      targetKeyword: brief?.primaryKeyword ?? null,
+      relatedKeywords: brief?.secondaryKeywords.slice(0, 20) ?? [],
       factCheckScore: factCheck.score,
       seoScore: seoLint.score,
       wordCount: countWords(article.contentHe),
@@ -1723,6 +1822,62 @@ ${article.contentHe}
   };
 }
 
+// --- Keyword-brief targeting --------------------------------------------------
+
+/**
+ * Read the keyword brief off a WritingJob. Jobs created from a probe gap have
+ * none, so every caller must handle null — brief-driven targeting is additive,
+ * never a precondition for writing.
+ */
+function jobBrief(job: { brief?: unknown }): ArticleBrief | null {
+  const b = job.brief as ArticleBrief | null | undefined;
+  if (!b || typeof b !== 'object' || !b.primaryKeyword) return null;
+  return b;
+}
+
+/**
+ * The targeting instructions injected into the plan and section prompts.
+ *
+ * This is what converts "write something about business plans" into "rank for
+ * these 10 measured phrases and answer these 14 questions verbatim". Without
+ * it the writer produces a perfectly nice article that targets nothing.
+ */
+function renderBriefBlock(brief: ArticleBrief): string {
+  const secondaries = brief.secondaryKeywords.slice(0, 14);
+  return `${DAVID_TOPIC_DOCTRINE_HE}
+
+---
+
+## הבריף לכתיבה - הביטויים שהמאמר הזה חייב לתפוס
+
+**ביטוי ראשי (חובה שיופיע מילה-במילה ב-H1 וגם במשפט הראשון של המבוא):**
+${brief.primaryKeyword}
+
+**סוג העמוד:** ${brief.role === 'pillar' ? 'עמוד עוגן (pillar) - רחב, מקיף, מקשר לכל מדריכי המשנה באשכול' : 'עמוד אשכול (cluster) - ממוקד בכוונת חיפוש אחת, מקשר חזרה לעמוד העוגן'}
+**כוונת החיפוש:** ${brief.intent}
+**נפח חיפוש חודשי מצטבר של האשכול:** ${brief.volume}
+
+**איך לבנות את העמוד לפי כוונת החיפוש:**
+${brief.playbookHe}
+
+**הזווית העריכותית:**
+${brief.angleHe}
+
+**ביטויים משניים שחייבים להופיע בטבעיות בגוף המאמר (חלקם ככותרות H2/H3, חלקם בתוך פסקאות):**
+${secondaries.map((k) => `- ${k}`).join('\n') || '- (אין)'}
+
+**השאלות שסקציית "שאלות נפוצות" חייבת לענות עליהן כלשונן:**
+${brief.targetQuestions.map((q) => `- ${q}`).join('\n')}
+
+כלל ברזל: את השאלות האלה מנסחים בדיוק כפי שהן כתובות כאן. זו הצורה שבה
+משתמש שואל מנוע תשובות, ולכן זו הצורה שנשלפת ומצוטטת. אל תשכתב אותן
+לניסוח "יפה" יותר. מותר ורצוי להוסיף עליהן שאלות משלך.
+
+חריג יחיד: חלק מהשאלות נוצרו אוטומטית מתבניות ולכן ייתכן שאחת מהן פשוט לא
+מתאימה לנושא או נשמעת לא טבעית בעברית. במקרה כזה השמט אותה לגמרי - אל
+תשכתב אותה ואל תמציא לה תשובה מאולצת. עדיף 8 שאלות טובות מ-12 עם שתיים מביכות.`;
+}
+
 // --- Chunked-writing stage helpers (Opus, one section per invocation) --------
 
 interface SectionSpec { heading: string; brief: string }
@@ -1745,14 +1900,20 @@ async function runArticlePlan(
   summary: string,
   sources: string[],
   ctx?: DailyContext,
+  brief?: ArticleBrief | null,
 ): Promise<ArticlePlan> {
   const recentGuidesBlock = ctx
     ? `\n\n---\n\n${summarizeRecentGuidesForPrompt(ctx)}\n\nאל תכתוב על נושא שכבר כוסה — אם כן, זווית שונה לחלוטין. אסור לחזור על אותו H1.\n`
     : '';
+  const briefBlock = brief ? `\n\n---\n\n${renderBriefBlock(brief)}\n` : '';
+
+  // A brief carries a measured question list, so its FAQ should be as long as
+  // that list — capping it at 7 would throw away demand we already researched.
+  const faqCount = brief ? Math.min(brief.targetQuestions.length + 2, 14) : 7;
 
   const data = await callAnthropic({
     model: MODEL_WRITE,
-    max_tokens: 2000,
+    max_tokens: 2500,
     messages: [
       {
         role: 'user',
@@ -1761,7 +1922,7 @@ async function runArticlePlan(
 ---
 
 עובדות מאומתות על WeCcelerate (אלה המספרים היחידים שמותר לציין):
-${JSON.stringify(VERIFIED_FACTS, null, 2)}${recentGuidesBlock}
+${JSON.stringify(VERIFIED_FACTS, null, 2)}${recentGuidesBlock}${briefBlock}
 
 ---
 
@@ -1783,10 +1944,12 @@ ${sources.slice(0, 10).join('\n')}
 }
 
 חוקים לתוכנית:
-- 5-7 סקציות תוכן.
-- הסקציה לפני-האחרונה חייבת להיות בדיוק "## שאלות נפוצות" (הבריף יציין: 5-7 שאלות ותשובות).
+- ${brief ? '6-8' : '5-7'} סקציות תוכן.
+- הסקציה לפני-האחרונה חייבת להיות בדיוק "## שאלות נפוצות" (הבריף יציין: ${faqCount} שאלות ותשובות).
 - הסקציה האחרונה חייבת להיות בדיוק "## איך WeCcelerate יכולה לעזור" (תיאור-שירות, לא הבטחה).
-- כל heading בעברית, ממוקד, בלי מספור.`,
+- כל heading בעברית, ממוקד, בלי מספור.${brief ? `
+- ה-titleHe חייב להכיל את הביטוי "${brief.primaryKeyword}" מילה-במילה.
+- לפחות שתיים מכותרות ה-H2 צריכות להכיל ביטוי משני מהרשימה בבריף.` : ''}`,
       },
     ],
   });
@@ -1813,6 +1976,7 @@ async function runSection(
   plan: SectionSpec[],
   idx: number,
   sources: string[],
+  brief?: ArticleBrief | null,
 ): Promise<string> {
   const section = plan[idx];
   const blueprint = plan
@@ -1821,15 +1985,33 @@ async function runSection(
   const allowedSlugs = (GUIDES as readonly Guide[]).map((g) => g.slug).join(', ');
   const isFaq = section.heading.includes('שאלות נפוצות');
   const isHelp = section.heading.includes('WeCcelerate');
+  const briefBlock = brief ? `\n---\n\n${renderBriefBlock(brief)}\n\n` : '';
+
+  // The FAQ section is the single highest-leverage block on the page: the page
+  // renderer (generated-guide-view.tsx, extractFaqs) builds FAQPage JSON-LD by
+  // scanning for `### question` headings inside "## שאלות נפוצות". Sections
+  // written as a bold/bulleted Q&A list parse to ZERO pairs, so the schema is
+  // silently omitted and the page forfeits its rich result and its answer-engine
+  // extraction. Hence the format is stated as a hard requirement, not a style note.
+  const faqRules = brief
+    ? `- זו סקציית FAQ. חובה לענות על כל השאלות הבאות, כל אחת ככותרת "### " נפרדת ובניסוח המדויק שלה:
+${brief.targetQuestions.map((q) => `### ${q}`).join('\n')}
+- מותר ורצוי להוסיף 1-3 שאלות משלך באותו פורמט.
+- כל תשובה: 2-4 משפטים. המשפט הראשון עונה על השאלה במלואו ועומד בפני עצמו (זה מה שמנוע תשובות מצטט).
+- התשובות בלשון תיאור-שירות, לא הבטחה.`
+    : `- זו סקציית FAQ: 5-7 שאלות ותשובות.
+- כל שאלה חייבת להיות כותרת markdown בפורמט "### השאלה?" ומתחתיה התשובה כפסקה. בלי bold, בלי רשימות במקום כותרות.
+- כל תשובה: 2-4 משפטים, המשפט הראשון עונה במלואו.
+- התשובות בלשון תיאור-שירות, לא הבטחה.`;
 
   const data = await callAnthropic({
     model: MODEL_WRITE,
-    max_tokens: 1600,
+    max_tokens: isFaq ? 3000 : 1600,
     messages: [
       {
         role: 'user',
         content: `${DAVID_WRITING_RULES_HE}
-
+${briefBlock}
 ---
 
 אתה כותב סקציה אחת בלבד מתוך מדריך SEO בעברית בשם "${titleHe}" (שאילתה: "${query}").
@@ -1843,11 +2025,12 @@ ${section.heading}
 
 דרישות:
 - התחל בדיוק עם הכותרת "${section.heading}", ואז גוף הסקציה.
-- 250-450 מילים בעברית (RTL).
+- ${isFaq ? '400-900' : '250-450'} מילים בעברית (RTL).
 - משפט אחד citation-bait (הגדרה/עובדה כללית מהתחום — לא על WeCcelerate ספציפית).
 - קישורים פנימיים מותר רק בפורמט [טקסט](/guides/SLUG) ל-slugs הבאים: ${allowedSlugs}
-${isFaq ? '- זו סקציית FAQ: 5-7 שאלות ותשובות. התשובות בלשון תיאור-שירות, לא הבטחה.' : ''}
+${isFaq ? faqRules : ''}
 ${isHelp ? '- תאר את הvalue שהיזם מקבל מהשירותים, בלשון "אנחנו מציעים", לא "אנחנו עושים/נביא".' : ''}
+${brief && !isFaq && !isHelp ? `- שלב בטבעיות בסקציה הזו ביטוי משני אחד או שניים מהבריף, אם הם רלוונטיים לכותרת.` : ''}
 - בלי מקפים ארוכים. בלי להמציא נתונים על WeCcelerate.
 
 מקורות (צטט כשרלוונטי, רק חיצוניים):

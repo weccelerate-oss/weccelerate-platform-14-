@@ -29,6 +29,8 @@ export interface GeneratedGuide {
   modelChain: string[];
   citedSources: string[];
   internalLinks: string[];
+  targetKeyword?: string | null;
+  relatedKeywords?: string[];
   factCheckScore: number | null;
   seoScore: number | null;
   wordCount: number | null;
@@ -79,6 +81,17 @@ export function renderGeneratedGuide(g: GeneratedGuide) {
       '@type': 'SpeakableSpecification',
       cssSelector: ['[data-speakable]'],
     },
+    // Keyword surfaces. The static catalog pages have always emitted these;
+    // agent-generated guides had no targetKeyword to emit, so their Article
+    // schema was thinner than the hand-written ones. Guides commissioned from
+    // a keyword brief now carry the phrase they were written to win.
+    ...(g.targetKeyword
+      ? {
+          alternativeHeadline: g.targetKeyword,
+          about: { '@type': 'Thing', name: g.targetKeyword },
+          keywords: [g.targetKeyword, ...(g.relatedKeywords ?? [])].join(', '),
+        }
+      : {}),
   };
 
   const faqSchema = faqs.length > 0

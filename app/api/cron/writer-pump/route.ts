@@ -56,9 +56,21 @@ export async function GET(req: NextRequest) {
   // writer again. after() keeps the invocation alive to maxDuration while
   // the pinger already got its 200. This is same-invocation after() (safe),
   // NOT the dropped-dispatch fetch chaining that stalled jobs before.
+  // `?jobs=N` advances up to N jobs in this one invocation instead of the
+  // default 1. The steady-state pinger leaves it unset — one job per ping is
+  // the right cadence for a queue that gains one article a day.
+  //
+  // It exists for the opposite situation: draining a large seeded backlog (the
+  // keyword campaign opens ~69 jobs at once), where one-job-per-ping would take
+  // days. Each job's step runs sequentially inside the invocation, so N is
+  // bounded by maxDuration: an Opus section batch budgets 42s, and 300s / ~50s
+  // leaves room for about 5.
+  const requested = Number(new URL(req.url).searchParams.get('jobs') ?? '1');
+  const maxJobs = Number.isFinite(requested) ? Math.min(Math.max(Math.trunc(requested), 1), 5) : 1;
+
   after(async () => {
     try {
-      const result = await pumpWritingJobs(1);
+      const result = await pumpWritingJobs(maxJobs);
       if (result.advanced.length > 0) {
         console.log(JSON.stringify({ event: 'writer-pump-advanced', jobIds: result.advanced }));
       }
@@ -67,5 +79,5 @@ export async function GET(req: NextRequest) {
     }
   });
 
-  return NextResponse.json({ ok: true, accepted: true });
+  return NextResponse.json({ ok: true, accepted: true, maxJobs });
 }

@@ -1029,11 +1029,18 @@ model ContentGap {
   id            String   @id @default(cuid())
 
   // Source of the gap signal
-  source        String   // 'probe-no-cite' | 'probe-low-rate' | 'manual'
+  source        String   // 'probe-no-cite' | 'probe-low-rate' | 'manual' | 'keyword-campaign'
 
   // The query/topic that exposed the gap
   query         String   @db.Text
   category      String?  // mirrors ProbeQuery.category
+
+  // Keyword brief (source='keyword-campaign' only) — the ArticleBrief from
+  // lib/agents/topic-strategy.ts that produced this row: primary keyword the
+  // H1 must contain, secondary keywords to weave in, and the natural-language
+  // questions the FAQ must answer verbatim. Null for probe-derived gaps, which
+  // carry only a query string. See lib/agents/keyword-campaign.ts.
+  brief         Json?
 
   // Severity 0-100, used as priority when picking the next gap to address
   severity      Int      @default(50)
@@ -1081,6 +1088,14 @@ model GeneratedGuide {
   modelChain    String[] @default([])  // ['perplexity-sonar', 'claude-opus-4-7', ...]
   citedSources  String[] @default([])  // URLs the writer used as research
   internalLinks String[] @default([])  // /guides/X paths linked from this guide
+
+  // Keyword targeting — carried over from the ArticleBrief that commissioned
+  // the guide. The static catalog (lib/seo/guides-catalog.ts) has had these
+  // since day one and uses them for `keywords` + `about` in Article JSON-LD;
+  // agent-generated guides had no equivalent, so their schema was thinner than
+  // the hand-written pages'. Null for probe-derived guides.
+  targetKeyword   String?
+  relatedKeywords String[] @default([])
 
   // Quality metrics
   factCheckScore Int?    // 0-100 from fact-checker stage
@@ -1177,6 +1192,10 @@ model WritingJob {
   query         String   @db.Text
   category      String?
   competitors   String[] @default([])
+
+  // Copied off the ContentGap at claim time so every writer stage can target
+  // the exact keywords without re-reading the gap. Null for probe-derived jobs.
+  brief         Json?
 
   // State machine
   stage         String   @default("research") // research | plan | sections | finalize | done | failed
