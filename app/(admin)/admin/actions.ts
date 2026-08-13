@@ -1781,7 +1781,7 @@ export async function adminReplyToThreadAction(answerId: string, body: string) {
         user: {
           select: { id: true, name: true, advisor: { select: { id: true, name: true } } },
         },
-        question: { select: { prompt: true } },
+        question: { select: { prompt: true, chapter: { select: { name: true } } } },
       },
     });
     if (!answer) {
@@ -1799,19 +1799,18 @@ export async function adminReplyToThreadAction(answerId: string, body: string) {
       },
     });
 
-    // The entrepreneur — same shape as an advisor reply, so it lands in their
-    // updates panel and reads as a real answer rather than a system message.
-    await prisma.notification
-      .create({
-        data: {
-          userId: answer.user.id,
-          type: 'success',
-          title: 'צוות WeCcelerate הגיב לתשובה שלך',
-          message: `על השאלה: "${prompt}"`,
-          link: '/portal/journey',
-        },
-      })
-      .catch(() => {});
+    // The entrepreneur — identical treatment to a mentor's reply (portal
+    // notification + email carrying the text), so the house stepping in never
+    // feels like a lesser answer.
+    const { notifyEntrepreneurOfReply } = await import('@/lib/advisors.server');
+    await notifyEntrepreneurOfReply({
+      entrepreneurId: answer.user.id,
+      authorName: 'צוות WeCcelerate',
+      fromTeam: true,
+      questionPrompt: answer.question?.prompt ?? '',
+      chapterName: answer.question?.chapter?.name ?? null,
+      replyBody: text,
+    });
 
     // The advisor, so they are not blindsided in their own thread.
     if (answer.user.advisor?.id) {

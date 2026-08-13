@@ -72,3 +72,71 @@ export async function notifyAdmins(input: {
     /* best effort */
   }
 }
+
+/**
+ * Tell the entrepreneur their answer got a reply — in the portal and by email.
+ *
+ * All three reply paths (the mentor's desk, the mentor's emailed link, and an
+ * admin stepping in) go through here, so the entrepreneur's experience cannot
+ * drift between them. The notification carries a preview of the reply so the
+ * updates panel says something, not just "you have a message".
+ *
+ * Best-effort throughout: a mail failure must never lose the reply itself,
+ * which is already saved by the time we get here.
+ */
+export async function notifyEntrepreneurOfReply(input: {
+  entrepreneurId: string;
+  authorName: string;
+  /** True when the house replied rather than the assigned mentor. */
+  fromTeam?: boolean;
+  questionPrompt: string;
+  chapterName?: string | null;
+  replyBody: string;
+}): Promise<{ emailed: boolean; error?: string }> {
+  const preview =
+    input.replyBody.length > 110 ? `${input.replyBody.slice(0, 110)}…` : input.replyBody;
+
+  try {
+    await prisma.notification.create({
+      data: {
+        userId: input.entrepreneurId,
+        type: 'success',
+        title: `${input.authorName} הגיב/ה לתשובה שלך`,
+        message: preview,
+        link: '/portal/journey',
+      },
+    });
+  } catch {
+    /* best effort */
+  }
+
+  let emailed = false;
+  let error: string | undefined;
+  try {
+    const user: { email: string; name: string } | null = await prisma.user.findUnique({
+      where: { id: input.entrepreneurId },
+      select: { email: true, name: true },
+    });
+    if (user?.email) {
+      const { sendAdvisorReplyEmail } = await import('@/lib/journey/advisor-reply-email');
+      const res = await sendAdvisorReplyEmail({
+        to: user.email,
+        entrepreneurName: user.name,
+        authorName: input.authorName,
+        fromTeam: input.fromTeam,
+        questionPrompt: input.questionPrompt,
+        chapterName: input.chapterName ?? null,
+        replyBody: input.replyBody,
+      });
+      emailed = res.ok;
+      if (!res.ok) error = res.error;
+    }
+  } catch (err) {
+    error = err instanceof Error ? err.message : String(err);
+  }
+
+  if (!emailed && error) {
+    console.error('[notifyEntrepreneurOfReply] email failed:', error);
+  }
+  return { emailed, error };
+}

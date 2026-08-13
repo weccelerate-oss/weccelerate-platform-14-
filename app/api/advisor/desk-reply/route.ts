@@ -13,7 +13,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
 import { advisorDisplayName } from '@/lib/advisors';
-import { notifyAdmins } from '@/lib/advisors.server';
+import { notifyAdmins, notifyEntrepreneurOfReply } from '@/lib/advisors.server';
 
 function isSameOrigin(req: NextRequest): boolean {
   const origin = req.headers.get('origin');
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         id: true,
         advisorRequestedAt: true,
         user: { select: { id: true, name: true, advisorId: true } },
-        question: { select: { prompt: true } },
+        question: { select: { prompt: true, chapter: { select: { name: true } } } },
       },
     });
     if (!answer) {
@@ -108,19 +108,14 @@ export async function POST(req: NextRequest) {
       type: 'success',
     });
 
-    try {
-      await prisma.notification.create({
-        data: {
-          userId: answer.user.id,
-          type: 'success',
-          title: `${advisorName} הגיב/ה לתשובה שלך`,
-          message: `על השאלה: "${(answer.question?.prompt ?? '').slice(0, 80)}"`,
-          link: '/portal/journey',
-        },
-      });
-    } catch {
-      /* best effort */
-    }
+    // Portal notification + email, both carrying the reply itself.
+    await notifyEntrepreneurOfReply({
+      entrepreneurId: answer.user.id,
+      authorName: advisorName,
+      questionPrompt: answer.question?.prompt ?? '',
+      chapterName: answer.question?.chapter?.name ?? null,
+      replyBody: text,
+    });
 
     try {
       await prisma.activityLog.create({
