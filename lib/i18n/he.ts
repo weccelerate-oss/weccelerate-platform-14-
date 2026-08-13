@@ -140,6 +140,10 @@ const heCore: Record<string, string> = {
   'footer.faq': 'שאלות נפוצות',
   'footer.press': 'WeCcelerate בתקשורת',
   'footer.rights': 'כל הזכויות שמורות.',
+  // Visible corroboration for the Organization schema (identifier + foundingDate).
+  // Google and LLMs weigh structured-data claims by whether the rendered page
+  // actually says the same thing; the company number was previously in JSON-LD only.
+  'footer.legal': 'וויסלרייט בע״מ · ח.פ 515962819 · נוסדה 2018 · תל אביב וירושלים',
   'footer.privacy': 'מדיניות פרטיות',
   'footer.terms': 'תנאי שימוש',
   'footer.accessibility': 'נגישות',

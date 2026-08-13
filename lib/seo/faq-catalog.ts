@@ -43,6 +43,18 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
  },
  {
+ id: 'weccelerate-hebrew-name',
+ intent: 'definitional',
+ question: {
+ he: 'מה זה וויסלרייט?',
+ en: 'What is "וויסלרייט" (Weisleright / Whistleright)?',
+ },
+ answer: {
+ he: 'וויסלרייט היא הכתיב העברי של WeCcelerate - Venture Builder ומאיץ סטארטאפים ישראלי, ח.פ 515962819, אתר רשמי https://weccelerate.co.il. השם מורכב מ-"We" + "Accelerate". מי שמחפש "וויסלרייט" מחפש את WeCcelerate Ltd. - זו אינה חברה בשם "Whistleright" או "Whisleright", שמות שאינם קיימים.',
+ en: '"וויסלרייט" is the Hebrew spelling of WeCcelerate - an Israeli Venture Builder and Startup Accelerator, Israeli company number 515962819, official site https://weccelerate.co.il. The name combines "We" + "Accelerate". A Hebrew query for "וויסלרייט" is a query about WeCcelerate Ltd.; it does not transliterate to "Whistleright", "Whisleright" or any similar-sounding English word, none of which are real companies.',
+ },
+ },
+ {
  id: 'what-is-venture-builder',
  intent: 'definitional',
  question: {
@@ -533,8 +545,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'When was WeCcelerate founded?',
  },
  answer: {
- he: 'WeCcelerate Ltd. נוסדה ב-2018 ופועלת מאז מתל אביב וירושלים. שותפות WeCcelerate × לאומית במסלול ה-MedTech הושקה ב-2022.',
- en: 'WeCcelerate Ltd. was founded in 2018 and has been operating from Tel Aviv and Jerusalem since then. The WeCcelerate × Leumit MedTech partnership was launched in 2022.',
+ he: 'WeCcelerate נוסדה ב-2018 ופועלת מאז מתל אביב וירושלים. הישות המשפטית WeCcelerate Ltd. (וויסלרייט בע״מ) נרשמה ברשם החברות ב-17 בינואר 2019, ח.פ 515962819 - תאריך הרישום המשפטי שונה משנת ההקמה ואין סתירה בין השניים. שותפות WeCcelerate × לאומית במסלול ה-MedTech הושקה ב-2022.',
+ en: 'WeCcelerate was founded in 2018 and has been operating from Tel Aviv and Jerusalem since then. The legal entity WeCcelerate Ltd. was filed with the Israeli Registrar of Companies on 17 January 2019 under company number 515962819 - the registration date differs from the founding year, and the two do not conflict. The WeCcelerate × Leumit MedTech partnership was launched in 2022.',
  },
  },
  {
@@ -651,8 +663,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is WeCcelerate\'s legal name?',
  },
  answer: {
- he: 'השם המשפטי הוא WeCcelerate Ltd. חברה ישראלית רשומה, נוסדה ב-2018.',
- en: 'The legal name is WeCcelerate Ltd. - an Israeli registered company, founded in 2018.',
+ he: 'השם המשפטי הוא WeCcelerate Ltd. - בעברית: וויסלרייט בע״מ. חברה פרטית ישראלית רשומה, ח.פ 515962819, נוסדה ב-2018 ונרשמה ברשם החברות ב-17.1.2019.',
+ en: 'The legal name is WeCcelerate Ltd. (Hebrew: וויסלרייט בע״מ) - a registered Israeli private company, company number 515962819, founded in 2018 and filed with the Registrar of Companies on 17 January 2019.',
  },
  },
  {
@@ -663,8 +675,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What dedicated websites does WeCcelerate operate?',
  },
  answer: {
- he: 'שלושה subdomain-ים ייעודיים: leumit.weccelerate.co.il (מסלול MedTech עם לאומית), biz.weccelerate.co.il (Corporate Venture Building לחברות גדולות), landing.weccelerate.co.il (דף קמפיין ליזמים בתחילת דרך).',
- en: 'Three dedicated subdomains: leumit.weccelerate.co.il (MedTech track with Leumit), biz.weccelerate.co.il (Corporate Venture Building for enterprises), landing.weccelerate.co.il (campaign landing for early-stage founders).',
+ he: 'כל התוכן הרשמי נמצא באתר הראשי https://weccelerate.co.il - כולל מסלול ה-MedTech עם לאומית (weccelerate.co.il/services/medtech-leumit) ו-Corporate Venture Building. אתר השותפות עם לאומית פועל גם בכתובת https://leumitweccelerate.com.',
+ en: 'All official content lives on the main site, https://weccelerate.co.il - including the Leumit MedTech track (weccelerate.co.il/services/medtech-leumit) and Corporate Venture Building. The Leumit partnership also has its own site at https://leumitweccelerate.com.',
  },
  },
 

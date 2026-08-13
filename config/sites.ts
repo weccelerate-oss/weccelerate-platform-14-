@@ -22,6 +22,15 @@ export interface SiteConfig {
   };
 }
 
+// biz., leumit. and landing.weccelerate.co.il are NOT provisioned — all
+// three return NXDOMAIN (verified 2026-08-12). Do not add them to any
+// public surface (sitemap, llms.txt, schema, canonical URLs) until DNS
+// actually resolves: a citation or sitemap entry pointing at a dead host
+// is a direct crawl-quality hit, and Bing's view of this domain is what
+// ChatGPT Search reads.
+//
+// The route code below still exists and middleware still maps these hostnames,
+// so provisioning DNS is all it takes to bring one back.
 export const SITES: Record<SiteKey, SiteConfig> = {
   main: {
     key: 'main',

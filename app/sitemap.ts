@@ -3,7 +3,7 @@
  * 
  * Generates a comprehensive sitemap including:
  * - All static pages
- * - All subdomains (leumit, biz, landing)
+ * - Main site only. The leumit/biz/landing subdomains are unprovisioned.
  * - Dynamic content (events, videos, blog)
  * - Proper priority and change frequency
  * 
@@ -58,20 +58,43 @@ const STATIC_PAGES = [
   { path: '/services/investor-preparation', priority: 0.8, changeFreq: 'monthly' as const },
 ];
 
-const SUBDOMAIN_PAGES = {
-  leumit: [
-    { path: '/', priority: 0.9, changeFreq: 'weekly' as const },
-  ],
-  biz: [
-    { path: '/', priority: 0.9, changeFreq: 'weekly' as const },
-  ],
-};
+// biz., leumit. and landing.weccelerate.co.il are NOT provisioned — all
+// three return NXDOMAIN (verified 2026-08-12). Do not add them to any
+// public surface (sitemap, llms.txt, schema, canonical URLs) until DNS
+// actually resolves: a citation or sitemap entry pointing at a dead host
+// is a direct crawl-quality hit, and Bing's view of this domain is what
+// ChatGPT Search reads.
+
+// Regenerate hourly instead of freezing at build time.
+//
+// A Next.js sitemap.ts is static by default, so without this the URL list is
+// whatever the database held during the last deploy. David publishes daily, so
+// a static sitemap means every new guide waits for an unrelated deploy before
+// search engines can discover it — the same invisibility the adapter bug caused,
+// just with a slower fuse. One hour is well inside the crawl cadence and costs
+// three indexed queries per regeneration.
+export const revalidate = 3600;
 
 async function getDynamicContent() {
+  // Use the shared singleton from lib/db, NOT `new PrismaClient()`.
+  //
+  // This was the bug that made every agent-written guide invisible to search
+  // engines. Under Prisma 7 a bare `new PrismaClient()` throws — the client
+  // requires a driver adapter, which lib/db configures (PrismaPg + pg Pool).
+  // That throw was swallowed by the outer catch and the function returned empty
+  // arrays, so the sitemap silently shipped with ZERO dynamic entries: no
+  // generated guides, no events, no videos. Nothing logged, nothing failed; the
+  // sitemap just quietly listed only the static catalog.
+  //
+  // The consequence was total: nothing on the site links to a freshly written
+  // guide, so the sitemap is its ONLY discovery path. Every article David ever
+  // published was uncrawlable.
+  //
+  // Keep the try/catch — a sitemap must never 500 — but LOG on failure so the
+  // next silent breakage is visible instead of invisible.
   try {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
-    try {
+    const { prisma } = await import('@/lib/db');
+    {
       const [events, videos, generatedGuides] = await Promise.all([
         prisma.event.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
         prisma.video.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
@@ -83,12 +106,9 @@ async function getDynamicContent() {
         }),
       ]);
       return { events, videos, generatedGuides };
-    } catch {
-      return { events: [], videos: [], generatedGuides: [] };
-    } finally {
-      await prisma.$disconnect();
     }
-  } catch {
+  } catch (e) {
+    console.error('[sitemap] dynamic content query failed — sitemap will omit guides/events/videos:', e);
     return { events: [], videos: [], generatedGuides: [] };
   }
 }
@@ -115,27 +135,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: Math.round(page.priority * 0.9 * 100) / 100,
     });
   });
-  
-  // Subdomain pages
-  Object.entries(SUBDOMAIN_PAGES).forEach(([sub, pages]) => {
-    const subUrl = SITE_CONFIG.subdomains[sub as keyof typeof SITE_CONFIG.subdomains];
-    pages.forEach((page) => {
-      entries.push({
-        url: `${subUrl}${page.path}`,
-        lastModified: now,
-        changeFrequency: page.changeFreq,
-        priority: page.priority,
-      });
-    });
-  });
-  
-  // Dynamic content
-  events.forEach((e) => entries.push({ url: `${baseUrl}/events/${e.slug}`, lastModified: e.updatedAt, changeFrequency: 'weekly', priority: 0.7 }));
-  videos.forEach((v) => entries.push({ url: `${baseUrl}/videos/${v.slug}`, lastModified: v.updatedAt, changeFrequency: 'monthly', priority: 0.6 }));
+
+  // Dynamic content. lib/db exports an untyped client, so the rows arrive as
+  // `any` — annotate the shape we actually selected.
+  type SlugRow = { slug: string; updatedAt: Date };
+
+  events.forEach((e: SlugRow) => entries.push({ url: `${baseUrl}/events/${e.slug}`, lastModified: e.updatedAt, changeFrequency: 'weekly', priority: 0.7 }));
+  videos.forEach((v: SlugRow) => entries.push({ url: `${baseUrl}/videos/${v.slug}`, lastModified: v.updatedAt, changeFrequency: 'monthly', priority: 0.6 }));
 
   // Agent-written guides (David) — same /guides/[slug] namespace as the
   // static catalog, slightly lower priority until they earn citations.
-  generatedGuides.forEach((g) =>
+  generatedGuides.forEach((g: SlugRow) =>
     entries.push({
       url: `${baseUrl}/guides/${g.slug}`,
       lastModified: g.updatedAt,

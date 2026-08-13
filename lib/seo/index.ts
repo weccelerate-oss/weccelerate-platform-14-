@@ -24,11 +24,15 @@ export const SITE_CONFIG = {
  url: 'https://weccelerate.co.il',
  defaultDescription: 'WeCcelerate is a leading Venture Builder in Tel Aviv & Jerusalem, specializing in MedTech, AI, and IP strategy for startups. Partnered with Leumit Health Care.',
  titleTemplate: '%s | WeCcelerate - Venture Builder & Startup Accelerator Israel',
+ // Only hosts with a live DNS record belong here.
+ // biz., leumit. and landing.weccelerate.co.il are NOT provisioned — all
+ // three return NXDOMAIN (verified 2026-08-12). Do not add them to any
+ // public surface (sitemap, llms.txt, schema, canonical URLs) until DNS
+ // actually resolves: a citation or sitemap entry pointing at a dead host
+ // is a direct crawl-quality hit, and Bing's view of this domain is what
+ // ChatGPT Search reads.
  subdomains: {
  main: 'https://weccelerate.co.il',
- leumit: 'https://leumit.weccelerate.co.il',
- biz: 'https://biz.weccelerate.co.il',
- landing: 'https://landing.weccelerate.co.il',
  },
  defaultLocale: 'he_IL',
  supportedLocales: ['he_IL', 'en_US', 'en_IL'],

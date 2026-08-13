@@ -913,9 +913,12 @@ function Footer() {
         </div>
 
         <div className="border-t border-white/5 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/50">
-            © {new Date().getFullYear()} WeCcelerate Ltd. {t('footer.rights')}
-          </p>
+          <div className="text-xs text-white/50 space-y-1">
+            <p>
+              © {new Date().getFullYear()} WeCcelerate Ltd. {t('footer.rights')}
+            </p>
+            <p className="text-white/40">{t('footer.legal')}</p>
+          </div>
           <div className="flex items-center gap-6 text-xs text-white/50">
             <Link href="/privacy" className="hover:text-white/70 transition-colors">{t('footer.privacy')}</Link>
             <Link href="/terms" className="hover:text-white/70 transition-colors">{t('footer.terms')}</Link>

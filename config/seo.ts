@@ -113,7 +113,7 @@ export const COMPANY_INFO = {
   image: 'https://weccelerate.co.il/opengraph-image.jpg',
   email: 'info@weccelerate.co.il',
   telephone: '+972-55-564-7538',
-  foundingDate: '2016',
+  foundingDate: '2018', // keep in sync with components/seo/GeoSchema.tsx
   founders: [
     {
       '@type': 'Person',

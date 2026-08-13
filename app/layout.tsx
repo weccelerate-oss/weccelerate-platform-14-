@@ -134,7 +134,9 @@ export default function RootLayout({
 
         {/* DNS Prefetch */}
         <link rel="dns-prefetch" href="https://www.leumit.co.il" />
-        <link rel="dns-prefetch" href="https://api.weccelerate.co.il" />
+        {/* api.weccelerate.co.il prefetch removed 2026-08-12 — the host has no
+            DNS record, so every page load asked the resolver for a name that
+            does not exist. */}
 
         {/* Canonical + hreflang are emitted by Next.js metadata.alternates
             (see lib/seo/metadata.ts). Manual <link> tags here caused

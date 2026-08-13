@@ -389,6 +389,87 @@ its own — no force-refresh button currently.
 
 ---
 
+## 🧭 Entity Resolution — why ChatGPT answers "I don't know" (added 2026-08-12)
+
+**Trigger**: a user asked ChatGPT "מי זה וויסלרייט?" and got back "I could not
+find a reliable source identifying a company by that name." ChatGPT guessed the
+English spelling was "Whistleright" and never reached WeCcelerate.
+
+**This is not an indexing problem.** A plain web search for "וויסלרייט" returns,
+on page one: weccelerate.co.il, the LinkedIn company page, a Reshet 13 feature,
+the Israeli company registry, the YouTube channel and leumitweccelerate.com. The
+site is indexed and findable. What failed is *entity resolution*: nothing told
+the model that the Hebrew string "וויסלרייט" resolves to the English brand
+"WeCcelerate", so it invented a back-transliteration and gave up.
+
+### Fixed in code on 2026-08-12 (no action needed from you)
+
+| What was wrong | Where | Now |
+|---|---|---|
+| Site contradicted **itself** on the founding year — JSON-LD on every page emitted `2016` while llms.txt, llms-full.txt and the FAQ schema all said `2018` | `components/seo/GeoSchema.tsx`, `config/seo.ts`, `public/llms-full.txt` (which disagreed with itself, line 9 vs 166), `lib/seo/guides-catalog.ts` | All surfaces now say **2018** |
+| llms.txt declared the year `2019` "incorrect" — but 2019 is what the **official Israeli registrar** publishes. The site was effectively telling AI engines the government record is wrong | `lib/seo/llms-base.ts` | Now explains that founding (2018) and legal registration (17.1.2019) are two different facts that do not conflict |
+| Company number (ח.פ) — the single strongest unambiguous entity anchor — appeared nowhere in the schema | `components/seo/GeoSchema.tsx` | `identifier: 515962819` added to both Organization and LocalBusiness |
+| No mapping from the Hebrew name to the English brand anywhere a model would read it | `lib/seo/llms-base.ts`, `lib/seo/faq-catalog.ts`, `public/llms-full.txt` | Explicit "וויסלרייט = WeCcelerate, NOT Whistleright" statement, plus a new FAQ entry that renders into FAQPage schema |
+| Founder name split across two spellings — schema said "Alon Pinchas", his own LinkedIn says "Pinhas" — so one person read as two weak entities. Same for Hinoch/Heinoch and Ido/Eido Sabag | `components/seo/GeoSchema.tsx`, `lib/seo/llms-base.ts` | Both spellings listed as `alternateName`; llms.txt states they are the same person |
+| `sitemap.xml` submitted `biz.weccelerate.co.il` and `leumit.weccelerate.co.il` — **both are NXDOMAIN**, so every Googlebot/Bingbot sitemap fetch ended at a dead host | `app/sitemap.ts` | Dead subdomains removed from the sitemap |
+| llms.txt and the FAQ told AI engines to *cite* `biz.weccelerate.co.il` — a host that does not exist | `lib/seo/llms-base.ts`, `lib/seo/faq-catalog.ts`, `public/llms-full.txt` | Repointed to live URLs on the main domain |
+
+Note the connection to the CyberGuard section above: that flag was attributed to
+"cross-source contradictions (founding year...)". The founding-year contradiction
+was never actually resolved in 2026-04 — the schema kept emitting 2016. It is
+resolved now.
+
+### ⚠️ Needs a decision from you
+
+1. **Founding year — confirm 2018.** Three dates were live in the codebase: 2016
+   (schema, with a comment saying you confirmed it on 2026-04-26), 2018 (llms.txt
+   and FAQ, and owner-confirmed 2026-05-14), and 2019-01-17 (the registrar's
+   filing date for ח.פ 515962819). I standardised on **2018** because it is the
+   later of the two owner confirmations and it already appeared on more surfaces.
+   **If 2016 is actually correct, tell me and I will flip all of it back** — but
+   it must be one number everywhere, and llms.txt must stop calling the
+   registrar's 2019 wrong.
+
+2. **Registered address.** The company register lists **לוריא צבי 11, באר שבע**.
+   The site publishes **HaRakevet 58, Tel Aviv**. I left Tel Aviv as the schema
+   address (changing it would move the business in Google local results — your
+   call, not mine) and documented the registered address in llms.txt so the two
+   read as complementary rather than contradictory. Confirm this is how you want it.
+
+3. **The three subdomains.** `biz.`, `leumit.` and `landing.weccelerate.co.il`
+   have no DNS records, but the route code exists in the repo and middleware
+   already maps the hostnames. Either provision the DNS (and I will re-add them
+   to the sitemap) or confirm they are abandoned so the code can be retired.
+
+### 🔴 Off-site actions — this is what actually moves GEO now
+
+> **Paste-ready runbook: [`GEO-ENTITY-SETUP.md`](./GEO-ENTITY-SETUP.md)** — exact
+> Wikidata statements (verified property IDs), Crunchbase and Google Business
+> Profile field values, the as7 redirect, and the deploy + IndexNow sequence
+> that has to happen first.
+
+The on-site work is close to exhausted. Brand-name recall in an LLM is won by
+*third-party corroboration*, because that is what the model absorbed during
+training. Ranked by impact:
+
+| Priority | Action | Why |
+|---|---|---|
+| 🔥 P0 | **Create a Wikidata item** for WeCcelerate Ltd. (free, no notability bar as strict as Wikipedia's). Include: company number 515962819, founding year, founders, official website, LinkedIn. | Wikidata is the entity backbone every major model and search engine reads. This is the single highest-leverage item on the list, and nothing on the site can substitute for it. |
+| 🔥 P0 | **Fix the Crunchbase slug.** The profile is live under `crunchbase.com/organization/weccelerat` (missing the final E). Ask Crunchbase support to correct it to `weccelerate`, then update the two `sameAs` arrays in `components/seo/GeoSchema.tsx`. | Crunchbase is a primary training source for company entities. A misspelled slug means the profile does not match the brand string models look up. |
+| 🔥 P0 | **weccelerate.as7.co.il has an expired TLS certificate** and still serves a legacy copy of the site (200 only when certificate validation is disabled). It is still indexed and still surfaces in search. | Every crawler and browser hits a security error, and a second indexed copy of the brand splits entity authority. Either renew the certificate and 301 the whole host to weccelerate.co.il, or take it down. Redirecting is better — it transfers the accumulated signal. |
+| High | **Google Business Profile** for the Tel Aviv office, verified. | Feeds the Google Knowledge Panel, which is a strong secondary entity anchor. |
+| High | **Get the Hebrew name into press copy.** Ask outlets that already cover you (Calcalist, Globes, Geektime, Reshet 13) to write "WeCcelerate (וויסלרייט)" rather than one form alone. | This is exactly the string pairing that was missing. Press text is heavily weighted in training data. |
+| Medium | Claim/complete profiles on Start-Up Nation Central, IATI, PitchBook, Dealroom, LinkedIn "About". | Each adds an independent corroborating source for the same facts. Make sure the founding year and company number match the site exactly — mismatches are worse than absence. |
+
+**Timeline expectation**: sitemap and llms.txt changes are picked up within days
+(IndexNow pushes to Bing, which is what ChatGPT Search reads). Wikidata and
+Crunchbase influence *search-grounded* answers within weeks. Getting into a
+model's *parametric* memory — so ChatGPT answers "וויסלרייט" correctly without
+searching — takes a training cycle and cannot be rushed. Judge progress by
+whether ChatGPT/Perplexity answer correctly **with** web search enabled.
+
+---
+
 ## Reference — updated automatically by Claude
 
 This file is maintained by the code-change workflow. When a new manual

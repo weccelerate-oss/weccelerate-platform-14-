@@ -65,6 +65,16 @@ function buildOrganizationSchema() {
       ...BRAND.hebrew.variations,
     ],
     legalName: BRAND.legalName,
+    // Israeli Registrar of Companies number — the strongest unambiguous
+    // anchor this entity has. It is public record, independently verifiable
+    // (checkid.co.il, datacheck.co.il, openid.co.il, obudget.org), and it is
+    // what lets an AI engine tie the Hebrew name וויסלרייט to WeCcelerate Ltd.
+    // rather than guessing at a back-transliteration.
+    identifier: {
+      '@type': 'PropertyValue',
+      propertyID: 'Israeli Company Number (ח.פ)',
+      value: '515962819',
+    },
     description: BRAND.descriptions.long.he,
     url: SITE_CONFIG.url,
     logo: {
@@ -100,12 +110,21 @@ function buildOrganizationSchema() {
     },
     
     // Founding & Contact
-    // Founding year confirmed by Alon (CEO) on 2026-04-26: WeCcelerate Ltd.
-    // was incorporated in 2016. Earlier code used 2020 which was incorrect
-    // and contradicted the LinkedIn company page and the B7Net article that
-    // quoted 2017. All canonical surfaces (llms.txt, llms-full.txt, footer,
-    // about page, schema) now align on 2016.
-    foundingDate: '2016',
+    // Founding year: 2018 (owner-confirmed 2026-05-14, superseding an earlier
+    // 2026-04-26 note that said 2016).
+    //
+    // This value MUST stay in sync with lib/seo/llms-base.ts,
+    // lib/seo/faq-catalog.ts and public/llms-full.txt. Until 2026-08-12 it did
+    // not: those surfaces said 2018 while this schema emitted 2016, so every
+    // page shipped a self-contradiction — the fastest way to lose entity
+    // confidence in an AI engine, which cross-checks a site against itself.
+    //
+    // Deliberately NOT conflated with this: the legal entity WeCcelerate Ltd.
+    // (ח.פ 515962819) was registered with the Israeli Registrar of Companies
+    // on 2019-01-17. That public record is what LLMs check, so llms.txt now
+    // explains the gap between founding and incorporation instead of
+    // declaring the registrar's date "incorrect".
+    foundingDate: '2018',
     foundingLocation: {
       '@type': 'Place',
       name: 'Tel Aviv, Israel',
@@ -117,7 +136,10 @@ function buildOrganizationSchema() {
         '@type': 'Person',
         '@id': `${SITE_CONFIG.url}/team#alon-pinchas`,
         name: 'Alon Pinchas',
-        alternateName: 'אלון פנחס',
+        // Both English spellings are in active public use — his own LinkedIn
+        // says "Pinhas". Listing both keeps the two forms resolving to one
+        // person instead of splitting into two weak entities.
+        alternateName: ['אלון פנחס', 'Alon Pinhas'],
         jobTitle: 'Founder & CEO',
         worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
         url: `${SITE_CONFIG.url}/team#alon-pinchas`,
@@ -128,7 +150,7 @@ function buildOrganizationSchema() {
         '@type': 'Person',
         '@id': `${SITE_CONFIG.url}/team#avraham-hinoch`,
         name: 'Avraham Hinoch',
-        alternateName: 'אברהם הינוך',
+        alternateName: ['אברהם הינוך', 'Avraham Heinoch'],
         jobTitle: 'Co-Founder',
         worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
         sameAs: ['https://www.linkedin.com/in/avraham-heinoch-20168a231/'],
@@ -137,7 +159,7 @@ function buildOrganizationSchema() {
         '@type': 'Person',
         '@id': `${SITE_CONFIG.url}/team#ido-sabag`,
         name: 'Ido Sabag',
-        alternateName: 'עידו סבג',
+        alternateName: ['עידו סבג', 'Eido Sabag'],
         jobTitle: 'Co-Founder',
         worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
         sameAs: ['https://www.linkedin.com/in/ido-sabag-382b641b3/'],
@@ -527,6 +549,12 @@ function buildLocalBusinessSchema() {
     '@type': 'LocalBusiness',
     '@id': `${SITE_CONFIG.url}/#localbusiness`,
     name: 'WeCcelerate - Venture Builder & Startup Accelerator',
+    // Same registrar anchor as the Organization node — see buildOrganizationSchema.
+    identifier: {
+      '@type': 'PropertyValue',
+      propertyID: 'Israeli Company Number (ח.פ)',
+      value: '515962819',
+    },
     image: `${SITE_CONFIG.url}/logo.png`,
     telephone: '+972-55-564-7538',
     email: 'info@weccelerate.co.il',

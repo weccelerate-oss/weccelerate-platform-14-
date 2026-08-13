@@ -43,12 +43,10 @@ export const SITE_CONFIG = {
  },
  },
  
+ // Only hosts with a live DNS record belong here. leumit., biz., landing.,
+ // portal. and api.weccelerate.co.il all return NXDOMAIN (verified 2026-08-12).
  subdomains: {
  main: 'https://weccelerate.co.il',
- leumit: 'https://leumit.weccelerate.co.il',
- biz: 'https://biz.weccelerate.co.il',
- portal: 'https://portal.weccelerate.co.il',
- api: 'https://api.weccelerate.co.il',
  },
  locale: 'he-IL',
  alternateLocales: ['en-US', 'en-GB'],
@@ -970,7 +968,7 @@ export const viewport: Viewport = {
  */
 export function getRandomBrandVariation(language: 'english' | 'hebrew'): string {
  const variations = language === 'english' ? BRAND.english.variations : BRAND.hebrew.variations;
- return variations[Math.floor(Math.random * variations.length)];
+ return variations[Math.floor(Math.random() * variations.length)];
 }
 
 /**
