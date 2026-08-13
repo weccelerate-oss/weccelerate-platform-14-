@@ -9,7 +9,8 @@
  * costs a page load.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import {
   BadgeCheck,
@@ -79,7 +80,21 @@ export function AdvisorDesk({
 }) {
   const [threads, setThreads] = useState(initialThreads);
   const [tab, setTab] = useState<Tab>('waiting');
-  const [openId, setOpenId] = useState<string | null>(null);
+
+  // A ?thread=<answerId> deep link — from a notification — opens that card
+  // directly. It also forces the "all" tab, because the thread being linked
+  // to may well be one that has already been answered.
+  const searchParams = useSearchParams();
+  const deepLinkThread = searchParams.get('thread');
+  const [openId, setOpenId] = useState<string | null>(deepLinkThread);
+
+  useEffect(() => {
+    if (!deepLinkThread) return;
+    setOpenId(deepLinkThread);
+    if (!initialThreads.some((t) => t.answerId === deepLinkThread && t.needsReply)) {
+      setTab('all');
+    }
+  }, [deepLinkThread, initialThreads]);
 
   const waiting = useMemo(() => threads.filter((t) => t.needsReply), [threads]);
   const answered = useMemo(() => threads.filter((t) => !t.needsReply), [threads]);

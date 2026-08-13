@@ -52,6 +52,8 @@ export async function notifyAdmins(input: {
   title: string;
   message: string;
   type?: 'info' | 'success' | 'warning';
+  /** The thread this is about — deep-links the admin straight to it. */
+  answerId?: string | null;
 }): Promise<void> {
   try {
     const admins: Array<{ id: string }> = await prisma.user.findMany({
@@ -65,7 +67,9 @@ export async function notifyAdmins(input: {
         type: input.type ?? 'info',
         title: input.title,
         message: input.message,
-        link: '/admin/advisor-threads',
+        link: input.answerId
+          ? `/admin/advisor-threads?thread=${input.answerId}`
+          : '/admin/advisor-threads',
       })),
     });
   } catch {
@@ -74,27 +78,38 @@ export async function notifyAdmins(input: {
 }
 
 /**
- * Tell the entrepreneur their answer got a reply — in the portal and by email.
+ * Tell the entrepreneur their answer got a reply.
+ *
+ * In the portal only — deliberately no email. The owner does not want an
+ * inbox pinged on every message; the updates wait in the bell until the
+ * entrepreneur next opens the portal. (The mentor still gets an email when a
+ * request arrives — that one is a call to action, not a status update.)
  *
  * All three reply paths (the mentor's desk, the mentor's emailed link, and an
  * admin stepping in) go through here, so the entrepreneur's experience cannot
  * drift between them. The notification carries a preview of the reply so the
- * updates panel says something, not just "you have a message".
+ * bell says something, not just "you have a message".
  *
- * Best-effort throughout: a mail failure must never lose the reply itself,
- * which is already saved by the time we get here.
+ * Best-effort: the reply itself is already saved by the time we get here, so a
+ * failure to notify logs and moves on rather than losing the message.
  */
 export async function notifyEntrepreneurOfReply(input: {
   entrepreneurId: string;
   authorName: string;
   /** True when the house replied rather than the assigned mentor. */
   fromTeam?: boolean;
+  /** Deep-links the notification straight to the question that was answered. */
+  questionId?: string | null;
   questionPrompt: string;
   chapterName?: string | null;
   replyBody: string;
-}): Promise<{ emailed: boolean; error?: string }> {
+}): Promise<void> {
   const preview =
     input.replyBody.length > 110 ? `${input.replyBody.slice(0, 110)}…` : input.replyBody;
+
+  // Land on the question itself, not on the chapter map — the reply is only
+  // readable in context, and hunting for it is friction nobody needs.
+  const link = input.questionId ? `/portal/journey?q=${input.questionId}` : '/portal/journey';
 
   try {
     await prisma.notification.create({
@@ -103,40 +118,10 @@ export async function notifyEntrepreneurOfReply(input: {
         type: 'success',
         title: `${input.authorName} הגיב/ה לתשובה שלך`,
         message: preview,
-        link: '/portal/journey',
+        link,
       },
     });
-  } catch {
-    /* best effort */
-  }
-
-  let emailed = false;
-  let error: string | undefined;
-  try {
-    const user: { email: string; name: string } | null = await prisma.user.findUnique({
-      where: { id: input.entrepreneurId },
-      select: { email: true, name: true },
-    });
-    if (user?.email) {
-      const { sendAdvisorReplyEmail } = await import('@/lib/journey/advisor-reply-email');
-      const res = await sendAdvisorReplyEmail({
-        to: user.email,
-        entrepreneurName: user.name,
-        authorName: input.authorName,
-        fromTeam: input.fromTeam,
-        questionPrompt: input.questionPrompt,
-        chapterName: input.chapterName ?? null,
-        replyBody: input.replyBody,
-      });
-      emailed = res.ok;
-      if (!res.ok) error = res.error;
-    }
   } catch (err) {
-    error = err instanceof Error ? err.message : String(err);
+    console.error('[notifyEntrepreneurOfReply] failed:', err);
   }
-
-  if (!emailed && error) {
-    console.error('[notifyEntrepreneurOfReply] email failed:', error);
-  }
-  return { emailed, error };
 }

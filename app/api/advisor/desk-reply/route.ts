@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
       where: { id: answerId },
       select: {
         id: true,
+        questionId: true,
         advisorRequestedAt: true,
         user: { select: { id: true, name: true, advisorId: true } },
         question: { select: { prompt: true, chapter: { select: { name: true } } } },
@@ -106,12 +107,14 @@ export async function POST(req: NextRequest) {
       title: `${advisorName} השיב/ה ל${entrepreneurName}`,
       message: `"${(answer.question?.prompt ?? '').slice(0, 60)}" · ${text.slice(0, 90)}${text.length > 90 ? '…' : ''}`,
       type: 'success',
+      answerId: answer.id,
     });
 
     // Portal notification + email, both carrying the reply itself.
     await notifyEntrepreneurOfReply({
       entrepreneurId: answer.user.id,
       authorName: advisorName,
+      questionId: answer.questionId,
       questionPrompt: answer.question?.prompt ?? '',
       chapterName: answer.question?.chapter?.name ?? null,
       replyBody: text,

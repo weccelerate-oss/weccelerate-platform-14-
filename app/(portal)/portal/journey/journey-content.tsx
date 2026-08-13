@@ -23,6 +23,7 @@ import {
   useState,
 } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -201,9 +202,52 @@ export function JourneyContent({
   });
 
   // ----- navigation state ---------------------------------------------------
-  const [chapterIdx, setChapterIdx] = useState<number | null>(null); // null = map
-  const [questionIdx, setQuestionIdx] = useState(0);
+  // A ?q=<questionId> deep link opens straight on that question. Notifications
+  // about a mentor's reply carry it — landing on the chapter map and hunting
+  // for the right question is not "go read the answer".
+  const searchParams = useSearchParams();
+  const deepLinkQuestionId = searchParams.get('q');
+
+  const deepLink = useMemo(() => {
+    if (!deepLinkQuestionId) return null;
+    for (let ci = 0; ci < chapters.length; ci++) {
+      const qi = chapters[ci].questions.findIndex((q) => q.id === deepLinkQuestionId);
+      if (qi >= 0) return { ci, qi };
+    }
+    return null;
+  }, [deepLinkQuestionId, chapters]);
+
+  const [chapterIdx, setChapterIdx] = useState<number | null>(deepLink ? deepLink.ci : null); // null = map
+  const [questionIdx, setQuestionIdx] = useState(deepLink ? deepLink.qi : 0);
   const [direction, setDirection] = useState(1); // slide direction
+
+  // The link can also arrive while the screen is already mounted (clicking a
+  // notification from the journey itself), so follow it on change too.
+  useEffect(() => {
+    if (!deepLink) return;
+    setChapterIdx(deepLink.ci);
+    setQuestionIdx(deepLink.qi);
+  }, [deepLink]);
+
+  // Opening the question is not enough — the reply lives further down, past the
+  // answer box and the AI review. Scroll the conversation into view and flash
+  // it, so "go read what your mentor wrote" lands on the actual words.
+  const threadRef = useRef<HTMLDivElement | null>(null);
+  const [highlightThread, setHighlightThread] = useState(false);
+
+  useEffect(() => {
+    if (!deepLink) return;
+    setHighlightThread(true);
+    // One frame after the question mounts, so the element exists to scroll to.
+    const scroll = setTimeout(() => {
+      threadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 350);
+    const fade = setTimeout(() => setHighlightThread(false), 2600);
+    return () => {
+      clearTimeout(scroll);
+      clearTimeout(fade);
+    };
+  }, [deepLink]);
 
   // ----- silent autosave ----------------------------------------------------
   const dirtyRef = useRef<Set<string>>(new Set());
@@ -1113,9 +1157,17 @@ export function JourneyContent({
                   </motion.div>
                 )}
 
-                {/* Human-mentor thread — INVESTOR_PREP plan */}
+                {/* Human-mentor thread — unlocked by having an assigned mentor */}
                 {features.humanMentor && (
-                  <div className="mt-4 rounded-2xl border border-white/[0.1] bg-white/[0.03] px-4 sm:px-5 py-4">
+                  <div
+                    ref={threadRef}
+                    className={cn(
+                      'mt-4 rounded-2xl border px-4 sm:px-5 py-4 transition-all duration-700',
+                      highlightThread
+                        ? 'border-[#c8a951]/60 bg-[#c8a951]/[0.07] shadow-[0_0_0_3px_rgba(200,169,81,0.14)]'
+                        : 'border-white/[0.1] bg-white/[0.03]',
+                    )}
+                  >
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2 text-[11px] tracking-[0.14em] text-white/50 font-bold">
                         <MessagesSquare className="w-3.5 h-3.5 text-[#c8a951]" />

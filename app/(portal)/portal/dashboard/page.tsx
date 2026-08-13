@@ -32,10 +32,9 @@ async function getProjectData(userId: string) {
   try {
     const { prisma } = await import('@/lib/db');
 
-    // Project + notifications can run in parallel. Activities depend on project.id,
-    // so run the first two together, then activities.
-    const [project, notifications] = await Promise.all([
-      prisma.project.findFirst({
+    // Notifications are no longer fetched here — the navbar bell in the portal
+    // layout is the single place updates surface, on every page.
+    const project = await prisma.project.findFirst({
         where: {
           userId,
           isArchived: false,
@@ -59,16 +58,7 @@ async function getProjectData(userId: string) {
             },
           },
         },
-      }),
-      prisma.notification.findMany({
-        where: {
-          userId,
-          isRead: false,
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      }),
-    ]);
+      });
 
     const activities = await prisma.activityLog.findMany({
       where: {
@@ -83,7 +73,6 @@ async function getProjectData(userId: string) {
 
     return {
       project,
-      notifications,
       activities,
       dbError: false,
     };
@@ -91,7 +80,6 @@ async function getProjectData(userId: string) {
     console.warn('[Dashboard] Database error:', dbError);
     return {
       project: null,
-      notifications: [],
       activities: [],
       dbError: true,
     };
@@ -210,30 +198,6 @@ function getMockData(userId: string) {
         company: 'Demo Startup',
       },
     },
-    notifications: [
-      {
-        id: 'notif-1',
-        title: 'פגישה מתקרבת',
-        message: 'יש לך פגישה עם המנטור מחר בשעה 14:00',
-        link: '/portal/calendar',
-        type: 'info',
-        userId,
-        isRead: false,
-        readAt: null,
-        createdAt: now,
-      },
-      {
-        id: 'notif-2',
-        title: 'מסמך חדש זמין',
-        message: 'המנטור שלך העלה מסמך חדש לצפייה',
-        link: '/portal/documents',
-        type: 'success',
-        userId,
-        isRead: false,
-        readAt: null,
-        createdAt: new Date(now.getTime() - 86400000),
-      },
-    ],
     activities: [
       {
         id: 'activity-1',
@@ -429,7 +393,6 @@ export default async function DashboardPage() {
             image: session.user.image ?? null,
           }}
           project={data.project}
-          notifications={data.notifications}
           activities={data.activities}
           dbError={data.dbError}
           dealProducts={dealProducts}

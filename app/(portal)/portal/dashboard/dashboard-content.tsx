@@ -13,13 +13,12 @@ import { WhatsAppButton } from './components/whatsapp-button';
 import { WelcomeOnboarding } from './components/welcome-onboarding';
 import { StatsCards } from './components/stats-cards';
 import { RecentActivity } from './components/recent-activity';
-import { UpdatesPanel } from './components/updates-panel';
 import { QuickActions } from './components/quick-actions';
 import { ServiceTimeline } from './components/service-timeline';
 import type { DealProductDisplay } from './components/purchased-services';
 import type { DealActivityDisplay } from './components/deal-activities';
 import type { MatchedService } from '@/lib/service-matcher';
-import type { Project, File, ProjectNote, Notification, ActivityLog } from '@prisma/client';
+import type { Project, File, ProjectNote, ActivityLog } from '@prisma/client';
 
 // =============================================================================
 // TYPES
@@ -48,7 +47,6 @@ interface ProjectWithRelations extends Project {
 interface DashboardContentProps {
   user: DashboardUser;
   project: ProjectWithRelations | null;
-  notifications: Notification[];
   activities: ActivityLog[];
   dbError?: boolean;
   dealProducts?: DealProductDisplay[];
@@ -67,7 +65,6 @@ interface DashboardContentProps {
 export function DashboardContent({
   user,
   project,
-  notifications,
   activities,
   dbError,
   dealProducts = [],
@@ -92,25 +89,10 @@ export function DashboardContent({
     );
   }
 
-  const updates = notifications.map((n) => ({
-    id: n.id,
-    title: n.title,
-    message: n.message,
-    link: n.link,
-    type: n.type,
-    createdAt: n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
-  }));
-
-  // No project — show onboarding. The updates still belong here: most journey
-  // entrepreneurs have no Project row, and this early return used to hide a
-  // mentor's reply from exactly those people.
+  // No project — show onboarding. Updates are not duplicated here: the navbar
+  // bell is the single place they live, on every portal page.
   if (!project) {
-    return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-5">
-        <UpdatesPanel updates={updates} />
-        <WelcomeOnboarding user={user} />
-      </div>
-    );
+    return <WelcomeOnboarding user={user} />;
   }
 
   const firstName = user.name?.split(' ')[0] || 'יזם';
@@ -149,9 +131,6 @@ export function DashboardContent({
         {/* Widgets */}
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Unread updates — an advisor's reply lands here, above the fold. */}
-            <UpdatesPanel updates={updates} />
-
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <QuickActions project={project} />
             </motion.div>

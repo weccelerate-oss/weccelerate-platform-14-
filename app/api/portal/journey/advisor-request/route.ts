@@ -15,6 +15,7 @@ import { hasFeature } from '@/lib/entitlements';
 import { signAdvisorToken } from '@/lib/journey/advisor-token';
 import { sendAdvisorReviewEmail } from '@/lib/journey/advisor-email';
 import { notifyAdmins } from '@/lib/advisors.server';
+import { threadState } from '@/lib/advisors';
 
 const PORTAL_URL = 'https://weccelerate.co.il';
 
@@ -91,7 +92,10 @@ export async function POST(req: NextRequest) {
 
     const answer = await prisma.userJourneyAnswer.findUnique({
       where: { userId_questionId: { userId, questionId } },
-      include: { question: { include: { chapter: { select: { name: true } } } } },
+      include: {
+        question: { include: { chapter: { select: { name: true } } } },
+        comments: { select: { authorType: true, createdAt: true }, orderBy: { createdAt: 'asc' } },
+      },
     });
     if (!answer || (answer.content ?? '').trim().length < 10) {
       return NextResponse.json(
@@ -119,20 +123,31 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // One email per waiting cycle, not per message. If the mentor is already
+    // holding an unanswered request on this answer, a re-send only updates the
+    // desk — an entrepreneur pressing send ten times must not produce ten
+    // emails. Once the mentor has replied, the next submission is a fresh
+    // cycle and does get mailed, so a revised answer is never left in silence.
+    const alreadyPending =
+      Boolean(answer.advisorRequestedAt) &&
+      threadState(answer.advisorRequestedAt!, answer.comments ?? []).awaitingReply;
+
     const token = signAdvisorToken(answer.id, advisor.email);
     const reviewUrl = `${PORTAL_URL}/advisor/${token}`;
 
-    const emailRes = await sendAdvisorReviewEmail({
-      to: advisor.email,
-      advisorName: advisor.name,
-      entrepreneurName: user.name || 'היזם',
-      chapterName: answer.question?.chapter?.name ?? '',
-      questionPrompt: answer.question?.prompt ?? '',
-      answerContent: answer.content ?? '',
-      aiFeedback: answer.aiFeedback ?? null,
-      entrepreneurNote: safeNote,
-      reviewUrl,
-    });
+    const emailRes = alreadyPending
+      ? { ok: true, error: undefined as string | undefined }
+      : await sendAdvisorReviewEmail({
+          to: advisor.email,
+          advisorName: advisor.name,
+          entrepreneurName: user.name || 'היזם',
+          chapterName: answer.question?.chapter?.name ?? '',
+          questionPrompt: answer.question?.prompt ?? '',
+          answerContent: answer.content ?? '',
+          aiFeedback: answer.aiFeedback ?? null,
+          entrepreneurNote: safeNote,
+          reviewUrl,
+        });
 
     // In-desk notification for the advisor. The email is the nudge; this is
     // what makes the request visible when they open /advisor in the morning
@@ -144,7 +159,7 @@ export async function POST(req: NextRequest) {
           type: 'info',
           title: `${user.name || 'יזם'} ביקש/ה את המשוב שלך`,
           message: `על השאלה: "${(answer.question?.prompt ?? '').slice(0, 80)}"`,
-          link: '/advisor',
+          link: `/advisor?thread=${answer.id}`,
         },
       });
     } catch {
@@ -155,18 +170,20 @@ export async function POST(req: NextRequest) {
       title: `${user.name || 'יזם'} ביקש/ה משוב מ${advisor.name}`,
       message: `"${(answer.question?.prompt ?? '').slice(0, 70)}" — הפנייה נשלחה, השעון רץ.`,
       type: 'info',
+      answerId: answer.id,
     });
 
     try {
       await prisma.activityLog.create({
         data: {
           action: emailRes.ok ? 'journey.advisor_requested' : 'journey.advisor_request_email_failed',
-          description: `Advisor review ${emailRes.ok ? 'requested' : 'EMAIL FAILED'} for question "${(answer.question?.prompt ?? '').slice(0, 60)}" → ${advisor.name} <${advisor.email}>`,
+          description: `Advisor review ${emailRes.ok ? (alreadyPending ? 'requested (no email — already pending)' : 'requested') : 'EMAIL FAILED'} for question "${(answer.question?.prompt ?? '').slice(0, 60)}" → ${advisor.name} <${advisor.email}>`,
           userId,
           metadata: {
             questionId,
             advisorId: advisor.id,
             advisorEmail: advisor.email,
+            emailSkipped: alreadyPending,
             ...(emailRes.ok ? {} : { error: emailRes.error }),
           },
         },

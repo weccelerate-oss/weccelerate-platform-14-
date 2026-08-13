@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   AlertTriangle,
   Building2,
@@ -62,10 +62,28 @@ export function AdvisorThreadsClient({
 }) {
   const router = useRouter();
   const [threads, setThreads] = useState(initial);
+  // A ?thread=<answerId> deep link — from a notification — opens that
+  // conversation. It wins over the default filter, which would otherwise hide
+  // the very thread the admin clicked through to read.
+  const searchParams = useSearchParams();
+  const deepLinkThread = searchParams.get('thread');
+
   const [filter, setFilter] = useState<Filter>(
-    initial.some((t) => t.overdue) ? 'overdue' : initial.some((t) => t.awaitingReply) ? 'waiting' : 'all',
+    deepLinkThread
+      ? 'all'
+      : initial.some((t) => t.overdue)
+        ? 'overdue'
+        : initial.some((t) => t.awaitingReply)
+          ? 'waiting'
+          : 'all',
   );
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(deepLinkThread);
+
+  useEffect(() => {
+    if (!deepLinkThread) return;
+    setOpenId(deepLinkThread);
+    setFilter('all');
+  }, [deepLinkThread]);
 
   // Landing on this screen is reading the notifications that pointed at it.
   useEffect(() => {

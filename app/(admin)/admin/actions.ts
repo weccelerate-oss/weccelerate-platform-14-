@@ -1778,6 +1778,7 @@ export async function adminReplyToThreadAction(answerId: string, body: string) {
       where: { id: answerId },
       select: {
         id: true,
+        questionId: true,
         user: {
           select: { id: true, name: true, advisor: { select: { id: true, name: true } } },
         },
@@ -1807,6 +1808,7 @@ export async function adminReplyToThreadAction(answerId: string, body: string) {
       entrepreneurId: answer.user.id,
       authorName: 'צוות WeCcelerate',
       fromTeam: true,
+      questionId: answer.questionId,
       questionPrompt: answer.question?.prompt ?? '',
       chapterName: answer.question?.chapter?.name ?? null,
       replyBody: text,
@@ -1821,7 +1823,7 @@ export async function adminReplyToThreadAction(answerId: string, body: string) {
             type: 'info',
             title: `צוות WeCcelerate הצטרף לשיחה עם ${answer.user.name}`,
             message: `על השאלה: "${prompt}"`,
-            link: '/advisor',
+            link: `/advisor?thread=${answer.id}`,
           },
         })
         .catch(() => {});

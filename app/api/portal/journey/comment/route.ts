@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
             type: 'info',
             title: `${user.name || 'היזם'} הוסיף/ה הודעה בשיחה`,
             message: `על השאלה: "${(answer.question?.prompt ?? '').slice(0, 80)}"`,
-            link: '/advisor',
+            link: `/advisor?thread=${answer.id}`,
           },
         });
       } catch {
@@ -109,6 +109,7 @@ export async function POST(req: NextRequest) {
       title: `${user.name || 'היזם'} הוסיף/ה הודעה בשיחה עם המלווה`,
       message: `"${(answer.question?.prompt ?? '').slice(0, 70)}"`,
       type: 'info',
+      answerId: answer.id,
     });
 
     return NextResponse.json({

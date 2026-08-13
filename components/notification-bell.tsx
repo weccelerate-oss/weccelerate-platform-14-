@@ -107,10 +107,33 @@ export function NotificationBell({ initial }: { initial: BellNotification[] }) {
       </button>
 
       {open && (
-        <div
-          dir="rtl"
-          className="absolute left-0 mt-2 w-[min(88vw,340px)] rounded-2xl border border-white/[0.1] bg-[#0b1029] shadow-[0_18px_48px_rgba(0,0,0,0.55)] overflow-hidden z-50"
-        >
+        <>
+          {/* Mobile backdrop. The panel becomes a sheet there, so it needs
+              something to dismiss against. */}
+          <div
+            className="fixed inset-0 z-40 bg-black/55 sm:hidden"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            dir="rtl"
+            className={cn(
+              // Mobile: a bottom sheet pinned to the viewport. Anchoring to the
+              // button does not work here — the bell sits mid-navbar, and a
+              // 340px panel has no room to either side on a phone, so it used
+              // to open half off-screen.
+              'fixed inset-x-0 bottom-0 z-50 max-h-[72vh] rounded-t-2xl border-t border-white/[0.1]',
+              'bg-[#0b1029] shadow-[0_-18px_48px_rgba(0,0,0,0.55)] overflow-hidden',
+              'pb-[env(safe-area-inset-bottom)] sm:pb-0',
+              // Desktop: the dropdown it always was.
+              'sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:mt-2 sm:w-[340px]',
+              'sm:max-h-none sm:rounded-2xl sm:border sm:shadow-[0_18px_48px_rgba(0,0,0,0.55)]',
+            )}
+          >
+            {/* grab handle — sheet affordance, mobile only */}
+            <div className="sm:hidden flex justify-center pt-2.5 pb-1">
+              <span className="h-1 w-9 rounded-full bg-white/20" />
+            </div>
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.07]">
             <span className="text-[12.5px] font-bold text-white/85">עדכונים</span>
             {items.length > 0 && (
@@ -125,9 +148,9 @@ export function NotificationBell({ initial }: { initial: BellNotification[] }) {
           </div>
 
           {items.length === 0 ? (
-            <p className="px-4 py-6 text-[12.5px] text-white/35 text-center m-0">אין עדכונים חדשים</p>
+            <p className="px-4 py-8 sm:py-6 text-[12.5px] text-white/35 text-center m-0">אין עדכונים חדשים</p>
           ) : (
-            <ul className="m-0 p-0 list-none max-h-[60vh] overflow-y-auto divide-y divide-white/[0.05]">
+            <ul className="m-0 p-0 list-none max-h-[56vh] sm:max-h-[60vh] overflow-y-auto divide-y divide-white/[0.05]">
               {items.map((item) => {
                 // A reply from a mentor or the team wears the WeCcelerate mark;
                 // anything else gets a neutral glyph.
@@ -166,7 +189,8 @@ export function NotificationBell({ initial }: { initial: BellNotification[] }) {
               })}
             </ul>
           )}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
