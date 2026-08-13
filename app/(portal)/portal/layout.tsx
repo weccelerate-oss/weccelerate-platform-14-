@@ -38,6 +38,32 @@ export default async function PortalLayout({
     redirect('/onboarding/set-password');
   }
 
+  // Unread notifications for the bell. Fetched in the layout so every portal
+  // page shows the badge — the journey screen, where the mentor conversation
+  // actually happens, had no indicator at all before this.
+  let notifications: Array<{ id: string; title: string; message: string; link: string | null; type: string; createdAt: string }> = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userId = (session.user as any).id as string | undefined;
+  try {
+    const { prisma } = await import('@/lib/db');
+    const rows: Array<{ id: string; title: string; message: string; link: string | null; type: string; createdAt: Date }> =
+      await prisma.notification.findMany({
+        where: { userId, isRead: false },
+        orderBy: { createdAt: 'desc' },
+        take: 15,
+      });
+    notifications = (userId ? rows : []).map((n) => ({
+      id: n.id,
+      title: n.title,
+      message: n.message,
+      link: n.link,
+      type: n.type,
+      createdAt: n.createdAt.toISOString(),
+    }));
+  } catch {
+    // A DB hiccup must not take the whole portal down for a badge.
+  }
+
   return (
     <div className="min-h-screen bg-[#070b1e] relative" dir="rtl">
       {/* Deep-glass ambience: breathing aurora blobs behind every portal page */}
@@ -51,6 +77,7 @@ export default async function PortalLayout({
         <PortalNavbar
           userName={session.user.name || 'יזם'}
           userEmail={session.user.email || ''}
+          notifications={notifications}
         />
         {children}
       </div>

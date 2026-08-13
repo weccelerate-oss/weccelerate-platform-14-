@@ -92,9 +92,25 @@ export function DashboardContent({
     );
   }
 
-  // No project — show onboarding
+  const updates = notifications.map((n) => ({
+    id: n.id,
+    title: n.title,
+    message: n.message,
+    link: n.link,
+    type: n.type,
+    createdAt: n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
+  }));
+
+  // No project — show onboarding. The updates still belong here: most journey
+  // entrepreneurs have no Project row, and this early return used to hide a
+  // mentor's reply from exactly those people.
   if (!project) {
-    return <WelcomeOnboarding user={user} />;
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 space-y-5">
+        <UpdatesPanel updates={updates} />
+        <WelcomeOnboarding user={user} />
+      </div>
+    );
   }
 
   const firstName = user.name?.split(' ')[0] || 'יזם';
@@ -134,17 +150,7 @@ export function DashboardContent({
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Unread updates — an advisor's reply lands here, above the fold. */}
-            <UpdatesPanel
-              updates={notifications.map((n) => ({
-                id: n.id,
-                title: n.title,
-                message: n.message,
-                link: n.link,
-                type: n.type,
-                createdAt:
-                  n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
-              }))}
-            />
+            <UpdatesPanel updates={updates} />
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <QuickActions project={project} />

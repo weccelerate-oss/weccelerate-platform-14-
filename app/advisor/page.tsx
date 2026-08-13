@@ -15,6 +15,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { AdvisorDesk, type DeskThread, type DeskAdvisee, type DeskComment } from './desk-client';
+import type { BellNotification } from '@/components/notification-bell';
 
 // Shapes of the rows the two queries below select. Declared here because the
 // shared prisma client is untyped (lib/db.ts returns `any`).
@@ -158,15 +159,33 @@ export default async function AdvisorDeskPage() {
     lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
   }));
 
-  // Opening the desk *is* reading the notifications that pointed here — clear
-  // them so tomorrow's badge only counts what actually arrived since.
-  if (!isAdmin) {
-    await prisma.notification
-      .updateMany({
-        where: { userId: me.id, link: '/advisor', isRead: false },
-        data: { isRead: true, readAt: new Date() },
-      })
-      .catch(() => {});
+  // Unread notifications for the bell. These used to be marked read on sight,
+  // which meant a mentor who glanced at the desk lost the record of what came
+  // in. The bell clears them on click instead.
+  let notifications: BellNotification[] = [];
+  try {
+    const rows: Array<{
+      id: string;
+      title: string;
+      message: string;
+      link: string | null;
+      type: string;
+      createdAt: Date;
+    }> = await prisma.notification.findMany({
+      where: { userId: me.id, isRead: false },
+      orderBy: { createdAt: 'desc' },
+      take: 15,
+    });
+    notifications = rows.map((n) => ({
+      id: n.id,
+      title: n.title,
+      message: n.message,
+      link: n.link,
+      type: n.type,
+      createdAt: n.createdAt.toISOString(),
+    }));
+  } catch {
+    // A DB hiccup must not take the desk down for a badge.
   }
 
   return (
@@ -175,6 +194,7 @@ export default async function AdvisorDeskPage() {
       isAdmin={isAdmin}
       threads={threads}
       advisees={deskAdvisees}
+      notifications={notifications}
     />
   );
 }

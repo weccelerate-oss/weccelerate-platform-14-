@@ -25,6 +25,7 @@ import {
   Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NotificationBell, type BellNotification } from '@/components/notification-bell';
 
 export interface DeskComment {
   id: string;
@@ -67,11 +68,14 @@ export function AdvisorDesk({
   isAdmin,
   threads: initialThreads,
   advisees,
+  notifications = [],
 }: {
   advisorName: string;
   isAdmin: boolean;
   threads: DeskThread[];
   advisees: DeskAdvisee[];
+  /** Unread notifications — new requests and follow-ups from entrepreneurs. */
+  notifications?: BellNotification[];
 }) {
   const [threads, setThreads] = useState(initialThreads);
   const [tab, setTab] = useState<Tab>('waiting');
@@ -122,6 +126,8 @@ export function AdvisorDesk({
               </div>
             </div>
           </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+          <NotificationBell initial={notifications} />
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
             className="flex items-center gap-1.5 shrink-0 rounded-xl border border-white/[0.12] px-3 py-2 text-[12.5px] text-white/55 hover:text-white/90 hover:border-white/25 transition-colors cursor-pointer"
@@ -129,6 +135,7 @@ export function AdvisorDesk({
             <LogOut className="w-3.5 h-3.5" />
             התנתק
           </button>
+          </div>
         </header>
 
         {/* ── the one number that matters ─────────────────────────── */}

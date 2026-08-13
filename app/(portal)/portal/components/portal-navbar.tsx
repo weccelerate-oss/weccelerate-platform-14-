@@ -18,11 +18,14 @@ import {
   LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NotificationBell, type BellNotification } from '@/components/notification-bell';
 import { signOut } from 'next-auth/react';
 
 interface PortalNavbarProps {
   userName: string;
   userEmail: string;
+  /** Unread notifications, newest first — powers the bell. */
+  notifications?: BellNotification[];
 }
 
 const NAV_LINKS = [
@@ -31,7 +34,7 @@ const NAV_LINKS = [
   { href: '/portal/learning', label: 'מרכז למידה', icon: GraduationCap },
 ];
 
-export function PortalNavbar({ userName, userEmail }: PortalNavbarProps) {
+export function PortalNavbar({ userName, userEmail, notifications = [] }: PortalNavbarProps) {
   const pathname = usePathname();
   const firstName = userName?.split(' ')[0] || 'יזם';
 
@@ -74,6 +77,7 @@ export function PortalNavbar({ userName, userEmail }: PortalNavbarProps) {
 
           {/* User */}
           <div className="flex items-center gap-3">
+            <NotificationBell initial={notifications} />
             <div className="hidden sm:block text-start">
               <p className="text-xs font-medium text-white/70">{userName}</p>
               <p className="text-[10px] text-white/30">{userEmail}</p>

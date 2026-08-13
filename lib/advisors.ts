@@ -20,8 +20,12 @@
  * name with the WeCcelerate mark as their avatar (ADVISOR_AVATAR).
  */
 
-/** Shown as the advisor's profile picture everywhere they appear. */
-export const ADVISOR_AVATAR = '/images/WeCcelerate-logo.png';
+/**
+ * The advisor's (and the team's) profile picture: the W roundel on its own,
+ * cropped from the master logo. The full wordmark was unreadable once squeezed
+ * into a 28px circle.
+ */
+export const ADVISOR_AVATAR = '/images/weccelerate-mark.png';
 
 /** What the entrepreneur reads next to an advisor's name. */
 export const ADVISOR_TITLE = 'המלווה שלך · WeCcelerate';
