@@ -10,7 +10,6 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  AlertTriangle,
   Check,
   Inbox,
   Mail,
@@ -43,10 +42,10 @@ export interface AdvisorRow {
 
 export function AdvisorsClient({
   advisors,
-  unassignedInvestorPrep,
+  assignedEntrepreneurs,
 }: {
   advisors: AdvisorRow[];
-  unassignedInvestorPrep: number;
+  assignedEntrepreneurs: number;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -159,7 +158,7 @@ export function AdvisorsClient({
             מלווים
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            המלווים שאפשר לשייך ליזמים בתוכנית ההכנה למשקיעים. הם נכנסים לאזור המלווה שלהם ב-
+            שיוך מלווה ליזם ב<a href="/admin/users" className="text-royal-600 underline">מסך היזמים</a> פותח לו את הליווי האישי — אין הגדרה נוספת. המלווים נכנסים לאזור שלהם ב-
             <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">/advisor</code> ועונים ליזמים משם.
           </p>
         </div>
@@ -185,23 +184,11 @@ export function AdvisorsClient({
           alert={totalWaiting > 0}
         />
         <StatCard
-          label="יזמי תוכנית משקיעים ללא מלווה"
-          value={unassignedInvestorPrep}
-          icon={<AlertTriangle className="w-4 h-4" />}
-          alert={unassignedInvestorPrep > 0}
+          label="יזמים עם מלווה"
+          value={assignedEntrepreneurs}
+          icon={<UserRound className="w-4 h-4" />}
         />
       </div>
-
-      {unassignedInvestorPrep > 0 && (
-        <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-          יש {unassignedInvestorPrep} יזמים בתוכנית ההכנה למשקיעים בלי מלווה משויך — הם לא יכולים לבקש חוות דעת
-          אנושית. השיוך נעשה במסך{' '}
-          <a href="/admin/users" className="font-semibold underline">
-            היזמים
-          </a>
-          .
-        </div>
-      )}
 
       {notice && (
         <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800 flex items-start justify-between gap-3">

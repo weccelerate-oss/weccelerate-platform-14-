@@ -9,6 +9,7 @@
 
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/db';
+import { threadState } from '@/lib/advisors';
 import { AdvisorsClient, type AdvisorRow } from './advisors-client';
 
 export const metadata: Metadata = { title: 'מלווים | ניהול' };
@@ -61,14 +62,7 @@ export default async function AdvisorsPage() {
   }>) {
     const advisorId = a.user?.advisorId;
     if (!advisorId) continue;
-    let lastAdvisorAt: number | null = null;
-    let lastEntrepreneurAt = a.advisorRequestedAt.getTime();
-    for (const c of a.comments) {
-      const at = c.createdAt.getTime();
-      if (c.authorType === 'ADVISOR') lastAdvisorAt = Math.max(lastAdvisorAt ?? 0, at);
-      else lastEntrepreneurAt = Math.max(lastEntrepreneurAt, at);
-    }
-    if (lastAdvisorAt === null || lastEntrepreneurAt > lastAdvisorAt) {
+    if (threadState(a.advisorRequestedAt, a.comments).awaitingReply) {
       waitingByAdvisor.set(advisorId, (waitingByAdvisor.get(advisorId) ?? 0) + 1);
     }
   }
@@ -85,11 +79,12 @@ export default async function AdvisorsPage() {
     mustChangePassword: m.mustChangePassword,
   }));
 
-  // Entrepreneurs in the investor-prep programme with nobody to ask — the one
-  // number that makes this page actionable.
-  const unassigned = await prisma.user.count({
-    where: { role: 'ENTREPRENEUR', plan: 'INVESTOR_PREP', advisorId: null },
+  // How many entrepreneurs have a mentor at all. Not having one is now the
+  // ordinary state — the mentor is added when someone needs one — so this is a
+  // reach figure, not a warning.
+  const assigned = await prisma.user.count({
+    where: { role: 'ENTREPRENEUR', advisorId: { not: null } },
   });
 
-  return <AdvisorsClient advisors={rows} unassignedInvestorPrep={unassigned} />;
+  return <AdvisorsClient advisors={rows} assignedEntrepreneurs={assigned} />;
 }

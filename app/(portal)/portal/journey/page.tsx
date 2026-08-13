@@ -30,6 +30,7 @@ export default async function JourneyPage() {
         select: {
           plan: true,
           featureOverrides: true,
+          advisorId: true,
           advisor: { select: { name: true, isActive: true } },
         },
       })

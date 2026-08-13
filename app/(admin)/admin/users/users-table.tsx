@@ -30,7 +30,6 @@ import {
   toggleUserActiveAction,
   resetUserPasswordAction,
   deleteUserAction,
-  setUserPlanAction,
   setUserAdvisorAction,
 } from '../actions';
 // AO-16: WelcomeEmailStatus is re-exported from page.tsx — single source of truth.
@@ -379,36 +378,12 @@ export function UsersTable({ users, advisors = [] }: UsersTableProps) {
                         🤖 auto · {user.provisionedSource}
                       </span>
                     )}
-                    {user.role === 'ENTREPRENEUR' && (
-                      <select
-                        value={(user as any).plan ?? 'WECCELERATE'}
-                        onChange={(e) => {
-                          const plan = e.target.value as 'WECCELERATE' | 'INVESTOR_PREP' | 'FREE';
-                          startTransition(async () => {
-                            await setUserPlanAction(user.id, plan);
-                            router.refresh();
-                          });
-                        }}
-                        disabled={isPending}
-                        title="תוכנית הפורטל — קובעת אילו פיצ'רים פתוחים ליזם"
-                        className={cn(
-                          'px-1.5 py-0.5 text-xs font-medium rounded-full border cursor-pointer outline-none',
-                          (user as any).plan === 'INVESTOR_PREP'
-                            ? 'bg-amber-50 text-amber-800 border-amber-300'
-                            : (user as any).plan === 'FREE'
-                              ? 'bg-slate-50 text-slate-600 border-slate-300'
-                              : 'bg-yellow-50 text-yellow-800 border-yellow-200',
-                        )}
-                      >
-                        <option value="WECCELERATE">יזם וויסלרייט</option>
-                        <option value="INVESTOR_PREP">הכנה למשקיעים ⭐</option>
-                        <option value="FREE">הרשמה חופשית</option>
-                      </select>
-                    )}
-                    {/* Human advisor. Only INVESTOR_PREP unlocks the thread
-                        (lib/entitlements.ts), so that's where an assignment
-                        does anything — we still show it for other plans so an
-                        upgrade doesn't need a second trip here. */}
+                    {/* The plan dropdown used to live here. It was a second
+                        switch that had to agree with the advisor assignment —
+                        set one without the other and the entrepreneur either
+                        had a mentor they could not reach or a button that led
+                        nowhere. Assigning a mentor is now the whole act
+                        (lib/entitlements.ts); everyone is a WeCcelerate client. */}
                     {user.role === 'ENTREPRENEUR' && advisors.length > 0 && (
                       <select
                         value={user.advisorId ?? ''}
@@ -422,19 +397,15 @@ export function UsersTable({ users, advisors = [] }: UsersTableProps) {
                           });
                         }}
                         disabled={isPending}
-                        title="המלווה האנושי שמקבל את בקשות המשוב של היזם"
+                        title="שיוך מלווה פותח ליזם את הליווי האישי — אין הגדרה נוספת"
                         className={cn(
                           'px-1.5 py-0.5 text-xs font-medium rounded-full border cursor-pointer outline-none',
                           user.advisorId
                             ? 'bg-purple-50 text-purple-700 border-purple-300'
-                            : user.plan === 'INVESTOR_PREP'
-                              ? 'bg-red-50 text-red-700 border-red-300'
-                              : 'bg-slate-50 text-slate-500 border-slate-200',
+                            : 'bg-slate-50 text-slate-500 border-slate-200',
                         )}
                       >
-                        <option value="">
-                          {user.plan === 'INVESTOR_PREP' ? '⚠ ללא מלווה' : 'ללא מלווה'}
-                        </option>
+                        <option value="">ללא מלווה</option>
                         {advisors.map((a) => (
                           <option key={a.id} value={a.id}>
                             🧑‍🏫 {a.name}

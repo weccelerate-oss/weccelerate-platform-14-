@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
         name: true,
         plan: true,
         featureOverrides: true,
+        advisorId: true,
         advisor: { select: { id: true, isActive: true } },
       },
     });

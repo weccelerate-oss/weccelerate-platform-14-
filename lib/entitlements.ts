@@ -6,12 +6,16 @@
  * (e.g. { "mentorAi": false }) — an override always beats the plan default.
  *
  * Plans:
- *   WECCELERATE   — house clients (form automation / team-opened). Full
- *                   journey + learning + AI mentor.
- *   INVESTOR_PREP — purchased the investor-prep service. Everything above
- *                   PLUS the human-mentor thread with their advisor.
+ *   WECCELERATE   — everyone. Full journey + learning + AI mentor.
+ *   INVESTOR_PREP — legacy tier, kept so old rows still resolve. No longer
+ *                   assigned: it used to be what unlocked the human mentor.
  *   FREE          — future open self-signup. Learning + journey basics,
  *                   no AI mentor (costs money) until they upgrade.
+ *
+ * `humanMentor` deliberately ignores all of the above — see hasFeature. The
+ * admin unlocked it by setting a plan AND assigning an advisor, and forgetting
+ * either half left an entrepreneur with a mentor they could not reach. Now the
+ * assignment alone is the entitlement.
  */
 
 export type PortalFeature =
@@ -29,7 +33,7 @@ const PLAN_FEATURES: Record<PlanName, Record<PortalFeature, boolean>> = {
     learning: true,
     mentorAi: true,
     kit: true,
-    humanMentor: false,
+    humanMentor: false, // unused — resolved from the advisor assignment
   },
   INVESTOR_PREP: {
     journey: true,
@@ -50,6 +54,8 @@ const PLAN_FEATURES: Record<PlanName, Record<PortalFeature, boolean>> = {
 export interface EntitledUser {
   plan?: string | null;
   featureOverrides?: unknown;
+  /** The assigned advisor, if any — this is what unlocks `humanMentor`. */
+  advisorId?: string | null;
 }
 
 export function hasFeature(user: EntitledUser | null | undefined, feature: PortalFeature): boolean {
@@ -57,6 +63,12 @@ export function hasFeature(user: EntitledUser | null | undefined, feature: Porta
   const overrides = (user?.featureOverrides ?? null) as Record<string, unknown> | null;
   if (overrides && typeof overrides === 'object' && typeof overrides[feature] === 'boolean') {
     return overrides[feature] as boolean;
+  }
+  // The human-mentor thread is not a plan tier — it is simply whether somebody
+  // was assigned to this entrepreneur. Assigning a mentor in /admin/users is
+  // the whole act; there is no second switch to remember to flip.
+  if (feature === 'humanMentor') {
+    return Boolean(user?.advisorId);
   }
   return PLAN_FEATURES[plan]?.[feature] ?? PLAN_FEATURES.WECCELERATE[feature];
 }
