@@ -108,13 +108,12 @@ export function NotificationBell({ initial }: { initial: BellNotification[] }) {
 
       {open && (
         <>
-          {/* Mobile backdrop. The panel becomes a sheet there, so it needs
-              something to dismiss against. */}
-          <div
-            className="fixed inset-0 z-40 bg-black/55 sm:hidden"
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
+          {/* No scrim. The bell lives inside a `sticky z-40` navbar, which is
+              its own stacking context — a fixed backdrop rendered in here
+              paints over the navbar's own logo and links instead of behind
+              them, and no z-index can lift the navbar out of a context it
+              defines. Tapping outside still closes it (see the mousedown
+              handler above), so the scrim was only ever decoration. */}
           <div
             dir="rtl"
             className={cn(

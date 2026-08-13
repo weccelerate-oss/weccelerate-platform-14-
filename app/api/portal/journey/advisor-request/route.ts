@@ -15,7 +15,7 @@ import { hasFeature } from '@/lib/entitlements';
 import { signAdvisorToken } from '@/lib/journey/advisor-token';
 import { sendAdvisorReviewEmail } from '@/lib/journey/advisor-email';
 import { notifyAdmins } from '@/lib/advisors.server';
-import { threadState } from '@/lib/advisors';
+import { israelDayKey, ADVISOR_EMAIL_LOG_ACTION } from '@/lib/advisors';
 
 const PORTAL_URL = 'https://weccelerate.co.il';
 
@@ -92,10 +92,7 @@ export async function POST(req: NextRequest) {
 
     const answer = await prisma.userJourneyAnswer.findUnique({
       where: { userId_questionId: { userId, questionId } },
-      include: {
-        question: { include: { chapter: { select: { name: true } } } },
-        comments: { select: { authorType: true, createdAt: true }, orderBy: { createdAt: 'asc' } },
-      },
+      include: { question: { include: { chapter: { select: { name: true } } } } },
     });
     if (!answer || (answer.content ?? '').trim().length < 10) {
       return NextResponse.json(
@@ -123,19 +120,26 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // One email per waiting cycle, not per message. If the mentor is already
-    // holding an unanswered request on this answer, a re-send only updates the
-    // desk — an entrepreneur pressing send ten times must not produce ten
-    // emails. Once the mentor has replied, the next submission is a fresh
-    // cycle and does get mailed, so a revised answer is never left in silence.
-    const alreadyPending =
-      Boolean(answer.advisorRequestedAt) &&
-      threadState(answer.advisorRequestedAt!, answer.comments ?? []).awaitingReply;
+    // At most one email per entrepreneur per day. The first message of the day
+    // reaches the mentor's inbox; everything after it that day only lands on
+    // their desk. An entrepreneur working through ten questions in an afternoon
+    // must not produce ten emails.
+    //
+    // The cap is keyed on the entrepreneur, not the thread, because that is
+    // what the mentor experiences — ten mails about one person in one day is
+    // the thing to avoid, whichever questions they were about.
+    const today = israelDayKey(new Date());
+    const lastEmail: { createdAt: Date } | null = await prisma.activityLog.findFirst({
+      where: { userId, action: ADVISOR_EMAIL_LOG_ACTION },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    });
+    const alreadyEmailedToday = Boolean(lastEmail) && israelDayKey(lastEmail!.createdAt) === today;
 
     const token = signAdvisorToken(answer.id, advisor.email);
     const reviewUrl = `${PORTAL_URL}/advisor/${token}`;
 
-    const emailRes = alreadyPending
+    const emailRes = alreadyEmailedToday
       ? { ok: true, error: undefined as string | undefined }
       : await sendAdvisorReviewEmail({
           to: advisor.email,
@@ -148,6 +152,20 @@ export async function POST(req: NextRequest) {
           entrepreneurNote: safeNote,
           reviewUrl,
         });
+
+    // Stamp the send itself — this row is what the daily cap reads next time.
+    if (emailRes.ok && !alreadyEmailedToday) {
+      await prisma.activityLog
+        .create({
+          data: {
+            action: ADVISOR_EMAIL_LOG_ACTION,
+            description: `Advisor request email sent to ${advisor.name} <${advisor.email}> for ${user.name || 'entrepreneur'}`,
+            userId,
+            metadata: { advisorId: advisor.id, answerId: answer.id },
+          },
+        })
+        .catch(() => {});
+    }
 
     // In-desk notification for the advisor. The email is the nudge; this is
     // what makes the request visible when they open /advisor in the morning
@@ -177,13 +195,13 @@ export async function POST(req: NextRequest) {
       await prisma.activityLog.create({
         data: {
           action: emailRes.ok ? 'journey.advisor_requested' : 'journey.advisor_request_email_failed',
-          description: `Advisor review ${emailRes.ok ? (alreadyPending ? 'requested (no email — already pending)' : 'requested') : 'EMAIL FAILED'} for question "${(answer.question?.prompt ?? '').slice(0, 60)}" → ${advisor.name} <${advisor.email}>`,
+          description: `Advisor review ${emailRes.ok ? (alreadyEmailedToday ? 'requested (no email — daily cap)' : 'requested') : 'EMAIL FAILED'} for question "${(answer.question?.prompt ?? '').slice(0, 60)}" → ${advisor.name} <${advisor.email}>`,
           userId,
           metadata: {
             questionId,
             advisorId: advisor.id,
             advisorEmail: advisor.email,
-            emailSkipped: alreadyPending,
+            emailSkipped: alreadyEmailedToday,
             ...(emailRes.ok ? {} : { error: emailRes.error }),
           },
         },

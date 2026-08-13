@@ -149,3 +149,22 @@ export function threadState(
 function toMs(v: Date | string): number {
   return v instanceof Date ? v.getTime() : Date.parse(v);
 }
+
+/**
+ * The calendar day a moment falls on, in Israel time, as "YYYY-MM-DD".
+ *
+ * Used to cap mentor emails at one per entrepreneur per day. Comparing
+ * formatted local dates sidesteps offset arithmetic and DST entirely — two
+ * instants are the same day iff this string matches.
+ */
+export function israelDayKey(date: Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jerusalem',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
+/** Audit action written whenever a mentor actually receives a request email. */
+export const ADVISOR_EMAIL_LOG_ACTION = 'journey.advisor_email_sent';
