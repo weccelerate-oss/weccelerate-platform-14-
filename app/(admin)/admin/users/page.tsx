@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { UsersTable } from './users-table';
+import { listAdvisors } from '@/lib/advisors.server';
 import { CreateUserDialog } from './create-user-dialog';
 import { OnboardingStatusCard } from './onboarding-status-card';
 
@@ -360,7 +361,13 @@ async function getUsers() {
 }
 
 export default async function UsersManagementPage() {
-  const [users, onboarding] = await Promise.all([getUsers(), getOnboardingActivity()]);
+  // The advisor roster feeds the per-entrepreneur assignment dropdown — an
+  // admin picks a real advisor, never types an address.
+  const [users, onboarding, advisors] = await Promise.all([
+    getUsers(),
+    getOnboardingActivity(),
+    listAdvisors().catch(() => []),
+  ]);
 
   const entrepreneurs = users.filter((u: { role?: string | null }) => u.role === 'ENTREPRENEUR');
   // "Awaiting first login" = was given a temp password (mustChangePassword)
@@ -458,7 +465,7 @@ export default async function UsersManagementPage() {
       {/* Users Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <Suspense fallback={<div className="p-6">טוען...</div>}>
-          <UsersTable users={users} />
+          <UsersTable users={users} advisors={advisors} />
         </Suspense>
       </div>
     </div>

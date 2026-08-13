@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
 import { verifyAdvisorToken } from '@/lib/journey/advisor-token';
+import { advisorDisplayName } from '@/lib/advisors';
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,23 +40,36 @@ export async function POST(req: NextRequest) {
     const answer = await prisma.userJourneyAnswer.findUnique({
       where: { id: verified.answerId },
       include: {
-        user: { select: { id: true, advisorEmail: true, name: true } },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            advisor: { select: { id: true, name: true, email: true, isActive: true } },
+          },
+        },
         question: { select: { prompt: true } },
       },
     });
     if (!answer) {
       return NextResponse.json({ error: 'התשובה לא נמצאה' }, { status: 404 });
     }
-    if ((answer.user?.advisorEmail ?? '').toLowerCase() !== verified.advisorEmail) {
+    // The token proves *which* advisor holds the link; the assignment proves
+    // they still hold this entrepreneur. Reassigning an entrepreneur therefore
+    // revokes every outstanding link the previous advisor was mailed.
+    const advisor = answer.user?.advisor;
+    if (!advisor?.isActive || advisor.email.toLowerCase() !== verified.advisorEmail) {
       return NextResponse.json({ error: 'הקישור אינו תואם ליזם הזה עוד' }, { status: 403 });
     }
 
-    const advisorName = verified.advisorEmail.split('@')[0];
+    // The entrepreneur sees a person, not an inbox: the advisor's real name,
+    // never the local part of their email (which is what this used to show).
+    const advisorName = advisorDisplayName(advisor);
     const comment = await prisma.answerComment.create({
       data: {
         answerId: answer.id,
         authorType: 'ADVISOR',
         authorName: advisorName,
+        authorId: advisor.id,
         body: text,
       },
     });
@@ -66,7 +80,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId: answer.user.id,
           type: 'success',
-          title: 'המלווה שלך הגיב לתשובה שלך',
+          title: `${advisorName} הגיב/ה לתשובה שלך`,
           message: `על השאלה: "${(answer.question?.prompt ?? '').slice(0, 80)}"`,
           link: '/portal/journey',
         },

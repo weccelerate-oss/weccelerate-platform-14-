@@ -13,6 +13,8 @@ const PORTAL_URL = 'https://weccelerate.co.il';
 
 export interface AdvisorReviewEmailInput {
   to: string;
+  /** The advisor's display name — greeting only; the entrepreneur never sees it. */
+  advisorName?: string;
   entrepreneurName: string;
   chapterName: string;
   questionPrompt: string;
@@ -40,7 +42,7 @@ export async function sendAdvisorReviewEmail(
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 6px 24px rgba(7,11,30,0.08);">
   <tr><td style="background:#070b1e;padding:22px 28px;">
     <div style="font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#c8a951;font-weight:700;">מסע מרעיון למיזם · בקשת משוב</div>
-    <div style="font-size:19px;font-weight:700;color:#ffffff;margin-top:6px;">${esc(input.entrepreneurName)} מחכה למשוב שלך</div>
+    <div style="font-size:19px;font-weight:700;color:#ffffff;margin-top:6px;">${input.advisorName ? `${esc(input.advisorName)}, ` : ''}${esc(input.entrepreneurName)} מחכה למשוב שלך</div>
   </td></tr>
   <tr><td style="height:3px;background:linear-gradient(90deg,#c8a951,#e8d48b,#c8a951);font-size:0;">&nbsp;</td></tr>
 
@@ -67,6 +69,11 @@ export async function sendAdvisorReviewEmail(
   <tr><td align="center" style="padding:24px 28px;">
     <a href="${input.reviewUrl}" style="display:inline-block;background:linear-gradient(135deg,#c8a951,#e8d48b);color:#070b1e !important;font-weight:700;padding:13px 34px;border-radius:10px;text-decoration:none;font-size:15px;">צפייה ומענה ליזם ←</a>
     <div style="font-size:11px;color:#94a3b8;margin-top:10px;">הקישור אישי ותקף ל-30 יום — אין צורך בהתחברות</div>
+    <div style="font-size:11.5px;color:#64748b;margin-top:14px;line-height:1.6;">
+      כל הפניות שלך מרוכזות באזור המלווה —
+      <a href="${PORTAL_URL}/advisor" style="color:#c8a951;text-decoration:none;font-weight:600;">${PORTAL_URL}/advisor</a><br />
+      שווה להיכנס לשם בכל בוקר: רואים שם מה עוד מחכה לתשובה.
+    </div>
   </td></tr>
 
   <tr><td style="background:#070b1e;padding:16px 28px;text-align:center;">
@@ -86,6 +93,8 @@ ${truncate(input.answerContent, 1200)}
 ${input.entrepreneurNote ? `\nהודעה מהיזם: ${truncate(input.entrepreneurNote, 400)}\n` : ''}
 צפייה ומענה: ${input.reviewUrl}
 (קישור אישי, תקף ל-30 יום)
+
+כל הפניות שלך במקום אחד — אזור המלווה: ${PORTAL_URL}/advisor
 
 — WeCcelerate`;
 

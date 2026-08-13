@@ -57,7 +57,12 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true, plan: true, featureOverrides: true, advisorEmail: true },
+      select: {
+        name: true,
+        plan: true,
+        featureOverrides: true,
+        advisor: { select: { id: true, name: true, email: true, isActive: true } },
+      },
     });
     if (!user || !hasFeature(user, 'humanMentor')) {
       return NextResponse.json(
@@ -65,7 +70,11 @@ export async function POST(req: NextRequest) {
         { status: 403 },
       );
     }
-    if (!user.advisorEmail) {
+    // The advisor must be an assigned, still-active roster member. A
+    // deactivated advisor is treated as no advisor rather than mailing a
+    // closed account into the void.
+    const advisor = user.advisor?.isActive ? user.advisor : null;
+    if (!advisor) {
       return NextResponse.json(
         { error: 'לא הוגדר לך מלווה אישי עדיין — פנה לצוות ונחבר אותך' },
         { status: 409 },
@@ -108,11 +117,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const token = signAdvisorToken(answer.id, user.advisorEmail);
+    const token = signAdvisorToken(answer.id, advisor.email);
     const reviewUrl = `${PORTAL_URL}/advisor/${token}`;
 
     const emailRes = await sendAdvisorReviewEmail({
-      to: user.advisorEmail,
+      to: advisor.email,
+      advisorName: advisor.name,
       entrepreneurName: user.name || 'היזם',
       chapterName: answer.question?.chapter?.name ?? '',
       questionPrompt: answer.question?.prompt ?? '',
@@ -122,13 +132,35 @@ export async function POST(req: NextRequest) {
       reviewUrl,
     });
 
+    // In-desk notification for the advisor. The email is the nudge; this is
+    // what makes the request visible when they open /advisor in the morning
+    // even if the mail was missed or filtered.
+    try {
+      await prisma.notification.create({
+        data: {
+          userId: advisor.id,
+          type: 'info',
+          title: `${user.name || 'יזם'} ביקש/ה את המשוב שלך`,
+          message: `על השאלה: "${(answer.question?.prompt ?? '').slice(0, 80)}"`,
+          link: '/advisor',
+        },
+      });
+    } catch {
+      /* best effort */
+    }
+
     try {
       await prisma.activityLog.create({
         data: {
           action: emailRes.ok ? 'journey.advisor_requested' : 'journey.advisor_request_email_failed',
-          description: `Advisor review ${emailRes.ok ? 'requested' : 'EMAIL FAILED'} for question "${(answer.question?.prompt ?? '').slice(0, 60)}" → ${user.advisorEmail}`,
+          description: `Advisor review ${emailRes.ok ? 'requested' : 'EMAIL FAILED'} for question "${(answer.question?.prompt ?? '').slice(0, 60)}" → ${advisor.name} <${advisor.email}>`,
           userId,
-          metadata: { questionId, advisorEmail: user.advisorEmail, ...(emailRes.ok ? {} : { error: emailRes.error }) },
+          metadata: {
+            questionId,
+            advisorId: advisor.id,
+            advisorEmail: advisor.email,
+            ...(emailRes.ok ? {} : { error: emailRes.error }),
+          },
         },
       });
     } catch {

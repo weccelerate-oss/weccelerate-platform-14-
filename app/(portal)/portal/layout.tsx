@@ -21,6 +21,14 @@ export default async function PortalLayout({
     redirect('/login?callbackUrl=/portal');
   }
 
+  // Advisors share the login page with entrepreneurs but belong on their own
+  // desk — the portal is the entrepreneur's product, and an advisor has no
+  // journey of their own to show.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((session.user as any).role === 'MENTOR') {
+    redirect('/advisor');
+  }
+
   // Auto-provisioned accounts log in with a temp password and must pick a
   // permanent one before they get to the portal. The forced set-password
   // page lives outside this layout (at /onboarding/set-password) so there

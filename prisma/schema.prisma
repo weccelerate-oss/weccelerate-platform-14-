@@ -146,9 +146,20 @@ model User {
   // { "journey": true, "mentorAi": false, ... } — overrides the plan default.
   plan             UserPlan @default(WECCELERATE)
   featureOverrides Json?
-  // The advisor who opened this entrepreneur (from the form's "שם משתמש").
-  // Powers the human-mentor thread: this address gets the review emails.
-  advisorEmail     String?
+  // Who *opened* this entrepreneur — the sales/intake person whose address the
+  // Google Form auto-collected as "שם משתמש". Attribution only: it does NOT
+  // grant advisory access. Kept on the original `advisorEmail` column so the
+  // historical attribution survives the rename.
+  openedByEmail    String?  @map("advisorEmail")
+
+  // The assigned human advisor (a MENTOR-role user from the advisor roster).
+  // Set by an admin, never by the intake form. Powers the INVESTOR_PREP
+  // human-mentor thread: this person gets the review requests and answers
+  // them from /advisor.
+  advisor          User?    @relation("AdvisorAssignment", fields: [advisorId], references: [id], onDelete: SetNull)
+  advisorId        String?
+  // Reverse side: the entrepreneurs this advisor is responsible for.
+  advisees         User[]   @relation("AdvisorAssignment")
 
   // Onboarding / auto-provisioning
   // True for accounts created via the onboarding webhook with a temp password.
@@ -169,6 +180,7 @@ model User {
 
   @@index([role, isActive]) // Admin: list entrepreneurs, mentors
   @@index([email])          // Auth: login lookup (covered by unique but explicit)
+  @@index([advisorId])      // Advisor desk: "my entrepreneurs"
   @@map("users")
 }
 
@@ -864,7 +876,11 @@ model AnswerComment {
   answerId   String
 
   authorType String   // 'ENTREPRENEUR' | 'ADVISOR'
+  // Display name captured at write time (advisors are shown by name, never by
+  // email — see lib/advisors.ts). authorId is the User id behind it when we
+  // have one, so a later rename can be resolved back to the person.
   authorName String
+  authorId   String?
   body       String   @db.Text
 
   createdAt  DateTime @default(now())

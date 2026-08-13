@@ -595,7 +595,7 @@ export async function resetUserPasswordAction(id: string) {
         password: hashedPassword,
         mustChangePassword: true,
       },
-      select: { id: true, email: true, name: true },
+      select: { id: true, email: true, name: true, role: true },
     });
 
     // Try to email the new credentials. We reuse the welcome-email template
@@ -612,12 +612,20 @@ export async function resetUserPasswordAction(id: string) {
     let emailSent = false;
     let emailError: string | undefined;
     try {
-      const { sendWelcomeEmail } = await import('@/lib/onboarding/welcome-email');
-      const result = await sendWelcomeEmail({
-        to: user.email,
-        name: user.name,
-        tempPassword,
-      });
+      // Advisors get the desk email — the entrepreneur welcome template talks
+      // about "פורטל היזמים" and "המסע שלך", which is wrong for them.
+      const result =
+        user.role === 'MENTOR'
+          ? await (await import('@/lib/advisor-invite-email')).sendAdvisorInviteEmail({
+              to: user.email,
+              name: user.name,
+              tempPassword,
+            })
+          : await (await import('@/lib/onboarding/welcome-email')).sendWelcomeEmail({
+              to: user.email,
+              name: user.name,
+              tempPassword,
+            });
       emailSent = result.ok;
       if (!result.ok) emailError = result.error;
     } catch (err) {
@@ -1424,25 +1432,44 @@ export async function setUserPlanAction(
   }
 }
 
-export async function setUserAdvisorAction(id: string, advisorEmail: string | null) {
+/**
+ * Assign (or clear) the human advisor of an entrepreneur.
+ *
+ * `advisorId` must be an active MENTOR account — the roster in
+ * lib/advisors.ts, seeded by scripts/seed-advisors.ts. Free-text emails are
+ * deliberately not accepted anymore: the previous version let any address
+ * become someone's "advisor", which is how the intake form's submitters
+ * (nir@, coheni@, lioz@, ...) ended up fielding entrepreneurs' questions.
+ */
+export async function setUserAdvisorAction(id: string, advisorId: string | null) {
   try {
     const actor = await verifyAdmin();
-    const clean = advisorEmail?.trim().toLowerCase() || null;
-    if (clean && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
-      return { success: false, error: 'כתובת מייל לא תקינה' };
+    const targetId = advisorId?.trim() || null;
+
+    let advisorLabel = '(none)';
+    if (targetId) {
+      const advisor = await prisma.user.findUnique({
+        where: { id: targetId },
+        select: { id: true, name: true, email: true, role: true, isActive: true },
+      });
+      if (!advisor || advisor.role !== 'MENTOR' || !advisor.isActive) {
+        return { success: false, error: 'המלווה שנבחר אינו חשבון מלווה פעיל' };
+      }
+      advisorLabel = `${advisor.name} <${advisor.email}>`;
     }
+
     const updated = await prisma.user.update({
       where: { id },
-      data: { advisorEmail: clean },
+      data: { advisorId: targetId },
       select: { id: true, email: true },
     });
     await prisma.activityLog
       .create({
         data: {
           action: 'admin.user.set_advisor',
-          description: `Admin ${(actor as any).email ?? '?'} set advisor of ${updated.email} → ${clean ?? '(none)'}`,
+          description: `Admin ${(actor as any).email ?? '?'} set advisor of ${updated.email} → ${advisorLabel}`,
           userId: updated.id,
-          metadata: { actorEmail: (actor as any).email ?? null, advisorEmail: clean },
+          metadata: { actorEmail: (actor as any).email ?? null, advisorId: targetId },
         },
       })
       .catch(() => {});
@@ -1451,6 +1478,282 @@ export async function setUserAdvisorAction(id: string, advisorEmail: string | nu
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error('[Admin] setUserAdvisorAction failed:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+// =============================================================================
+// ADVISOR ROSTER ACTIONS
+// =============================================================================
+// Advisors are MENTOR-role User rows. lib/advisors.ts holds the initial four;
+// everything below is how the admin grows and maintains the roster without a
+// deploy. Deliberately no hard delete: an advisor with history is deactivated
+// so their past replies keep their author, and assignments to them are cleared
+// in the same step rather than silently pointing at a dead account.
+
+const ADVISOR_EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export interface AdvisorFormData {
+  name: string;
+  email: string;
+}
+
+/**
+ * Create an advisor account and email them their credentials.
+ *
+ * If the address already belongs to a non-advisor account we refuse rather
+ * than silently promoting it — turning an entrepreneur into a MENTOR would
+ * strip them of their own portal.
+ */
+export async function createAdvisorAction(data: AdvisorFormData) {
+  try {
+    const actor = await verifyAdmin();
+    const name = data.name?.trim();
+    const email = data.email?.trim().toLowerCase();
+
+    if (!name || name.length < 2) {
+      return { success: false, error: 'שם המלווה חסר' };
+    }
+    if (!email || !ADVISOR_EMAIL_SHAPE.test(email)) {
+      return { success: false, error: 'כתובת מייל לא תקינה' };
+    }
+
+    const existing = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, role: true, name: true, isActive: true },
+    });
+    if (existing && existing.role !== 'MENTOR') {
+      return {
+        success: false,
+        error: `הכתובת כבר משויכת לחשבון ${existing.role === 'ADMIN' ? 'מנהל' : 'אחר'} (${existing.name}) — בחר כתובת אחרת`,
+      };
+    }
+    if (existing) {
+      // Already an advisor: reactivate and fix the name instead of erroring.
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: { isActive: true, name },
+      });
+      revalidatePath('/admin/advisors');
+      revalidatePath('/admin/users');
+      return { success: true, reactivated: true };
+    }
+
+    const tempPassword = generateTempPassword();
+    const created = await prisma.user.create({
+      data: {
+        email,
+        name,
+        password: await bcrypt.hash(tempPassword, 12),
+        role: 'MENTOR',
+        isActive: true,
+        mustChangePassword: true,
+        provisionedAt: new Date(),
+        provisionedSource: 'admin_advisor',
+      },
+      select: { id: true, email: true },
+    });
+
+    let emailSent = false;
+    let emailError: string | undefined;
+    try {
+      const { sendAdvisorInviteEmail } = await import('@/lib/advisor-invite-email');
+      const res = await sendAdvisorInviteEmail({ to: email, name, tempPassword });
+      emailSent = res.ok;
+      if (!res.ok) emailError = res.error;
+    } catch (err) {
+      emailError = err instanceof Error ? err.message : String(err);
+    }
+
+    await prisma.activityLog
+      .create({
+        data: {
+          action: 'admin.advisor.created',
+          description: `Admin ${(actor as any).email ?? '?'} created advisor ${name} <${email}> (email ${emailSent ? 'sent' : 'failed'})`,
+          userId: created.id,
+          metadata: {
+            actorEmail: (actor as any).email ?? null,
+            emailSent,
+            emailError: emailError ?? null,
+          },
+        },
+      })
+      .catch(() => {});
+
+    revalidatePath('/admin/advisors');
+    revalidatePath('/admin/users');
+    // The password comes back so the admin can pass it on by hand when the
+    // email failed — it is never retrievable again.
+    return { success: true, tempPassword, emailSent, emailError };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[Admin] createAdvisorAction failed:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+/** Rename an advisor, or move them to a different address. */
+export async function updateAdvisorAction(id: string, data: AdvisorFormData) {
+  try {
+    const actor = await verifyAdmin();
+    const name = data.name?.trim();
+    const email = data.email?.trim().toLowerCase();
+
+    if (!name || name.length < 2) {
+      return { success: false, error: 'שם המלווה חסר' };
+    }
+    if (!email || !ADVISOR_EMAIL_SHAPE.test(email)) {
+      return { success: false, error: 'כתובת מייל לא תקינה' };
+    }
+
+    const target = await prisma.user.findUnique({
+      where: { id },
+      select: { role: true, email: true },
+    });
+    if (!target || target.role !== 'MENTOR') {
+      return { success: false, error: 'החשבון אינו מלווה' };
+    }
+    if (email !== target.email) {
+      const clash = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+      if (clash && clash.id !== id) {
+        return { success: false, error: 'הכתובת כבר תפוסה על ידי חשבון אחר' };
+      }
+    }
+
+    await prisma.user.update({ where: { id }, data: { name, email } });
+
+    await prisma.activityLog
+      .create({
+        data: {
+          action: 'admin.advisor.updated',
+          description: `Admin ${(actor as any).email ?? '?'} updated advisor → ${name} <${email}>`,
+          userId: id,
+          metadata: { actorEmail: (actor as any).email ?? null, previousEmail: target.email },
+        },
+      })
+      .catch(() => {});
+
+    revalidatePath('/admin/advisors');
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[Admin] updateAdvisorAction failed:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Activate / deactivate an advisor.
+ *
+ * Deactivating also clears their assignments — otherwise an entrepreneur would
+ * keep pointing at someone who can no longer sign in, and their "send to my
+ * advisor" button would fail with no explanation. The count of released
+ * entrepreneurs comes back so the admin knows what needs reassigning.
+ */
+export async function setAdvisorActiveAction(id: string, isActive: boolean) {
+  try {
+    const actor = await verifyAdmin();
+    const target = await prisma.user.findUnique({
+      where: { id },
+      select: { role: true, name: true },
+    });
+    if (!target || target.role !== 'MENTOR') {
+      return { success: false, error: 'החשבון אינו מלווה' };
+    }
+
+    await prisma.user.update({ where: { id }, data: { isActive } });
+
+    let released = 0;
+    if (!isActive) {
+      const res = await prisma.user.updateMany({
+        where: { advisorId: id },
+        data: { advisorId: null },
+      });
+      released = res.count ?? 0;
+    }
+
+    await prisma.activityLog
+      .create({
+        data: {
+          action: isActive ? 'admin.advisor.activated' : 'admin.advisor.deactivated',
+          description: `Admin ${(actor as any).email ?? '?'} ${isActive ? 'activated' : 'deactivated'} advisor ${target.name}${released ? ` (released ${released} entrepreneurs)` : ''}`,
+          userId: id,
+          metadata: { actorEmail: (actor as any).email ?? null, released },
+        },
+      })
+      .catch(() => {});
+
+    revalidatePath('/admin/advisors');
+    revalidatePath('/admin/users');
+    return { success: true, released };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[Admin] setAdvisorActiveAction failed:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * (Re)send the advisor onboarding email — credentials plus what the role asks.
+ *
+ * Reissues the password every time, because we cannot read the existing one:
+ * an advisor who never got the mail, lost it, or was promoted from an old
+ * entrepreneur account has no working credential we know of. The new temp
+ * password lands in the email and must be changed on first login.
+ */
+export async function sendAdvisorOnboardingAction(id: string) {
+  try {
+    const actor = await verifyAdmin();
+    const target = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, name: true, email: true, role: true, isActive: true },
+    });
+    if (!target || target.role !== 'MENTOR') {
+      return { success: false, error: 'החשבון אינו מלווה' };
+    }
+    if (!target.isActive) {
+      return { success: false, error: 'המלווה מושבת — הפעל אותו לפני שליחת פרטי כניסה' };
+    }
+
+    const tempPassword = generateTempPassword();
+    await prisma.user.update({
+      where: { id },
+      data: { password: await bcrypt.hash(tempPassword, 12), mustChangePassword: true },
+    });
+
+    let emailSent = false;
+    let emailError: string | undefined;
+    try {
+      const { sendAdvisorInviteEmail } = await import('@/lib/advisor-invite-email');
+      const res = await sendAdvisorInviteEmail({
+        to: target.email,
+        name: target.name,
+        tempPassword,
+      });
+      emailSent = res.ok;
+      if (!res.ok) emailError = res.error;
+    } catch (err) {
+      emailError = err instanceof Error ? err.message : String(err);
+    }
+
+    await prisma.activityLog
+      .create({
+        data: {
+          action: emailSent ? 'admin.advisor.onboarding_sent' : 'admin.advisor.onboarding_failed',
+          description: `Admin ${(actor as any).email ?? '?'} sent advisor onboarding to ${target.name} <${target.email}> (${emailSent ? 'sent' : 'FAILED'})`,
+          userId: target.id,
+          metadata: { actorEmail: (actor as any).email ?? null, emailError: emailError ?? null },
+        },
+      })
+      .catch(() => {});
+
+    revalidatePath('/admin/advisors');
+    // Password comes back only so the admin can hand it over when the mail bounced.
+    return { success: true, emailSent, emailError, tempPassword: emailSent ? undefined : tempPassword };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[Admin] sendAdvisorOnboardingAction failed:', msg);
     return { success: false, error: msg };
   }
 }

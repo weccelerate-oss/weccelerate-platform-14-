@@ -49,6 +49,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { JourneyChapterView, JourneyAnswerView } from '@/lib/journey/repository';
+import { ADVISOR_AVATAR, ADVISOR_TITLE } from '@/lib/advisors';
 
 
 // ---------------------------------------------------------------------------
@@ -79,8 +80,9 @@ interface JourneyContentProps {
   initialMentorQuota?: { remaining: number; limit: number };
   /** Plan-derived feature switches (see lib/entitlements.ts). */
   features?: { mentorAi: boolean; humanMentor: boolean };
-  /** Whether an advisor email is assigned (required for the human thread). */
-  hasAdvisor?: boolean;
+  /** The assigned advisor's name, or null when nobody is assigned yet. The
+   *  entrepreneur sees a person — never an email address. */
+  advisorName?: string | null;
 }
 
 const AUTOSAVE_DELAY_MS = 10_000;
@@ -177,8 +179,9 @@ export function JourneyContent({
   initialAnswers,
   initialMentorQuota,
   features = { mentorAi: true, humanMentor: false },
-  hasAdvisor = false,
+  advisorName = null,
 }: JourneyContentProps) {
+  const hasAdvisor = Boolean(advisorName);
   const firstName = userName.split(' ')[0] || 'יזם';
   const isStatic = chapters[0]?.id.startsWith('static:');
 
@@ -1116,7 +1119,7 @@ export function JourneyContent({
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2 text-[11px] tracking-[0.14em] text-white/50 font-bold">
                         <MessagesSquare className="w-3.5 h-3.5 text-[#c8a951]" />
-                        שיחה עם המלווה האישי
+                        {advisorName ? `שיחה עם ${advisorName} · המלווה שלך` : 'שיחה עם המלווה האישי'}
                       </div>
                       {answer?.advisorRequestedAt && (
                         <span className="text-[11px] text-emerald-400/80">
@@ -1126,19 +1129,33 @@ export function JourneyContent({
                     </div>
 
                     {(answer?.comments ?? []).map((c) => (
-                      <div
-                        key={c.id}
-                        className={cn(
-                          'rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed mb-2 max-w-[92%]',
-                          c.authorType === 'ADVISOR'
-                            ? 'bg-[#c8a951]/[0.12] border border-[#c8a951]/30'
-                            : 'bg-white/[0.05] border border-white/[0.09] mr-auto',
+                      <div key={c.id} className="flex items-start gap-2 mb-2 max-w-[92%]">
+                        {/* The advisor wears the house badge: WeCcelerate mark
+                            as the avatar, their real name above the message. */}
+                        {c.authorType === 'ADVISOR' && (
+                          <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full border border-[#c8a951]/35 bg-[#03061a]">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={ADVISOR_AVATAR}
+                              alt=""
+                              aria-hidden="true"
+                              className="h-5 w-5 object-contain"
+                            />
+                          </span>
                         )}
-                      >
-                        <div className={cn('text-[10.5px] font-bold mb-0.5', c.authorType === 'ADVISOR' ? 'text-[#e8d48b]' : 'text-white/45')}>
-                          {c.authorType === 'ADVISOR' ? `${c.authorName} · המלווה שלך` : 'אתה'}
+                        <div
+                          className={cn(
+                            'rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed flex-1 min-w-0',
+                            c.authorType === 'ADVISOR'
+                              ? 'bg-[#c8a951]/[0.12] border border-[#c8a951]/30'
+                              : 'bg-white/[0.05] border border-white/[0.09] mr-auto',
+                          )}
+                        >
+                          <div className={cn('text-[10.5px] font-bold mb-0.5', c.authorType === 'ADVISOR' ? 'text-[#e8d48b]' : 'text-white/45')}>
+                            {c.authorType === 'ADVISOR' ? `${c.authorName} · ${ADVISOR_TITLE}` : 'אתה'}
+                          </div>
+                          <div className="text-white/80 whitespace-pre-line">{c.body}</div>
                         </div>
-                        <div className="text-white/80 whitespace-pre-line">{c.body}</div>
                       </div>
                     ))}
 
@@ -1154,7 +1171,7 @@ export function JourneyContent({
                           onChange={(e) => setThreadDraft(e.target.value)}
                           placeholder={
                             answer?.advisorRequestedAt
-                              ? 'כתוב הודעה למלווה...'
+                              ? `כתוב הודעה ל${advisorName ?? 'מלווה'}...`
                               : 'הודעה אישית למלווה (לא חובה) — ואז שלח את התשובה לעיונו'
                           }
                           rows={2}
@@ -1169,7 +1186,11 @@ export function JourneyContent({
                               className="flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] text-[#1d1704] font-bold px-4 py-2.5 text-[13px] shadow-[0_6px_20px_-8px_rgba(200,169,81,.6)] hover:brightness-105 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <UserRound className="w-4 h-4" />
-                              {advisorSending ? 'שולח למלווה...' : 'שלח את התשובה למלווה שלי'}
+                              {advisorSending
+                                ? 'שולח למלווה...'
+                                : advisorName
+                                  ? `שלח את התשובה ל${advisorName}`
+                                  : 'שלח את התשובה למלווה שלי'}
                             </button>
                           ) : (
                             <>

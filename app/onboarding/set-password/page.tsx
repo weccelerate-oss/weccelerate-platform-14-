@@ -19,11 +19,15 @@ export default async function SetPasswordPage() {
   // If the user already has a permanent password (no flag), send them straight to the portal.
   const u = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { mustChangePassword: true, name: true, email: true },
+    select: { mustChangePassword: true, name: true, email: true, role: true },
   });
 
+  // Advisors live at /advisor, entrepreneurs at /portal — same one-time
+  // password step, different destination.
+  const landingUrl = u?.role === 'MENTOR' ? '/advisor' : '/portal/dashboard';
+
   if (!u || u.mustChangePassword === false) {
-    redirect('/portal');
+    redirect(landingUrl);
   }
 
   return (
@@ -44,11 +48,13 @@ export default async function SetPasswordPage() {
             ברוך הבא, {u.name}
           </h1>
           <p className="text-white/55 text-sm">
-            לפני הכניסה הראשונה לפורטל — בחר סיסמה קבועה במקום הסיסמה הזמנית.
+            {u.role === 'MENTOR'
+              ? 'לפני הכניסה הראשונה לאזור המלווה — בחר סיסמה קבועה במקום הסיסמה הזמנית.'
+              : 'לפני הכניסה הראשונה לפורטל — בחר סיסמה קבועה במקום הסיסמה הזמנית.'}
           </p>
         </div>
 
-        <SetPasswordForm userEmail={u.email} />
+        <SetPasswordForm userEmail={u.email} landingUrl={landingUrl} />
       </div>
     </main>
   );

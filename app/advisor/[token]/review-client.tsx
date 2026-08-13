@@ -18,7 +18,7 @@ interface CommentView {
 
 interface Props {
   token: string;
-  advisorEmail: string;
+  advisorName: string;
   entrepreneur: { name: string; company: string | null };
   chapterName: string;
   questionPrompt: string;
@@ -76,7 +76,7 @@ export function AdvisorReviewClient(props: Props) {
                 <span className="text-white/40 font-normal text-sm"> · {props.entrepreneur.company}</span>
               )}
             </div>
-            <div className="text-xs text-white/40">ביקש/ה את המשוב שלך ({props.advisorEmail})</div>
+            <div className="text-xs text-white/40">ביקש/ה את המשוב שלך · {props.advisorName}</div>
           </div>
         </div>
       </div>

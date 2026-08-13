@@ -5,6 +5,7 @@ import { getPublishedJourney, getUserJourneyAnswers } from '@/lib/journey/reposi
 import { getQuota } from '@/lib/ai-quota';
 import { prisma } from '@/lib/db';
 import { featuresFor } from '@/lib/entitlements';
+import { advisorDisplayName } from '@/lib/advisors';
 
 // Content is admin-managed and answers are per-user — always render fresh.
 export const dynamic = 'force-dynamic';
@@ -26,7 +27,11 @@ export default async function JourneyPage() {
     prisma.user
       .findUnique({
         where: { id: userId },
-        select: { plan: true, featureOverrides: true, advisorEmail: true },
+        select: {
+          plan: true,
+          featureOverrides: true,
+          advisor: { select: { name: true, isActive: true } },
+        },
       })
       .catch(() => null),
   ]);
@@ -43,7 +48,7 @@ export default async function JourneyPage() {
       initialAnswers={answers}
       initialMentorQuota={{ remaining: mentorQuota.remaining, limit: mentorQuota.limit }}
       features={{ mentorAi: features.mentorAi, humanMentor: features.humanMentor }}
-      hasAdvisor={Boolean(dbUser?.advisorEmail)}
+      advisorName={dbUser?.advisor?.isActive ? advisorDisplayName(dbUser.advisor) : null}
     />
   );
 }

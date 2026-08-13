@@ -7,7 +7,15 @@ import { setNewPassword, type SetPasswordState } from './actions';
 
 const INITIAL: SetPasswordState = { success: false, message: '' };
 
-export function SetPasswordForm({ userEmail }: { userEmail: string }) {
+export function SetPasswordForm({
+  userEmail,
+  landingUrl = '/portal/dashboard',
+}: {
+  userEmail: string;
+  /** Where to walk the user after they pick a password. Advisors (MENTOR)
+   *  belong on their desk, not in the entrepreneur portal. */
+  landingUrl?: string;
+}) {
   const [state, formAction, isPending] = useActionState(setNewPassword, INITIAL);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -25,15 +33,15 @@ export function SetPasswordForm({ userEmail }: { userEmail: string }) {
       const t = setTimeout(() => {
         update({ mustChangePassword: false })
           .then(() => {
-            window.location.href = '/portal/dashboard';
+            window.location.href = landingUrl;
           })
           .catch(() => {
-            window.location.href = '/portal/dashboard';
+            window.location.href = landingUrl;
           });
       }, 800);
       return () => clearTimeout(t);
     }
-  }, [state.success, update]);
+  }, [state.success, update, landingUrl]);
 
   return (
     <form

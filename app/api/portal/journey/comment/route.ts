@@ -49,7 +49,12 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true, plan: true, featureOverrides: true },
+      select: {
+        name: true,
+        plan: true,
+        featureOverrides: true,
+        advisor: { select: { id: true, isActive: true } },
+      },
     });
     if (!user || !hasFeature(user, 'humanMentor')) {
       return NextResponse.json({ error: 'השיחה עם מלווה זמינה בחבילת ההכנה למשקיעים' }, { status: 403 });
@@ -64,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     const answer = await prisma.userJourneyAnswer.findUnique({
       where: { userId_questionId: { userId, questionId } },
-      select: { id: true },
+      select: { id: true, advisorRequestedAt: true, question: { select: { prompt: true } } },
     });
     if (!answer) {
       return NextResponse.json({ error: 'אין עדיין תשובה לשאלה הזו' }, { status: 404 });
@@ -75,9 +80,28 @@ export async function POST(req: NextRequest) {
         answerId: answer.id,
         authorType: 'ENTREPRENEUR',
         authorName: user.name || 'היזם',
+        authorId: userId,
         body: text,
       },
     });
+
+    // Surface the follow-up on the advisor's desk. Without this a reply inside
+    // an already-open thread was invisible until they happened to reopen it.
+    if (user.advisor?.isActive && answer.advisorRequestedAt) {
+      try {
+        await prisma.notification.create({
+          data: {
+            userId: user.advisor.id,
+            type: 'info',
+            title: `${user.name || 'היזם'} הוסיף/ה הודעה בשיחה`,
+            message: `על השאלה: "${(answer.question?.prompt ?? '').slice(0, 80)}"`,
+            link: '/advisor',
+          },
+        });
+      } catch {
+        /* best effort */
+      }
+    }
 
     return NextResponse.json({
       success: true,

@@ -13,6 +13,7 @@ import { WhatsAppButton } from './components/whatsapp-button';
 import { WelcomeOnboarding } from './components/welcome-onboarding';
 import { StatsCards } from './components/stats-cards';
 import { RecentActivity } from './components/recent-activity';
+import { UpdatesPanel } from './components/updates-panel';
 import { QuickActions } from './components/quick-actions';
 import { ServiceTimeline } from './components/service-timeline';
 import type { DealProductDisplay } from './components/purchased-services';
@@ -132,6 +133,19 @@ export function DashboardContent({
         {/* Widgets */}
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            {/* Unread updates — an advisor's reply lands here, above the fold. */}
+            <UpdatesPanel
+              updates={notifications.map((n) => ({
+                id: n.id,
+                title: n.title,
+                message: n.message,
+                link: n.link,
+                type: n.type,
+                createdAt:
+                  n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
+              }))}
+            />
+
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <QuickActions project={project} />
             </motion.div>

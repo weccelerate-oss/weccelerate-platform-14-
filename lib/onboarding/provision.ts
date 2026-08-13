@@ -34,11 +34,13 @@ export type OnboardingBody = z.infer<typeof OnboardingBodySchema>;
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Pull the advisor's email out of the raw form payload. The Google Form
- * auto-collects the submitter as "שם משתמש"; we also accept an explicit
- * `_advisorEmail` key for future senders.
+ * Pull the *submitter's* email out of the raw form payload — the Google Form
+ * auto-collects it as "שם משתמש". This is intake attribution (who opened the
+ * entrepreneur), NOT an advisory assignment: it used to land in advisorEmail
+ * and made sales staff the entrepreneur's "advisor". Real advisors come from
+ * the roster in lib/advisors.ts and are assigned by an admin.
  */
-function extractAdvisorEmail(raw?: Record<string, unknown> | null): string | null {
+function extractOpenedByEmail(raw?: Record<string, unknown> | null): string | null {
   if (!raw || typeof raw !== 'object') return null;
   const direct = raw['_advisorEmail'] ?? raw['advisorEmail'];
   if (typeof direct === 'string' && EMAIL_SHAPE.test(direct.trim())) {
@@ -141,10 +143,12 @@ export async function provisionEntrepreneur(input: ProvisionInput): Promise<Prov
     ...(input.mustReview ? { _mustReview: true, _flaggedAt: new Date().toISOString() } : {}),
   };
 
-  // Advisor attribution: the form's "שם משתמש" field carries the advisor's
-  // email. Anyone arriving through the automation is a WeCcelerate client —
-  // that's what plan=WECCELERATE marks (vs the future FREE self-signup).
-  const advisorEmail = extractAdvisorEmail(input.rawFormData);
+  // Intake attribution: the form's "שם משתמש" field carries whoever submitted
+  // the form on the entrepreneur's behalf. Anyone arriving through the
+  // automation is a WeCcelerate client — that's what plan=WECCELERATE marks
+  // (vs the future FREE self-signup). No advisor is assigned here; an admin
+  // picks one from the roster at /admin/users.
+  const openedByEmail = extractOpenedByEmail(input.rawFormData);
 
   let userId: string;
   try {
@@ -158,7 +162,7 @@ export async function provisionEntrepreneur(input: ProvisionInput): Promise<Prov
         role: 'ENTREPRENEUR',
         isActive: true,
         plan: 'WECCELERATE',
-        advisorEmail,
+        openedByEmail,
         mustChangePassword: true,
         provisionedAt: new Date(),
         provisionedSource: input.source ?? 'webhook',

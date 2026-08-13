@@ -6,9 +6,11 @@
  */
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { prisma } from '@/lib/db';
 import { verifyAdvisorToken } from '@/lib/journey/advisor-token';
 import { AdvisorReviewClient } from './review-client';
+import { advisorDisplayName } from '@/lib/advisors';
 
 export const metadata: Metadata = {
   title: 'משוב ליזם | WeCcelerate',
@@ -38,18 +40,27 @@ export default async function AdvisorReviewPage({
   const answer = await prisma.userJourneyAnswer.findUnique({
     where: { id: verified.answerId },
     include: {
-      user: { select: { name: true, company: true, advisorEmail: true } },
+      user: {
+        select: {
+          name: true,
+          company: true,
+          advisor: { select: { name: true, email: true, isActive: true } },
+        },
+      },
       question: { include: { chapter: { select: { name: true } } } },
       comments: { orderBy: { createdAt: 'asc' } },
     },
   });
 
-  if (!answer || (answer.user?.advisorEmail ?? '').toLowerCase() !== verified.advisorEmail) {
+  const advisor = answer?.user?.advisor;
+  if (!answer || !advisor?.isActive || advisor.email.toLowerCase() !== verified.advisorEmail) {
     return (
       <Shell>
         <div className="text-center py-16">
           <h1 className="text-xl font-bold text-white mb-2">הקישור אינו תקף</h1>
-          <p className="text-white/50 text-sm">ייתכן שהשיוך ליזם השתנה. פנה לצוות.</p>
+          <p className="text-white/50 text-sm">
+            ייתכן שהשיוך ליזם השתנה. אפשר לראות את כל הפניות שלך ב<Link href="/advisor" className="text-[#c8a951] underline">אזור המלווה</Link>.
+          </p>
         </div>
       </Shell>
     );
@@ -59,7 +70,7 @@ export default async function AdvisorReviewPage({
     <Shell>
       <AdvisorReviewClient
         token={token}
-        advisorEmail={verified.advisorEmail}
+        advisorName={advisorDisplayName(advisor)}
         entrepreneur={{ name: answer.user?.name ?? 'היזם', company: answer.user?.company ?? null }}
         chapterName={answer.question?.chapter?.name ?? ''}
         questionPrompt={answer.question?.prompt ?? ''}

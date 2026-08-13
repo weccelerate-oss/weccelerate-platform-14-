@@ -27,6 +27,7 @@ import {
   FileText,
   FolderKanban,
   Compass,
+  UserCog,
   Menu,
   X,
 } from 'lucide-react';
@@ -63,6 +64,7 @@ const NAV_ITEMS = [
     label: 'ניהול יזמים',
     items: [
       { label: 'יזמים', href: '/admin/users', icon: Users },
+      { label: 'מלווים (מנטורים)', href: '/admin/advisors', icon: UserCog },
       { label: 'פרויקטים', href: '/admin/projects', icon: FolderKanban },
     ],
   },
