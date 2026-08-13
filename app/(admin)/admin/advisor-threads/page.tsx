@@ -12,7 +12,7 @@
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
-import { OVERDUE_AFTER_MS } from '@/lib/advisors';
+import { OVERDUE_AFTER_MS, threadState } from '@/lib/advisors';
 import { AdvisorThreadsClient, type AdminThread } from './threads-client';
 
 export const metadata: Metadata = { title: 'התכתבויות מלווים | ניהול' };
@@ -80,34 +80,7 @@ export default async function AdvisorThreadsPage() {
       createdAt: c.createdAt.toISOString(),
     }));
 
-    // The clock starts when the entrepreneur's side last moved and stops on the
-    // first reply from the mentor or the house after that.
-    const requestedAtMs = a.advisorRequestedAt.getTime();
-    let lastFromHouseAt: number | null = null;
-    let lastFromEntrepreneurAt = requestedAtMs;
-    let entrepreneurMessages = 0;
-    let advisorMessages = 0;
-
-    for (const c of comments) {
-      const at = Date.parse(c.createdAt);
-      if (c.authorType === 'ENTREPRENEUR') {
-        entrepreneurMessages += 1;
-        lastFromEntrepreneurAt = Math.max(lastFromEntrepreneurAt, at);
-      } else {
-        if (c.authorType === 'ADVISOR') advisorMessages += 1;
-        lastFromHouseAt = Math.max(lastFromHouseAt ?? 0, at);
-      }
-    }
-
-    const awaitingReply = lastFromHouseAt === null || lastFromEntrepreneurAt > lastFromHouseAt;
-    const waitingMs = awaitingReply ? now - lastFromEntrepreneurAt : 0;
-
-    // How long the mentor took the first time — the honest measure of a
-    // mentor's responsiveness, unaffected by later back-and-forth.
-    const firstAdvisorReply = comments.find((c) => c.authorType === 'ADVISOR');
-    const firstReplyMs = firstAdvisorReply
-      ? Date.parse(firstAdvisorReply.createdAt) - requestedAtMs
-      : null;
+    const state = threadState(a.advisorRequestedAt, comments, now);
 
     return {
       answerId: a.id,
@@ -122,12 +95,12 @@ export default async function AdvisorThreadsPage() {
       answerContent: a.content ?? '',
       aiFeedback: a.aiFeedback ?? null,
       requestedAt: a.advisorRequestedAt.toISOString(),
-      awaitingReply,
-      waitingMs,
-      overdue: awaitingReply && waitingMs > OVERDUE_AFTER_MS,
-      firstReplyMs,
-      entrepreneurMessages,
-      advisorMessages,
+      awaitingReply: state.awaitingReply,
+      waitingMs: state.waitingMs,
+      overdue: state.overdue,
+      firstReplyMs: state.firstAdvisorReplyMs,
+      entrepreneurMessages: state.entrepreneurMessages,
+      advisorMessages: state.advisorMessages,
       comments,
     };
   });

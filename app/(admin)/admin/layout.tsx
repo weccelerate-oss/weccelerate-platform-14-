@@ -35,7 +35,7 @@ export default async function AdminLayout({
   let overdueThreads = 0;
   try {
     const { prisma } = await import('@/lib/db');
-    const { OVERDUE_AFTER_MS } = await import('@/lib/advisors');
+    const { threadState } = await import('@/lib/advisors');
     const rows: Array<{ advisorRequestedAt: Date; comments: Array<{ authorType: string; createdAt: Date }> }> =
       await prisma.userJourneyAnswer.findMany({
         where: { advisorRequestedAt: { not: null }, user: { advisorId: { not: null } } },
@@ -46,15 +46,7 @@ export default async function AdminLayout({
       });
     const now = Date.now();
     for (const r of rows) {
-      let lastFromHouse: number | null = null;
-      let lastFromEntrepreneur = r.advisorRequestedAt.getTime();
-      for (const c of r.comments) {
-        const at = c.createdAt.getTime();
-        if (c.authorType === 'ENTREPRENEUR') lastFromEntrepreneur = Math.max(lastFromEntrepreneur, at);
-        else lastFromHouse = Math.max(lastFromHouse ?? 0, at);
-      }
-      const awaiting = lastFromHouse === null || lastFromEntrepreneur > lastFromHouse;
-      if (awaiting && now - lastFromEntrepreneur > OVERDUE_AFTER_MS) overdueThreads += 1;
+      if (threadState(r.advisorRequestedAt, r.comments, now).overdue) overdueThreads += 1;
     }
   } catch {
     // A DB hiccup must not take down every admin page for a badge.

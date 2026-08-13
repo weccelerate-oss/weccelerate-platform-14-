@@ -16,6 +16,14 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { AdvisorDesk, type DeskThread, type DeskAdvisee, type DeskComment } from './desk-client';
 import type { BellNotification } from '@/components/notification-bell';
+import { threadState } from '@/lib/advisors';
+
+/** Timestamp of the newest thing in the thread — the request, or the last message. */
+function lastActivityIso(requestedAt: Date, comments: DeskComment[]): string {
+  let latest = requestedAt.getTime();
+  for (const c of comments) latest = Math.max(latest, Date.parse(c.createdAt));
+  return new Date(latest).toISOString();
+}
 
 // Shapes of the rows the two queries below select. Declared here because the
 // shared prisma client is untyped (lib/db.ts returns `any`).
@@ -113,20 +121,9 @@ export default async function AdvisorDeskPage() {
       createdAt: c.createdAt.toISOString(),
     }));
 
-    // "Waiting on me" = the entrepreneur's side moved last. Their side moves
-    // when they send the answer over (advisorRequestedAt) or add a message;
-    // an advisor reply after that clears it.
-    const requestedAtMs = a.advisorRequestedAt.getTime();
-    let lastAdvisorAt: number | null = null;
-    let lastEntrepreneurAt = requestedAtMs;
-    for (const c of comments) {
-      const at = Date.parse(c.createdAt);
-      if (c.authorType === 'ADVISOR') {
-        lastAdvisorAt = Math.max(lastAdvisorAt ?? 0, at);
-      } else {
-        lastEntrepreneurAt = Math.max(lastEntrepreneurAt, at);
-      }
-    }
+    // "Waiting on me" — one shared definition, so the desk cannot disagree with
+    // the admin screens about whether a thread is still open.
+    const state = threadState(a.advisorRequestedAt, comments);
 
     return {
       answerId: a.id,
@@ -142,8 +139,8 @@ export default async function AdvisorDeskPage() {
       answerStatus: a.status,
       aiFeedback: a.aiFeedback ?? null,
       requestedAt: a.advisorRequestedAt.toISOString(),
-      lastActivityAt: new Date(Math.max(lastEntrepreneurAt, lastAdvisorAt ?? 0)).toISOString(),
-      needsReply: lastAdvisorAt === null || lastEntrepreneurAt > lastAdvisorAt,
+      lastActivityAt: lastActivityIso(a.advisorRequestedAt, comments),
+      needsReply: state.awaitingReply,
       comments,
     };
   });

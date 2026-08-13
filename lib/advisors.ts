@@ -74,3 +74,78 @@ export function advisorDisplayName(advisor: { name?: string | null } | null | un
   const n = (advisor?.name ?? '').trim();
   return n || 'המלווה שלך';
 }
+
+/** The minimum a thread-state calculation needs to know about a message. */
+export interface ThreadMessage {
+  authorType: string;
+  createdAt: Date | string;
+}
+
+export interface ThreadState {
+  /** The entrepreneur's side moved last — somebody owes them an answer. */
+  awaitingReply: boolean;
+  /** How long they have been waiting, 0 when nothing is owed. */
+  waitingMs: number;
+  /** Past the promised response window. */
+  overdue: boolean;
+  /** Time to the mentor's *first* reply, or null if they never answered. */
+  firstAdvisorReplyMs: number | null;
+  entrepreneurMessages: number;
+  advisorMessages: number;
+}
+
+/**
+ * Whether a mentor thread is waiting on a reply, and for how long.
+ *
+ * THE ONE definition. This existed as four hand-rolled copies — the roster
+ * screen, the threads screen, the admin badge and the mentor's desk — and two
+ * of them classified an ADMIN message as the *entrepreneur's* side. The result
+ * was one screen reporting "2 ממתינות למענה" while another said 0, for the
+ * same two threads, because the house had replied last in both.
+ *
+ * The rule: anyone from the house (ADVISOR or ADMIN) answering clears the wait.
+ * Mentor responsiveness is a separate number — firstAdvisorReplyMs counts only
+ * the mentor's own first reply, so an admin covering for them flatters nobody.
+ */
+export function threadState(
+  requestedAt: Date | string,
+  messages: readonly ThreadMessage[],
+  now: number = Date.now(),
+): ThreadState {
+  const requestedMs = toMs(requestedAt);
+  let lastFromHouse: number | null = null;
+  let lastFromEntrepreneur = requestedMs;
+  let firstAdvisorAt: number | null = null;
+  let entrepreneurMessages = 0;
+  let advisorMessages = 0;
+
+  for (const m of messages) {
+    const at = toMs(m.createdAt);
+    if (m.authorType === 'ENTREPRENEUR') {
+      entrepreneurMessages += 1;
+      if (at > lastFromEntrepreneur) lastFromEntrepreneur = at;
+      continue;
+    }
+    if (m.authorType === 'ADVISOR') {
+      advisorMessages += 1;
+      if (firstAdvisorAt === null || at < firstAdvisorAt) firstAdvisorAt = at;
+    }
+    if (lastFromHouse === null || at > lastFromHouse) lastFromHouse = at;
+  }
+
+  const awaitingReply = lastFromHouse === null || lastFromEntrepreneur > lastFromHouse;
+  const waitingMs = awaitingReply ? Math.max(0, now - lastFromEntrepreneur) : 0;
+
+  return {
+    awaitingReply,
+    waitingMs,
+    overdue: awaitingReply && waitingMs > OVERDUE_AFTER_MS,
+    firstAdvisorReplyMs: firstAdvisorAt === null ? null : firstAdvisorAt - requestedMs,
+    entrepreneurMessages,
+    advisorMessages,
+  };
+}
+
+function toMs(v: Date | string): number {
+  return v instanceof Date ? v.getTime() : Date.parse(v);
+}
