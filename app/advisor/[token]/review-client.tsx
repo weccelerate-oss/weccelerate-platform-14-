@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 interface CommentView {
   id: string;
-  authorType: 'ENTREPRENEUR' | 'ADVISOR';
+  authorType: 'ENTREPRENEUR' | 'ADVISOR' | 'ADMIN';
   authorName: string;
   body: string;
   createdAt: string;
@@ -130,11 +130,17 @@ export function AdvisorReviewClient(props: Props) {
                 'rounded-xl px-4 py-3 text-[13.5px] leading-relaxed max-w-[92%]',
                 c.authorType === 'ADVISOR'
                   ? 'bg-[#c8a951]/[0.12] border border-[#c8a951]/30 mr-auto'
-                  : 'bg-white/[0.05] border border-white/[0.09] ml-auto',
+                  : c.authorType === 'ADMIN'
+                    ? 'bg-[#3f56c9]/[0.14] border border-[#3f56c9]/35 mr-auto'
+                    : 'bg-white/[0.05] border border-white/[0.09] ml-auto',
               )}
             >
               <div className={cn('text-[10.5px] font-bold mb-1', c.authorType === 'ADVISOR' ? 'text-[#e8d48b]' : 'text-white/45')}>
-                {c.authorType === 'ADVISOR' ? `${c.authorName} · מלווה` : c.authorName}
+                {c.authorType === 'ADVISOR'
+                  ? `${c.authorName} · מלווה`
+                  : c.authorType === 'ADMIN'
+                    ? `${c.authorName} · צוות WeCcelerate`
+                    : c.authorName}
                 <span className="font-normal text-white/30 mr-2">
                   {new Date(c.createdAt).toLocaleDateString('he-IL')}
                 </span>

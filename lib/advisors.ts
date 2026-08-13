@@ -26,6 +26,23 @@ export const ADVISOR_AVATAR = '/images/WeCcelerate-logo.png';
 /** What the entrepreneur reads next to an advisor's name. */
 export const ADVISOR_TITLE = 'המלווה שלך · WeCcelerate';
 
+/**
+ * A thread message can come from three places. `authorType` is a plain string
+ * column, so ADMIN needed no migration — but every renderer must handle it, or
+ * an admin's message shows up labelled "אתה" in the entrepreneur's thread.
+ */
+export type CommentAuthorType = 'ENTREPRENEUR' | 'ADVISOR' | 'ADMIN';
+
+/** What an admin's message is signed as. Admins speak for the house, not for themselves. */
+export const ADMIN_TITLE = 'צוות WeCcelerate';
+
+/**
+ * How long a request may sit unanswered before the admin screen calls it late.
+ * Matches the response window promised in the advisor onboarding email
+ * (lib/advisor-invite-email.ts) — two business days, approximated as 48h.
+ */
+export const OVERDUE_AFTER_MS = 48 * 60 * 60 * 1000;
+
 export interface RosterEntry {
   name: string;
   email: string;

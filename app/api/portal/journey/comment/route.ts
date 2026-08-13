@@ -11,6 +11,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
 import { hasFeature } from '@/lib/entitlements';
+import { notifyAdmins } from '@/lib/advisors.server';
 
 function isSameOrigin(req: NextRequest): boolean {
   const origin = req.headers.get('origin');
@@ -102,6 +103,12 @@ export async function POST(req: NextRequest) {
         /* best effort */
       }
     }
+
+    await notifyAdmins({
+      title: `${user.name || 'היזם'} הוסיף/ה הודעה בשיחה עם המלווה`,
+      message: `"${(answer.question?.prompt ?? '').slice(0, 70)}"`,
+      type: 'info',
+    });
 
     return NextResponse.json({
       success: true,

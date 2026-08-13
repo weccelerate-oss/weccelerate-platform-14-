@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 
 export interface DeskComment {
   id: string;
-  authorType: 'ENTREPRENEUR' | 'ADVISOR';
+  authorType: 'ENTREPRENEUR' | 'ADVISOR' | 'ADMIN';
   authorName: string;
   body: string;
   createdAt: string;
@@ -389,16 +389,23 @@ function ThreadCard({
                     'rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-[92%]',
                     c.authorType === 'ADVISOR'
                       ? 'bg-[#c8a951]/[0.12] border border-[#c8a951]/28 mr-auto'
-                      : 'bg-white/[0.05] border border-white/[0.09] ml-auto',
+                      : c.authorType === 'ADMIN'
+                        ? 'bg-[#3f56c9]/[0.14] border border-[#3f56c9]/35 mr-auto'
+                        : 'bg-white/[0.05] border border-white/[0.09] ml-auto',
                   )}
                 >
                   <div
                     className={cn(
                       'text-[10.5px] font-bold mb-0.5',
-                      c.authorType === 'ADVISOR' ? 'text-[#e8d48b]' : 'text-white/45',
+                      c.authorType === 'ADVISOR'
+                        ? 'text-[#e8d48b]'
+                        : c.authorType === 'ADMIN'
+                          ? 'text-[#9fb0ff]'
+                          : 'text-white/45',
                     )}
                   >
                     {c.authorName}
+                    {c.authorType === 'ADMIN' && ' · צוות WeCcelerate'}
                     <span className="font-normal text-white/25 mr-2">{relativeTime(c.createdAt)}</span>
                   </div>
                   <div className="text-white/80 whitespace-pre-line">{c.body}</div>

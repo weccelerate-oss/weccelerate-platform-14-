@@ -28,6 +28,7 @@ import {
   FolderKanban,
   Compass,
   UserCog,
+  MessageSquare,
   Menu,
   X,
 } from 'lucide-react';
@@ -40,6 +41,8 @@ interface AdminSidebarProps {
     email: string;
     role: string;
   };
+  /** Per-href counters rendered as a badge, e.g. mentor threads running late. */
+  badges?: Record<string, number>;
 }
 
 const NAV_ITEMS = [
@@ -65,6 +68,7 @@ const NAV_ITEMS = [
     items: [
       { label: 'יזמים', href: '/admin/users', icon: Users },
       { label: 'מלווים (מנטורים)', href: '/admin/advisors', icon: UserCog },
+      { label: 'התכתבויות מלווים', href: '/admin/advisor-threads', icon: MessageSquare },
       { label: 'פרויקטים', href: '/admin/projects', icon: FolderKanban },
     ],
   },
@@ -79,7 +83,7 @@ const NAV_ITEMS = [
   },
 ];
 
-export function AdminSidebar({ user }: AdminSidebarProps) {
+export function AdminSidebar({ user, badges }: AdminSidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -188,7 +192,14 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                       )}
                     >
                       <item.icon className="w-4 h-4" />
-                      <span>{item.label}</span>
+                      <span className="flex-1">{item.label}</span>
+                      {/* A count only appears when something needs the admin —
+                          a silent nav item means nothing is late. */}
+                      {(badges?.[item.href] ?? 0) > 0 && (
+                        <span className="rounded-full bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 min-w-[18px] text-center">
+                          {badges![item.href]}
+                        </span>
+                      )}
                     </Link>
                   ))}
                 </>

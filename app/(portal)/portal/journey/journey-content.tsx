@@ -49,7 +49,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { JourneyChapterView, JourneyAnswerView } from '@/lib/journey/repository';
-import { ADVISOR_AVATAR, ADVISOR_TITLE } from '@/lib/advisors';
+import { ADVISOR_AVATAR, ADVISOR_TITLE, ADMIN_TITLE } from '@/lib/advisors';
 
 
 // ---------------------------------------------------------------------------
@@ -58,7 +58,7 @@ import { ADVISOR_AVATAR, ADVISOR_TITLE } from '@/lib/advisors';
 
 interface ThreadComment {
   id: string;
-  authorType: 'ENTREPRENEUR' | 'ADVISOR';
+  authorType: 'ENTREPRENEUR' | 'ADVISOR' | 'ADMIN';
   authorName: string;
   body: string;
   createdAt: string;
@@ -1130,9 +1130,12 @@ export function JourneyContent({
 
                     {(answer?.comments ?? []).map((c) => (
                       <div key={c.id} className="flex items-start gap-2 mb-2 max-w-[92%]">
-                        {/* The advisor wears the house badge: WeCcelerate mark
-                            as the avatar, their real name above the message. */}
-                        {c.authorType === 'ADVISOR' && (
+                        {/* Anyone from the house — the advisor, or the team
+                            stepping in — wears the WeCcelerate mark and is
+                            named. Only the entrepreneur's own messages are
+                            "אתה"; an ADMIN message used to fall into that
+                            branch and read as if they had written it. */}
+                        {c.authorType !== 'ENTREPRENEUR' && (
                           <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full border border-[#c8a951]/35 bg-[#03061a]">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
@@ -1146,13 +1149,17 @@ export function JourneyContent({
                         <div
                           className={cn(
                             'rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed flex-1 min-w-0',
-                            c.authorType === 'ADVISOR'
+                            c.authorType !== 'ENTREPRENEUR'
                               ? 'bg-[#c8a951]/[0.12] border border-[#c8a951]/30'
                               : 'bg-white/[0.05] border border-white/[0.09] mr-auto',
                           )}
                         >
-                          <div className={cn('text-[10.5px] font-bold mb-0.5', c.authorType === 'ADVISOR' ? 'text-[#e8d48b]' : 'text-white/45')}>
-                            {c.authorType === 'ADVISOR' ? `${c.authorName} · ${ADVISOR_TITLE}` : 'אתה'}
+                          <div className={cn('text-[10.5px] font-bold mb-0.5', c.authorType !== 'ENTREPRENEUR' ? 'text-[#e8d48b]' : 'text-white/45')}>
+                            {c.authorType === 'ADVISOR'
+                              ? `${c.authorName} · ${ADVISOR_TITLE}`
+                              : c.authorType === 'ADMIN'
+                                ? ADMIN_TITLE
+                                : 'אתה'}
                           </div>
                           <div className="text-white/80 whitespace-pre-line">{c.body}</div>
                         </div>

@@ -1757,3 +1757,118 @@ export async function sendAdvisorOnboardingAction(id: string) {
     return { success: false, error: msg };
   }
 }
+
+/**
+ * The admin joins a mentor↔entrepreneur conversation.
+ *
+ * Written as ADMIN, not as the advisor: the entrepreneur sees "צוות
+ * WeCcelerate" rather than a message that looks like it came from their
+ * mentor. Both the entrepreneur and the assigned advisor are notified, so
+ * nobody discovers days later that the house stepped into their thread.
+ */
+export async function adminReplyToThreadAction(answerId: string, body: string) {
+  try {
+    const actor = await verifyAdmin();
+    const text = typeof body === 'string' ? body.trim().slice(0, 4000) : '';
+    if (text.length < 2) {
+      return { success: false, error: 'כתוב תגובה לפני השליחה' };
+    }
+
+    const answer = await prisma.userJourneyAnswer.findUnique({
+      where: { id: answerId },
+      select: {
+        id: true,
+        user: {
+          select: { id: true, name: true, advisor: { select: { id: true, name: true } } },
+        },
+        question: { select: { prompt: true } },
+      },
+    });
+    if (!answer) {
+      return { success: false, error: 'השיחה לא נמצאה' };
+    }
+
+    const prompt = (answer.question?.prompt ?? '').slice(0, 80);
+    const comment = await prisma.answerComment.create({
+      data: {
+        answerId: answer.id,
+        authorType: 'ADMIN',
+        authorName: (actor as any).name || 'צוות WeCcelerate',
+        authorId: (actor as any).id ?? null,
+        body: text,
+      },
+    });
+
+    // The entrepreneur — same shape as an advisor reply, so it lands in their
+    // updates panel and reads as a real answer rather than a system message.
+    await prisma.notification
+      .create({
+        data: {
+          userId: answer.user.id,
+          type: 'success',
+          title: 'צוות WeCcelerate הגיב לתשובה שלך',
+          message: `על השאלה: "${prompt}"`,
+          link: '/portal/journey',
+        },
+      })
+      .catch(() => {});
+
+    // The advisor, so they are not blindsided in their own thread.
+    if (answer.user.advisor?.id) {
+      await prisma.notification
+        .create({
+          data: {
+            userId: answer.user.advisor.id,
+            type: 'info',
+            title: `צוות WeCcelerate הצטרף לשיחה עם ${answer.user.name}`,
+            message: `על השאלה: "${prompt}"`,
+            link: '/advisor',
+          },
+        })
+        .catch(() => {});
+    }
+
+    await prisma.activityLog
+      .create({
+        data: {
+          action: 'journey.admin_replied',
+          description: `Admin ${(actor as any).email ?? '?'} replied in ${answer.user.name}'s thread on "${prompt}"`,
+          userId: answer.user.id,
+          metadata: { answerId: answer.id, advisorId: answer.user.advisor?.id ?? null },
+        },
+      })
+      .catch(() => {});
+
+    revalidatePath('/admin/advisor-threads');
+    return {
+      success: true,
+      comment: {
+        id: comment.id,
+        authorType: 'ADMIN' as const,
+        authorName: (actor as any).name || 'צוות WeCcelerate',
+        body: text,
+        createdAt: comment.createdAt.toISOString(),
+      },
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[Admin] adminReplyToThreadAction failed:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+/** Clear the admin's own thread notifications once they have read the screen. */
+export async function markAdvisorThreadNotificationsReadAction() {
+  try {
+    const actor = await verifyAdmin();
+    await prisma.notification.updateMany({
+      where: { userId: (actor as any).id, link: '/admin/advisor-threads', isRead: false },
+      data: { isRead: true, readAt: new Date() },
+    });
+    revalidatePath('/admin/advisor-threads');
+    return { success: true };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return { success: false, error: msg };
+  }
+}

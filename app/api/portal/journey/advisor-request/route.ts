@@ -14,6 +14,7 @@ import { rateLimit } from '@/lib/rate-limit';
 import { hasFeature } from '@/lib/entitlements';
 import { signAdvisorToken } from '@/lib/journey/advisor-token';
 import { sendAdvisorReviewEmail } from '@/lib/journey/advisor-email';
+import { notifyAdmins } from '@/lib/advisors.server';
 
 const PORTAL_URL = 'https://weccelerate.co.il';
 
@@ -148,6 +149,12 @@ export async function POST(req: NextRequest) {
     } catch {
       /* best effort */
     }
+
+    await notifyAdmins({
+      title: `${user.name || 'יזם'} ביקש/ה משוב מ${advisor.name}`,
+      message: `"${(answer.question?.prompt ?? '').slice(0, 70)}" — הפנייה נשלחה, השעון רץ.`,
+      type: 'info',
+    });
 
     try {
       await prisma.activityLog.create({
