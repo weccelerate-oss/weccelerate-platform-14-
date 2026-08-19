@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import BioScanPanel from './BioScanPanel';
+import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 
 
 // =============================================================================
@@ -136,6 +137,11 @@ export default function MedTechContent() {
  <BioScanPanel />
 
  {/* ================================================================= */}
+ {/* CASE STUDIES — real ventures from this service */}
+ {/* ================================================================= */}
+ <ServiceCaseStudies serviceId="medtech-leumit" />
+
+ {/* ================================================================= */}
  {/* CTA SECTION */}
  {/* ================================================================= */}
  <section className="relative py-24 sm:py-32 overflow-hidden">
@@ -154,7 +160,7 @@ export default function MedTechContent() {
  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight">
  {t('service.medtech.cta.ready')}
  </h2>
- <p className="text-white/ text-lg mb-12 max-w-lg mx-auto leading-relaxed">
+ <p className="text-white/40 text-lg mb-12 max-w-lg mx-auto leading-relaxed">
  {t('service.medtech.cta.text')}
  </p>
 

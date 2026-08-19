@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
-import StickyScroll from './StickyScroll';
+import ProductJourney from '@/components/services/ProductJourney';
+import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 
 
 // =============================================================================
@@ -91,7 +92,21 @@ export default function DigitalProductContent() {
  {/* ================================================================= */}
  {/* STICKY SCROLL SECTION */}
  {/* ================================================================= */}
- <StickyScroll />
+ <ProductJourney
+     serviceId="digital-product"
+     processHeading={t('service.digital.timeline.heading')}
+     processSteps={[
+     { title: t('service.digital.step1.title'), text: t('service.digital.step1.text') },
+     { title: t('service.digital.step2.title'), text: t('service.digital.step2.text') },
+     { title: t('service.digital.step3.title'), text: t('service.digital.step3.text') },
+     { title: t('service.digital.step4.title'), text: t('service.digital.step4.text') },
+     ]}
+    />
+
+ {/* ================================================================= */}
+ {/* CASE STUDIES — real ventures from this service */}
+ {/* ================================================================= */}
+ <ServiceCaseStudies serviceId="digital-product" />
 
  {/* ================================================================= */}
  {/* CTA SECTION */}
@@ -105,7 +120,7 @@ export default function DigitalProductContent() {
  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight">
  {t('service.digital.cta.ready')}
  </h2>
- <p className="text-white/ text-lg mb-12 max-w-lg mx-auto leading-relaxed">
+ <p className="text-white/40 text-lg mb-12 max-w-lg mx-auto leading-relaxed">
  {t('service.digital.cta.text')}
  </p>
 

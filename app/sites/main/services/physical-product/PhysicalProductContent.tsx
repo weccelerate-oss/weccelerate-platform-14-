@@ -4,7 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
-import CADPanel from './CADPanel';
+import ProductJourney from '@/components/services/ProductJourney';
+import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
+import ProductGallery from './ProductGallery';
 
 
 // =============================================================================
@@ -95,7 +97,27 @@ export default function PhysicalProductContent() {
  {/* ================================================================= */}
  {/* INTERACTIVE CAD PANEL */}
  {/* ================================================================= */}
- <CADPanel />
+ <ProductJourney
+     serviceId="physical-product"
+     processHeading={t('service.physical.timeline.heading')}
+     processSteps={[
+     { title: t('service.physical.step1.title'), text: t('service.physical.step1.text') },
+     { title: t('service.physical.step2.title'), text: t('service.physical.step2.text') },
+     { title: t('service.physical.step3.title'), text: t('service.physical.step3.text') },
+     { title: t('service.physical.step4.title'), text: t('service.physical.step4.text') },
+     { title: t('service.physical.step5.title'), text: t('service.physical.step5.text') },
+     ]}
+    />
+
+ {/* ================================================================= */}
+ {/* CASE STUDIES — real ventures from this service */}
+ {/* ================================================================= */}
+ <ServiceCaseStudies serviceId="physical-product" />
+
+ {/* ================================================================= */}
+ {/* PRODUCTS IN DEVELOPMENT + CONFERENCES */}
+ {/* ================================================================= */}
+ <ProductGallery />
 
  {/* ================================================================= */}
  {/* CTA SECTION */}
@@ -126,7 +148,7 @@ export default function PhysicalProductContent() {
  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight">
  {t('service.physical.cta.ready')}
  </h2>
- <p className="text-white/ text-lg mb-12 max-w-lg mx-auto leading-relaxed">
+ <p className="text-white/40 text-lg mb-12 max-w-lg mx-auto leading-relaxed">
  {t('service.physical.cta.text')}
  </p>
 

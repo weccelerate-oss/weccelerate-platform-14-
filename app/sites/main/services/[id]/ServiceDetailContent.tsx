@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Target, Box, Code2, HeartPulse, TrendingUp, Hand
 import { useLanguage } from '@/lib/i18n';
 import { servicesHe, servicesEn, type Service } from '@/lib/services-data';
 import ServiceFullSections from '@/components/services/ServiceFullSections';
+import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 
 
 // =============================================================================
@@ -121,6 +122,11 @@ export function ServiceDetailContent({ serviceId }: { serviceId: string }) {
       {/* FULL SECTIONS — Bento grid with images                           */}
       {/* ================================================================= */}
       <ServiceFullSections serviceId={serviceId} />
+
+      {/* ================================================================= */}
+      {/* CASE STUDIES — real ventures from this service */}
+      {/* ================================================================= */}
+      <ServiceCaseStudies serviceId={serviceId} />
 
       {/* ================================================================= */}
       {/* CTA SECTION                                                       */}

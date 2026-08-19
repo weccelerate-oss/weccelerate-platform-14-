@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
-import BusinessTimeline from './BusinessTimeline';
+import ProductJourney from '@/components/services/ProductJourney';
+import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 
 
 // =============================================================================
@@ -95,7 +96,24 @@ export default function BusinessConsultingContent() {
  {/* ================================================================= */}
  {/* INTERACTIVE TIMELINE SECTION */}
  {/* ================================================================= */}
- <BusinessTimeline />
+ <ProductJourney
+     serviceId="business-consulting"
+     processHeading={t('service.consulting.timeline.heading')}
+     processSteps={[
+     { title: t('service.consulting.step1.title'), text: t('service.consulting.step1.text') },
+     { title: t('service.consulting.step2.title'), text: t('service.consulting.step2.text') },
+     { title: t('service.consulting.step3.title'), text: t('service.consulting.step3.text') },
+     { title: t('service.consulting.step4.title'), text: t('service.consulting.step4.text') },
+     { title: t('service.consulting.step5.title'), text: t('service.consulting.step5.text') },
+     { title: t('service.consulting.step6.title'), text: t('service.consulting.step6.text') },
+     { title: t('service.consulting.step7.title'), text: t('service.consulting.step7.text') },
+     ]}
+    />
+
+ {/* ================================================================= */}
+ {/* CASE STUDIES — real ventures from this service */}
+ {/* ================================================================= */}
+ <ServiceCaseStudies serviceId="business-consulting" />
 
  {/* ================================================================= */}
  {/* CTA SECTION */}
@@ -110,7 +128,7 @@ export default function BusinessConsultingContent() {
  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight">
  {t('service.consulting.cta.ready')}
  </h2>
- <p className="text-white/ text-lg mb-12 max-w-lg mx-auto leading-relaxed">
+ <p className="text-white/40 text-lg mb-12 max-w-lg mx-auto leading-relaxed">
  {t('service.consulting.cta.text')}
  </p>
 

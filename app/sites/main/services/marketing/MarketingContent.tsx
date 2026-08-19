@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
-import MarketingTimeline from './MarketingTimeline';
+import ProductJourney from '@/components/services/ProductJourney';
+import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 
 
 // =============================================================================
@@ -123,7 +124,21 @@ export default function MarketingContent() {
  {/* ================================================================= */}
  {/* INTERACTIVE TIMELINE SECTION */}
  {/* ================================================================= */}
- <MarketingTimeline />
+ <ProductJourney
+     serviceId="marketing"
+     processHeading={t('service.marketing.timeline.heading')}
+     processSteps={[
+     { title: t('service.marketing.step4.title'), text: t('service.marketing.step4.text') },
+     { title: t('service.marketing.step1.title'), text: t('service.marketing.step1.text') },
+     { title: t('service.marketing.step2.title'), text: t('service.marketing.step2.text') },
+     { title: t('service.marketing.step3.title'), text: t('service.marketing.step3.text') },
+     ]}
+    />
+
+ {/* ================================================================= */}
+ {/* CASE STUDIES — real ventures from this service */}
+ {/* ================================================================= */}
+ <ServiceCaseStudies serviceId="marketing" />
 
  {/* ================================================================= */}
  {/* CTA SECTION */}
@@ -138,7 +153,7 @@ export default function MarketingContent() {
  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight">
  {t('service.marketing.cta.ready')}
  </h2>
- <p className="text-white/ text-lg mb-12 max-w-lg mx-auto leading-relaxed">
+ <p className="text-white/40 text-lg mb-12 max-w-lg mx-auto leading-relaxed">
  {t('service.marketing.cta.text')}
  </p>
 
