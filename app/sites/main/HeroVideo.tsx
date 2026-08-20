@@ -9,7 +9,8 @@
  * black every 26 seconds and first paint was a black rectangle.
  *
  * The poster is frame 0 of that same file, so nothing jumps when playback
- * starts. Mobile skips the video entirely and shows the poster.
+ * starts. Mobile skips the video entirely and keeps its own still
+ * (hero-bg-poster.jpeg) — owner's call, left as it was.
  */
 
 import { useEffect, useState } from 'react';
@@ -29,7 +30,7 @@ export function HeroBackground() {
     return (
       <div className="absolute inset-0 bg-[#050810]">
         <img
-          src="/hero-bg-poster7.jpeg"
+          src="/hero-bg-poster.jpeg"
           alt="WeCcelerate — Venture Builder & Startup Accelerator Israel"
           className="w-full h-full object-cover"
         />
