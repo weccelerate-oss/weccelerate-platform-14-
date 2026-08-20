@@ -706,52 +706,66 @@ export function JourneyContent({
           )}
         </motion.div>
 
-        {/* Journey tools. Rendered unconditionally: the previous version only
-            showed the kit link inside `resumeTarget &&` or when readyCount > 0,
-            which meant a founder with no answers yet saw neither. */}
-        <div className="mb-5 flex flex-wrap items-center justify-center gap-2">
-          <Link
-            href="/portal/journey/kit"
-            className="flex items-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-4 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
-          >
-            <FolderOpen className="w-4 h-4" />
-            תיק המוכנות
-            {readyCount > 0 && (
-              <span className="tabular-nums text-[11px] bg-[#c8a951]/15 border border-[#c8a951]/30 rounded-full px-2 py-0.5">
-                {readyCount}
-              </span>
-            )}
-          </Link>
-
-          {features.trackers !== false && (
-            <>
+        {/* Journey tools.
+            Rendered unconditionally: the previous version showed the kit link
+            only inside `resumeTarget &&` or when readyCount > 0, and
+            resumeTarget is null until the founder answers something — so a new
+            founder saw no way in at all.
+            Cards rather than outline pills: as pills these sat in an empty band
+            under the summary card at 13px with a 40%-opacity border, and read
+            as decoration. Owner feedback was "I'm not sure there's even a
+            button here." */}
+        <div className="mb-8 grid gap-3 sm:grid-cols-3">
+          {[
+            {
+              href: '/portal/journey/kit',
+              Icon: FolderOpen,
+              title: 'תיק המוכנות',
+              hint: 'התשובות שסימנת כמוכנות להצגה',
+              count: readyCount,
+              show: true,
+            },
+            {
+              href: '/portal/journey/trackers/calls',
+              Icon: PhoneCall,
+              title: 'תיעוד שיחות',
+              hint: 'כל שיחה עם לקוח פוטנציאלי',
+              count: trackerCounts.calls,
+              show: features.trackers !== false,
+            },
+            {
+              href: '/portal/journey/trackers/leads',
+              Icon: Send,
+              title: 'מעקב פניות',
+              hint: 'למי פנית, מתי, ומה הסטטוס',
+              count: trackerCounts.leads,
+              show: features.trackers !== false,
+            },
+          ]
+            .filter((t) => t.show)
+            .map(({ href, Icon, title, hint, count }) => (
               <Link
-                href="/portal/journey/trackers/calls"
-                className="flex items-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-4 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
+                key={href}
+                href={href}
+                className="group wc-glass wc-glass-lift rounded-2xl px-4 py-4 flex items-center gap-3 border-[#c8a951]/25 hover:border-[#c8a951]/60"
               >
-                <PhoneCall className="w-4 h-4" />
-                תיעוד שיחות
-                {trackerCounts.calls > 0 && (
-                  <span className="tabular-nums text-[11px] bg-[#c8a951]/15 border border-[#c8a951]/30 rounded-full px-2 py-0.5">
-                    {trackerCounts.calls}
+                <span className="shrink-0 w-11 h-11 rounded-xl bg-[#c8a951]/15 border border-[#c8a951]/30 grid place-items-center group-hover:bg-[#c8a951]/25 transition-colors">
+                  <Icon className="w-5 h-5 text-[#e8d48b]" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2">
+                    <span className="font-bold text-white/90 text-[15px]">{title}</span>
+                    {count > 0 && (
+                      <span className="tabular-nums text-[11px] font-bold text-[#1d1704] bg-gradient-to-l from-[#c8a951] to-[#e8d48b] rounded-full px-2 py-0.5">
+                        {count}
+                      </span>
+                    )}
                   </span>
-                )}
+                  <span className="block text-[12px] text-white/40 mt-0.5 truncate">{hint}</span>
+                </span>
+                <ArrowLeft className="w-4 h-4 shrink-0 text-white/25 group-hover:text-[#e8d48b] group-hover:-translate-x-0.5 transition-all" />
               </Link>
-
-              <Link
-                href="/portal/journey/trackers/leads"
-                className="flex items-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-4 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
-              >
-                <Send className="w-4 h-4" />
-                מעקב פניות
-                {trackerCounts.leads > 0 && (
-                  <span className="tabular-nums text-[11px] bg-[#c8a951]/15 border border-[#c8a951]/30 rounded-full px-2 py-0.5">
-                    {trackerCounts.leads}
-                  </span>
-                )}
-              </Link>
-            </>
-          )}
+            ))}
         </div>
 
         {isStatic && (
