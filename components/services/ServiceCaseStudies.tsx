@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, ExternalLink, Newspaper, Trophy } from 'lucide-r
 import { useLanguage } from '@/lib/i18n';
 import CaseVideo from '@/components/services/CaseVideo';
 import { getCaseStudies, getPressItems, type CaseStudy } from '@/lib/case-studies-data';
+import { getProductJourney } from '@/lib/product-journeys-data';
 
 interface ServiceCaseStudiesProps {
   serviceId: string;
@@ -45,15 +46,26 @@ function CaseCard({ caseStudy, index }: { caseStudy: CaseStudy; index: number })
                 {caseStudy.images.map((src, i) => (
                   <div
                     key={src}
-                    className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10"
+                    className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-[#0d1321]"
                   >
-                    <Image
-                      src={src}
-                      alt={`${caseStudy.name} ${i + 1}`}
-                      fill
-                      sizes="(max-width: 1024px) 45vw, 25vw"
-                      className="object-cover"
-                    />
+                    {src.startsWith('/') ? (
+                      <Image
+                        src={src}
+                        alt={`${caseStudy.name} ${i + 1}`}
+                        fill
+                        sizes="(max-width: 1024px) 45vw, 25vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      // Press photography stays on the newsroom's own CDN
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={src}
+                        alt={`${caseStudy.name} ${i + 1}`}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -152,8 +164,16 @@ export default function ServiceCaseStudies({ serviceId }: ServiceCaseStudiesProp
   const { lang } = useLanguage();
   const isHe = lang === 'he';
 
-  const cases = getCaseStudies(serviceId);
-  const press = getPressItems(serviceId);
+  // The ProductJourney above already walks one venture through this service in
+  // full. Showing it again as a card would just repeat the same story.
+  const journey = getProductJourney(serviceId);
+  const cases = getCaseStudies(serviceId).filter((c) => c.id !== journey?.caseId);
+
+  // Likewise, an article already used inside the journey shouldn't reappear below.
+  const journeyUrls = new Set(
+    (journey?.stages ?? []).flatMap((stage) => (stage.image ? [stage.image] : []))
+  );
+  const press = getPressItems(serviceId).filter((item) => !journeyUrls.has(item.image));
 
   if (cases.length === 0 && press.length === 0) return null;
 

@@ -20,6 +20,8 @@ export interface JourneyStage {
   image?: string;
   /** 'contain' for product cutouts on a white tile; defaults to 'cover' */
   fit?: 'cover' | 'contain';
+  /** Photo credit, shown under the media. Required for press photography. */
+  credit?: string;
   videoId?: string;
   metric?: string;
   metricLabel?: string;
@@ -246,7 +248,69 @@ export const productJourneys: ProductJourney[] = [
       },
     ],
   },
-];
+  {
+    services: ['medtech-leumit'],
+    caseId: 'medtech-founder',
+    name: 'סימביוזיס',
+    tagline: 'מסתם לב דינמי — מרעיון של וטרינרית ועד פרס בכנס הקרדיולוגיה המוביל בעולם',
+    taglineEn:
+      'A dynamic heart valve — from a veterinarian’s idea to a prize at the world’s leading cardiology conference',
+    stages: [
+      {
+        label: 'רעיון קליני',
+        labelEn: 'Clinical idea',
+        title: 'הבעיה שאף מסתם לא פתר',
+        titleEn: 'The problem no valve solved',
+        text: 'ד״ר שירה בורג, וטרינרית ברפואת חירום, טיפלה בכלבים עם אי-ספיקה מיטרלית והבינה שזו אותה מחלה בדיוק בבני אדם — ושהאנטומיה משתנה בין חולה לחולה ולאורך מחזור הלב. המסתמים הקיימים קשיחים בצורתם, ולכן כ-80% מהחולים אינם מועמדים להחלפה. מכאן נולד הרעיון למסתם דינמי שמשנה את צורתו תוך כדי צנתור.',
+        textEn:
+          'Dr. Shira Burg, an emergency veterinarian, treated dogs with mitral regurgitation and realised it is the same disease in humans — with anatomy that varies between patients and across the cardiac cycle. Existing valves are fixed in shape, which leaves roughly 80% of patients ineligible for replacement. Hence a dynamic valve that changes shape during catheterisation.',
+        image: '/images/cases/medtech-1.jpg',
+        fit: 'contain',
+        credit: 'צילום: סימביוזיס, מתוך TheMarker',
+      },
+      {
+        label: 'צוות ותוכנית',
+        labelEn: 'Team and plan',
+        title: 'מרעיון לחברה',
+        titleEn: 'From an idea to a company',
+        text: 'סימביוזיס הוקמה בפברואר 2021 על ידי ד״ר בורג ו-ורדה בדט. כאן נכנסנו: העמקת התוכנית העסקית מהסבב הראשון ($400K) והערכת שווי — החומרים שהופכים פיתוח מבטיח למשהו שמשקיע יכול לבחון.',
+        textEn:
+          'Symbiosis was founded in February 2021 by Dr. Burg and Varda Badat. This is where we came in: deepening the business plan from the first ($400K) round, plus a valuation — the materials that turn a promising development into something an investor can assess.',
+        image: '/images/cases/medtech-2.jpg',
+        credit: 'צילום: סימביוזיס, מתוך TheMarker',
+      },
+      {
+        label: 'רגולציה וגיוס',
+        labelEn: 'Regulation and funding',
+        title: 'ייעוץ רגולטורי וסבבי גיוס',
+        titleEn: 'Regulatory consulting and funding rounds',
+        text: 'ייעוץ רגולטורי עם ד״ר סוזן אלפרט מה-FDA, ובזכות החומרים העסקיים היזמיות סגרו סבב של 1M$ והכניסו מנכ״ל שבתפקידו הקודם ניהל חברה בנאסד״ק — עד גיוסים של מעל 5M$ והכנה לשוק הבינלאומי.',
+        textEn:
+          'Regulatory consulting with Dr. Susan Alpert (ex-FDA), and on the strength of the business materials the founders closed a $1M round and brought in a CEO who previously ran a Nasdaq-listed company — reaching over $5M raised and preparation for international markets.',
+        image:
+          'https://cdn.prod.website-files.com/623e41e1f88efb16cda26216/6408562da0d6de4156d594f2_OL7A4832_1-01.jpg',
+        credit: 'צילום: מתוך Calcalist360',
+        metric: '$5M+',
+        metricLabel: 'סה״כ גיוסים',
+        metricLabelEn: 'Total raised',
+      },
+      {
+        label: 'הכרה עולמית',
+        labelEn: 'Global recognition',
+        title: 'פרס ראשון בכנס TCT בוושינגטון',
+        titleEn: 'First prize at TCT in Washington',
+        text: 'באוקטובר 2024 זכתה סימביוזיס בתחרות SHARK TANK בכנס ה-TCT בוושינגטון — כנס הקרדיולוגיה המוביל בעולם — והקדימה עשרות חברות, עם פרס של 200 אלף דולר. מיד לאחר מכן הגיעו הצעות לניסויים קליניים ראשונים במוסדות רפואיים באירופה ובארה״ב. ניסויים בבני אדם צפויים בתחילת 2027.',
+        textEn:
+          'In October 2024 Symbiosis won the SHARK TANK competition at TCT in Washington — the world’s leading cardiology conference — ahead of dozens of companies, with a $200,000 prize. Offers for first clinical trials at medical institutions in Europe and the US followed immediately. Human trials are expected in early 2027.',
+        image: '/images/cases/medtech-3.jpg',
+        credit: 'צילום: מתוך TheMarker',
+        metric: '$200K',
+        metricLabel: 'פרס ראשון בתחרות TCT',
+        metricLabelEn: 'First prize at TCT',
+      },
+    ],
+  },
+]
 
 export function getProductJourney(serviceId: string): ProductJourney | undefined {
   return productJourneys.find((j) => j.services.includes(serviceId));

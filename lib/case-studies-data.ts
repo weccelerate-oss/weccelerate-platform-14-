@@ -174,7 +174,7 @@ export const caseStudies: CaseStudy[] = [
   {
     id: 'medtech-founder',
     services: ['medtech-leumit', 'business-consulting', 'investor-preparation', 'investors'],
-    name: 'מיזם MedTech',
+    name: 'סימביוזיס',
     title: 'הרופאה-יזמית שסדקה את תקרת הזכוכית',
     titleEn: 'The physician-founder who broke the glass ceiling',
     description:
@@ -192,6 +192,7 @@ export const caseStudies: CaseStudy[] = [
       { value: '$1M', label: 'סבב נוסף', labelEn: 'Follow-on round' },
       { value: '$5M+', label: 'סה״כ גיוסים', labelEn: 'Total raised' },
     ],
+    images: ['/images/cases/medtech-1.jpg', '/images/cases/medtech-3.jpg'],
     links: [
       {
         label: 'כתבה ב-Calcalist360',
@@ -217,6 +218,7 @@ export const caseStudies: CaseStudy[] = [
       'From the idea onward: business materials, app development, fundraising, recruiting a CEO, PR, hands-on marketing and closing major contracts.',
     highlight: 'חוזים עם מלונות פתאל, קפה אילנס ופיצה האט נתב״ג',
     highlightEn: 'Contracts with Fattal Hotels, Ilan’s Coffee and Pizza Hut (Ben Gurion Airport)',
+    images: ['https://img.mako.co.il/2026/05/14/YAKOV_autoOrient_i.jpg'],
     links: [
       {
         label: 'כתבה ב-mako',
@@ -242,6 +244,9 @@ export const caseStudies: CaseStudy[] = [
       'Business model and business plan, investor introductions and a design partner (El Al) for an advanced-stage pilot — through to the exit and acquisition by Nagish.',
     highlight: 'אקזיט — נרכשה על ידי Nagish',
     highlightEn: 'Exit — acquired by Nagish',
+    images: [
+      'https://pic1.calcalist.co.il/picserver3/crop_images/2025/10/27/BkeyoICn0xg/BkeyoICn0xg_0_0_1152_640_0_large.jpg',
+    ],
     links: [
       {
         label: 'כתבה ב-CTech',
@@ -296,6 +301,16 @@ export const pressItems: PressItem[] = [
     image:
       'https://cdn.prod.website-files.com/623e41e1f88efb16cda26216/6408562da0d6de4156d594f2_OL7A4832_1-01.jpg',
     url: 'https://calcalist360.webflow.io/articles/shira-burg',
+  },
+  {
+    services: ['marketing', 'medtech-leumit', 'investor-preparation'],
+    title: 'הדור הבא של המסתמים',
+    titleEn: 'The next generation of heart valves',
+    source: 'TheMarker',
+    sourceColor: '#00a0e3',
+    image:
+      'https://img.haarets.co.il/bs/00000194-1c50-dc42-afbc-3cf7356f0000/48/be/ee90c3e44792b7d75fa459bb5fa0/59847390.JPG?&width=740',
+    url: 'https://www.themarker.com/labels/innovation/2025-01-02/ty-article-labels/00000194-1c50-dc42-afbc-3cf736280000',
   },
   {
     services: ['marketing', 'physical-product'],

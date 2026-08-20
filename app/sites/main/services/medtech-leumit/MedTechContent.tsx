@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
-import BioScanPanel from './BioScanPanel';
+import ProductJourney from '@/components/services/ProductJourney';
 import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 
 
@@ -134,7 +134,15 @@ export default function MedTechContent() {
  {/* ================================================================= */}
  {/* BIO-SCAN INTERACTIVE PANEL */}
  {/* ================================================================= */}
- <BioScanPanel />
+ <ProductJourney
+     serviceId="medtech-leumit"
+     processHeading={t('service.medtech.timeline.heading')}
+     processSteps={[
+     { title: t('service.medtech.step1.title'), text: t('service.medtech.step1.text') },
+     { title: t('service.medtech.step2.title'), text: t('service.medtech.step2.text') },
+     { title: t('service.medtech.step3.title'), text: t('service.medtech.step3.text') },
+     ]}
+    />
 
  {/* ================================================================= */}
  {/* CASE STUDIES — real ventures from this service */}

@@ -115,7 +115,7 @@ export default function ProductJourney({
               className="grid lg:grid-cols-2"
             >
               {/* Media */}
-              <div className="bg-[#050810] p-5 sm:p-6 flex items-center">
+              <div className="bg-[#050810] p-5 sm:p-6 flex flex-col justify-center">
                 {stage.videoId ? (
                   <div className="w-full">
                     <CaseVideo videoId={stage.videoId} title={journey.name} />
@@ -165,6 +165,10 @@ export default function ProductJourney({
                       {String(active + 1).padStart(2, '0')}
                     </span>
                   </div>
+                )}
+
+                {stage.credit && (
+                  <p className="mt-2 text-[11px] text-white/30 text-center">{stage.credit}</p>
                 )}
               </div>
 
