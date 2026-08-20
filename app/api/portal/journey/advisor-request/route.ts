@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
+import { isSameOrigin } from '@/lib/http/same-origin';
 import { hasFeature } from '@/lib/entitlements';
 import { signAdvisorToken } from '@/lib/journey/advisor-token';
 import { sendAdvisorReviewEmail } from '@/lib/journey/advisor-email';
@@ -18,25 +19,6 @@ import { notifyAdmins } from '@/lib/advisors.server';
 import { israelDayKey, ADVISOR_EMAIL_LOG_ACTION } from '@/lib/advisors';
 
 const PORTAL_URL = 'https://weccelerate.co.il';
-
-function isSameOrigin(req: NextRequest): boolean {
-  const origin = req.headers.get('origin');
-  const host = req.headers.get('host');
-  if (!origin || !host) {
-    const referer = req.headers.get('referer');
-    if (!referer) return true;
-    try {
-      return new URL(referer).host === host;
-    } catch {
-      return false;
-    }
-  }
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {

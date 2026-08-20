@@ -19,27 +19,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
+import { isSameOrigin } from '@/lib/http/same-origin';
 
 const MAX_ANSWER_LENGTH = 20_000;
-
-function isSameOrigin(req: NextRequest): boolean {
-  const origin = req.headers.get('origin');
-  const host = req.headers.get('host');
-  if (!origin || !host) {
-    const referer = req.headers.get('referer');
-    if (!referer) return true;
-    try {
-      return new URL(referer).host === host;
-    } catch {
-      return false;
-    }
-  }
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {

@@ -23,6 +23,7 @@ export type PortalFeature =
   | 'learning'     // the learning center
   | 'mentorAi'     // AI answer review ("חוות דעת")
   | 'kit'          // תיק המוכנות (readiness kit)
+  | 'trackers'     // תיעוד שיחות + מעקב פניות (the two founder spreadsheets)
   | 'humanMentor'; // send answers to the human advisor + thread
 
 export type PlanName = 'WECCELERATE' | 'INVESTOR_PREP' | 'FREE';
@@ -33,6 +34,7 @@ const PLAN_FEATURES: Record<PlanName, Record<PortalFeature, boolean>> = {
     learning: true,
     mentorAi: true,
     kit: true,
+    trackers: true,
     humanMentor: false, // unused — resolved from the advisor assignment
   },
   INVESTOR_PREP: {
@@ -40,6 +42,7 @@ const PLAN_FEATURES: Record<PlanName, Record<PortalFeature, boolean>> = {
     learning: true,
     mentorAi: true,
     kit: true,
+    trackers: true,
     humanMentor: true,
   },
   FREE: {
@@ -47,6 +50,7 @@ const PLAN_FEATURES: Record<PlanName, Record<PortalFeature, boolean>> = {
     learning: true,
     mentorAi: false,
     kit: true,
+    trackers: true,
     humanMentor: false,
   },
 };
@@ -79,6 +83,7 @@ export function featuresFor(user: EntitledUser | null | undefined): Record<Porta
     learning: hasFeature(user, 'learning'),
     mentorAi: hasFeature(user, 'mentorAi'),
     kit: hasFeature(user, 'kit'),
+    trackers: hasFeature(user, 'trackers'),
     humanMentor: hasFeature(user, 'humanMentor'),
   };
 }

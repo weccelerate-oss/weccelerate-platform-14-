@@ -139,6 +139,8 @@ model User {
   quizAttempts  QuizAttempt[]
   journeyAnswers UserJourneyAnswer[]
   aiUsage       AiUsage[]
+  callLogs      FounderCallLog[]
+  outreachLeads FounderOutreachLead[]
 
   // Plan & entitlements. Everyone provisioned so far is a WeCcelerate house
   // client; FREE arrives with the future self-signup page. featureOverrides
@@ -887,6 +889,76 @@ model AnswerComment {
 
   @@index([answerId, createdAt])
   @@map("answer_comments")
+}
+
+// =============================================================================
+// FOUNDER TRACKERS — the two spreadsheets founders keep beside תיק המוכנות
+// =============================================================================
+// Entrepreneurs already run these in Excel: a customer-discovery call log and
+// an outreach tracker. Owned by the entrepreneur; their assigned advisor and
+// ADMIN get READ-ONLY access — every visibility decision lives in
+// lib/trackers/access.ts and nowhere else.
+//
+// Rows are soft-deleted. Autosave + a spreadsheet + paste-import is exactly the
+// shape that produces "I lost 80 rows", and `deletedAt` makes that recoverable
+// from db:studio instead of gone. Every read filters `deletedAt: null`.
+//
+// Dates are @db.Date on purpose: the app runs UTC and founders are in
+// Asia/Jerusalem, so a plain DateTime would show them yesterday's date in the
+// evening. Serialize with toISOString().slice(0,10) — never getDate().
+
+model FounderCallLog {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  // Display order, server-assigned from the array index on every bulk save, so
+  // reordering never needs fractional indices.
+  position Int @default(0)
+
+  contactName   String    @default("") @db.VarChar(200)  // שם
+  relevance     String    @default("") @db.VarChar(60)   // רלוונטיות — free text, chip-suggested
+  company       String    @default("") @db.VarChar(200)  // חברה
+  phone         String    @default("") @db.VarChar(60)   // טלפון
+  email         String    @default("") @db.VarChar(200)  // מייל
+  lastContactAt DateTime? @db.Date                       // תאריך התקשרות אחרון
+  summary       String    @default("") @db.Text          // סיכום שיחה
+  recordingUrl  String    @default("") @db.VarChar(2000) // קישור להקלטה — URL only
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, deletedAt, position])
+  @@map("founder_call_logs")
+}
+
+model FounderOutreachLead {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  // "מס'" in the sheet is DERIVED from this (position + 1) and never stored —
+  // a stored row number goes stale the first time a row is deleted.
+  position Int @default(0)
+
+  companyName    String    @default("") @db.VarChar(200)  // שם החברה
+  occupation     String    @default("") @db.VarChar(200)  // עיסוק
+  category       String    @default("") @db.VarChar(120)  // קטגוריה
+  contactName    String    @default("") @db.VarChar(200)  // איש קשר
+  phone          String    @default("") @db.VarChar(60)   // טלפון
+  email          String    @default("") @db.VarChar(200)  // אימייל
+  link           String    @default("") @db.VarChar(2000) // אתר / לינקדאין
+  status         String    @default("") @db.VarChar(60)   // סטטוס פנייה — free text, chip-suggested
+  lastOutreachAt DateTime? @db.Date                       // תאריך פנייה אחרון
+  notes          String    @default("") @db.Text          // הערות
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, deletedAt, position])
+  @@map("founder_outreach_leads")
 }
 
 // =============================================================================

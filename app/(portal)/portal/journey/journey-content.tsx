@@ -39,6 +39,7 @@ import {
   Gem,
   MessagesSquare,
   Send,
+  PhoneCall,
   UserRound,
   Landmark,
   LineChart,
@@ -80,7 +81,9 @@ interface JourneyContentProps {
   /** Monthly mentor-feedback pool state at page load. */
   initialMentorQuota?: { remaining: number; limit: number };
   /** Plan-derived feature switches (see lib/entitlements.ts). */
-  features?: { mentorAi: boolean; humanMentor: boolean };
+  features?: { mentorAi: boolean; humanMentor: boolean; trackers?: boolean };
+  /** Row counts for the two founder trackers, shown on the tool pills. */
+  trackerCounts?: { calls: number; leads: number };
   /** The assigned advisor's name, or null when nobody is assigned yet. The
    *  entrepreneur sees a person — never an email address. */
   advisorName?: string | null;
@@ -179,7 +182,8 @@ export function JourneyContent({
   chapters,
   initialAnswers,
   initialMentorQuota,
-  features = { mentorAi: true, humanMentor: false },
+  features = { mentorAi: true, humanMentor: false, trackers: true },
+  trackerCounts = { calls: 0, leads: 0 },
   advisorName = null,
 }: JourneyContentProps) {
   const hasAdvisor = Boolean(advisorName);
@@ -697,32 +701,58 @@ export function JourneyContent({
                   המשך מהמקום שעצרת
                   <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                 </button>
-                <Link
-                  href="/portal/journey/kit"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-5 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
-                >
-                  <FolderOpen className="w-4 h-4" />
-                  תיק המוכנות שלי
-                  <span className="tabular-nums text-[11px] bg-[#c8a951]/15 border border-[#c8a951]/30 rounded-full px-2 py-0.5">
-                    {readyCount}
-                  </span>
-                </Link>
               </div>
             </>
           )}
         </motion.div>
 
-        {!resumeTarget && readyCount > 0 && (
-          <div className="flex justify-center mb-4">
-            <Link
-              href="/portal/journey/kit"
-              className="flex items-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-5 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
-            >
-              <FolderOpen className="w-4 h-4" />
-              תיק המוכנות שלי ({readyCount})
-            </Link>
-          </div>
-        )}
+        {/* Journey tools. Rendered unconditionally: the previous version only
+            showed the kit link inside `resumeTarget &&` or when readyCount > 0,
+            which meant a founder with no answers yet saw neither. */}
+        <div className="mb-5 flex flex-wrap items-center justify-center gap-2">
+          <Link
+            href="/portal/journey/kit"
+            className="flex items-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-4 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
+          >
+            <FolderOpen className="w-4 h-4" />
+            תיק המוכנות
+            {readyCount > 0 && (
+              <span className="tabular-nums text-[11px] bg-[#c8a951]/15 border border-[#c8a951]/30 rounded-full px-2 py-0.5">
+                {readyCount}
+              </span>
+            )}
+          </Link>
+
+          {features.trackers !== false && (
+            <>
+              <Link
+                href="/portal/journey/trackers/calls"
+                className="flex items-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-4 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
+              >
+                <PhoneCall className="w-4 h-4" />
+                תיעוד שיחות
+                {trackerCounts.calls > 0 && (
+                  <span className="tabular-nums text-[11px] bg-[#c8a951]/15 border border-[#c8a951]/30 rounded-full px-2 py-0.5">
+                    {trackerCounts.calls}
+                  </span>
+                )}
+              </Link>
+
+              <Link
+                href="/portal/journey/trackers/leads"
+                className="flex items-center gap-2 rounded-xl border border-[#c8a951]/40 text-[#e8d48b] font-semibold px-4 py-2.5 text-[13px] hover:bg-[#c8a951]/10 transition-colors"
+              >
+                <Send className="w-4 h-4" />
+                מעקב פניות
+                {trackerCounts.leads > 0 && (
+                  <span className="tabular-nums text-[11px] bg-[#c8a951]/15 border border-[#c8a951]/30 rounded-full px-2 py-0.5">
+                    {trackerCounts.leads}
+                  </span>
+                )}
+              </Link>
+            </>
+          )}
+        </div>
 
         {isStatic && (
           <div className="text-center text-xs text-amber-400/80 mb-4">

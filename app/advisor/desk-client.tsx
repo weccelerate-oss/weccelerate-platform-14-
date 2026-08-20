@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import {
@@ -24,6 +25,7 @@ import {
   Send,
   Sparkles,
   Users,
+  Table2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NotificationBell, type BellNotification } from '@/components/notification-bell';
@@ -213,6 +215,13 @@ export function AdvisorDesk({
                 {p.openThreads === 0 && (
                   <span className="text-[11px] text-white/30 shrink-0">טרם פנה אליך</span>
                 )}
+                <Link
+                  href={`/advisor/entrepreneur/${p.id}/trackers`}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[#c8a951]/30 px-3 py-1.5 text-[11.5px] font-semibold text-[#e8d48b] hover:bg-[#c8a951]/10 transition-colors"
+                >
+                  <Table2 className="w-3.5 h-3.5" />
+                  שיחות ופניות
+                </Link>
               </div>
             ))}
           </div>

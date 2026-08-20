@@ -6,6 +6,7 @@ import { getQuota } from '@/lib/ai-quota';
 import { prisma } from '@/lib/db';
 import { featuresFor } from '@/lib/entitlements';
 import { advisorDisplayName } from '@/lib/advisors';
+import { getTrackerCounts } from '@/lib/trackers/repository';
 
 // Content is admin-managed and answers are per-user — always render fresh.
 export const dynamic = 'force-dynamic';
@@ -20,10 +21,11 @@ export default async function JourneyPage() {
     redirect('/login?callbackUrl=/portal/journey');
   }
 
-  const [chapters, answers, mentorQuota, dbUser] = await Promise.all([
+  const [chapters, answers, mentorQuota, trackerCounts, dbUser] = await Promise.all([
     getPublishedJourney(),
     getUserJourneyAnswers(userId),
     getQuota(userId, 'mentor_feedback'),
+    getTrackerCounts(userId),
     prisma.user
       .findUnique({
         where: { id: userId },
@@ -48,7 +50,12 @@ export default async function JourneyPage() {
       chapters={chapters}
       initialAnswers={answers}
       initialMentorQuota={{ remaining: mentorQuota.remaining, limit: mentorQuota.limit }}
-      features={{ mentorAi: features.mentorAi, humanMentor: features.humanMentor }}
+      features={{
+        mentorAi: features.mentorAi,
+        humanMentor: features.humanMentor,
+        trackers: features.trackers,
+      }}
+      trackerCounts={trackerCounts}
       advisorName={dbUser?.advisor?.isActive ? advisorDisplayName(dbUser.advisor) : null}
     />
   );
