@@ -105,7 +105,7 @@ function CaseCard({ caseStudy, index }: { caseStudy: CaseStudy; index: number })
 
           {/* Headline result */}
           {highlight && (
-            <div className="flex items-start gap-3 rounded-xl border border-[#c8a951]/25 bg-[#c8a951]/[0.07] px-5 py-4 mb-5 border-s-2 border-s-[#c8a951]">
+            <div className="flex items-start gap-3 rounded-xl border border-[#c8a951]/25 bg-[#c8a951]/[0.07] px-5 py-4 mb-5">
               <Trophy className="w-5 h-5 text-[#c8a951] shrink-0 mt-0.5" />
               <div>
                 <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[#c8a951]/70 mb-1">
