@@ -77,7 +77,11 @@ export const caseStudies: CaseStudy[] = [
       { value: '$181,661', label: 'סה״כ גיוס בקמפיינים', labelEn: 'Total raised in campaigns' },
     ],
     videoId: 'PTAJmcPl0Tw',
-    images: ['/images/cases/success1a.png', '/images/cases/success1b.png'],
+    images: [
+      '/images/cases/success1b.png',
+      '/images/cases/knotix-hero.jpg',
+      '/images/cases/success1a.png',
+    ],
     links: [
       {
         label: 'Kickstarter',
@@ -120,7 +124,12 @@ export const caseStudies: CaseStudy[] = [
       { value: 'Amazon', label: 'מכירה בשוק האמריקאי', labelEn: 'Selling in the US market' },
     ],
     videoId: 'HJwI2ppyanY',
-    images: ['/images/cases/success2a.jpg', '/images/cases/success2b.jpg'],
+    images: [
+      '/images/cases/bubl-pack.png',
+      '/images/cases/success2a.jpg',
+      '/images/cases/success2b.jpg',
+      '/images/cases/bubl-bag.png',
+    ],
     links: [
       {
         label: 'כתבה ב-ynet',
@@ -149,7 +158,11 @@ export const caseStudies: CaseStudy[] = [
     highlight: 'פריסה אצל רשתות מובילות — רנואר, אדידס ועוד',
     highlightEn: 'Deployed at leading chains — Renuar, Adidas and more',
     videoId: 'odJV5IFjQiY',
-    images: ['/images/cases/success3a.png', '/images/cases/success3b.png'],
+    images: [
+      '/images/cases/paytag-station.jpg',
+      '/images/cases/success3a.png',
+      '/images/cases/success3b.png',
+    ],
     links: [
       {
         label: 'כתבה ב-mako',
@@ -192,7 +205,11 @@ export const caseStudies: CaseStudy[] = [
       { value: '$1M', label: 'סבב נוסף', labelEn: 'Follow-on round' },
       { value: '$5M+', label: 'סה״כ גיוסים', labelEn: 'Total raised' },
     ],
-    images: ['/images/cases/medtech-1.jpg', '/images/cases/medtech-3.jpg'],
+    images: [
+      '/images/cases/medtech-1.jpg',
+      '/images/cases/medtech-2.jpg',
+      '/images/cases/medtech-3.jpg',
+    ],
     links: [
       {
         label: 'כתבה ב-Calcalist360',
@@ -205,20 +222,25 @@ export const caseStudies: CaseStudy[] = [
   {
     id: 'gigs-app',
     services: ['digital-product', 'marketing'],
-    name: 'אפליקציית עבודות מזדמנות',
-    title: 'המורה שהקים אפליקציה לעבודות מזדמנות',
-    titleEn: 'The teacher who built a gig-work app',
+    name: 'Job2day',
+    title: 'המורה שהקים מרקטפלייס לעבודות מזדמנות',
+    titleEn: 'The teacher who built a marketplace for gig work',
     description:
-      'אפליקציה שמחברת בין עסקים לעובדים למשמרות ועבודות מזדמנות — מרעיון של מורה למוצר שעובד מול רשתות ארציות.',
+      'יעקב וייס היה מחנך בתלמוד תורה שחיפש השלמת הכנסה, וזיהה פער: מעסיקים במסעדנות ובמלונאות זקוקים לעובדי תגבור כל הזמן, חברות כוח אדם עולות 90-100 ₪ לשעה ולא מספקות עובד בודד או פתרון למשק בית. Job2day היא פלטפורמת מרקטפלייס שמחברת ישירות בין השניים.',
     descriptionEn:
-      'An app connecting businesses with workers for shifts and gig jobs — from a teacher’s idea to a product serving national chains.',
+      'Yaakov Weiss was a teacher looking for extra income when he spotted the gap: restaurants and hotels constantly need surge staff, while staffing agencies cost ₪90-100 an hour and will not supply a single worker or serve a household. Job2day is a marketplace connecting the two directly.',
     process:
       'משלב הרעיון: בניית חומרים עסקיים, פיתוח האפליקציה, גיוס כספים, גיוס מנכ״לית, יחסי ציבור, שיווק בפועל וסגירת חוזים גדולים.',
     processEn:
       'From the idea onward: business materials, app development, fundraising, recruiting a CEO, PR, hands-on marketing and closing major contracts.',
     highlight: 'חוזים עם מלונות פתאל, קפה אילנס ופיצה האט נתב״ג',
     highlightEn: 'Contracts with Fattal Hotels, Ilan’s Coffee and Pizza Hut (Ben Gurion Airport)',
-    images: ['https://img.mako.co.il/2026/05/14/YAKOV_autoOrient_i.jpg'],
+    images: [
+      '/images/cases/job2day-2.jpg',
+      '/images/cases/job2day-4.jpg',
+      '/images/cases/job2day-3.jpg',
+      '/images/cases/job2day-founder.jpg',
+    ],
     links: [
       {
         label: 'כתבה ב-mako',
@@ -275,8 +297,8 @@ export const pressItems: PressItem[] = [
   },
   {
     services: ['marketing', 'digital-product'],
-    title: 'המורה שהקים אפליקציה לעבודות מזדמנות',
-    titleEn: 'The teacher who built a gig-work app',
+    title: 'היזם שרוצה לפתור את מצוקת העובדים',
+    titleEn: 'The founder taking on the staffing shortage',
     source: 'mako',
     sourceColor: '#ff3b3b',
     image: 'https://img.mako.co.il/2026/05/14/YAKOV_autoOrient_i.jpg',

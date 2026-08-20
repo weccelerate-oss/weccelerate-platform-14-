@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, ExternalLink, Newspaper, Trophy } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useLanguage } from '@/lib/i18n';
 import CaseVideo from '@/components/services/CaseVideo';
 import { getCaseStudies, getPressItems, type CaseStudy } from '@/lib/case-studies-data';
@@ -42,18 +43,27 @@ function CaseCard({ caseStudy, index }: { caseStudy: CaseStudy; index: number })
             {caseStudy.videoId && <CaseVideo videoId={caseStudy.videoId} title={caseStudy.name} />}
 
             {caseStudy.images && caseStudy.images.length > 0 && (
+              // Ventures carry different numbers of images depending on what
+              // actually exists. A lone tile in a 2-column grid reads as a
+              // missing image, and 3 tiles leave a hole, so the first image
+              // goes full width whenever the count is odd.
               <div className="grid grid-cols-2 gap-3">
                 {caseStudy.images.map((src, i) => (
                   <div
                     key={src}
-                    className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-[#0d1321]"
+                    className={cn(
+                      'relative overflow-hidden rounded-xl border border-white/10 bg-[#0d1321]',
+                      caseStudy.images!.length % 2 === 1 && i === 0
+                        ? 'col-span-2 aspect-video'
+                        : 'aspect-[4/3]',
+                    )}
                   >
                     {src.startsWith('/') ? (
                       <Image
                         src={src}
                         alt={`${caseStudy.name} ${i + 1}`}
                         fill
-                        sizes="(max-width: 1024px) 45vw, 25vw"
+                        sizes="(max-width: 1024px) 90vw, 45vw"
                         className="object-cover"
                       />
                     ) : (
