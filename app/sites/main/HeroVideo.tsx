@@ -1,5 +1,17 @@
 'use client';
 
+/**
+ * Homepage hero background.
+ *
+ * hero-bg7.mp4 is the source clip re-encoded for the web: audio stripped (it
+ * plays muted), 8.1 -> 2.6 Mbps, and trimmed past the fade-in and before the
+ * fade-out. The trim matters because this loops — untrimmed, the hero faded to
+ * black every 26 seconds and first paint was a black rectangle.
+ *
+ * The poster is frame 0 of that same file, so nothing jumps when playback
+ * starts. Mobile skips the video entirely and shows the poster.
+ */
+
 import { useEffect, useState } from 'react';
 
 export function HeroBackground() {
@@ -17,7 +29,7 @@ export function HeroBackground() {
     return (
       <div className="absolute inset-0 bg-[#050810]">
         <img
-          src="/hero-bg-poster.jpeg"
+          src="/hero-bg-poster7.jpeg"
           alt="WeCcelerate — Venture Builder & Startup Accelerator Israel"
           className="w-full h-full object-cover"
         />
@@ -43,8 +55,8 @@ export function HeroBackground() {
         loop
         muted
         playsInline
-        src="/hero-bg6.mp4"
-        poster="/hero-bg-poster6.jpeg"
+        src="/hero-bg7.mp4"
+        poster="/hero-bg-poster7.jpeg"
         style={{
           display: 'block',
           position: 'absolute',
