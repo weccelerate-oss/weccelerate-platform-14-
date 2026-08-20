@@ -36,6 +36,7 @@ export default function ProductJourney({
   const stages = journey.stages;
   const stage = stages[active];
   const isExternalImage = Boolean(stage.image && !stage.image.startsWith('/'));
+  const isContain = stage.fit === 'contain';
 
   // In RTL the visual "forward" arrow points left
   const PrevIcon = isRtl ? ChevronRight : ChevronLeft;
@@ -120,7 +121,15 @@ export default function ProductJourney({
                     <CaseVideo videoId={stage.videoId} title={journey.name} />
                   </div>
                 ) : stage.image ? (
-                  <div className="relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 bg-[#0d1321]">
+                  // Product cutouts sit on a light tile so they read as a catalogue
+                  // shot; photographs fill the frame.
+                  <div
+                    className={`relative w-full aspect-video overflow-hidden rounded-xl border ${
+                      isContain
+                        ? 'border-white/15 bg-gradient-to-br from-white to-[#e9ecf3] p-5'
+                        : 'border-white/10 bg-[#0d1321]'
+                    }`}
+                  >
                     {isExternalImage ? (
                       // Press images live on newsroom CDNs, outside next/image's allowed hosts
                       // eslint-disable-next-line @next/next/no-img-element
@@ -137,7 +146,7 @@ export default function ProductJourney({
                         fill
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         loading="eager"
-                        className="object-cover"
+                        className={isContain ? 'object-contain p-4' : 'object-cover'}
                       />
                     )}
                   </div>

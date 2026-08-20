@@ -18,6 +18,8 @@ export interface JourneyStage {
   textEn: string;
   /** Local path, or an external URL (rendered with a plain img) */
   image?: string;
+  /** 'contain' for product cutouts on a white tile; defaults to 'cover' */
+  fit?: 'cover' | 'contain';
   videoId?: string;
   metric?: string;
   metricLabel?: string;
@@ -50,6 +52,8 @@ export const productJourneys: ProductJourney[] = [
         text: 'התחלנו מהשאלה אם בכלל אפשר: אבקה שבמגע עם מים יוצרת שכבת קצף קשיחה. הגדרנו את קהל היעד, את חומרי הגלם ואת הקונספט שאפשר לייצר בעלות סבירה.',
         textEn:
           'We started from whether it was even possible: a powder that forms a firm foam layer on contact with water. We defined the audience, the raw materials, and a concept that could actually be manufactured at a sane cost.',
+        image: '/images/cases/bubl-pack.png',
+        fit: 'contain',
       },
       {
         label: 'פיתוח',
@@ -101,6 +105,7 @@ export const productJourneys: ProductJourney[] = [
         text: 'הצטרפנו בשלב הרעיון. בנינו תוכנית עסקית מסודרת ואפיון שהגדיר בדיוק מה נבנה — עמדה פיזית ואפליקציה שעובדות יחד — לפני שנכתבה שורת קוד אחת.',
         textEn:
           'We joined at the idea stage, building a proper business plan and a spec that defined exactly what would be built — a physical station and an app working together — before a line of code was written.',
+        image: '/images/cases/paytag-station.jpg',
       },
       {
         label: 'פטנט',
@@ -110,6 +115,7 @@ export const productJourneys: ProductJourney[] = [
         text: 'ליווינו את כתיבת הפטנטים על המוצר. במוצר שמשלב חומרה, NFC ואפליקציה — ההגנה על הקניין הרוחני היא מה שהופך אותו לנכס שאפשר לגייס עליו.',
         textEn:
           'We supported the patent writing. In a product combining hardware, NFC and an app, the IP protection is what turns it into an asset you can raise on.',
+        image: '/images/cases/success3a.png',
       },
       {
         label: 'פיתוח',
@@ -129,7 +135,7 @@ export const productJourneys: ProductJourney[] = [
         text: 'המערכות פרוסות היום בסניפים של רנואר ואדידס. mako כתבו על החברה, וציינו במפורש את הליווי שלנו משלב הרעיון ועד הפיילוט.',
         textEn:
           'The stations are deployed today in Renuar and Adidas branches. mako covered the company and explicitly named our support from idea through pilot.',
-        image: '/images/cases/success3a.png',
+        image: '/images/cases/success3b.png',
       },
     ],
   },
@@ -148,6 +154,8 @@ export const productJourneys: ProductJourney[] = [
         text: 'ליווינו את היזמים משלב הרעיון הראשוני. תוכנית עסקית מקיפה — שוק, תמחור, מודל ייצור ואבני דרך — היא מה שהפך רעיון לגגון למשהו שאפשר להציג ולגייס עליו.',
         textEn:
           'We joined at the initial idea. A full business plan — market, pricing, manufacturing model and milestones — is what turned a roof-rack idea into something you can pitch and raise on.',
+        image: '/images/cases/knotix-hero.jpg',
+        fit: 'contain',
       },
       {
         label: 'מוצר',
@@ -199,6 +207,8 @@ export const productJourneys: ProductJourney[] = [
         text: 'אבקת ניקוי היא לא סיפור. "סוף לבושה בשירותים הציבוריים" הוא סיפור. העבודה הראשונה בשיווק היא לנסח את המוצר במונחים של הבעיה האנושית שהוא פותר.',
         textEn:
           'A cleaning powder is not a story. "No more embarrassment in public restrooms" is a story. The first job in marketing is to frame the product in terms of the human problem it solves.',
+        image: '/images/cases/bubl-bag.png',
+        fit: 'contain',
       },
       {
         label: 'הדגמה',

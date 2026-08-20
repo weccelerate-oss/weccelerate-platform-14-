@@ -105,9 +105,14 @@ function CaseCard({ caseStudy, index }: { caseStudy: CaseStudy; index: number })
 
           {/* Headline result */}
           {highlight && (
-            <div className="flex items-start gap-3 rounded-xl bg-gradient-to-r from-[#c8a951] to-[#e8d48b] px-5 py-4 mb-5">
-              <Trophy className="w-5 h-5 text-[#070b1e] shrink-0 mt-0.5" />
-              <span className="text-[#070b1e] font-bold leading-snug">{highlight}</span>
+            <div className="flex items-start gap-3 rounded-xl border border-[#c8a951]/25 bg-[#c8a951]/[0.07] px-5 py-4 mb-5 border-s-2 border-s-[#c8a951]">
+              <Trophy className="w-5 h-5 text-[#c8a951] shrink-0 mt-0.5" />
+              <div>
+                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[#c8a951]/70 mb-1">
+                  {isHe ? 'התוצאה' : 'The result'}
+                </span>
+                <span className="text-white/85 font-semibold leading-snug">{highlight}</span>
+              </div>
             </div>
           )}
 
