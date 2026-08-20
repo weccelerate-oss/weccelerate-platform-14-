@@ -325,6 +325,31 @@ export function looksLikeHeader(match: HeaderMatch): boolean {
   return match.matched >= 2;
 }
 
+/**
+ * Finds the header row rather than assuming it is row 0.
+ *
+ * Real sheets — including the workbook this app exports — put a title and a
+ * generated-on line above the table. Scanning the first rows for the best
+ * header match is what makes "export, then re-import" produce the same records
+ * instead of a pile of junk rows.
+ */
+export function locateHeader(
+  grid: string[][],
+  slug: TrackerSlug,
+  scanRows = 12,
+): { index: number; match: HeaderMatch } {
+  let best = { index: -1, match: matchHeaders([], slug) };
+
+  for (let i = 0; i < Math.min(scanRows, grid.length); i++) {
+    const candidate = matchHeaders(grid[i], slug);
+    if (candidate.matched > best.match.matched) {
+      best = { index: i, match: candidate };
+    }
+  }
+
+  return looksLikeHeader(best.match) ? best : { index: -1, match: best.match };
+}
+
 // =============================================================================
 // EXPORT
 // =============================================================================

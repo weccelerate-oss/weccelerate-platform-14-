@@ -4,8 +4,8 @@
  * Toolbar: add / import / export / copy / print / search, plus the save status.
  *
  * The status pill is a deliberate departure from the journey, whose autosave is
- * silent by owner decision. In a spreadsheet it is not optional — somebody who
- * just pasted 200 rows has to see that it landed.
+ * silent by owner decision. Here it is not optional — somebody who just
+ * imported 200 records has to see that it landed.
  */
 
 import { AlertTriangle, Check, Copy, Download, Loader2, Plus, Printer, RefreshCw, Search, Upload } from 'lucide-react';
@@ -14,6 +14,8 @@ import type { SaveState } from '@/components/trackers/use-tracker-rows';
 
 interface TrackerToolbarProps {
   readOnly: boolean;
+  addLabel: string;
+  countNoun: string;
   rowCount: number;
   warningCount: number;
   search: string;
@@ -105,6 +107,8 @@ function SaveStatus({
 export default function TrackerToolbar(props: TrackerToolbarProps) {
   const {
     readOnly,
+    addLabel,
+    countNoun,
     rowCount,
     warningCount,
     search,
@@ -124,13 +128,13 @@ export default function TrackerToolbar(props: TrackerToolbarProps) {
         <input
           value={search}
           onChange={(e) => onSearch(e.target.value)}
-          placeholder="חיפוש בטבלה"
+          placeholder="חיפוש"
           className="w-full rounded-xl border border-white/[0.1] bg-white/[0.03] py-2 pr-9 pl-3 text-[13px] text-white/85 placeholder:text-white/25 outline-none focus:border-[#c8a951]/40"
         />
       </div>
 
       <span className="text-[12px] text-white/35 tabular-nums">
-        {rowCount.toLocaleString('he-IL')} שורות
+        {rowCount.toLocaleString('he-IL')} {countNoun}
       </span>
 
       {warningCount > 0 && (
@@ -151,7 +155,7 @@ export default function TrackerToolbar(props: TrackerToolbarProps) {
           className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] px-4 py-2 text-[13px] font-bold text-[#1d1704] shadow-[0_8px_26px_-10px_rgba(200,169,81,.6)] hover:brightness-105 transition"
         >
           <Plus className="w-4 h-4" />
-          שורה חדשה
+          {addLabel}
         </button>
       )}
 
@@ -163,18 +167,25 @@ export default function TrackerToolbar(props: TrackerToolbarProps) {
           ייבוא
         </button>
       )}
-      <button type="button" onClick={onExport} className={cn(secondaryBtn, 'hidden sm:inline-flex')}>
-        <Download className="w-3.5 h-3.5" />
-        ייצוא CSV
-      </button>
-      <button type="button" onClick={onCopy} className={cn(secondaryBtn, 'hidden sm:inline-flex')}>
-        {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-        {copied ? 'הועתק' : 'העתק ללוח'}
-      </button>
-      <button type="button" onClick={onPrint} className={cn(secondaryBtn, 'hidden lg:inline-flex')}>
-        <Printer className="w-3.5 h-3.5" />
-        הדפסה
-      </button>
+
+      {/* Nothing to export yet — an export button over an empty list is an
+          invitation to download a blank file. */}
+      {rowCount > 0 && (
+        <>
+          <button type="button" onClick={onExport} className={cn(secondaryBtn, 'hidden sm:inline-flex')}>
+            <Download className="w-3.5 h-3.5" />
+            ייצוא לאקסל
+          </button>
+          <button type="button" onClick={onCopy} className={cn(secondaryBtn, 'hidden sm:inline-flex')}>
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? 'הועתק' : 'העתק ללוח'}
+          </button>
+          <button type="button" onClick={onPrint} className={cn(secondaryBtn, 'hidden lg:inline-flex')}>
+            <Printer className="w-3.5 h-3.5" />
+            הדפסה
+          </button>
+        </>
+      )}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 /**
  * FOUNDER TRACKERS — the column contract.
  *
- * This file defines what the two trackers ARE. The grid renderer, the mobile
- * card list, the CSV serializer, the import column-mapper and the server-side
+ * This file defines what the two trackers ARE. The record list, the editor
+ * panel, the CSV serializer, the import column-mapper and the server-side
  * validator all read their columns from here, which is what makes the second
  * tracker cost ~1.1x the first instead of 2x.
  *
@@ -24,7 +24,7 @@ export type TrackerSlug = 'calls' | 'leads';
 export type ColumnKind =
   /** Single-line text. */
   | 'text'
-  /** Long text — one truncated line in the grid, popover to edit. */
+  /** Long text — clamped on the card, a textarea in the editor. */
   | 'longtext'
   /** Date-only, carried over the wire as 'YYYY-MM-DD'. */
   | 'date'
@@ -41,12 +41,9 @@ export interface TrackerColumn {
   kind: ColumnKind;
   /** Hard cap applied server-side after trimming. */
   maxLength: number;
-  /** Grid track width. */
+  /** Legacy grid track width. Kept for the print stylesheet. */
   width: string;
-  /**
-   * 1 = shown on the mobile card face. Everything else is edit-sheet only.
-   * A 11-column grid has no business rendering on a phone.
-   */
+  /** 1 = surfaced on the card face; everything else lives in the editor. */
   mobilePriority: 1 | 2;
   /** Suggested values for 'chip' columns. Never enforced. */
   suggestions?: string[];
@@ -62,11 +59,15 @@ export interface TrackerDefinition {
   subtitle: string;
   /** Filename stem for CSV export. ASCII on purpose. */
   exportName: string;
-  /** Columns in RTL reading order — first entry is the rightmost, sticky one. */
+  /** Columns in reading order — the first entry is the record's title. */
   columns: TrackerColumn[];
   /** Tracker B shows a derived row number; tracker A does not. */
   showRowNumber: boolean;
   emptyHint: string;
+  /** "שיחה חדשה" rather than "שורה חדשה" — these are records, not spreadsheet rows. */
+  addLabel: string;
+  /** Plural noun for the counter: "12 שיחות". */
+  countNoun: string;
 }
 
 // =============================================================================
@@ -261,6 +262,8 @@ export const TRACKERS: Record<TrackerSlug, TrackerDefinition> = {
     columns: CALL_COLUMNS,
     showRowNumber: false,
     emptyHint: 'עדיין לא תיעדת אף שיחה',
+    addLabel: 'שיחה חדשה',
+    countNoun: 'שיחות',
   },
   leads: {
     slug: 'leads',
@@ -270,6 +273,8 @@ export const TRACKERS: Record<TrackerSlug, TrackerDefinition> = {
     columns: LEAD_COLUMNS,
     showRowNumber: true,
     emptyHint: 'עדיין לא רשמת אף פנייה',
+    addLabel: 'פנייה חדשה',
+    countNoun: 'פניות',
   },
 };
 
@@ -326,7 +331,7 @@ export function isRowEmpty(slug: TrackerSlug, row: Record<string, unknown>): boo
 // data always lands; suspicious cells get an amber ring and a count in the
 // toolbar. The one exception is a dangerous URL scheme, which is defanged.
 
-const CONTROL_CHARS = /[ --]/g;
+const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
 /** Bidi marks and NBSP — Hebrew Excel exports are full of these. */
 const INVISIBLES = /[‎‏‪-‮⁦-⁩﻿ ]/g;
 const LOOSE_EMAIL = /^\S+@\S+\.\S+$/;

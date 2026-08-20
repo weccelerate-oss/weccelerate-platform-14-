@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * The tracker screen: state, toolbar, responsive grid/cards, import, print.
+ * The tracker screen: state, toolbar, record list, editor panel, import.
  * Serves both the founder (readOnly=false) and the advisor/admin read-only view.
  */
 
@@ -10,11 +10,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Eye, Plus, Undo2, Upload } from 'lucide-react';
 import { useTrackerRows } from '@/components/trackers/use-tracker-rows';
 import TrackerToolbar from '@/components/trackers/tracker-toolbar';
-import TrackerGrid from '@/components/trackers/tracker-grid';
-import TrackerCards from '@/components/trackers/tracker-cards';
-import TrackerRowSheet from '@/components/trackers/tracker-row-sheet';
+import TrackerList from '@/components/trackers/tracker-list';
+import TrackerEditor from '@/components/trackers/tracker-editor';
 import ImportDialog from '@/components/trackers/import-dialog';
-import { csvFilename, toCsv, toTsv } from '@/lib/trackers/csv';
+import { toTsv } from '@/lib/trackers/csv';
+import { buildTrackerWorkbook, xlsxFilename } from '@/lib/trackers/xlsx-write';
 import { TRACKERS, sanitizeRow, type TrackerSlug } from '@/lib/trackers/schema';
 
 interface TrackerScreenProps {
@@ -38,7 +38,7 @@ export default function TrackerScreen({
 
   const [search, setSearch] = useState('');
   const [importOpen, setImportOpen] = useState(false);
-  const [sheetId, setSheetId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const visibleRows = useMemo(() => {
@@ -64,14 +64,24 @@ export default function TrackerScreen({
     [slug, state.rows],
   );
 
+  // Adding opens the editor on the new record straight away. Without this the
+  // founder gets a blank card and has to hunt for where to type.
+  const handleAdd = useCallback(() => {
+    const clientId = state.addRow();
+    if (clientId) setEditingId(clientId);
+  }, [state]);
+
+  // A styled workbook rather than CSV: it keeps leading zeros on phone numbers,
+  // carries real dates, and its summary block is built from live formulas.
   const handleExport = useCallback(() => {
-    const csv = toCsv(state.rows as Array<Record<string, unknown>>, slug);
-    const today = new Date().toISOString().slice(0, 10);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const printed = now.toLocaleDateString('he-IL');
+    const blob = buildTrackerWorkbook(state.rows as Array<Record<string, unknown>>, slug, printed);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = csvFilename(slug, today);
+    a.download = xlsxFilename(slug, today);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -101,7 +111,9 @@ export default function TrackerScreen({
     [state],
   );
 
-  const sheetRow = sheetId ? state.rows.find((r) => r.clientId === sheetId) ?? null : null;
+  const editingRow = editingId
+    ? state.rows.find((r) => r.clientId === editingId) ?? null
+    : null;
 
   return (
     <div>
@@ -116,11 +128,13 @@ export default function TrackerScreen({
 
       <TrackerToolbar
         readOnly={readOnly}
+        addLabel={definition.addLabel}
+        countNoun={definition.countNoun}
         rowCount={state.rows.length}
         warningCount={warningCount}
         search={search}
         onSearch={setSearch}
-        onAdd={state.addRow}
+        onAdd={handleAdd}
         onImport={() => setImportOpen(true)}
         onExport={handleExport}
         onCopy={handleCopy}
@@ -140,11 +154,11 @@ export default function TrackerScreen({
             <div className="flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={state.addRow}
+                onClick={handleAdd}
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-[#c8a951] to-[#e8d48b] px-5 py-2.5 text-[13px] font-bold text-[#1d1704] hover:brightness-105 transition"
               >
                 <Plus className="w-4 h-4" />
-                הוסיפו שורה ראשונה
+                {definition.addLabel}
               </button>
               <button
                 type="button"
@@ -158,27 +172,15 @@ export default function TrackerScreen({
           )}
         </div>
       ) : (
-        <>
-          <div className="hidden md:block">
-            <TrackerGrid
-              definition={definition}
-              rows={visibleRows}
-              readOnly={readOnly}
-              onCell={state.updateCell}
-              onCommit={() => void state.flushNow()}
-              onDelete={state.deleteRow}
-              onMove={state.moveRow}
-              onDuplicate={state.duplicateRow}
-            />
-          </div>
-          <div className="md:hidden">
-            <TrackerCards
-              definition={definition}
-              rows={visibleRows}
-              onOpen={setSheetId}
-            />
-          </div>
-        </>
+        <TrackerList
+          definition={definition}
+          rows={visibleRows}
+          readOnly={readOnly}
+          onOpen={setEditingId}
+          onDelete={state.deleteRow}
+          onMove={state.moveRow}
+          onDuplicate={state.duplicateRow}
+        />
       )}
 
       {search && visibleRows.length === 0 && state.rows.length > 0 && (
@@ -209,14 +211,15 @@ export default function TrackerScreen({
         )}
       </AnimatePresence>
 
-      <TrackerRowSheet
+      <TrackerEditor
         definition={definition}
-        row={sheetRow}
+        row={editingRow}
         readOnly={readOnly}
-        onClose={() => setSheetId(null)}
+        onClose={() => setEditingId(null)}
         onCell={state.updateCell}
         onCommit={() => void state.flushNow()}
         onDelete={state.deleteRow}
+        onSaveAndNew={handleAdd}
       />
 
       <ImportDialog

@@ -16,13 +16,14 @@ import {
   detectDelimiter,
   formatHebrewDate,
   isRowNumberHeader,
-  looksLikeHeader,
+  locateHeader,
   matchHeaders,
   parseDelimited,
   parseHebrewDate,
   type DecodedEncoding,
 } from '@/lib/trackers/csv';
 import { rowDedupeKey, type DraftRow, type TrackerDefinition } from '@/lib/trackers/schema';
+import { isLegacyXls, isXlsxFile, readXlsx, xlsxErrorMessage } from '@/lib/trackers/xlsx';
 
 type DuplicateMode = 'skip' | 'add' | 'merge';
 
@@ -56,6 +57,10 @@ export default function ImportDialog({
   const [mapping, setMapping] = useState<Record<string, number>>({});
   const [sawRowNumber, setSawRowNumber] = useState(false);
   const [encoding, setEncoding] = useState<DecodedEncoding | 'auto'>('auto');
+  // The encoding picker is developer jargon. It only appears when a decode
+  // actually looks wrong, phrased as a question a founder can answer.
+  const [showEncoding, setShowEncoding] = useState(false);
+  const [sheetNote, setSheetNote] = useState<string | null>(null);
   const [detected, setDetected] = useState<string | null>(null);
   const [duplicateMode, setDuplicateMode] = useState<DuplicateMode>('skip');
   const [busy, setBusy] = useState(false);
@@ -69,19 +74,24 @@ export default function ImportDialog({
     setSawRowNumber(false);
     setDetected(null);
     setFileError(null);
+    setShowEncoding(false);
+    setSheetNote(null);
     setDuplicateMode('skip');
   }, []);
 
-  const ingest = useCallback(
-    (text: string) => {
-      const delimiter = detectDelimiter(text);
-      const parsed = parseDelimited(text, delimiter);
+  const applyGrid = useCallback(
+    (parsed: string[][]) => {
       if (!parsed.length) {
         setFileError('לא נמצאו שורות');
         return;
       }
-      const match = matchHeaders(parsed[0], definition.slug);
-      const header = looksLikeHeader(match);
+
+      // Sheets often carry a title and a date above the table — our own export
+      // does — so find the header rather than assuming the first row is it, and
+      // discard everything above it.
+      const { index, match } = locateHeader(parsed, definition.slug);
+      const header = index >= 0;
+      if (index > 0) parsed = parsed.slice(index);
 
       setGrid(parsed);
       setHasHeader(header);
@@ -104,6 +114,11 @@ export default function ImportDialog({
     [definition],
   );
 
+  const ingest = useCallback(
+    (text: string) => applyGrid(parseDelimited(text, detectDelimiter(text))),
+    [applyGrid],
+  );
+
   const onPaste = useCallback(
     (text: string) => {
       setRaw(text);
@@ -116,19 +131,49 @@ export default function ImportDialog({
   const onFile = useCallback(
     async (file: File) => {
       setFileError(null);
-      if (/\.xlsx?$/i.test(file.name) && !/\.csv$/i.test(file.name)) {
-        setFileError(
-          'קובץ אקסל (.xlsx) לא נתמך. סמנו את הטבלה באקסל, Ctrl+C, והדביקו כאן — או שמרו כ-CSV UTF-8.',
-        );
+      setSheetNote(null);
+
+      if (isLegacyXls(file)) {
+        setFileError('קובץ .xls ישן. פתחו אותו באקסל ושמרו כ-.xlsx, ואז העלו שוב.');
         return;
       }
+
       const buffer = await file.arrayBuffer();
+
+      // A real .xlsx — read it directly. No encoding question arises.
+      if (isXlsxFile(file)) {
+        try {
+          const { grid: sheetGrid, sheetName, sheetCount } = await readXlsx(buffer);
+          if (!sheetGrid.length) {
+            setFileError('הגיליון ריק.');
+            return;
+          }
+          setShowEncoding(false);
+          setDetected(null);
+          if (sheetCount > 1) {
+            setSheetNote(
+              `הקובץ מכיל ${sheetCount} גיליונות — נקרא הראשון${sheetName ? ` („${sheetName}”)` : ''}.`,
+            );
+          }
+          setRaw('');
+          applyGrid(sheetGrid);
+        } catch (err) {
+          setFileError(xlsxErrorMessage(String((err as Error)?.message ?? '')));
+        }
+        return;
+      }
+
       const decoded = decodeFileBytes(buffer, encoding === 'auto' ? undefined : encoding);
-      setDetected(decoded.encoding + (decoded.guessed ? ' (משוער)' : ''));
       setRaw(decoded.text);
       ingest(decoded.text);
+
+      // Only surface the encoding control when the result looks wrong: a file
+      // with no Hebrew and replacement characters is the CP1255 failure mode.
+      const looksBroken = /�/.test(decoded.text) || decoded.guessed;
+      setShowEncoding(looksBroken);
+      setDetected(looksBroken ? decoded.encoding : null);
     },
-    [encoding, ingest],
+    [applyGrid, encoding, ingest],
   );
 
   // ---------------------------------------------------------------------------
@@ -258,7 +303,7 @@ export default function ImportDialog({
               <div>
                 <h3 className="text-xl font-bold text-white">ייבוא מאקסל</h3>
                 <p className="text-[13px] text-white/45 mt-1">
-                  סמנו את הטבלה באקסל, Ctrl+C, והדביקו כאן — או העלו קובץ CSV
+                  העלו קובץ אקסל, או סמנו את הטבלה באקסל והדביקו כאן
                 </p>
               </div>
               <button
@@ -288,12 +333,12 @@ export default function ImportDialog({
                 className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.12] px-3.5 py-2 text-[13px] font-semibold text-white/70 hover:border-[#c8a951]/40 hover:text-white transition-colors"
               >
                 <FileUp className="w-3.5 h-3.5" />
-                העלאת קובץ CSV
+                העלאת קובץ אקסל
               </button>
               <input
                 ref={fileInput}
                 type="file"
-                accept=".csv,.txt,text/csv,text/plain"
+                accept=".xlsx,.csv,.txt,text/csv,text/plain"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -302,23 +347,27 @@ export default function ImportDialog({
                 }}
               />
 
-              <label className="flex items-center gap-2 text-[12px] text-white/40">
-                קידוד
-                <select
-                  value={encoding}
-                  onChange={(e) => setEncoding(e.target.value as DecodedEncoding | 'auto')}
-                  className="rounded-lg border border-white/10 bg-[#0b1024] px-2 py-1 text-[12px] text-white/70"
-                >
-                  {ENCODINGS.map((e2) => (
-                    <option key={e2.value} value={e2.value}>
-                      {e2.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              {detected && <span className="text-[12px] text-white/30">זוהה: {detected}</span>}
+              {showEncoding && (
+                <label className="flex items-center gap-2 text-[12px] text-amber-200/80">
+                  הטקסט נראה משובש? נסו קידוד אחר
+                  <select
+                    value={encoding}
+                    onChange={(e) => setEncoding(e.target.value as DecodedEncoding | 'auto')}
+                    className="rounded-lg border border-white/10 bg-[#0b1024] px-2 py-1 text-[12px] text-white/70"
+                  >
+                    {ENCODINGS.map((e2) => (
+                      <option key={e2.value} value={e2.value}>
+                        {e2.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
             </div>
+
+            {sheetNote && (
+              <p className="mt-3 text-[12.5px] text-white/45">{sheetNote}</p>
+            )}
 
             {fileError && (
               <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-400/30 bg-amber-400/[0.07] p-3 text-[13px] text-amber-200/90">

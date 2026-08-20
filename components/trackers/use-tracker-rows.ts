@@ -35,7 +35,8 @@ export interface UseTrackerRows {
   savedAt: string | null;
   errorMessage: string | null;
   updateCell: (clientId: string, field: string, value: string | null) => void;
-  addRow: () => void;
+  /** Returns the new record's clientId so the caller can open the editor on it. */
+  addRow: () => string;
   deleteRow: (clientId: string) => void;
   undoDelete: () => void;
   pendingUndo: { clientId: string; label: string } | null;
@@ -281,14 +282,15 @@ export function useTrackerRows(
     [markDirty, readOnly, schedule],
   );
 
-  const addRow = useCallback(() => {
-    if (readOnly) return;
+  const addRow = useCallback((): string => {
+    if (readOnly) return '';
     const row = emptyRow(slug, rowsRef.current.length, nextClientId());
     setRows((prev) => [...prev, row]);
     markDirty(row.clientId);
     // Not flushed yet: an all-empty row is dropped server-side. It saves as
     // soon as the founder types anything into it.
     setSaveState('dirty');
+    return row.clientId;
   }, [markDirty, readOnly, slug]);
 
   const duplicateRow = useCallback(
