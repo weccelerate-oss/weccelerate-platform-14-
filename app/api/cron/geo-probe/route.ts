@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runAllProbes } from '@/lib/seo/geo-probes';
 import { requireCron } from '@/lib/auth/require-cron';
+import { davidPausedResponse } from '@/lib/agents/automation-paused';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -21,6 +22,8 @@ export const maxDuration = 60; // Hobby plan cap; Pro plan can extend to 800s
 export async function GET(req: NextRequest) {
   const unauth = requireCron(req);
   if (unauth) return unauth;
+  const paused = davidPausedResponse('geo-probe');
+  if (paused) return paused;
 
   const summary = await runAllProbes();
 

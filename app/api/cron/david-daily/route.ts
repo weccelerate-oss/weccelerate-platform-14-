@@ -28,6 +28,7 @@ import { runSocialPoster } from '@/lib/agents/social-poster';
 import { prisma } from '@/lib/db';
 import { DAVID, DAVID_EMAIL_FROM, DAVID_EMAIL_TO } from '@/lib/agents/david';
 import { requireCron } from '@/lib/auth/require-cron';
+import { davidPausedResponse } from '@/lib/agents/automation-paused';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -57,6 +58,8 @@ interface StageResult {
 export async function GET(req: NextRequest) {
   const unauth = requireCron(req);
   if (unauth) return unauth;
+  const paused = davidPausedResponse('david-daily');
+  if (paused) return paused;
 
   const today = planForToday();
   const tomorrow = planForTomorrow();

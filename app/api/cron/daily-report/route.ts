@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { DAVID, DAVID_EMAIL_FROM, DAVID_EMAIL_TO } from '@/lib/agents/david';
 import { requireCron } from '@/lib/auth/require-cron';
+import { davidPausedResponse } from '@/lib/agents/automation-paused';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -18,6 +19,8 @@ export const maxDuration = 60;
 export async function GET(req: NextRequest) {
   const unauth = requireCron(req);
   if (unauth) return unauth;
+  const paused = davidPausedResponse('daily-report');
+  if (paused) return paused;
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ ok: false, reason: 'RESEND_API_KEY not set' });
   }

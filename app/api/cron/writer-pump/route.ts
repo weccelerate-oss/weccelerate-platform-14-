@@ -21,6 +21,7 @@
 
 import { NextRequest, NextResponse, after } from 'next/server';
 import { requireCron } from '@/lib/auth/require-cron';
+import { davidPausedResponse } from '@/lib/agents/automation-paused';
 import { pumpWritingJobs } from '@/lib/agents/content-writer';
 import { prisma } from '@/lib/db';
 
@@ -35,6 +36,8 @@ export const maxDuration = 300;
 export async function GET(req: NextRequest) {
   const unauth = requireCron(req);
   if (unauth) return unauth;
+  const paused = davidPausedResponse('writer-pump');
+  if (paused) return paused;
 
   // Liveness proof for the daily report: a stale heartbeat means the external
   // pinger stopped (or was never configured) and jobs are crawling on the

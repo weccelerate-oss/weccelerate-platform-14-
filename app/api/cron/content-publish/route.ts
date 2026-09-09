@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { startWritingJobs } from '@/lib/agents/content-writer';
 import { requireCron } from '@/lib/auth/require-cron';
+import { davidPausedResponse } from '@/lib/agents/automation-paused';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -22,6 +23,8 @@ export const maxDuration = 60; // Hobby plan cap; Pro plan can extend to 800s
 export async function GET(req: NextRequest) {
   const unauth = requireCron(req);
   if (unauth) return unauth;
+  const paused = davidPausedResponse('content-publish');
+  if (paused) return paused;
   // Force-start the split pipeline (research -> write -> finalize). Returns the
   // WritingJob id(s); the guide publishes asynchronously over the next minutes.
   const result = await startWritingJobs();
