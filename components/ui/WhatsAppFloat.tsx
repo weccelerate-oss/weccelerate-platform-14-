@@ -1,20 +1,21 @@
 'use client';
 
 /**
- * Floating WhatsApp button + the WhatsApp gate.
+ * Floating WhatsApp button + the WhatsApp gate ("gold card" direction).
  *
  * Before: every WhatsApp button opened wa.me directly, so two thirds of all
  * inquiries never touched a form or Pipedrive. Now the button (and any other
- * WhatsApp link that calls `openWhatsAppGate()`) opens a small sheet: name,
- * phone, "what do you need". The lead is recorded through the same server
- * action as the contact form, then the chat opens with a prefilled message.
+ * WhatsApp link that calls `openWhatsAppGate()`) opens a card: what do you
+ * need (icon tiles), name, phone, optional email. The lead is recorded
+ * through the same server action as the contact form, then the chat opens
+ * with a prefilled message.
  *
  * The gate lives inside this component so every site layout that already
  * renders <WhatsAppFloat /> gets it without further wiring.
  */
 
 import { useActionState, useCallback, useEffect, useRef, useState } from 'react';
-import { Loader2, X, MessageCircle, AlertCircle } from 'lucide-react';
+import { Loader2, X, MessageCircle, AlertCircle, ArrowLeft, User, Phone, Mail, MoreHorizontal } from 'lucide-react';
 import { submitContactForm, type FormState } from '@/app/actions/leads';
 import { trackLead } from '@/lib/analytics/meta-pixel';
 import { trackClick } from '@/lib/analytics/track';
@@ -30,10 +31,11 @@ import {
 
 const initialState: FormState = { success: false, message: '' };
 
+const fieldBase =
+  'flex items-center gap-2 rounded-xl bg-white/[0.05] border px-3 py-3 ' +
+  'focus-within:ring-2 focus-within:ring-[#c8a951]/40 focus-within:border-transparent';
 const inputBase =
-  'w-full px-4 py-3 bg-white/[0.05] border text-white placeholder-white/30 rounded-sm ' +
-  'focus:outline-none focus:ring-2 focus:ring-[#25D366]/50 focus:border-transparent ' +
-  'disabled:opacity-50 disabled:cursor-not-allowed';
+  'w-full bg-transparent text-white placeholder-white/35 text-[15px] focus:outline-none disabled:opacity-50';
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -43,13 +45,39 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
+/** Stroke icons for the "what do you need" tiles, one consistent 2px style. */
+function NeedIcon({ need, className }: { need: WhatsAppNeed; className?: string }) {
+  const common = {
+    className,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+  };
+  switch (need) {
+    case 'idea':
+      return <svg {...common}><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z" /></svg>;
+    case 'product':
+      return <svg {...common}><path d="M21 8 12 3 3 8v8l9 5 9-5V8z" /><path d="M3 8l9 5 9-5M12 13v8" /></svg>;
+    case 'funding':
+      return <svg {...common}><circle cx="8" cy="8" r="6" /><path d="M18.1 9.9A6 6 0 1 1 9.9 18.1" /><path d="M7 6h2v4" /></svg>;
+    case 'medtech':
+      return <svg {...common}><path d="M19.5 12.6 12 20l-7.5-7.4a5 5 0 1 1 7.5-6.6 5 5 0 1 1 7.5 6.6z" /><path d="M3 12h4l2-3 2 5 2-2h4" /></svg>;
+    default:
+      return <MoreHorizontal className={className} aria-hidden="true" />;
+  }
+}
+
 interface WhatsAppFloatProps {
   /** Site key recorded on the lead (main | leumit | biz | landing). */
   site?: string;
 }
 
 export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
-  const { t, lang } = useLanguage();
+  const { t, lang, dir } = useLanguage();
   const [open, setOpen] = useState(false);
   const [opts, setOpts] = useState<WhatsAppGateOptions>({ location: 'float-button' });
   const [need, setNeed] = useState<WhatsAppNeed | ''>('');
@@ -73,7 +101,7 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
     return () => window.removeEventListener(WHATSAPP_GATE_EVENT, handler);
   }, [openGate]);
 
-  // Focus + Escape + scroll lock while the sheet is open.
+  // Focus + Escape + scroll lock while the card is open.
   useEffect(() => {
     if (!open) return;
     firstFieldRef.current?.focus();
@@ -94,7 +122,10 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
   }, [state]);
 
   const err = (k: string) => state.errors?.[k]?.[0];
-  const needLabel = WHATSAPP_NEEDS.find((n) => n.value === need)?.[lang === 'en' ? 'en' : 'he'] ?? '';
+  const isEn = lang === 'en';
+  const needLabel = WHATSAPP_NEEDS.find((n) => n.value === need)?.[isEn ? 'en' : 'he'] ?? '';
+  const tiles = WHATSAPP_NEEDS.filter((n) => n.value !== 'other');
+  const other = WHATSAPP_NEEDS.find((n) => n.value === 'other');
 
   return (
     <>
@@ -116,152 +147,199 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
           onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
-          <div
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="wa-gate-title"
-            className="relative w-full sm:max-w-md bg-[#0d1321] border border-white/[0.08] sm:rounded-sm shadow-2xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto"
-          >
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label={t('wa.gate.close')}
-              className="absolute top-3 end-3 w-9 h-9 flex items-center justify-center text-white/50 hover:text-white rounded-full hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(360px_300px_at_50%_30%,rgba(200,169,81,0.12),transparent_70%)]" aria-hidden="true" />
+
+          {/* Gold → green hairline frame around the card */}
+          <div className="relative w-full sm:max-w-[400px] p-px sm:rounded-[20px] bg-gradient-to-br from-[#e8d48b] via-[#c8a951]/20 to-[#25D366]/50 shadow-2xl">
+            <div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="wa-gate-title"
+              className="relative bg-[#0d1321] sm:rounded-[19px] p-6 max-h-[92vh] overflow-y-auto overflow-x-hidden"
             >
-              <X className="w-5 h-5" aria-hidden="true" />
-            </button>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label={t('wa.gate.close')}
+                className="absolute top-3 end-3 w-9 h-9 flex items-center justify-center text-white/50 hover:text-white rounded-full hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              >
+                <X className="w-5 h-5" aria-hidden="true" />
+              </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-[#25D366]/15 flex items-center justify-center flex-shrink-0">
-                <WhatsAppIcon className="w-5 h-5 fill-[#25D366]" />
-              </div>
-              <div>
-                <h2 id="wa-gate-title" className="text-lg font-bold text-white leading-tight">{t('wa.gate.title')}</h2>
-                <p className="text-white/50 text-xs mt-0.5">{t('wa.gate.sub')}</p>
-              </div>
-            </div>
-
-            {state.success ? (
-              <div className="space-y-4" role="status">
-                <p className="text-emerald-300 text-sm leading-relaxed">
-                  {state.delivered ? t('wa.gate.success') : state.message}
-                </p>
-                {chatUrl && (
-                  <a
-                    href={chatUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackClick('click.whatsapp', { location: opts.location, gate: 'manual-open' })}
-                    className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5b] text-white font-bold py-3.5 px-6 rounded-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/50"
-                  >
-                    <MessageCircle className="w-5 h-5" aria-hidden="true" />
-                    {t('wa.gate.open')}
-                  </a>
-                )}
-              </div>
-            ) : (
-              <form action={formAction} noValidate className="space-y-3">
-                <LeadHiddenFields site={site} formType="whatsapp_gate" service={opts.service ?? null} />
-                <input type="hidden" name="message" value={needLabel ? `${t('wa.gate.need')} ${needLabel}` : ''} />
-
-                {!state.success && state.message && !state.errors && (
-                  <p className="text-red-300 text-sm flex items-center gap-2" role="alert">
-                    <AlertCircle className="w-4 h-4" aria-hidden="true" />{state.message}
+              {/* Header: eyebrow + headline, WhatsApp badge at the far end */}
+              <div className="flex items-start justify-between gap-3 pe-8">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[#c8a951] text-xs font-semibold tracking-[0.12em]">{t('wa.gate.eyebrow')}</span>
+                  <h2 id="wa-gate-title" className="text-white text-[26px] font-black leading-[1.15] whitespace-pre-line text-balance">
+                    {state.success ? t('wa.gate.successTitle') : t('wa.gate.headline')}
+                  </h2>
+                  <p className="text-white/55 text-sm leading-relaxed">
+                    {state.success ? (state.delivered ? t('wa.gate.success') : state.message) : t('wa.gate.sub')}
                   </p>
-                )}
+                </div>
+                <div className="w-12 h-12 rounded-[14px] bg-[#25D366]/10 border border-[#25D366]/30 flex items-center justify-center flex-shrink-0">
+                  <WhatsAppIcon className="w-6 h-6 fill-[#25D366]" />
+                </div>
+              </div>
 
-                <div>
-                  <label htmlFor="wa-name" className="sr-only">{t('contact.form.name')}</label>
-                  <input
-                    ref={firstFieldRef}
-                    id="wa-name"
-                    name="name"
-                    type="text"
-                    required
-                    autoComplete="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={isPending}
-                    placeholder={`${t('contact.form.name')} *`}
-                    aria-invalid={err('name') ? 'true' : undefined}
-                    className={`${inputBase} ${err('name') ? 'border-red-500' : 'border-white/[0.08]'}`}
-                  />
-                  {err('name') && <p className="mt-1 text-xs text-red-400" role="alert">{err('name')}</p>}
+              {state.success ? (
+                <div className="mt-6" role="status">
+                  {chatUrl && (
+                    <a
+                      href={chatUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackClick('click.whatsapp', { location: opts.location, gate: 'manual-open' })}
+                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#25D366] to-[#1ebe5b] hover:opacity-90 text-white font-extrabold py-[15px] px-6 rounded-xl transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/50"
+                    >
+                      <MessageCircle className="w-5 h-5" aria-hidden="true" />
+                      {t('wa.gate.open')}
+                    </a>
+                  )}
                 </div>
-                <div>
-                  <label htmlFor="wa-phone" className="sr-only">{t('contact.form.phone')}</label>
-                  <input
-                    id="wa-phone"
-                    name="phone"
-                    type="tel"
-                    required
-                    autoComplete="tel"
-                    inputMode="tel"
-                    dir="ltr"
-                    disabled={isPending}
-                    placeholder="050-000-0000 *"
-                    aria-invalid={err('phone') ? 'true' : undefined}
-                    className={`${inputBase} text-start ${err('phone') ? 'border-red-500' : 'border-white/[0.08]'}`}
-                  />
-                  {err('phone') && <p className="mt-1 text-xs text-red-400" role="alert">{err('phone')}</p>}
-                </div>
-                <div>
-                  <label htmlFor="wa-email" className="sr-only">{t('contact.form.email')}</label>
-                  <input
-                    id="wa-email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    dir="ltr"
-                    disabled={isPending}
-                    placeholder={t('wa.gate.emailOptional')}
-                    aria-invalid={err('email') ? 'true' : undefined}
-                    className={`${inputBase} text-start ${err('email') ? 'border-red-500' : 'border-white/[0.08]'}`}
-                  />
-                  {err('email') && <p className="mt-1 text-xs text-red-400" role="alert">{err('email')}</p>}
-                </div>
-                <fieldset>
-                  <legend className="text-xs font-medium text-white/60 mb-2">{t('wa.gate.need')}</legend>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {WHATSAPP_NEEDS.map((n) => (
+              ) : (
+                <form action={formAction} noValidate className="mt-5 flex flex-col gap-4">
+                  <LeadHiddenFields site={site} formType="whatsapp_gate" service={opts.service ?? null} />
+                  <input type="hidden" name="message" value={needLabel ? `${t('wa.gate.need')} ${needLabel}` : ''} />
+
+                  {!state.success && state.message && !state.errors && (
+                    <p className="text-red-300 text-sm flex items-center gap-2" role="alert">
+                      <AlertCircle className="w-4 h-4" aria-hidden="true" />{state.message}
+                    </p>
+                  )}
+
+                  {/* What do you need: 2×2 icon tiles + "something else" */}
+                  <fieldset className="flex flex-col gap-2">
+                    <legend className="text-white/70 text-[13px] font-medium mb-2">{t('wa.gate.need')}</legend>
+                    <div className="grid grid-cols-2 gap-2">
+                      {tiles.map((n) => {
+                        const selected = need === n.value;
+                        return (
+                          <label
+                            key={n.value}
+                            className={`flex flex-col gap-2 p-3 rounded-xl border cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#c8a951]/50 ${
+                              selected
+                                ? 'border-[#c8a951] bg-[#c8a951]/10 text-white'
+                                : 'border-white/10 bg-white/[0.03] text-white/85 hover:bg-white/[0.06]'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="need"
+                              value={n.value}
+                              checked={selected}
+                              onChange={() => setNeed(n.value)}
+                              disabled={isPending}
+                              className="sr-only"
+                            />
+                            <NeedIcon need={n.value} className={`w-[22px] h-[22px] ${selected ? 'text-[#e8d48b]' : 'text-white/70'}`} />
+                            <span className={`text-sm ${selected ? 'font-semibold' : 'font-medium'}`}>{isEn ? n.en : n.he}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {other && (
                       <label
-                        key={n.value}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-sm border cursor-pointer text-sm transition-colors ${
-                          need === n.value
-                            ? 'border-[#25D366]/60 bg-[#25D366]/10 text-white'
-                            : 'border-white/[0.08] bg-white/[0.02] text-white/70 hover:bg-white/[0.05]'
+                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed cursor-pointer text-[13px] transition-colors focus-within:ring-2 focus-within:ring-[#c8a951]/50 ${
+                          need === 'other' ? 'border-[#c8a951] bg-[#c8a951]/10 text-white' : 'border-white/15 text-white/60 hover:bg-white/[0.04]'
                         }`}
                       >
                         <input
                           type="radio"
                           name="need"
-                          value={n.value}
-                          checked={need === n.value}
-                          onChange={() => setNeed(n.value)}
+                          value="other"
+                          checked={need === 'other'}
+                          onChange={() => setNeed('other')}
                           disabled={isPending}
-                          className="accent-[#25D366]"
+                          className="sr-only"
                         />
-                        <span>{lang === 'en' ? n.en : n.he}</span>
+                        <NeedIcon need="other" className="w-4 h-4" />
+                        {isEn ? other.en : other.he}
                       </label>
-                    ))}
-                  </div>
-                </fieldset>
+                    )}
+                  </fieldset>
 
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5b] text-white font-bold py-3.5 px-6 rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/50"
-                >
-                  {isPending ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />{t('contact.form.sending')}</>
-                  ) : (
-                    <><WhatsAppIcon className="w-5 h-5 fill-white" />{t('wa.gate.submit')}</>
-                  )}
-                </button>
-                <p className="text-[11px] text-white/35 leading-relaxed">{t('wa.gate.privacy')}</p>
-              </form>
-            )}
+                  {/* Name + phone side by side, email below */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label htmlFor="wa-name" className="sr-only">{t('contact.form.name')}</label>
+                      <div className={`${fieldBase} ${err('name') ? 'border-red-500' : 'border-white/[0.08]'}`}>
+                        <User className="w-4 h-4 text-white/40 flex-shrink-0" aria-hidden="true" />
+                        <input
+                          ref={firstFieldRef}
+                          id="wa-name"
+                          name="name"
+                          type="text"
+                          required
+                          autoComplete="name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          disabled={isPending}
+                          placeholder={`${t('contact.form.name')} *`}
+                          aria-invalid={err('name') ? 'true' : undefined}
+                          className={inputBase}
+                        />
+                      </div>
+                      {err('name') && <p className="mt-1 text-xs text-red-400" role="alert">{err('name')}</p>}
+                    </div>
+                    <div>
+                      <label htmlFor="wa-phone" className="sr-only">{t('contact.form.phone')}</label>
+                      <div className={`${fieldBase} ${err('phone') ? 'border-red-500' : 'border-white/[0.08]'}`}>
+                        <Phone className="w-4 h-4 text-white/40 flex-shrink-0" aria-hidden="true" />
+                        <input
+                          id="wa-phone"
+                          name="phone"
+                          type="tel"
+                          required
+                          autoComplete="tel"
+                          inputMode="tel"
+                          dir="ltr"
+                          disabled={isPending}
+                          placeholder="050-000-0000 *"
+                          aria-invalid={err('phone') ? 'true' : undefined}
+                          className={`${inputBase} text-start`}
+                        />
+                      </div>
+                      {err('phone') && <p className="mt-1 text-xs text-red-400" role="alert">{err('phone')}</p>}
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="wa-email" className="sr-only">{t('contact.form.email')}</label>
+                      <div className={`${fieldBase} py-2.5 ${err('email') ? 'border-red-500' : 'border-white/[0.08]'}`}>
+                        <Mail className="w-4 h-4 text-white/40 flex-shrink-0" aria-hidden="true" />
+                        <input
+                          id="wa-email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          dir="ltr"
+                          disabled={isPending}
+                          placeholder={t('wa.gate.emailOptional')}
+                          aria-invalid={err('email') ? 'true' : undefined}
+                          className={`${inputBase} text-start text-sm`}
+                        />
+                      </div>
+                      {err('email') && <p className="mt-1 text-xs text-red-400" role="alert">{err('email')}</p>}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2.5">
+                    <button
+                      type="submit"
+                      disabled={isPending}
+                      className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#25D366] to-[#1ebe5b] hover:opacity-90 text-white font-extrabold text-base py-[15px] px-6 rounded-xl transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/50"
+                    >
+                      {isPending ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />{t('contact.form.sending')}</>
+                      ) : (
+                        <>{t('wa.gate.submit')}<ArrowLeft className={`w-[18px] h-[18px] ${dir === 'rtl' ? '' : 'rotate-180'}`} aria-hidden="true" /></>
+                      )}
+                    </button>
+                    <p className="text-center text-[12px] text-white/40 leading-relaxed">{t('wa.gate.privacy')}</p>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       )}

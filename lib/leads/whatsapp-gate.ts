@@ -23,11 +23,11 @@ export interface WhatsAppGateOptions {
 export type WhatsAppNeed = 'idea' | 'product' | 'funding' | 'medtech' | 'other';
 
 export const WHATSAPP_NEEDS: Array<{ value: WhatsAppNeed; he: string; en: string }> = [
-  { value: 'idea', he: 'יש לי רעיון ואני רוצה לבדוק אותו', en: 'I have an idea and want to validate it' },
-  { value: 'product', he: 'אני צריך לפתח מוצר / אפליקציה', en: 'I need to build a product / app' },
-  { value: 'funding', he: 'אני מתכונן לגיוס משקיעים', en: 'I am preparing to raise from investors' },
-  { value: 'medtech', he: 'מיזם רפואי (MedTech)', en: 'Medical / MedTech venture' },
-  { value: 'other', he: 'משהו אחר', en: 'Something else' },
+  { value: 'idea', he: 'יש לי רעיון', en: 'I have an idea' },
+  { value: 'product', he: 'מוצר / אפליקציה', en: 'Product / app' },
+  { value: 'funding', he: 'גיוס משקיעים', en: 'Raising from investors' },
+  { value: 'medtech', he: 'מיזם רפואי', en: 'MedTech venture' },
+  { value: 'other', he: 'משהו אחר לגמרי', en: 'Something else entirely' },
 ];
 
 export function openWhatsAppGate(opts: WhatsAppGateOptions): void {
