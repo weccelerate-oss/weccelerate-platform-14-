@@ -15,6 +15,11 @@ import { useState } from 'react';
  *
  * Drop this once into every contact / application / newsletter / event
  * form. Zero visible UI, zero accessibility impact.
+ *
+ * Hiding is clip-based, not an off-screen offset: `left: -9999px` on an
+ * RTL page extends the document's scrollable width by ~10,000px, which
+ * let phones swipe sideways into an empty white area (seen on /contact
+ * and inside the WhatsApp gate, 2026-09-10).
  */
 export function HoneypotFields() {
   const [renderedAtMs] = useState(() => Date.now());
@@ -26,11 +31,17 @@ export function HoneypotFields() {
         aria-hidden="true"
         style={{
           position: 'absolute',
-          left: '-9999px',
-          top: 'auto',
           width: '1px',
           height: '1px',
+          margin: '-1px',
+          padding: 0,
+          border: 0,
           overflow: 'hidden',
+          clip: 'rect(0 0 0 0)',
+          clipPath: 'inset(50%)',
+          whiteSpace: 'nowrap',
+          opacity: 0,
+          pointerEvents: 'none',
         }}
       >
         <label htmlFor="website-hp">Website (do not fill)</label>

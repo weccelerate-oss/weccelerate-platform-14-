@@ -32,10 +32,10 @@ import {
 const initialState: FormState = { success: false, message: '' };
 
 const fieldBase =
-  'flex items-center gap-2 rounded-xl bg-white/[0.05] border px-3 py-3 ' +
+  'flex items-center gap-2 rounded-xl bg-white/[0.05] border px-3 py-2.5 sm:py-3 min-h-[44px] ' +
   'focus-within:ring-2 focus-within:ring-[#c8a951]/40 focus-within:border-transparent';
 const inputBase =
-  'w-full bg-transparent text-white placeholder-white/35 text-[15px] focus:outline-none disabled:opacity-50';
+  'w-full min-w-0 bg-transparent text-white placeholder-white/35 text-base sm:text-[15px] focus:outline-none disabled:opacity-50';
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -156,7 +156,7 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
               role="dialog"
               aria-modal="true"
               aria-labelledby="wa-gate-title"
-              className="relative bg-[#0d1321] sm:rounded-[19px] p-6 max-h-[92vh] overflow-y-auto overflow-x-hidden"
+              className="relative bg-[#0d1321] sm:rounded-[19px] p-5 sm:p-6 max-h-[94dvh] overflow-y-auto overflow-x-hidden overscroll-contain"
             >
               <button
                 type="button"
@@ -171,15 +171,15 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
               <div className="flex items-start justify-between gap-3 pe-8">
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[#c8a951] text-xs font-semibold tracking-[0.12em]">{t('wa.gate.eyebrow')}</span>
-                  <h2 id="wa-gate-title" className="text-white text-[26px] font-black leading-[1.15] whitespace-pre-line text-balance">
+                  <h2 id="wa-gate-title" className="text-white text-[22px] sm:text-[26px] font-black leading-[1.15] whitespace-pre-line text-balance">
                     {state.success ? t('wa.gate.successTitle') : t('wa.gate.headline')}
                   </h2>
                   <p className="text-white/55 text-sm leading-relaxed">
                     {state.success ? (state.delivered ? t('wa.gate.success') : state.message) : t('wa.gate.sub')}
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-[14px] bg-[#25D366]/10 border border-[#25D366]/30 flex items-center justify-center flex-shrink-0">
-                  <WhatsAppIcon className="w-6 h-6 fill-[#25D366]" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] bg-[#25D366]/10 border border-[#25D366]/30 flex items-center justify-center flex-shrink-0">
+                  <WhatsAppIcon className="w-5 h-5 sm:w-6 sm:h-6 fill-[#25D366]" />
                 </div>
               </div>
 
@@ -199,7 +199,7 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
                   )}
                 </div>
               ) : (
-                <form action={formAction} noValidate className="mt-5 flex flex-col gap-4">
+                <form action={formAction} noValidate className="mt-4 sm:mt-5 flex flex-col gap-3 sm:gap-4">
                   <LeadHiddenFields site={site} formType="whatsapp_gate" service={opts.service ?? null} />
                   <input type="hidden" name="message" value={needLabel ? `${t('wa.gate.need')} ${needLabel}` : ''} />
 
@@ -211,14 +211,14 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
 
                   {/* What do you need: 2×2 icon tiles + "something else" */}
                   <fieldset className="flex flex-col gap-2">
-                    <legend className="text-white/70 text-[13px] font-medium mb-2">{t('wa.gate.need')}</legend>
+                    <legend className="text-white/70 text-[13px] font-medium mb-1.5 sm:mb-2">{t('wa.gate.need')}</legend>
                     <div className="grid grid-cols-2 gap-2">
                       {tiles.map((n) => {
                         const selected = need === n.value;
                         return (
                           <label
                             key={n.value}
-                            className={`flex flex-col gap-2 p-3 rounded-xl border cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#c8a951]/50 ${
+                            className={`flex flex-row sm:flex-col items-center sm:items-start gap-2 px-3 py-2.5 sm:p-3 min-h-[44px] rounded-xl border cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#c8a951]/50 ${
                               selected
                                 ? 'border-[#c8a951] bg-[#c8a951]/10 text-white'
                                 : 'border-white/10 bg-white/[0.03] text-white/85 hover:bg-white/[0.06]'
@@ -233,15 +233,15 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
                               disabled={isPending}
                               className="sr-only"
                             />
-                            <NeedIcon need={n.value} className={`w-[22px] h-[22px] ${selected ? 'text-[#e8d48b]' : 'text-white/70'}`} />
-                            <span className={`text-sm ${selected ? 'font-semibold' : 'font-medium'}`}>{isEn ? n.en : n.he}</span>
+                            <NeedIcon need={n.value} className={`w-[18px] h-[18px] sm:w-[22px] sm:h-[22px] flex-shrink-0 ${selected ? 'text-[#e8d48b]' : 'text-white/70'}`} />
+                            <span className={`text-[13px] sm:text-sm leading-tight ${selected ? 'font-semibold' : 'font-medium'}`}>{isEn ? n.en : n.he}</span>
                           </label>
                         );
                       })}
                     </div>
                     {other && (
                       <label
-                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed cursor-pointer text-[13px] transition-colors focus-within:ring-2 focus-within:ring-[#c8a951]/50 ${
+                        className={`flex items-center gap-2 px-3 py-2 sm:py-2.5 min-h-[40px] rounded-xl border border-dashed cursor-pointer text-[13px] transition-colors focus-within:ring-2 focus-within:ring-[#c8a951]/50 ${
                           need === 'other' ? 'border-[#c8a951] bg-[#c8a951]/10 text-white' : 'border-white/15 text-white/60 hover:bg-white/[0.04]'
                         }`}
                       >
@@ -261,7 +261,7 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
                   </fieldset>
 
                   {/* Name + phone side by side, email below */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label htmlFor="wa-name" className="sr-only">{t('contact.form.name')}</label>
                       <div className={`${fieldBase} ${err('name') ? 'border-red-500' : 'border-white/[0.08]'}`}>
@@ -303,7 +303,7 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
                       </div>
                       {err('phone') && <p className="mt-1 text-xs text-red-400" role="alert">{err('phone')}</p>}
                     </div>
-                    <div className="sm:col-span-2">
+                    <div className="col-span-2">
                       <label htmlFor="wa-email" className="sr-only">{t('contact.form.email')}</label>
                       <div className={`${fieldBase} py-2.5 ${err('email') ? 'border-red-500' : 'border-white/[0.08]'}`}>
                         <Mail className="w-4 h-4 text-white/40 flex-shrink-0" aria-hidden="true" />
@@ -316,18 +316,18 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
                           disabled={isPending}
                           placeholder={t('wa.gate.emailOptional')}
                           aria-invalid={err('email') ? 'true' : undefined}
-                          className={`${inputBase} text-start text-sm`}
+                          className={`${inputBase} text-start sm:text-sm`}
                         />
                       </div>
                       {err('email') && <p className="mt-1 text-xs text-red-400" role="alert">{err('email')}</p>}
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2.5">
+                  <div className="flex flex-col gap-2 sm:gap-2.5 pb-[env(safe-area-inset-bottom)]">
                     <button
                       type="submit"
                       disabled={isPending}
-                      className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#25D366] to-[#1ebe5b] hover:opacity-90 text-white font-extrabold text-base py-[15px] px-6 rounded-xl transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/50"
+                      className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#25D366] to-[#1ebe5b] hover:opacity-90 text-white font-extrabold text-base py-3.5 sm:py-[15px] px-6 rounded-xl transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/50"
                     >
                       {isPending ? (
                         <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />{t('contact.form.sending')}</>
