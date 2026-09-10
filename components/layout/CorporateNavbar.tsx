@@ -45,6 +45,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { TrackedLink } from '@/components/ui/TrackedLink';
+import { openWhatsAppGate } from '@/lib/leads/whatsapp-gate';
 import { useLanguage, useLangSwitch } from '@/lib/i18n';
 
 // =============================================================================
@@ -241,18 +242,15 @@ export function CorporateNavbar() {
                 <Phone className="w-3.5 h-3.5" aria-hidden="true" />
                 <span dir="ltr">{topBar.phone}</span>
               </TrackedLink>
-              <TrackedLink
-                trackAction="click.whatsapp"
-                trackMeta={{ location: 'navbar-desktop' }}
-                href={topBar.whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => openWhatsAppGate({ location: 'navbar-desktop' })}
                 className="flex items-center gap-2 hover:text-green-400 transition-colors"
                 aria-label={t('nav.sendWhatsApp')}
               >
                 <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>WhatsApp</span>
-              </TrackedLink>
+              </button>
               <TrackedLink
                 trackAction="click.email"
                 trackMeta={{ location: 'navbar-desktop' }}
@@ -570,18 +568,15 @@ export function CorporateNavbar() {
                   <Phone className="w-4 h-4" aria-hidden="true" />
                   <span dir="ltr">{topBar.phone}</span>
                 </TrackedLink>
-                <TrackedLink
-                  trackAction="click.whatsapp"
-                  trackMeta={{ location: 'navbar-mobile' }}
-                  href={topBar.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => openWhatsAppGate({ location: 'navbar-mobile' })}
                   className="flex items-center gap-2 text-green-500/70 hover:text-green-400 transition-colors"
                   aria-label={t('nav.sendWhatsApp')}
                 >
                   <MessageCircle className="w-4 h-4" aria-hidden="true" />
                   <span>WhatsApp</span>
-                </TrackedLink>
+                </button>
               </div>
             </nav>
           </div>

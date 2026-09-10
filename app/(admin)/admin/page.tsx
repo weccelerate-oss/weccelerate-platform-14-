@@ -126,7 +126,7 @@ async function getDashboardStats() {
     const [leadsThisWeek, contactsToday, recentLeadLogs] = await Promise.all([
       prisma.activityLog.count({
         where: {
-          action: { in: ['form.contact_submit', 'lead.contact_fallback', 'form.contact'] },
+          OR: [{ action: { startsWith: 'form.' } }, { action: 'lead.contact_fallback' }],
           createdAt: { gte: weekAgo },
         },
       }),
@@ -139,7 +139,7 @@ async function getDashboardStats() {
       // Recent leads — fetch last 10 from activityLog with full metadata for source tracking
       prisma.activityLog.findMany({
         where: {
-          action: { in: ['form.contact_submit', 'lead.contact_fallback', 'form.contact'] },
+          OR: [{ action: { startsWith: 'form.' } }, { action: 'lead.contact_fallback' }],
         },
         orderBy: { createdAt: 'desc' },
         take: 10,

@@ -25,6 +25,7 @@ import { HeroBackground } from './HeroVideo';
 import { NavigationButtons, LocationMap } from '@/components/ui/NavigationButtons';
 import { TrackedLink } from '@/components/ui/TrackedLink';
 import { useLanguage } from '@/lib/i18n';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // TYPES
@@ -205,6 +206,7 @@ export function HomepageContent({ news, events, videos, stories }: HomepageConte
         <AlumniSection />
         <PressSection articles={news} />
         <NewsSection events={events} />
+        <LeadFormSection formType="home_cta" />
         <CTASection />
       </main>
 

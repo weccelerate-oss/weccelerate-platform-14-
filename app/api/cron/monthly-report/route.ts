@@ -7,7 +7,16 @@ const ACTION_LABELS: Record<string, string> = {
   'click.email': 'אימיילים',
   'click.maps': 'ניווט Google Maps',
   'click.waze': 'ניווט Waze',
-  'form.contact_submit': 'שליחת טופס',
+  'form.contact_submit': 'טופס צור קשר',
+  'form.whatsapp_gate': 'טופס וואטסאפ',
+  'form.home_cta': 'טופס דף הבית',
+  'form.service': 'טופס עמוד שירות',
+  'form.guide_inline': 'טופס בתוך מדריך',
+  'form.lead_magnet': 'מגנט לידים',
+  'form.event': 'הרשמה לאירוע',
+  'form.leumit_landing': 'דף נחיתה Leumit',
+  'form.biz_landing': 'דף נחיתה Business',
+  'form.landing_multiselect': 'דף נחיתה קמפיין',
   'lead.contact_fallback': 'טופס (גיבוי)',
 };
 

@@ -60,17 +60,20 @@ re-evaluation.
 
 ---
 
-## ✅ Resolved — Founding year (2026-04-26)
+## ✅ Resolved — Founding year (final: 2018, confirmed 2026-05-14)
 
-Confirmed by Alon (CEO) on 2026-04-26: **WeCcelerate Ltd. was incorporated
-in 2016**. All canonical surfaces (`config/seo.ts`, `components/seo/GeoSchema.tsx`,
-`public/llms.txt`, `public/llms-full.txt`, `scripts/seed-news.ts`,
-`prisma/seed.ts`) have been aligned. Earlier records that quoted 2017
-(B7Net article) or 2020 (legacy schema default) are incorrect.
+**Canonical founding year is 2018.** The legal entity WeCcelerate Ltd.
+(וויסלרייט בע״מ, company no. 515962819) was filed with the Registrar of
+Companies on 17 January 2019 — a different fact that does not conflict.
+Every surface (`config/seo.ts`, `components/seo/GeoSchema.tsx`, footer
+i18n strings, `lib/seo/faq-catalog.ts`, `lib/seo/llms-base.ts`,
+`public/llms-full.txt`, `lib/agents/writing-rules.ts`) says 2018.
 
-The B7Net news record is intentionally still excluded from seed data —
-its excerpt contradicts the canonical year and we do not rewrite
-journalists' quotes.
+History: an earlier note here (2026-04-26) recorded 2016 and aligned the
+site to it. That was superseded on 2026-05-14 when Alon confirmed 2018.
+**Do not enter 2016, 2017 or 2020 anywhere** (Crunchbase, LinkedIn,
+Wikidata, GBP) — a directory that disagrees with the site is what
+triggered the reputation flag in the first place.
 
 ---
 

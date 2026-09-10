@@ -8,14 +8,23 @@
  *   1. Blocklist — emails/IPs the admin manually marked as spam from
  *      /admin/leads/spam-review. Permanent unless `expiresAt` is set.
  *   2. Rate limit — max 3 submissions from the same IP in 1 hour, max
- *      1 from the same email in 24 hours. Tunable below.
+ *      3 from the same email in 24 hours. Tunable below. (Was 1/day —
+ *      a founder who fixed a typo and resubmitted was silently dropped.)
  */
 
 import crypto from 'crypto';
 import { prisma } from '@/lib/db';
 
 const IP_HOURLY_LIMIT = 3;
-const EMAIL_DAILY_LIMIT = 1;
+
+/** Every action routeLeadThroughFilter writes for an accepted lead. */
+const LEAD_ACTIONS_FOR_EMAIL_LIMIT = [
+  'form.contact_submit', 'form.application', 'form.newsletter', 'form.event', 'form.api',
+  'form.whatsapp_gate', 'form.home_cta', 'form.service', 'form.guide_inline', 'form.lead_magnet',
+  'form.leumit_landing', 'form.biz_landing', 'form.landing_multiselect',
+];
+const LEAD_ACTIONS_FOR_IP_LIMIT = [...LEAD_ACTIONS_FOR_EMAIL_LIMIT, 'lead.spam_review', 'lead.spam_blocked'];
+const EMAIL_DAILY_LIMIT = 3;
 
 export type RateLimitDecision =
   | { allowed: true }
@@ -76,7 +85,7 @@ export async function checkRateLimit(opts: {
       const ipRecent = await prisma.activityLog.count({
         where: {
           action: {
-            in: ['form.contact_submit', 'form.application', 'form.newsletter', 'form.event', 'form.api', 'lead.spam_review', 'lead.spam_blocked'],
+            in: LEAD_ACTIONS_FOR_IP_LIMIT,
           },
           createdAt: { gte: oneHourAgo },
           metadata: { path: ['ipHash'], equals: ipHash },
@@ -94,14 +103,14 @@ export async function checkRateLimit(opts: {
     }
   }
 
-  // ---------- Rate limit by email (1 in last 24h) ----------
+  // ---------- Rate limit by email (3 in last 24h) ----------
+  // The WhatsApp gate may submit without an email; never rate-limit on ''.
+  if (!email) return { allowed: true };
   try {
     const oneDayAgo = new Date(now - 86_400_000);
     const emailRecent = await prisma.activityLog.count({
       where: {
-        action: {
-          in: ['form.contact_submit', 'form.application', 'form.newsletter', 'form.event', 'form.api'],
-        },
+        action: { in: LEAD_ACTIONS_FOR_EMAIL_LIMIT },
         createdAt: { gte: oneDayAgo },
         metadata: { path: ['email'], equals: email },
       },

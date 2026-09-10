@@ -12,6 +12,7 @@ import { useLanguage } from '@/lib/i18n';
 import { ContactForm } from './ContactForm';
 import { NavigationButtons, LocationMap } from '@/components/ui/NavigationButtons';
 import { TrackedLink } from '@/components/ui/TrackedLink';
+import { openWhatsAppGate } from '@/lib/leads/whatsapp-gate';
 
 export default function ContactContent() {
   const { t } = useLanguage();
@@ -79,13 +80,10 @@ export default function ContactContent() {
                     </TrackedLink>
                   </li>
                   <li>
-                    <TrackedLink
-                      trackAction="click.whatsapp"
-                      trackMeta={{ location: 'contact-page' }}
-                      href="https://wa.me/972555647538"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-start gap-3 group"
+                    <button
+                      type="button"
+                      onClick={() => openWhatsAppGate({ location: 'contact-page' })}
+                      className="flex items-start gap-3 group text-start"
                     >
                       <div className="w-10 h-10 bg-emerald-500/10 group-hover:bg-emerald-500 flex items-center justify-center flex-shrink-0 transition-colors">
                         <MessageCircle className="w-5 h-5 text-emerald-400 group-hover:text-white transition-colors" />
@@ -94,7 +92,7 @@ export default function ContactContent() {
                         <p className="text-sm text-white/40">WhatsApp</p>
                         <p className="font-medium text-emerald-400">{t('contact.details.whatsapp')}</p>
                       </div>
-                    </TrackedLink>
+                    </button>
                   </li>
                   <li>
                     <TrackedLink

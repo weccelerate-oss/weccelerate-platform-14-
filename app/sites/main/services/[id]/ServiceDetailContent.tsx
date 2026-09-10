@@ -6,6 +6,7 @@ import { useLanguage } from '@/lib/i18n';
 import { servicesHe, servicesEn, type Service } from '@/lib/services-data';
 import ServiceFullSections from '@/components/services/ServiceFullSections';
 import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 
 // =============================================================================
@@ -127,6 +128,8 @@ export function ServiceDetailContent({ serviceId }: { serviceId: string }) {
       {/* CASE STUDIES — real ventures from this service */}
       {/* ================================================================= */}
       <ServiceCaseStudies serviceId={serviceId} />
+
+      <LeadFormSection formType="service" service={serviceId} />
 
       {/* ================================================================= */}
       {/* CTA SECTION                                                       */}

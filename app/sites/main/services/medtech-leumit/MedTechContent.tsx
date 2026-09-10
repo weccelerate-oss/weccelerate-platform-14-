@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import ProductJourney from '@/components/services/ProductJourney';
 import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 
 // =============================================================================
@@ -148,6 +149,8 @@ export default function MedTechContent() {
  {/* CASE STUDIES — real ventures from this service */}
  {/* ================================================================= */}
  <ServiceCaseStudies serviceId="medtech-leumit" />
+
+ <LeadFormSection formType="service" service="medtech-leumit" />
 
  {/* ================================================================= */}
  {/* CTA SECTION */}

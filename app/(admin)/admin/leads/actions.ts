@@ -16,6 +16,75 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { deliverLead, type ZapierLead } from '@/lib/leads/zapier';
+
+/** Rebuild the Zapier lead from an ActivityLog metadata blob. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function leadFromMeta(id: string, meta: any, note: string): ZapierLead {
+  return {
+    name: meta.name ?? '',
+    email: meta.email ?? '',
+    phone: meta.phone ?? null,
+    company: meta.company ?? null,
+    message: meta.message ?? null,
+    formType: meta.formType ?? 'contact',
+    site: meta.site ?? 'main',
+    sourceUrl: meta.sourceUrl ?? null,
+    stage: meta.stage ?? null,
+    service: meta.service ?? null,
+    attribution: {
+      channel: meta.channel ?? null,
+      channelDetail: meta.channelDetail ?? null,
+      campaign: meta.campaign ?? null,
+      firstChannel: meta.firstChannel ?? null,
+      landingPage: meta.landingPage ?? null,
+      referrerUrl: meta.referrerUrl ?? null,
+      utmSource: meta.utmSource ?? null,
+      utmMedium: meta.utmMedium ?? null,
+      utmCampaign: meta.utmCampaign ?? null,
+      utmContent: meta.utmContent ?? null,
+      utmTerm: meta.utmTerm ?? null,
+      gclid: meta.gclid ?? null,
+      fbclid: meta.fbclid ?? null,
+    },
+    leadId: id,
+    spamScore: typeof meta.spamScore === 'number' ? meta.spamScore : null,
+    note,
+  };
+}
+
+/**
+ * Re-send a lead that never reached Zapier (or that the admin wants pushed
+ * again). Records the new delivery result on the row.
+ */
+export async function resendLeadAction(activityLogId: string): Promise<{ success: boolean; error?: string }> {
+  const gate = await requireAdmin();
+  if (!gate.ok) return { success: false, error: gate.reason };
+
+  const row = await prisma.activityLog.findUnique({
+    where: { id: activityLogId },
+    select: { id: true, metadata: true },
+  });
+  if (!row) return { success: false, error: 'Lead not found' };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const meta = (row.metadata as any) ?? {};
+
+  const delivery = await deliverLead(leadFromMeta(row.id, meta, 'admin_resend'));
+  await prisma.activityLog.update({
+    where: { id: row.id },
+    data: {
+      metadata: {
+        ...meta,
+        delivery,
+        resentAt: new Date().toISOString(),
+        resentByUserId: gate.userId,
+      },
+    },
+  });
+  revalidatePath('/admin/leads');
+  if (delivery.status !== 'sent') return { success: false, error: delivery.error || delivery.status };
+  return { success: true };
+}
 
 async function requireAdmin(): Promise<{ ok: false; reason: string } | { ok: true; userId: string }> {
   const session = await auth();
@@ -41,33 +110,8 @@ export async function approveLeadAction(activityLogId: string): Promise<{ succes
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const meta = (row.metadata as any) ?? {};
 
-  // Send to Zapier in arrears.
-  if (process.env.ZAPIER_WEBHOOK_URL) {
-    try {
-      const now = new Date();
-      await fetch(process.env.ZAPIER_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          'תאריך': now.toLocaleDateString('he-IL') + ' ' + now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
-          'שם מלא': meta.name ?? '',
-          'טלפון': meta.phone ?? '',
-          'אימייל': meta.email ?? '',
-          'מודעה': meta.sourceLabel ?? '',
-          'מקור': meta.sourceLabel ?? '',
-          'סאבדומיין': meta.site ?? 'main',
-          'סוג טופס': meta.formType ?? 'contact',
-          'כתובת מקור': meta.sourceUrl ?? '',
-          'הודעה': meta.message ?? '',
-          'חברה': meta.company ?? '',
-          'מקור-משני': 'approved_after_review',
-        }),
-      });
-    } catch (err) {
-      console.error('[approveLead] Zapier failed:', err);
-      // Don't block the approval — admin can resend.
-    }
-  }
+  // Send to Zapier (= Pipedrive) in arrears, through the shared delivery path.
+  const delivery = await deliverLead(leadFromMeta(row.id, meta, 'approved_after_review'));
 
   // Flip the row to status='approved' and change action so dashboard counters
   // count it as a legit lead.
@@ -75,7 +119,7 @@ export async function approveLeadAction(activityLogId: string): Promise<{ succes
     where: { id: activityLogId },
     data: {
       action: meta.formType ? `form.${meta.formType}` : 'form.contact_submit',
-      metadata: { ...meta, status: 'approved', reviewedAt: new Date().toISOString(), reviewedByUserId: gate.userId },
+      metadata: { ...meta, status: 'approved', delivery, reviewedAt: new Date().toISOString(), reviewedByUserId: gate.userId },
     },
   });
 

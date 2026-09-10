@@ -31,6 +31,7 @@ import {
   MessageSquare,
   Menu,
   X,
+  Inbox,
 } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -66,6 +67,7 @@ const NAV_ITEMS = [
   {
     label: 'ניהול יזמים',
     items: [
+      { label: 'לידים מהאתר', href: '/admin/leads', icon: Inbox },
       { label: 'יזמים', href: '/admin/users', icon: Users },
       { label: 'מלווים (מנטורים)', href: '/admin/advisors', icon: UserCog },
       { label: 'התכתבויות מלווים', href: '/admin/advisor-threads', icon: MessageSquare },

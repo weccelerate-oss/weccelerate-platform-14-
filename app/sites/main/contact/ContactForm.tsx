@@ -14,10 +14,10 @@
  */
 
 import { useActionState, useEffect, useState, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { submitContactForm, type FormState } from '@/app/actions/leads';
 import { trackLead } from '@/lib/analytics/meta-pixel';
-import { HoneypotFields } from '@/components/forms/HoneypotFields';
+import { LeadHiddenFields } from '@/components/forms/LeadHiddenFields';
 import { useLanguage } from '@/lib/i18n';
 import { z } from 'zod';
 import {
@@ -133,6 +133,7 @@ function FormField({
 export function ContactForm() {
   const { t, dir } = useLanguage();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
   // Form state
@@ -142,30 +143,30 @@ export function ContactForm() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Set<string>>(new Set());
 
-  // Track referrer
-  const [referrer, setReferrer] = useState('');
-  const [currentUrl, setCurrentUrl] = useState('');
-
   // Get service param for pre-filling
   const serviceParam = searchParams.get('service');
   const sourceParam = searchParams.get('source');
+  // A delivered lead is on its way to /thanks; keep the form locked meanwhile.
+  const redirecting = state.success && !!state.delivered;
 
-  // Set referrer on mount (client-side only)
+  // Delivered lead -> conversion event + /thanks (the URL analytics count).
+  // Anything not delivered (spam hold, rate limit) stays inline, no event.
   useEffect(() => {
-    setReferrer(document.referrer);
-    setCurrentUrl(window.location.href);
-  }, []);
-
-  // Reset form on success + report the Lead conversion (Meta Pixel / GA4)
-  useEffect(() => {
-    if (state.success && formRef.current) {
+    if (!state.success) return;
+    if (state.delivered) {
+      trackLead(serviceParam ? `contact:${serviceParam}` : 'contact-form');
+      const qs = new URLSearchParams({ from: 'contact' });
+      if (serviceParam) qs.set('service', serviceParam);
+      router.push(`/thanks?${qs.toString()}`);
+      return;
+    }
+    if (formRef.current) {
       formRef.current.reset();
       setFieldErrors({});
       setTouched(new Set());
-      trackLead(serviceParam || 'contact-form');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.success]);
+  }, [state]);
 
   // Build schema with translations
   const schema = createSchema(t);
@@ -230,6 +231,7 @@ export function ContactForm() {
   ];
 
   const isRtl = dir === 'rtl';
+  const busy = isPending || redirecting;
 
   return (
     <form
@@ -238,28 +240,17 @@ export function ContactForm() {
       className="space-y-6"
       noValidate
     >
-      {/* Spam-filter envelope */}
-      <HoneypotFields />
+      {/* Spam envelope + source / UTM / channel attribution + site/formType/service */}
+      <LeadHiddenFields site="main" formType="contact" service={serviceParam} />
 
-      {/* Hidden tracking fields */}
-      <input type="hidden" name="sourceUrl" value={currentUrl} />
-      <input type="hidden" name="referrerUrl" value={referrer} />
-      <input type="hidden" name="site" value="main" />
-      {searchParams.get('service') && (
-        <input type="hidden" name="service" value={searchParams.get('service') || ''} />
-      )}
-      {searchParams.get('utm_source') && (
-        <input type="hidden" name="utm_source" value={searchParams.get('utm_source') || ''} />
-      )}
-      {searchParams.get('utm_medium') && (
-        <input type="hidden" name="utm_medium" value={searchParams.get('utm_medium') || ''} />
-      )}
-      {searchParams.get('utm_campaign') && (
-        <input type="hidden" name="utm_campaign" value={searchParams.get('utm_campaign') || ''} />
-      )}
+      {/* The offer: what the visitor gets for filling this in */}
+      <div className="border border-[#c8a951]/25 bg-[#c8a951]/[0.06] p-4 rounded-sm">
+        <p className="text-white font-semibold">{t('lead.offer.title')}</p>
+        <p className="text-white/55 text-sm mt-1">{t('lead.offer.sub')} {t('lead.trust.reply')}.</p>
+      </div>
 
-      {/* Success Message */}
-      {state.success && (
+      {/* Accepted but not delivered (rate limit / soft hold): honest inline message */}
+      {state.success && !redirecting && (
         <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 flex items-start gap-3" role="status">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
           <div>
@@ -296,7 +287,7 @@ export function ContactForm() {
           autoComplete="name"
           onBlur={handleBlur}
           onChange={handleChange}
-          disabled={isPending}
+          disabled={busy}
           aria-invalid={getFieldError('name') ? 'true' : undefined}
           aria-describedby={getFieldError('name') ? 'name-error' : undefined}
           className={`
@@ -325,7 +316,7 @@ export function ContactForm() {
           autoComplete="email"
           onBlur={handleBlur}
           onChange={handleChange}
-          disabled={isPending}
+          disabled={busy}
           aria-invalid={getFieldError('email') ? 'true' : undefined}
           aria-describedby={getFieldError('email') ? 'email-error' : undefined}
           className={`
@@ -355,7 +346,7 @@ export function ContactForm() {
           autoComplete="tel"
           onBlur={handleBlur}
           onChange={handleChange}
-          disabled={isPending}
+          disabled={busy}
           aria-invalid={getFieldError('phone') ? 'true' : undefined}
           aria-describedby={getFieldError('phone') ? 'phone-error' : undefined}
           className={`
@@ -383,7 +374,7 @@ export function ContactForm() {
           autoComplete="organization"
           onBlur={handleBlur}
           onChange={handleChange}
-          disabled={isPending}
+          disabled={busy}
           className={`
             w-full ${isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-white/[0.05] border text-white placeholder-white/30
             focus:outline-none focus:ring-2 focus:ring-[#c8a951]/50 focus:border-transparent
@@ -406,7 +397,7 @@ export function ContactForm() {
           name="stage"
           onBlur={handleBlur}
           onChange={handleChange}
-          disabled={isPending}
+          disabled={busy}
           className={`
             w-full ${isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-white/[0.05] border text-white appearance-none
             focus:outline-none focus:ring-2 focus:ring-[#c8a951]/50 focus:border-transparent
@@ -441,7 +432,7 @@ export function ContactForm() {
           rows={5}
           onBlur={handleBlur}
           onChange={handleChange}
-          disabled={isPending}
+          disabled={busy}
           className={`
             w-full ${isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-white/[0.05] border text-white placeholder-white/30 resize-none
             focus:outline-none focus:ring-2 focus:ring-[#c8a951]/50 focus:border-transparent
@@ -471,7 +462,7 @@ export function ContactForm() {
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={isPending}
+        disabled={busy}
         className={`
           w-full flex items-center justify-center gap-3
           bg-gradient-to-r from-[#c8a951] to-[#e8d48b] hover:opacity-90
@@ -481,7 +472,7 @@ export function ContactForm() {
           focus:outline-none focus:ring-2 focus:ring-[#c8a951]/50
         `}
       >
-        {isPending ? (
+        {busy ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
             {t('contact.form.sending')}
@@ -489,7 +480,7 @@ export function ContactForm() {
         ) : (
           <>
             <Send className="w-5 h-5" />
-            {t('contact.form.sendButton')}
+            {t('lead.form.button')}
           </>
         )}
       </button>

@@ -1,8 +1,18 @@
 /**
  * Lead Generation Server Actions
  *
- * Server actions for handling form submissions.
- * Sends data to Zapier webhook and logs to database.
+ * Every public form on the marketing site (contact page, inline lead forms,
+ * the WhatsApp gate, landing-page forms, event registration, newsletter)
+ * lands here. The flow is:
+ *
+ *   validate → blocklist / rate limit → spam score → persist ActivityLog row
+ *   → deliver to Zapier (= Pipedrive) → record delivery result on the row
+ *   → alert admin if delivery failed.
+ *
+ * The FormState returned to the client carries `delivered`, which is what
+ * the UI uses to decide whether to fire the conversion event and redirect to
+ * /thanks. Spam-dropped, held-for-review and rate-limited submissions return
+ * `delivered: false` so analytics only count real leads.
  */
 
 'use server';
@@ -12,6 +22,13 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 import { runSpamFilter, type SpamFilterResult } from '@/lib/leads/spam-filter';
 import { checkRateLimit, hashIp } from '@/lib/leads/rate-limit';
+import {
+  deliverLead,
+  getSourceLabel,
+  type DeliveryResult,
+  type LeadAttribution,
+} from '@/lib/leads/zapier';
+import { notifyLeadDeliveryFailed } from '@/lib/leads/alert-email';
 
 /** Pull the source IP from request headers. Trusts x-forwarded-for from
  * Vercel's edge, which is set automatically. */
@@ -30,6 +47,12 @@ async function getSourceIp(): Promise<string | null> {
 // VALIDATION SCHEMAS
 // =============================================================================
 
+const PHONE_RE = /^[+]?\d[\d\s\-()]{6,19}$/;
+const isPhone = (val: string) => PHONE_RE.test(val) && val.replace(/\D/g, '').length >= 7;
+
+const STAGES = ['idea', 'mvp', 'early', 'growth', 'scale'] as const;
+export type LeadStage = (typeof STAGES)[number];
+
 const ContactFormSchema = z.object({
   name: z.string()
     .min(2, 'השם חייב להכיל לפחות 2 תווים')
@@ -38,9 +61,7 @@ const ContactFormSchema = z.object({
     .email('כתובת אימייל לא תקינה'),
   phone: z.string()
     .min(1, 'טלפון הוא שדה חובה')
-    .refine((val) => /^[+]?\d[\d\s\-()]{6,19}$/.test(val) && val.replace(/\D/g, '').length >= 7, {
-      message: 'מספר טלפון לא תקין',
-    }),
+    .refine(isPhone, { message: 'מספר טלפון לא תקין' }),
   company: z.string()
     .max(100, 'שם החברה ארוך מדי')
     .optional(),
@@ -49,10 +70,15 @@ const ContactFormSchema = z.object({
     .optional(),
 });
 
+/** The WhatsApp gate asks for name + phone only; email is welcome but optional. */
+const WhatsAppGateSchema = ContactFormSchema.extend({
+  email: z.union([z.literal(''), z.string().email('כתובת אימייל לא תקינה')]).optional(),
+});
+
 const ApplicationFormSchema = ContactFormSchema.extend({
   industry: z.string().optional(),
   companySize: z.enum(['1-10', '11-50', '51-200', '201-500', '500+']).optional(),
-  stage: z.enum(['idea', 'mvp', 'early', 'growth', 'scale']).optional(),
+  stage: z.enum(STAGES).optional(),
   fundingNeeded: z.number().min(0).max(100000000).optional(),
 });
 
@@ -69,199 +95,51 @@ export interface FormState {
   success: boolean;
   message: string;
   errors?: Record<string, string[]>;
+  /** ActivityLog id of the persisted lead (only when it passed the filter). */
   leadId?: string;
+  /** True only when the lead was accepted AND reached Zapier. Drives
+   * conversion tracking + the /thanks redirect on the client. */
+  delivered?: boolean;
 }
 
 // =============================================================================
-// ZAPIER WEBHOOK
+// FORM-DATA READERS
 // =============================================================================
 
-const ZAPIER_WEBHOOK_URL = process.env.ZAPIER_WEBHOOK_URL || '';
-
-// =============================================================================
-// LEAD SOURCE LABELS (Hebrew) — map site key to human-readable label
-// =============================================================================
-
-const SITE_SOURCE_LABELS: Record<string, string> = {
-  main: 'אתר ראשי',
-  leumit: 'דף נחיתה · Leumit MedTech',
-  biz: 'דף נחיתה · Business',
-  landing: 'דף נחיתה · קמפיין',
-};
-
-function getSourceLabel(site: string | null | undefined): string {
-  if (!site) return SITE_SOURCE_LABELS.main;
-  return SITE_SOURCE_LABELS[site] || `אתר · ${site}`;
+function str(formData: FormData, key: string, max = 500): string | null {
+  const v = formData.get(key);
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  return t ? t.slice(0, max) : null;
 }
 
-// =============================================================================
-// SPAM AUDIT — log every lead's filter decision so we can tune weights
-// =============================================================================
-
-/**
- * Centralized routing helper. After validation, EVERY lead funnels through
- * here so the spam decision and audit trail are consistent across the 4
- * server actions (contact / application / newsletter / event).
- *
- * Returns the user-facing FormState. Always claims success on `drop` so the
- * bot doesn't learn the filter exists.
- */
-async function routeLeadThroughFilter(opts: {
-  leadData: {
-    name: string;
-    email: string;
-    phone?: string | null;
-    company?: string | null;
-    message?: string | null;
+/** Attribution the client collected (UTM, referrer, classified channel). */
+function readAttribution(formData: FormData): LeadAttribution {
+  return {
+    utmSource: str(formData, 'utm_source', 200),
+    utmMedium: str(formData, 'utm_medium', 200),
+    utmCampaign: str(formData, 'utm_campaign', 200),
+    utmContent: str(formData, 'utm_content', 200),
+    utmTerm: str(formData, 'utm_term', 200),
+    gclid: str(formData, 'gclid', 200),
+    fbclid: str(formData, 'fbclid', 200),
+    referrerUrl: str(formData, 'referrerUrl', 2048),
+    landingPage: str(formData, 'landingPage', 500),
+    channel: str(formData, 'channel', 60),
+    channelDetail: str(formData, 'channelDetail', 200),
+    campaign: str(formData, 'campaign', 200),
+    firstChannel: str(formData, 'firstChannel', 60),
   };
-  envelope: { honeypot?: string | null; renderedAtMs?: number | null };
-  meta: {
-    site: string | null;
-    sourceUrl: string | null;
-    formType: string;
-    extra?: Record<string, unknown>;
-    userSuccessMessage: string;
-  };
-}): Promise<FormState> {
-  const { leadData, envelope, meta } = opts;
+}
 
-  // PHASE 2: capture source IP + check blocklist + rate-limit before scoring.
-  const ip = await getSourceIp();
-  const ipHash = ip ? hashIp(ip) : null;
+function readStage(formData: FormData): LeadStage | null {
+  const v = str(formData, 'stage', 20);
+  return v && (STAGES as readonly string[]).includes(v) ? (v as LeadStage) : null;
+}
 
-  const rate = await checkRateLimit({ email: leadData.email, ip });
-  if (!rate.allowed) {
-    // Log so the admin can see why nothing came through; return success
-    // silently so a misconfigured integration doesn't retry.
-    try {
-      await prisma.activityLog.create({
-        data: {
-          action: rate.reason.startsWith('blocklist') ? 'lead.blocklist_hit' : 'lead.rate_limited',
-          description: `${rate.reason}: ${leadData.email}`,
-          metadata: {
-            email: leadData.email,
-            name: leadData.name,
-            ipHash,
-            reason: rate.reason,
-            detail: rate.detail,
-            site: meta.site || 'main',
-            formType: meta.formType,
-            timestamp: new Date().toISOString(),
-          },
-        },
-      });
-    } catch {
-      /* swallow */
-    }
-    return { success: true, message: meta.userSuccessMessage };
-  }
-
-  const filter: SpamFilterResult = runSpamFilter({
-    name: leadData.name,
-    email: leadData.email,
-    phone: leadData.phone,
-    company: leadData.company,
-    message: leadData.message,
-    site: meta.site,
-    honeypot: envelope.honeypot,
-    renderedAtMs: envelope.renderedAtMs,
-  });
-
-  // Decision: drop. Log to audit only, return success silently.
-  if (filter.decision === 'drop') {
-    try {
-      await prisma.activityLog.create({
-        data: {
-          action: 'lead.spam_blocked',
-          description: `Spam blocked (score ${filter.score}): ${leadData.email}`,
-          metadata: {
-            email: leadData.email,
-            name: leadData.name,
-            phone: leadData.phone || null,
-            site: meta.site || 'main',
-            formType: meta.formType,
-            sourceUrl: meta.sourceUrl,
-            ipHash,
-            spamScore: filter.score,
-            spamCodes: filter.codes,
-            spamReasons: filter.reasons,
-            status: 'spam',
-            timestamp: new Date().toISOString(),
-          },
-        },
-      });
-    } catch (err) {
-      console.error('[Spam] audit log failed:', err);
-    }
-    return { success: true, message: meta.userSuccessMessage };
-  }
-
-  // Decision: review. Log to DB with status='review', skip Zapier.
-  if (filter.decision === 'review') {
-    try {
-      await prisma.activityLog.create({
-        data: {
-          action: 'lead.spam_review',
-          description: `Soft hold (score ${filter.score}): ${leadData.email}`,
-          metadata: {
-            ...leadData,
-            ...(meta.extra ?? {}),
-            site: meta.site || 'main',
-            sourceUrl: meta.sourceUrl,
-            formType: meta.formType,
-            sourceLabel: getSourceLabel(meta.site),
-            ipHash,
-            spamScore: filter.score,
-            spamCodes: filter.codes,
-            spamReasons: filter.reasons,
-            status: 'pending_review',
-            timestamp: new Date().toISOString(),
-          },
-        },
-      });
-    } catch (err) {
-      console.error('[Spam] review log failed:', err);
-    }
-    return { success: true, message: meta.userSuccessMessage };
-  }
-
-  // Decision: pass. Normal flow — Zapier + the standard activity log.
-  sendToZapier({
-    name: leadData.name,
-    email: leadData.email,
-    phone: leadData.phone || undefined,
-    company: leadData.company || undefined,
-    message: leadData.message || undefined,
-    formType: meta.formType,
-    site: meta.site,
-    sourceUrl: meta.sourceUrl,
-  });
-
-  try {
-    await prisma.activityLog.create({
-      data: {
-        action: meta.formType === 'contact' ? 'form.contact_submit' : `form.${meta.formType}`,
-        description: `${getSourceLabel(meta.site)} · ${leadData.name} · ${leadData.email}`,
-        metadata: {
-          ...leadData,
-          ...(meta.extra ?? {}),
-          site: meta.site || 'main',
-          sourceLabel: getSourceLabel(meta.site),
-          formType: meta.formType,
-          sourceUrl: meta.sourceUrl,
-          ipHash,
-          spamScore: filter.score,
-          spamCodes: filter.codes,
-          status: 'approved',
-          timestamp: new Date().toISOString(),
-        },
-      },
-    });
-  } catch (err) {
-    console.error(`[${meta.formType}] DB log failed:`, err);
-  }
-
-  return { success: true, message: meta.userSuccessMessage };
+function readService(formData: FormData): string | null {
+  const v = str(formData, 'service', 60);
+  return v && /^[a-z0-9-]{1,60}$/.test(v) ? v : null;
 }
 
 /** Pull honeypot + timestamp envelope from FormData. */
@@ -275,49 +153,212 @@ function readEnvelope(formData: FormData): { honeypot: string | null; renderedAt
   };
 }
 
-async function sendToZapier(data: {
-  name: string;
-  email: string;
-  phone?: string;
-  company?: string;
-  message?: string;
-  formType?: string;
-  site?: string | null;
-  sourceUrl?: string | null;
-}): Promise<void> {
-  try {
-    const now = new Date();
-    const sourceLabel = getSourceLabel(data.site);
-    const payload = {
-      'תאריך': now.toLocaleDateString('he-IL') + ' ' + now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
-      'שם מלא': data.name,
-      'טלפון': data.phone || '',
-      'אימייל': data.email,
-      'מודעה': sourceLabel,
-      'מקור': sourceLabel,
-      'סאבדומיין': data.site || 'main',
-      'סוג טופס': data.formType || 'contact',
-      'כתובת מקור': data.sourceUrl || '',
-      'הודעה': data.message || '',
-      'חברה': data.company || '',
-    };
-    if (!ZAPIER_WEBHOOK_URL) {
-      console.warn('[Zapier] ZAPIER_WEBHOOK_URL not configured');
-      return;
+// =============================================================================
+// CENTRAL ROUTER — validate → filter → persist → deliver
+// =============================================================================
+
+const RATE_LIMITED_MESSAGE =
+  'כבר קיבלנו ממך פנייה לאחרונה ואנחנו בדרך אליך. לפנייה דחופה אפשר להתקשר ל-055-564-7538.';
+
+/**
+ * Centralized routing helper. After validation, EVERY lead funnels through
+ * here so the spam decision, the audit trail and the Zapier delivery are
+ * consistent across all server actions.
+ *
+ * Claims success on `drop` so a bot doesn't learn the filter exists, but
+ * returns `delivered: false` so the UI never counts it as a conversion.
+ */
+async function routeLeadThroughFilter(opts: {
+  leadData: {
+    name: string;
+    email: string;
+    phone?: string | null;
+    company?: string | null;
+    message?: string | null;
+    stage?: string | null;
+    service?: string | null;
+  };
+  envelope: { honeypot?: string | null; renderedAtMs?: number | null };
+  meta: {
+    site: string | null;
+    sourceUrl: string | null;
+    formType: string;
+    attribution?: LeadAttribution | null;
+    extra?: Record<string, unknown>;
+    userSuccessMessage: string;
+  };
+}): Promise<FormState> {
+  const { leadData, envelope, meta } = opts;
+  const attribution = meta.attribution ?? {};
+
+  // PHASE 2: capture source IP + check blocklist + rate-limit before scoring.
+  const ip = await getSourceIp();
+  const ipHash = ip ? hashIp(ip) : null;
+
+  const rate = await checkRateLimit({ email: leadData.email, ip });
+  if (!rate.allowed) {
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: rate.reason.startsWith('blocklist') ? 'lead.blocklist_hit' : 'lead.rate_limited',
+          description: `${rate.reason}: ${leadData.email || leadData.phone}`,
+          metadata: {
+            email: leadData.email,
+            name: leadData.name,
+            phone: leadData.phone || null,
+            ipHash,
+            reason: rate.reason,
+            detail: rate.detail,
+            site: meta.site || 'main',
+            formType: meta.formType,
+            sourceUrl: meta.sourceUrl,
+            timestamp: new Date().toISOString(),
+          },
+        },
+      });
+    } catch {
+      /* swallow */
     }
-    await fetch(ZAPIER_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    console.error('[Zapier] webhook failed:', err);
+    // A blocklisted sender gets the generic "thanks" (don't tip them off).
+    // A legit person who simply submitted twice gets an honest message.
+    const honest = rate.reason === 'rate_limit_email' || rate.reason === 'rate_limit_ip';
+    return {
+      success: true,
+      delivered: false,
+      message: honest ? RATE_LIMITED_MESSAGE : meta.userSuccessMessage,
+    };
   }
+
+  const filter: SpamFilterResult = runSpamFilter({
+    name: leadData.name,
+    email: leadData.email,
+    phone: leadData.phone,
+    company: leadData.company,
+    message: leadData.message,
+    site: meta.site,
+    honeypot: envelope.honeypot,
+    renderedAtMs: envelope.renderedAtMs,
+  });
+
+  const sharedMeta = {
+    ...leadData,
+    ...(meta.extra ?? {}),
+    ...attribution,
+    site: meta.site || 'main',
+    sourceUrl: meta.sourceUrl,
+    formType: meta.formType,
+    sourceLabel: getSourceLabel(meta.site),
+    ipHash,
+    spamScore: filter.score,
+    spamCodes: filter.codes,
+    spamReasons: filter.reasons,
+    timestamp: new Date().toISOString(),
+  };
+
+  // Decision: drop. Log to audit only, return success silently.
+  if (filter.decision === 'drop') {
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: 'lead.spam_blocked',
+          description: `Spam blocked (score ${filter.score}): ${leadData.email || leadData.phone}`,
+          metadata: { ...sharedMeta, status: 'spam' },
+        },
+      });
+    } catch (err) {
+      console.error('[Spam] audit log failed:', err);
+    }
+    return { success: true, delivered: false, message: meta.userSuccessMessage };
+  }
+
+  // Decision: review. Log with status='pending_review', skip Zapier until an admin approves.
+  if (filter.decision === 'review') {
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: 'lead.spam_review',
+          description: `Soft hold (score ${filter.score}): ${leadData.email || leadData.phone}`,
+          metadata: { ...sharedMeta, status: 'pending_review' },
+        },
+      });
+    } catch (err) {
+      console.error('[Spam] review log failed:', err);
+    }
+    return { success: true, delivered: false, message: meta.userSuccessMessage };
+  }
+
+  // Decision: pass. Persist first (so the Zap can reference the row), then deliver.
+  let leadId: string | null = null;
+  try {
+    const row = await prisma.activityLog.create({
+      data: {
+        action: meta.formType === 'contact' ? 'form.contact_submit' : `form.${meta.formType}`,
+        description: `${getSourceLabel(meta.site)} · ${leadData.name} · ${leadData.email || leadData.phone}`,
+        metadata: {
+          ...sharedMeta,
+          status: 'approved',
+          delivery: { status: 'pending', attempts: 0, at: new Date().toISOString() },
+        },
+      },
+      select: { id: true },
+    });
+    leadId = row.id;
+  } catch (err) {
+    console.error(`[${meta.formType}] DB log failed:`, err);
+  }
+
+  const delivery: DeliveryResult = await deliverLead({
+    name: leadData.name,
+    email: leadData.email,
+    phone: leadData.phone,
+    company: leadData.company,
+    message: leadData.message,
+    formType: meta.formType,
+    site: meta.site,
+    sourceUrl: meta.sourceUrl,
+    stage: leadData.stage,
+    service: leadData.service,
+    attribution,
+    leadId,
+    spamScore: filter.score,
+  });
+
+  if (leadId) {
+    try {
+      await prisma.activityLog.update({
+        where: { id: leadId },
+        data: { metadata: { ...sharedMeta, status: 'approved', delivery } },
+      });
+    } catch (err) {
+      console.error('[Lead] delivery status update failed:', err);
+    }
+  }
+
+  if (delivery.status !== 'sent') {
+    await notifyLeadDeliveryFailed({
+      activityLogId: leadId,
+      name: leadData.name,
+      email: leadData.email,
+      phone: leadData.phone,
+      formType: meta.formType,
+      sourceUrl: meta.sourceUrl,
+      delivery,
+    });
+  }
+
+  return {
+    success: true,
+    delivered: delivery.status === 'sent',
+    leadId: leadId ?? undefined,
+    message: meta.userSuccessMessage,
+  };
 }
 
 // =============================================================================
-// CONTACT FORM ACTION
+// CONTACT FORM ACTION — used by every lead form on the site
 // =============================================================================
+
+const CONTACT_SUCCESS = 'תודה! קיבלנו את הפרטים ונחזור אליך תוך יום עסקים.';
 
 export async function submitContactForm(
   prevState: FormState,
@@ -325,17 +366,18 @@ export async function submitContactForm(
 ): Promise<FormState> {
   const rawData = {
     name: formData.get('name'),
-    email: formData.get('email'),
+    email: formData.get('email') ?? '',
     phone: formData.get('phone'),
     company: formData.get('company'),
     message: formData.get('message'),
   };
 
-  const sourceUrl = formData.get('sourceUrl') as string | null;
-  const site = formData.get('site') as string | null;
-  const formType = (formData.get('formType') as string | null) || 'contact';
+  const sourceUrl = str(formData, 'sourceUrl', 2048);
+  const site = str(formData, 'site', 50);
+  const formType = str(formData, 'formType', 40) || 'contact';
+  const isWhatsAppGate = formType === 'whatsapp_gate';
 
-  const validationResult = ContactFormSchema.safeParse(rawData);
+  const validationResult = (isWhatsAppGate ? WhatsAppGateSchema : ContactFormSchema).safeParse(rawData);
 
   if (!validationResult.success) {
     return {
@@ -350,17 +392,20 @@ export async function submitContactForm(
   return routeLeadThroughFilter({
     leadData: {
       name: validData.name,
-      email: validData.email,
+      email: validData.email || '',
       phone: validData.phone,
       company: validData.company || null,
       message: validData.message || null,
+      stage: readStage(formData),
+      service: readService(formData),
     },
     envelope: readEnvelope(formData),
     meta: {
       site,
       sourceUrl,
-      formType: formType || 'contact',
-      userSuccessMessage: 'תודה על פנייתך! ניצור איתך קשר בהקדם.',
+      formType,
+      attribution: readAttribution(formData),
+      userSuccessMessage: CONTACT_SUCCESS,
     },
   });
 }
@@ -387,8 +432,8 @@ export async function submitApplicationForm(
       : undefined,
   };
 
-  const sourceUrl = formData.get('sourceUrl') as string | null;
-  const site = formData.get('site') as string | null;
+  const sourceUrl = str(formData, 'sourceUrl', 2048);
+  const site = str(formData, 'site', 50);
 
   const validationResult = ApplicationFormSchema.safeParse(rawData);
 
@@ -409,16 +454,18 @@ export async function submitApplicationForm(
       phone: validData.phone,
       company: validData.company || null,
       message: validData.message || null,
+      stage: validData.stage || null,
+      service: readService(formData),
     },
     envelope: readEnvelope(formData),
     meta: {
       site,
       sourceUrl,
       formType: 'application',
+      attribution: readAttribution(formData),
       extra: {
         industry: validData.industry || null,
         companySize: validData.companySize || null,
-        stage: validData.stage || null,
         fundingNeeded: validData.fundingNeeded || null,
       },
       userSuccessMessage: 'תודה על הגשת המועמדות! נבדוק את הפרטים ונחזור אליך בהקדם.',
@@ -439,7 +486,7 @@ export async function submitNewsletterSignup(
     name: formData.get('name') || undefined,
   };
 
-  const site = formData.get('site') as string | null;
+  const site = str(formData, 'site', 50);
 
   const validationResult = NewsletterSchema.safeParse(rawData);
 
@@ -465,8 +512,9 @@ export async function submitNewsletterSignup(
     envelope: readEnvelope(formData),
     meta: {
       site,
-      sourceUrl: null,
+      sourceUrl: str(formData, 'sourceUrl', 2048),
       formType: 'newsletter',
+      attribution: readAttribution(formData),
       userSuccessMessage: 'תודה! נרשמת בהצלחה לניוזלטר.',
     },
   });
@@ -487,9 +535,9 @@ export async function submitEventRegistration(
     company: formData.get('company'),
   };
 
-  const eventId = formData.get('eventId') as string | null;
-  const eventName = formData.get('eventName') as string | null;
-  const site = formData.get('site') as string | null;
+  const eventId = str(formData, 'eventId', 100);
+  const eventName = str(formData, 'eventName', 200);
+  const site = str(formData, 'site', 50);
 
   const validationResult = ContactFormSchema.safeParse(rawData);
 
@@ -529,8 +577,9 @@ export async function submitEventRegistration(
     envelope: readEnvelope(formData),
     meta: {
       site,
-      sourceUrl: null,
+      sourceUrl: str(formData, 'sourceUrl', 2048),
       formType: 'event',
+      attribution: readAttribution(formData),
       extra: { eventId, eventName },
       userSuccessMessage: 'נרשמת בהצלחה לאירוע! נשלח אליך אישור במייל.',
     },
@@ -538,7 +587,7 @@ export async function submitEventRegistration(
 
   // Increment registration count only if the lead actually went through
   // (we don't want to inflate counts on spam attempts).
-  if (eventId && result.success) {
+  if (eventId && result.success && result.leadId) {
     try {
       await prisma.event.update({
         where: { id: eventId },
@@ -553,10 +602,14 @@ export async function submitEventRegistration(
 }
 
 // =============================================================================
-// QUICK LEAD ACTION
+// QUICK LEAD ACTION (programmatic)
 // =============================================================================
 
-const VALID_FORM_TYPES = ['contact', 'application', 'newsletter', 'event', 'api', 'leumit_landing'] as const;
+const VALID_FORM_TYPES = [
+  'contact', 'application', 'newsletter', 'event', 'api',
+  'leumit_landing', 'biz_landing', 'landing_multiselect',
+  'whatsapp_gate', 'home_cta', 'service', 'guide_inline', 'lead_magnet',
+] as const;
 
 const LeadSchema = z.object({
   name: z.string().min(1).max(200),
@@ -565,8 +618,12 @@ const LeadSchema = z.object({
   company: z.string().max(200).optional(),
   message: z.string().max(2000).optional(),
   sourceUrl: z.string().max(2048).optional(),
+  referrerUrl: z.string().max(2048).optional(),
+  leadSource: z.string().max(100).optional(),
   formType: z.enum(VALID_FORM_TYPES).optional(),
   site: z.string().max(50).optional(),
+  stage: z.enum(STAGES).optional(),
+  service: z.string().max(60).optional(),
 });
 
 export async function createLeadAction(data: {
@@ -580,6 +637,8 @@ export async function createLeadAction(data: {
   leadSource?: string;
   formType?: string;
   site?: string;
+  stage?: LeadStage;
+  service?: string;
 }): Promise<FormState> {
   const parsed = LeadSchema.safeParse(data);
   if (!parsed.success) {
@@ -599,12 +658,18 @@ export async function createLeadAction(data: {
       phone: validData.phone || null,
       company: validData.company || null,
       message: validData.message || null,
+      stage: validData.stage || null,
+      service: validData.service || null,
     },
     envelope: { honeypot: null, renderedAtMs: null }, // programmatic — no envelope
     meta: {
       site: validData.site || null,
       sourceUrl: validData.sourceUrl || null,
       formType,
+      attribution: {
+        referrerUrl: validData.referrerUrl || null,
+        channelDetail: validData.leadSource || null,
+      },
       userSuccessMessage: 'הפנייה נשלחה בהצלחה',
     },
   });
