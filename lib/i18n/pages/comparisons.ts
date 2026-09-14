@@ -21,10 +21,10 @@ export const comparisonsHe: Record<string, string> = {
 
   // WeCcelerate head-to-head row values
   'comparisons.weccelerate.model': 'Venture Builder (תורם צוות אופרטיבי)',
-  'comparisons.weccelerate.equity': '10-30% או Equity-for-Services',
+  'comparisons.weccelerate.equity': 'Equity-for-Services, מותאם למיזם',
   'comparisons.weccelerate.duration': 'חודשים עד שנים — ארוך-טווח',
   'comparisons.weccelerate.focus': 'MedTech, AI, B2B SaaS, Corporate Venture Building',
-  'comparisons.weccelerate.medicalData': '✅ 720K תיקי לאומית — בלעדי בישראל',
+  'comparisons.weccelerate.medicalData': '✅ גישה לנתונים קליניים דרך לאומית',
   'comparisons.weccelerate.operationalTeam': '✅ פיתוח, מוצר, שיווק, משפט מובנים',
   'comparisons.weccelerate.investorNetwork':
     'רשת משקיעים, יזמים ושותפים אסטרטגיים, היכרויות חמות',
@@ -74,7 +74,7 @@ export const comparisonsHe: Record<string, string> = {
   'comparisons.masschallenge-israel.strength':
     'רשת גלובלית של 3,000+ חברי פורטפוליו, פרס בולט ב-Demo Day.',
   'comparisons.masschallenge-israel.advantage':
-    'WeCcelerate ארוך-טווח (לא 4 חודשים), עם צוות אופרטיבי ייעודי. למיזמי MedTech ספציפית — שותפות לאומית עוקפת את ה-MassChallenge generic ב-200%.',
+    'WeCcelerate מלווה לאורך זמן ולא בתוכנית קצובה, עם צוות אופרטיבי ייעודי. למיזמי MedTech ספציפית, השותפות עם לאומית נותנת גישה קלינית שתוכנית כללית לא מספקת.',
 
   // Google for Startups Campus
   'comparisons.google-startups.what':
@@ -94,7 +94,7 @@ export const comparisonsHe: Record<string, string> = {
   'comparisons.techstars-tel-aviv.strength':
     'מותג גלובלי, רשת מנטורים בינלאומית, demo day מובנה.',
   'comparisons.techstars-tel-aviv.advantage':
-    'Techstars לוקחים אקוויטי גבוה (6%) על תמיכה לטווח קצר. WeCcelerate Equity-for-Services נמשך חודשים-שנים ומספק יותר ערך פר-אקוויטי.',
+    'Techstars מציעים תוכנית קצרה תמורת אקוויטי. WeCcelerate עובדת במודל Equity-for-Services לאורך זמן, עם צוות שמבצע בפועל ולא רק מייעץ.',
 
   // Pitango First
   'comparisons.pitango-first.what':
@@ -124,7 +124,7 @@ export const comparisonsHe: Record<string, string> = {
   // Final CTA
   'comparisons.cta.title': 'לא בטוח אם WeCcelerate מתאים לך?',
   'comparisons.cta.text':
-    'שיחת הכרות 30 דקות. נבדוק במשותף — ואם המסלול הנכון הוא לא אנחנו, נכוון אותך לאן שכן.',
+    'שיחת הכרות. נבדוק במשותף — ואם המסלול הנכון הוא לא אנחנו, נכוון אותך לאן שכן.',
   'comparisons.cta.button': 'שיחת הכרות חינם →',
 };
 
@@ -150,10 +150,10 @@ export const comparisonsEn: Record<string, string> = {
 
   // WeCcelerate head-to-head row values
   'comparisons.weccelerate.model': 'Venture Builder (contributes an operational team)',
-  'comparisons.weccelerate.equity': '10-30% or Equity-for-Services',
+  'comparisons.weccelerate.equity': 'Equity-for-Services, tailored per venture',
   'comparisons.weccelerate.duration': 'Months to years — long-term',
   'comparisons.weccelerate.focus': 'MedTech, AI, B2B SaaS, Corporate Venture Building',
-  'comparisons.weccelerate.medicalData': '✅ 720K Leumit records — exclusive in Israel',
+  'comparisons.weccelerate.medicalData': '✅ Clinical data access through Leumit',
   'comparisons.weccelerate.operationalTeam':
     '✅ Built-in development, product, marketing, legal',
   'comparisons.weccelerate.investorNetwork':
@@ -205,7 +205,7 @@ export const comparisonsEn: Record<string, string> = {
   'comparisons.masschallenge-israel.strength':
     'A global network of 3,000+ portfolio members, a prominent Demo Day prize.',
   'comparisons.masschallenge-israel.advantage':
-    'WeCcelerate is long-term (not 4 months), with a dedicated operational team. For MedTech ventures specifically — the Leumit partnership outperforms the generic MassChallenge by 200%.',
+    'WeCcelerate works with ventures over time rather than in a fixed cohort, with a dedicated operational team. For MedTech ventures specifically, the Leumit partnership gives clinical access a generic program does not.',
 
   // Google for Startups Campus
   'comparisons.google-startups.what':
@@ -225,7 +225,7 @@ export const comparisonsEn: Record<string, string> = {
   'comparisons.techstars-tel-aviv.strength':
     'A global brand, an international mentor network, a structured demo day.',
   'comparisons.techstars-tel-aviv.advantage':
-    'Techstars takes high equity (6%) for short-term support. WeCcelerate Equity-for-Services lasts months to years and delivers more value per equity point.',
+    'Techstars runs a short program in exchange for equity. WeCcelerate works on an Equity-for-Services model over time, with a team that executes rather than only advises.',
 
   // Pitango First
   'comparisons.pitango-first.what':
@@ -255,6 +255,6 @@ export const comparisonsEn: Record<string, string> = {
   // Final CTA
   'comparisons.cta.title': 'Not sure if WeCcelerate is right for you?',
   'comparisons.cta.text':
-    "A 30-minute intro call. We'll figure it out together — and if the right path isn't us, we'll point you to where it is.",
+    "An intro call. We'll figure it out together — and if the right path isn't us, we'll point you to where it is.",
   'comparisons.cta.button': 'Free intro call →',
 };
