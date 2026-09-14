@@ -96,6 +96,7 @@ function generateAboutPageSchema() {
  // links.
  sameAs: [
  'https://www.linkedin.com/company/weccelerate',
+ 'https://www.wikidata.org/wiki/Q141451357',
  'https://www.facebook.com/weccelerate',
  'https://www.instagram.com/weccelerate.ltd',
  'https://www.youtube.com/@WeCcelerate.Ltd1',

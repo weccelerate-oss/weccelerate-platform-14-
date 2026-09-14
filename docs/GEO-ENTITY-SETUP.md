@@ -55,6 +55,9 @@ sitemap full of dead hosts.
 
 ## Step 1 — Wikidata 🔥 highest leverage
 
+> **DONE 2026-09-14:** item created as **[Q141451357](https://www.wikidata.org/wiki/Q141451357)** with all nine statements and references (anonymous API edit, run by Maor from the repo: `node scripts/entity/wikidata-create.mjs`). Site `sameAs` arrays, `SOCIAL_LINKS` and llms.txt now point at it. Still to add later: P2088 (after the Crunchbase slug fix), founders as separate items once the company item has survived a few weeks. Watch the item for deletion nominations during the first month.
+
+
 This is the single most valuable item on the list. Wikidata is the entity
 backbone that search engines and language models read; nothing on your own
 domain substitutes for it. It is free and takes about fifteen minutes.

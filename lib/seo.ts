@@ -756,6 +756,7 @@ export const FAQ_DATA = FAQ_ITEMS;
 export const SOCIAL_LINKS = {
  facebook: 'https://www.facebook.com/weccelerate',
  linkedin: 'https://www.linkedin.com/company/weccelerate',
+ wikidata: 'https://www.wikidata.org/wiki/Q141451357',
  instagram: 'https://www.instagram.com/weccelerate.ltd',
  youtube: 'https://www.youtube.com/@WeCcelerate.Ltd1',
  tiktok: 'https://www.tiktok.com/@weccelerate',
