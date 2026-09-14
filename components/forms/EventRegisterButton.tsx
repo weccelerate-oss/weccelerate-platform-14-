@@ -48,6 +48,10 @@ export function EventRegisterButton({ eventId, eventName, externalUrl, site = 'm
   }, [state, eventId]);
 
   const err = (k: string) => state.errors?.[k]?.[0];
+  const RENDERED = ['name', 'phone', 'email'];
+  const hiddenError = state.errors
+    ? Object.entries(state.errors).filter(([k]) => !RENDERED.includes(k)).map(([, v]) => v[0]).join(' · ')
+    : '';
 
   return (
     <>
@@ -111,9 +115,9 @@ export function EventRegisterButton({ eventId, eventName, externalUrl, site = 'm
                 <input type="hidden" name="eventId" value={eventId} />
                 <input type="hidden" name="eventName" value={eventName} />
 
-                {!state.success && state.message && !state.errors && (
+                {!state.success && (hiddenError || (state.message && !state.errors)) && (
                   <p className="text-red-300 text-sm flex items-center gap-2" role="alert">
-                    <AlertCircle className="w-4 h-4" aria-hidden="true" />{state.message}
+                    <AlertCircle className="w-4 h-4" aria-hidden="true" />{hiddenError || state.message}
                   </p>
                 )}
 

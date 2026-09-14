@@ -122,6 +122,10 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
   }, [state]);
 
   const err = (k: string) => state.errors?.[k]?.[0];
+  const RENDERED = ['name', 'phone', 'email'];
+  const hiddenError = state.errors
+    ? Object.entries(state.errors).filter(([k]) => !RENDERED.includes(k)).map(([, v]) => v[0]).join(' · ')
+    : '';
   const isEn = lang === 'en';
   const needLabel = WHATSAPP_NEEDS.find((n) => n.value === need)?.[isEn ? 'en' : 'he'] ?? '';
   const tiles = WHATSAPP_NEEDS.filter((n) => n.value !== 'other');
@@ -203,9 +207,9 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
                   <LeadHiddenFields site={site} formType="whatsapp_gate" service={opts.service ?? null} />
                   <input type="hidden" name="message" value={needLabel ? `${t('wa.gate.need')} ${needLabel}` : ''} />
 
-                  {!state.success && state.message && !state.errors && (
+                  {!state.success && (hiddenError || (state.message && !state.errors)) && (
                     <p className="text-red-300 text-sm flex items-center gap-2" role="alert">
-                      <AlertCircle className="w-4 h-4" aria-hidden="true" />{state.message}
+                      <AlertCircle className="w-4 h-4" aria-hidden="true" />{hiddenError || state.message}
                     </p>
                   )}
 

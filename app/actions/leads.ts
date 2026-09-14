@@ -106,6 +106,17 @@ export interface FormState {
 // FORM-DATA READERS
 // =============================================================================
 
+/**
+ * Optional text field for Zod: `formData.get()` returns null when the input
+ * is not in the form at all (short forms have no company/message field) and
+ * `z.string().optional()` rejects null — which silently failed every short
+ * form from 2026-09-10 to 2026-09-14. undefined is what .optional() wants.
+ */
+function opt(formData: FormData, key: string): string | undefined {
+  const v = formData.get(key);
+  return typeof v === 'string' && v.trim() ? v : undefined;
+}
+
 function str(formData: FormData, key: string, max = 500): string | null {
   const v = formData.get(key);
   if (typeof v !== 'string') return null;
@@ -358,18 +369,18 @@ async function routeLeadThroughFilter(opts: {
 // CONTACT FORM ACTION — used by every lead form on the site
 // =============================================================================
 
-const CONTACT_SUCCESS = 'תודה! קיבלנו את הפרטים ונחזור אליך תוך יום עסקים.';
+const CONTACT_SUCCESS = 'תודה! קיבלנו את הפרטים ונחזור אליך בהקדם.';
 
 export async function submitContactForm(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
   const rawData = {
-    name: formData.get('name'),
+    name: formData.get('name') ?? '',
     email: formData.get('email') ?? '',
-    phone: formData.get('phone'),
-    company: formData.get('company'),
-    message: formData.get('message'),
+    phone: formData.get('phone') ?? '',
+    company: opt(formData, 'company'),
+    message: opt(formData, 'message'),
   };
 
   const sourceUrl = str(formData, 'sourceUrl', 2048);
@@ -419,14 +430,14 @@ export async function submitApplicationForm(
   formData: FormData
 ): Promise<FormState> {
   const rawData = {
-    name: formData.get('name'),
-    email: formData.get('email'),
-    phone: formData.get('phone'),
-    company: formData.get('company'),
-    message: formData.get('message'),
-    industry: formData.get('industry'),
-    companySize: formData.get('companySize'),
-    stage: formData.get('stage'),
+    name: formData.get('name') ?? '',
+    email: formData.get('email') ?? '',
+    phone: formData.get('phone') ?? '',
+    company: opt(formData, 'company'),
+    message: opt(formData, 'message'),
+    industry: opt(formData, 'industry'),
+    companySize: opt(formData, 'companySize'),
+    stage: opt(formData, 'stage'),
     fundingNeeded: formData.get('fundingNeeded')
       ? parseInt(formData.get('fundingNeeded') as string)
       : undefined,
@@ -482,8 +493,8 @@ export async function submitNewsletterSignup(
   formData: FormData
 ): Promise<FormState> {
   const rawData = {
-    email: formData.get('email'),
-    name: formData.get('name') || undefined,
+    email: formData.get('email') ?? '',
+    name: opt(formData, 'name'),
   };
 
   const site = str(formData, 'site', 50);
@@ -529,10 +540,10 @@ export async function submitEventRegistration(
   formData: FormData
 ): Promise<FormState> {
   const rawData = {
-    name: formData.get('name'),
-    email: formData.get('email'),
-    phone: formData.get('phone'),
-    company: formData.get('company'),
+    name: formData.get('name') ?? '',
+    email: formData.get('email') ?? '',
+    phone: formData.get('phone') ?? '',
+    company: opt(formData, 'company'),
   };
 
   const eventId = str(formData, 'eventId', 100);

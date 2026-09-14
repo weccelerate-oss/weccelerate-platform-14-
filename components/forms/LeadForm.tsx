@@ -73,6 +73,10 @@ export function LeadForm({
   }, [state]);
 
   const err = (name: string) => state.errors?.[name]?.[0];
+  const RENDERED = ['name', 'phone', 'email', 'stage', 'message'];
+  const hiddenError = state.errors && Object.keys(state.errors).some((k) => !RENDERED.includes(k))
+    ? Object.entries(state.errors).filter(([k]) => !RENDERED.includes(k)).map(([, v]) => v[0]).join(' · ')
+    : '';
   const stages: Array<[string, string]> = [
     ['', t('contact.form.stage.select')],
     ['idea', t('contact.form.stage.idea')],
@@ -104,10 +108,10 @@ export function LeadForm({
           <p className="text-emerald-300">{state.message}</p>
         </div>
       )}
-      {!state.success && state.message && !state.errors && (
+      {!state.success && (hiddenError || (state.message && !state.errors)) && (
         <div className="bg-red-500/10 border border-red-500/30 p-3 flex items-start gap-2 text-sm" role="alert">
           <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-          <p className="text-red-300">{state.message}</p>
+          <p className="text-red-300">{hiddenError || state.message}</p>
         </div>
       )}
 
