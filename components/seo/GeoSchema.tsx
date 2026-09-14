@@ -110,21 +110,12 @@ function buildOrganizationSchema() {
     },
     
     // Founding & Contact
-    // Founding year: 2018 (owner-confirmed 2026-05-14, superseding an earlier
-    // 2026-04-26 note that said 2016).
-    //
-    // This value MUST stay in sync with lib/seo/llms-base.ts,
-    // lib/seo/faq-catalog.ts and public/llms-full.txt. Until 2026-08-12 it did
-    // not: those surfaces said 2018 while this schema emitted 2016, so every
-    // page shipped a self-contradiction — the fastest way to lose entity
-    // confidence in an AI engine, which cross-checks a site against itself.
-    //
-    // Deliberately NOT conflated with this: the legal entity WeCcelerate Ltd.
-    // (ח.פ 515962819) was registered with the Israeli Registrar of Companies
-    // on 2019-01-17. That public record is what LLMs check, so llms.txt now
-    // explains the gap between founding and incorporation instead of
-    // declaring the registrar's date "incorrect".
-    foundingDate: '2018',
+    // Founding year: 2016. History: 2016 (owner, 2026-04-26) -> 2018 (owner,
+    // 2026-05-14) -> 2016 (owner via Maor, 2026-09-14). Every surface must
+    // agree: config/seo.ts, footer i18n, faq-catalog, llms.txt, writing-rules,
+    // Wikidata Q141451357 (P571). A mismatch between them is what got the
+    // domain flagged by reputation systems in April 2026.
+    foundingDate: '2016',
     foundingLocation: {
       '@type': 'Place',
       name: 'Tel Aviv, Israel',

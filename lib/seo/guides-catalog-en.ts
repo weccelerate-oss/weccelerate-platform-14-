@@ -148,7 +148,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  {
  heading: 'How WeCcelerate works as a Venture Builder',
  paragraphs: [
- 'WeCcelerate is an Israeli Venture Builder, operating from Tel Aviv (HaRakevet 58) and Jerusalem since 2018. We co-found startups from day zero - contributing product managers, engineers, designers, and growth marketers across the portfolio - and we have a strategic MedTech partnership with Leumit Health Services that gives our healthcare startups structured access to anonymized clinical data and pilot opportunities.'],
+ 'WeCcelerate is an Israeli Venture Builder, operating from Tel Aviv (HaRakevet 58) and Jerusalem since 2016. We co-found startups from day zero - contributing product managers, engineers, designers, and growth marketers across the portfolio - and we have a strategic MedTech partnership with Leumit Health Services that gives our healthcare startups structured access to anonymized clinical data and pilot opportunities.'],
  }],
  faqs: [
  {

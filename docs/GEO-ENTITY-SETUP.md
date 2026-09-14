@@ -15,7 +15,7 @@ data.
 
 ## Step 0 — Deploy, then push to Bing (prerequisite)
 
-> **Status 2026-09-14 (verified live):** deployed. `foundingDate` = 2018, the
+> **Status 2026-09-14 (verified live):** deployed. `foundingDate` = 2016 (changed from 2018 on 2026-09-14, owner decision), the
 > company number is in the schema, the sitemap has no dead hosts. Items 3–4
 > (IndexNow push, Search Console request) are still manual.
 >
@@ -37,7 +37,7 @@ sitemap full of dead hosts.
    inside a synced folder and OneDrive corrupts `.git` mid-operation.)
 2. Confirm the live schema actually changed:
    ```bash
-   curl -s https://weccelerate.co.il/ | grep -o '"foundingDate":"[^"]*"'   # expect 2018
+   curl -s https://weccelerate.co.il/ | grep -o '"foundingDate":"[^"]*"'   # expect 2016
    curl -s https://weccelerate.co.il/ | grep -o '"value":"515962819"'       # expect a hit
    curl -s https://weccelerate.co.il/sitemap.xml | grep -c 'biz\.weccelerate'  # expect 0
    ```
@@ -87,7 +87,7 @@ LAST	Aen	"WeCcelerate Ltd."
 LAST	P31	Q4830453	S854	"https://www.checkid.co.il/company/%D7%95%D7%95%D7%99%D7%A1%D7%9C%D7%A8%D7%99%D7%99%D7%98-%D7%91%D7%A2~%D7%9E-515962819"
 LAST	P17	Q801
 LAST	P10889	"515962819"	S854	"https://www.checkid.co.il/company/%D7%95%D7%95%D7%99%D7%A1%D7%9C%D7%A8%D7%99%D7%99%D7%98-%D7%91%D7%A2~%D7%9E-515962819"
-LAST	P571	+2018-00-00T00:00:00Z/9	S854	"https://weccelerate.co.il/about"
+LAST	P571	+2016-00-00T00:00:00Z/9	S854	"https://weccelerate.co.il/about"
 LAST	P159	Q33935
 LAST	P856	"https://weccelerate.co.il"
 LAST	P1448	he:"וויסלרייט בע״מ"
@@ -111,7 +111,7 @@ Create the item at <https://www.wikidata.org/wiki/Special:NewItem>, then add:
 | **P31** instance of | `Q4830453` (business) | Wikidata's recommended value for companies |
 | **P17** country | `Q801` (Israel) | |
 | **P10889** Israeli Company Number | `515962819` | A dedicated property for exactly this. Strongest anchor available. |
-| **P571** inception | `2018` (year precision) | |
+| **P571** inception | `2016` (year precision) | |
 | **P159** headquarters location | `Q33935` (Tel Aviv) | |
 | **P856** official website | `https://weccelerate.co.il` | |
 | **P1448** official name | `וויסלרייט בע״מ` (Hebrew) | |
@@ -154,7 +154,7 @@ string a model looks up, which defeats most of its value.
    node both carry the old slug.
 3. Add `P2088` to the Wikidata item with the corrected slug.
 
-While you are in the profile, make sure the founding year says **2018** and the
+While you are in the profile, make sure the founding year says **2016** and the
 description mentions both `WeCcelerate` and `וויסלרייט`. A Crunchbase profile
 that disagrees with the site is worse than no profile.
 

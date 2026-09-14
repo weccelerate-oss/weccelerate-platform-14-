@@ -185,7 +185,7 @@ async function seedNewsUpdates() {
     // REMOVED 2026-04-24 — B7Net "חברי הילדות מבאר שבע" record.
     // The excerpt quoted the B7Net article verbatim, which states the
     // founding year as 2017. The canonical incorporation year of
-    // WeCcelerate Ltd. is 2018 (confirmed by the owner on 2026-05-14).
+    // WeCcelerate Ltd. is 2016 (owner decision 2026-09-14; was 2018 between 2026-05 and 2026-09).
     // The WeCcelerate × Leumit MedTech partnership was launched in 2022.
     // Same record also removed from scripts/seed-news.ts.
     // ============================================================

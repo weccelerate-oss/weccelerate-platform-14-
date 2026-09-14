@@ -141,7 +141,7 @@ const enCore: Record<string, string> = {
   'footer.press': 'WeCcelerate in the press',
   'footer.rights': 'All rights reserved.',
   // See the note on the Hebrew key — visible backing for the schema identifier.
-  'footer.legal': 'WeCcelerate Ltd. · Israeli company no. 515962819 · Founded 2018 · Tel Aviv & Jerusalem',
+  'footer.legal': 'WeCcelerate Ltd. · Israeli company no. 515962819 · Founded 2016 · Tel Aviv & Jerusalem',
   'footer.privacy': 'Privacy Policy',
   'footer.terms': 'Terms of Service',
   'footer.accessibility': 'Accessibility',

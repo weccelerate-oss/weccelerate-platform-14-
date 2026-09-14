@@ -60,20 +60,21 @@ re-evaluation.
 
 ---
 
-## ✅ Resolved — Founding year (final: 2018, confirmed 2026-05-14)
+## ✅ Resolved — Founding year (final: 2016, set 2026-09-14)
 
-**Canonical founding year is 2018.** The legal entity WeCcelerate Ltd.
+**Canonical founding year is 2016.** The legal entity WeCcelerate Ltd.
 (וויסלרייט בע״מ, company no. 515962819) was filed with the Registrar of
 Companies on 17 January 2019 — a different fact that does not conflict.
 Every surface (`config/seo.ts`, `components/seo/GeoSchema.tsx`, footer
-i18n strings, `lib/seo/faq-catalog.ts`, `lib/seo/llms-base.ts`,
-`public/llms-full.txt`, `lib/agents/writing-rules.ts`) says 2018.
+i18n strings, `lib/seo/faq-catalog.ts`, `lib/i18n/pages/faq.ts`,
+`lib/seo/llms-base.ts`, `public/llms-full.txt`,
+`lib/agents/writing-rules.ts`, Wikidata item Q141451357) says 2016.
 
-History: an earlier note here (2026-04-26) recorded 2016 and aligned the
-site to it. That was superseded on 2026-05-14 when Alon confirmed 2018.
-**Do not enter 2016, 2017 or 2020 anywhere** (Crunchbase, LinkedIn,
-Wikidata, GBP) — a directory that disagrees with the site is what
-triggered the reputation flag in the first place.
+History: 2016 (Alon, 2026-04-26) → 2018 (Alon, 2026-05-14) → 2016 (Maor
+on Alon's behalf, 2026-09-14). LinkedIn has said 2016 throughout.
+**Do not enter 2017, 2018 or 2020 anywhere** (Crunchbase, Wikidata, GBP,
+directories) — a source that disagrees with the site is what triggered
+the reputation flag in the first place.
 
 ---
 
@@ -128,13 +129,13 @@ pending.
 > - Website: https://weccelerate.co.il
 > - LinkedIn: https://www.linkedin.com/company/weccelerate
 > - Press reference: https://www.globes.co.il/news/article.aspx?did=1001426009
-> - Founded: 2018
+> - Founded: 2016
 > - Leumit × WeCcelerate MedTech partnership launched: 2022
 >
 > Thanks,
 > Alon Pinchas, Founder & CEO
 
-**Also confirm in Crunchbase**: Founded year is set to **2018** (canonical),
+**Also confirm in Crunchbase**: Founded year is set to **2016** (canonical),
 not 2016 or 2020.
 
 ---
@@ -409,8 +410,8 @@ the model that the Hebrew string "וויסלרייט" resolves to the English br
 
 | What was wrong | Where | Now |
 |---|---|---|
-| Site contradicted **itself** on the founding year — JSON-LD on every page emitted `2016` while llms.txt, llms-full.txt and the FAQ schema all said `2018` | `components/seo/GeoSchema.tsx`, `config/seo.ts`, `public/llms-full.txt` (which disagreed with itself, line 9 vs 166), `lib/seo/guides-catalog.ts` | All surfaces now say **2018** |
-| llms.txt declared the year `2019` "incorrect" — but 2019 is what the **official Israeli registrar** publishes. The site was effectively telling AI engines the government record is wrong | `lib/seo/llms-base.ts` | Now explains that founding (2018) and legal registration (17.1.2019) are two different facts that do not conflict |
+| Site contradicted **itself** on the founding year — JSON-LD on every page emitted `2016` while llms.txt, llms-full.txt and the FAQ schema all said `2016` | `components/seo/GeoSchema.tsx`, `config/seo.ts`, `public/llms-full.txt` (which disagreed with itself, line 9 vs 166), `lib/seo/guides-catalog.ts` | All surfaces now say **2016** |
+| llms.txt declared the year `2019` "incorrect" — but 2019 is what the **official Israeli registrar** publishes. The site was effectively telling AI engines the government record is wrong | `lib/seo/llms-base.ts` | Now explains that founding (2016) and legal registration (17.1.2019) are two different facts that do not conflict |
 | Company number (ח.פ) — the single strongest unambiguous entity anchor — appeared nowhere in the schema | `components/seo/GeoSchema.tsx` | `identifier: 515962819` added to both Organization and LocalBusiness |
 | No mapping from the Hebrew name to the English brand anywhere a model would read it | `lib/seo/llms-base.ts`, `lib/seo/faq-catalog.ts`, `public/llms-full.txt` | Explicit "וויסלרייט = WeCcelerate, NOT Whistleright" statement, plus a new FAQ entry that renders into FAQPage schema |
 | Founder name split across two spellings — schema said "Alon Pinchas", his own LinkedIn says "Pinhas" — so one person read as two weak entities. Same for Hinoch/Heinoch and Ido/Eido Sabag | `components/seo/GeoSchema.tsx`, `lib/seo/llms-base.ts` | Both spellings listed as `alternateName`; llms.txt states they are the same person |
@@ -424,8 +425,8 @@ resolved now.
 
 ### ⚠️ Needs a decision from you
 
-1. **Founding year — confirm 2018.** Three dates were live in the codebase: 2016
-   (schema, with a comment saying you confirmed it on 2026-04-26), 2018 (llms.txt
+1. **Founding year — confirm 2016.** Three dates were live in the codebase: 2016
+   (schema, with a comment saying you confirmed it on 2026-04-26), 2016 (llms.txt
    and FAQ, and owner-confirmed 2026-05-14), and 2019-01-17 (the registrar's
    filing date for ח.פ 515962819). I standardised on **2018** because it is the
    later of the two owner confirmations and it already appeared on more surfaces.
