@@ -48,10 +48,12 @@ function Delivery({ lead }: { lead: LeadRecord }) {
     );
   }
   if (d.status === 'unknown' || d.status === 'pending') {
+    // Rows from before delivery tracking (2026-09-10). They already reached
+    // Pipedrive through the old path; a resend only adds a duplicate note to
+    // the existing deal, so no button here (the detail page still has one).
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-slate-400">
-        <Clock className="h-3 w-3" aria-hidden="true" />לא ידוע
-        <ResendButton leadId={lead.id} label="שלח" />
+      <span className="inline-flex items-center gap-1 text-xs text-slate-400" title="נרשם לפני מעקב המסירה; כבר הגיע ל-Pipedrive בדרך הישנה">
+        <Clock className="h-3 w-3" aria-hidden="true" />לפני מעקב
       </span>
     );
   }
