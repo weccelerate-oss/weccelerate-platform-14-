@@ -11,6 +11,8 @@
 
 import Link from 'next/link';
 import { SITE_CONFIG } from '@/lib/seo';
+import { GuideLeadForm } from '@/components/forms/GuideLeadForm';
+import { NewsletterBox } from '@/components/forms/NewsletterBox';
 
 // Local type — avoids importing from @prisma/client before the user has
 // regenerated the client (post-db:push). Mirrors the GeneratedGuide model
@@ -51,7 +53,7 @@ export function renderGeneratedGuide(g: GeneratedGuide) {
 
   // Pull FAQ pairs out of the markdown so we can build FAQPage schema.
   const faqs = extractFaqs(g.contentHe);
-  const blocks = parseMarkdown(g.contentHe);
+  const blocks = parseMarkdown(g.contentHe, <GuideLeadForm key="mid-form" category={g.category} placement="mid" />);
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -76,6 +78,7 @@ export function renderGeneratedGuide(g: GeneratedGuide) {
       logo: { '@type': 'ImageObject', url: `${SITE_CONFIG.url}/logo.png` },
     },
     wordCount: g.wordCount ?? undefined,
+    ...(g.wordCount ? { timeRequired: `PT${Math.max(1, Math.ceil(g.wordCount / 220))}M` } : {}),
     image: g.featuredImageUrl ?? `${SITE_CONFIG.url}/logo.png`,
     speakable: {
       '@type': 'SpeakableSpecification',
@@ -183,6 +186,8 @@ export function renderGeneratedGuide(g: GeneratedGuide) {
 
         <div className="container mx-auto px-4 py-10 md:py-14 max-w-3xl">
           <div className="space-y-1 text-white/75 leading-relaxed">{blocks}</div>
+          <GuideLeadForm category={g.category} placement="end" />
+          <NewsletterBox />
         </div>
       </article>
     </>
@@ -212,7 +217,12 @@ function extractFaqs(markdown: string): FaqPair[] {
   return pairs;
 }
 
-function parseMarkdown(md: string): React.ReactNode[] {
+/**
+ * @param midInsert  a node placed right before the third `## ` heading —
+ *                   i.e. after the reader has finished two sections.
+ */
+function parseMarkdown(md: string, midInsert?: React.ReactNode): React.ReactNode[] {
+  let h2Count = 0;
   const lines = md.split('\n');
   const out: React.ReactNode[] = [];
   let buffer: string[] = [];
@@ -248,6 +258,8 @@ function parseMarkdown(md: string): React.ReactNode[] {
     if (line.startsWith('# ')) { flushParagraph(); flushList(); continue; /* h1 already in header */ }
     if (line.startsWith('## ')) {
       flushParagraph(); flushList();
+      h2Count += 1;
+      if (h2Count === 3 && midInsert) out.push(midInsert);
       out.push(<h2 key={`h${out.length}`} className="mt-10 mb-4 text-2xl md:text-3xl font-bold tracking-tight text-white">{line.slice(3)}</h2>);
       continue;
     }

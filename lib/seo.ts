@@ -819,6 +819,17 @@ export const CONTACT = {
 // METADATA CONSTRUCTOR HELPER
 // =============================================================================
 
+/**
+ * Only these Hebrew paths have a real English page under /en. Emitting an
+ * hreflang (or a sitemap entry) for any other /en URL sends Google to a 404.
+ */
+export const EN_MIRRORED_PATHS = ['/guides', '/glossary', '/funding-guide', '/medtech-guide'] as const;
+
+export function hasEnglishMirror(path: string): boolean {
+ if (!path || path === '/') return false;
+ return EN_MIRRORED_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+}
+
 interface MetadataOptions {
  title: string;
  description?: string;
@@ -918,10 +929,9 @@ export function constructMetadata(options: MetadataOptions): Metadata {
 
  alternates: {
  canonical: url,
- languages: {
- 'he-IL': url,
- 'en-US': `${SITE_CONFIG.url}/en${path}`,
- },
+ languages: hasEnglishMirror(path)
+ ? { 'he-IL': url, 'en-US': `${SITE_CONFIG.url}/en${path}`, 'x-default': url }
+ : { 'he-IL': url, 'x-default': url },
  },
 
  verification: {

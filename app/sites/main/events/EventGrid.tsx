@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Calendar, Clock, MapPin, Tag, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
+import { EventRegisterButton } from '@/components/forms/EventRegisterButton';
 
 // =============================================================================
 // TYPES & HELPERS
@@ -179,16 +180,12 @@ function EventCard({ event }: { event: EventItem }) {
         </div>
 
         {/* CTA */}
-        {!isPast && event.registrationLink ? (
-          <a
-            href={event.registrationLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] px-5 py-2.5 text-sm font-bold rounded-lg hover:scale-[1.03] transition-all duration-300"
-          >
-            {t('events.detailsAndRegister')}
-            <ArrowLeft className="w-4 h-4" />
-          </a>
+        {!isPast ? (
+          <EventRegisterButton
+            eventId={event.id}
+            eventName={(lang === 'en' && event.nameEn) || event.name}
+            externalUrl={event.registrationLink}
+          />
         ) : isPast ? (
           <span className="inline-block text-white/20 text-sm font-medium">
             {t('events.endedFull')}

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import { ServicePageSchema } from '@/components/seo/ServicePageSchema';
 import MedTechContent from './MedTechContent';
+import { SERVICE_FAQS } from '@/lib/services-faqs';
 
 // =============================================================================
 // METADATA
@@ -53,20 +54,7 @@ export default function MedTechLeumitPage() {
  descriptionEn="Premium MedTech accelerator track in partnership with Leumit Health Services. Expert physician opinions, full regulatory guidance, and market reviews for early-stage healthcare startups."
  path="/services/medtech-leumit"
  category="Healthcare Acceleration"
- faqs={[
- {
- question: 'מה מסלול MedTech של WeCcelerate ולאומית כולל?',
- answer: 'המסלול כולל: חוות דעת מרופאים מומחים של לאומית, סקירת שוק מעמיקה, ליווי רגולטורי (CE, משרד הבריאות), גישה לנתוני בריאות אנונימיים, אפשרות לפיילוט קליני ברשת לאומית, וחיבור למשקיעים מתמחים בהלת\'טק.',
- },
- {
- question: 'How do I apply for the WeCcelerate-Leumit MedTech track?',
- answer: 'Apply through the WeCcelerate website contact form selecting "MedTech Leumit Track". Requirements: an innovative healthcare solution, founding team with relevant expertise, and willingness to pilot within the Israeli healthcare system. Acceptance is on a rolling basis.',
- },
- {
- question: 'האם צריך להיות רופא כדי להגיש מועמדות למסלול MedTech?',
- answer: 'לא, אין צורך להיות רופא. WeCcelerate מחפשת צוותים עם שילוב של מומחיות טכנולוגית וקלינית. אם אין לכם רופא בצוות, WeCcelerate יכולה לחבר אתכם עם יועצים רפואיים מרשת לאומית.',
- },
- ]}
+ faqs={SERVICE_FAQS['medtech-leumit']}
  />
  <MedTechContent />
  </>

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import { ServicePageSchema } from '@/components/seo/ServicePageSchema';
 import PhysicalProductContent from './PhysicalProductContent';
+import { SERVICE_FAQS } from '@/lib/services-faqs';
 
 // =============================================================================
 // METADATA
@@ -46,16 +47,7 @@ export default function PhysicalProductPage() {
  descriptionEn="From industrial design through prototyping to mass manufacturing. End-to-end engineering process to bring a physical product to market."
  path="/services/physical-product"
  category="Product Development"
- faqs={[
- {
- question: 'כמה עולה לפתח אב-טיפוס למוצר פיזי?',
- answer: 'עלות פיתוח אב-טיפוס משתנה בהתאם למורכבות המוצר. אב-טיפוס ראשוני בהדפסת 3D יכול לעלות החל מ-5,000 ₪, בעוד אב-טיפוס מתקדם עם מערכות אלקטרוניות יכול להגיע ל-50,000-100,000 ₪.',
- },
- {
- question: 'כמה זמן לוקח מהרעיון עד לייצור סדרתי?',
- answer: 'התהליך המלא — עיצוב, אב-טיפוס, בדיקות, הסמכות וייצור — אורך בדרך כלל 8-18 חודשים, תלוי בסוג המוצר ובדרישות הרגולטוריות.',
- },
- ]}
+ faqs={SERVICE_FAQS['physical-product']}
  />
  <PhysicalProductContent />
  </>

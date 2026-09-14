@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import { ServicePageSchema } from '@/components/seo/ServicePageSchema';
 import MarketingContent from './MarketingContent';
+import { SERVICE_FAQS } from '@/lib/services-faqs';
 
 // =============================================================================
 // METADATA
@@ -47,16 +48,7 @@ export default function MarketingPage() {
  descriptionEn="Full marketing suite for startups — digital advertising, public relations, social media marketing, and comprehensive marketing strategy."
  path="/services/marketing"
  category="Marketing & Advertising"
- faqs={[
- {
- question: 'כמה עולה שיווק דיגיטלי לסטארטאפ?',
- answer: 'תקציב שיווק דיגיטלי לסטארטאפ תלוי בשלב ובמטרות. WeCcelerate ממליצה להתחיל עם 5,000-15,000 ₪ לחודש לקמפיינים ממוקדים, ולהגדיל ככל שמוכחת התשואה.',
- },
- {
- question: 'What marketing channels work best for Israeli startups?',
- answer: 'For B2B: LinkedIn Ads + content marketing + PR in Israeli tech media. For B2C: Facebook/Instagram Ads + Google Ads + influencer partnerships. WeCcelerate builds a tailored channel mix based on your audience and budget.',
- },
- ]}
+ faqs={SERVICE_FAQS['marketing']}
  />
  <MarketingContent />
  </>

@@ -7,6 +7,8 @@ import { useLanguage } from '@/lib/i18n';
 import ProductJourney from '@/components/services/ProductJourney';
 import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 import { LeadFormSection } from '@/components/forms/LeadFormSection';
+import { ServiceFaq } from '@/components/services/ServiceFaq';
+import { SERVICE_FAQS } from '@/lib/services-faqs';
 
 
 // =============================================================================
@@ -150,6 +152,7 @@ export default function MedTechContent() {
  {/* ================================================================= */}
  <ServiceCaseStudies serviceId="medtech-leumit" />
 
+ <ServiceFaq items={SERVICE_FAQS['medtech-leumit']} />
  <LeadFormSection formType="service" service="medtech-leumit" />
 
  {/* ================================================================= */}

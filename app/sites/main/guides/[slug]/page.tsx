@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { constructMetadata, SITE_CONFIG } from '@/lib/seo';
 import {
@@ -13,6 +12,8 @@ import {
 import { getEnSlugFromHebrew } from '@/lib/seo/guides-catalog-en';
 import { prisma } from '@/lib/db';
 import { renderGeneratedGuide } from './generated-guide-view';
+import { GuideLeadForm } from '@/components/forms/GuideLeadForm';
+import { NewsletterBox } from '@/components/forms/NewsletterBox';
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -299,6 +300,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
           <div className="space-y-12">
             {guide.sections.map((section, i) => (
               <section key={i} id={`section-${i + 1}`} className="scroll-mt-24">
+                {i === 2 && <GuideLeadForm category={guide.category} placement="mid" />}
                 <h2 className="mb-4 text-2xl md:text-3xl font-bold tracking-tight">{section.heading}</h2>
                 <div className="space-y-4 text-white/75 leading-relaxed">
                   {section.paragraphs.map((p, j) => (
@@ -373,36 +375,14 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
           </section>
 
           {/* CTA */}
-          <section className="mt-14 relative overflow-hidden rounded-2xl border border-[#c8a951]/30 bg-gradient-to-br from-[#c8a951]/[0.10] via-transparent to-[#c8a951]/[0.04] p-8">
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(ellipse at center, rgba(200,169,81,0.10) 0%, transparent 70%)',
-              }}
-            />
-            <div className="relative z-10">
-              <h2 className="mb-3 text-2xl md:text-3xl font-bold">{guide.ctaLabel}</h2>
-              <p className="mb-6 text-white/70 leading-relaxed">
-                צוות WeCcelerate ליווה סטארטאפים בפורטפוליו. שיחת הכרות ראשונה ללא עלות.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#c8a951] to-[#e8d48b] text-[#070b1e] px-6 py-3 font-bold rounded-xl shadow-lg shadow-[#c8a951]/20 hover:shadow-xl hover:shadow-[#c8a951]/30 transition-all"
-                >
-                  דברו איתנו
-                  <ArrowLeft className="w-4 h-4" />
-                </Link>
-                <Link
-                  href={guide.ctaServicePath}
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3 font-semibold text-white hover:border-white/40 hover:bg-white/[0.04] transition-all"
-                >
-                  עוד על השירות
-                </Link>
-              </div>
-            </div>
-          </section>
+          <GuideLeadForm
+            category={guide.category}
+            placement="end"
+            ctaLabel={guide.ctaLabel}
+            ctaServicePath={guide.ctaServicePath}
+          />
+
+          <NewsletterBox />
 
           {/* Related guides */}
           {relatedGuides.length > 0 && (

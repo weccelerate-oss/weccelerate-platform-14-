@@ -7,6 +7,8 @@ import { useLanguage } from '@/lib/i18n';
 import ProductJourney from '@/components/services/ProductJourney';
 import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 import { LeadFormSection } from '@/components/forms/LeadFormSection';
+import { ServiceFaq } from '@/components/services/ServiceFaq';
+import { SERVICE_FAQS } from '@/lib/services-faqs';
 
 
 // =============================================================================
@@ -109,6 +111,7 @@ export default function DigitalProductContent() {
  {/* ================================================================= */}
  <ServiceCaseStudies serviceId="digital-product" />
 
+ <ServiceFaq items={SERVICE_FAQS['digital-product']} />
  <LeadFormSection formType="service" service="digital-product" />
 
  {/* ================================================================= */}

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import { ServicePageSchema } from '@/components/seo/ServicePageSchema';
 import BusinessConsultingContent from './BusinessConsultingContent';
+import { SERVICE_FAQS } from '@/lib/services-faqs';
 
 // =============================================================================
 // METADATA
@@ -48,20 +49,7 @@ export default function BusinessConsultingPage() {
  descriptionEn="Full business consulting for entrepreneurs — business plan, market research, financial plan, and executive summary. Building the foundations for fundraising and business success."
  path="/services/business-consulting"
  category="Business Consulting"
- faqs={[
- {
- question: 'מה כולל ייעוץ עסקי של WeCcelerate?',
- answer: 'הייעוץ העסקי כולל מחקר שוק מעמיק, בניית תוכנית שיווקית, תוכנית פיננסית מפורטת, תקציר מנהלים מקצועי ותוכנית עסקית מלאה — כל מה שנדרש לגיוס הון ולבניית עסק מצליח.',
- },
- {
- question: 'כמה זמן לוקח לבנות תוכנית עסקית?',
- answer: 'תוכנית עסקית מלאה עם WeCcelerate נבנית בדרך כלל בלוחות זמנים תלויי-היקף, תלוי במורכבות המיזם ובהיקף מחקר השוק הנדרש.',
- },
- {
- question: 'How much does business consulting cost at WeCcelerate?',
- answer: 'WeCcelerate offers tailored business consulting packages. Pricing depends on the scope — from market research only to full business plan + fundraising support. Contact us for a free consultation.',
- },
- ]}
+ faqs={SERVICE_FAQS['business-consulting']}
  />
  <BusinessConsultingContent />
  </>

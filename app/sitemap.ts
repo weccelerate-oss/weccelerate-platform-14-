@@ -11,7 +11,7 @@
  */
 
 import { MetadataRoute } from 'next';
-import { SITE_CONFIG } from '@/lib/seo';
+import { SITE_CONFIG, hasEnglishMirror } from '@/lib/seo';
 import { GUIDES } from '@/lib/seo/guides-catalog';
 import { GUIDES_EN } from '@/lib/seo/guides-catalog-en';
 import { TEAM_SLUGS } from '@/lib/seo/founders';
@@ -128,12 +128,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: page.changeFreq,
       priority: page.priority,
     });
-    entries.push({
-      url: `${baseUrl}/en${page.path}`,
-      lastModified: now,
-      changeFrequency: page.changeFreq,
-      priority: Math.round(page.priority * 0.9 * 100) / 100,
-    });
+    // Only paths with a real English page get an /en entry (the rest 404).
+    if (hasEnglishMirror(page.path)) {
+      entries.push({
+        url: `${baseUrl}/en${page.path}`,
+        lastModified: now,
+        changeFrequency: page.changeFreq,
+        priority: Math.round(page.priority * 0.9 * 100) / 100,
+      });
+    }
   });
 
   // Dynamic content. lib/db exports an untyped client, so the rows arrive as
