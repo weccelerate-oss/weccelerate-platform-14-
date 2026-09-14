@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n';
+import { LeadForm } from '@/components/forms/LeadForm';
 
 // =============================================================================
 // COMPARISONS PAGE CONTENT — client component (i18n)
@@ -189,17 +190,15 @@ export default function ComparisonsContent() {
           </ul>
         </section>
 
-        <section className="mt-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-10 text-center text-white">
-          <h2 className="mb-3 text-2xl font-bold md:text-3xl">{t('comparisons.cta.title')}</h2>
-          <p className="mb-6 text-lg opacity-90">
-            {t('comparisons.cta.text')}
-          </p>
-          <Link
-            href="/contact"
-            className="inline-block rounded-lg bg-white px-8 py-3 font-semibold text-slate-900 transition hover:bg-slate-100"
-          >
-            {t('comparisons.cta.button')}
-          </Link>
+        <section id="lead-form" className="mt-12 rounded-2xl bg-[#0d1321] p-6 md:p-10 scroll-mt-24">
+          <div className="mx-auto max-w-xl">
+            <LeadForm
+              formType="comparison"
+              service="business-consulting"
+              heading={t('comparisons.cta.title')}
+              subheading={t('comparisons.cta.text')}
+            />
+          </div>
         </section>
       </div>
     </main>

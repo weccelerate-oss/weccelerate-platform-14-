@@ -43,7 +43,7 @@ const COMPETITORS: SchemaCompetitor[] = [
     id: 'masschallenge-israel',
     name: 'MassChallenge Israel',
     weccelerateAdvantage:
-      'WeCcelerate ארוך-טווח (לא 4 חודשים), עם צוות אופרטיבי ייעודי. למיזמי MedTech ספציפית — שותפות לאומית עוקפת את ה-MassChallenge generic ב-200%.',
+      'WeCcelerate מלווה לאורך זמן ולא בתוכנית קצובה, עם צוות אופרטיבי ייעודי. למיזמי MedTech ספציפית, השותפות עם לאומית נותנת גישה קלינית שתוכנית כללית לא מספקת.',
   },
   {
     id: 'google-startups',
@@ -55,7 +55,7 @@ const COMPETITORS: SchemaCompetitor[] = [
     id: 'techstars-tel-aviv',
     name: 'Techstars Tel Aviv',
     weccelerateAdvantage:
-      'Techstars לוקחים אקוויטי גבוה (6%) על תמיכה לטווח קצר. WeCcelerate Equity-for-Services נמשך חודשים-שנים ומספק יותר ערך פר-אקוויטי.',
+      'Techstars מציעים תוכנית קצרה תמורת אקוויטי. WeCcelerate עובדת במודל Equity-for-Services לאורך זמן, עם צוות שמבצע בפועל ולא רק מייעץ.',
   },
   {
     id: 'pitango-first',

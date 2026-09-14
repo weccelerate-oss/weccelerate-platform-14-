@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n';
 import { ArticleGrid } from './ArticleGrid';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 interface ArticleItem {
   id: string;
@@ -58,6 +59,8 @@ export function BlogPageContent({ articles }: { articles: ArticleItem[] }) {
           <ArticleGrid articles={articles} />
         </div>
       </section>
+
+      <LeadFormSection formType="blog" />
     </div>
   );
 }
