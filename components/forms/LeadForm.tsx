@@ -89,7 +89,7 @@ export function LeadForm({
   const busy = isPending || redirecting;
 
   return (
-    <form ref={formRef} action={formAction} noValidate className={`space-y-4 ${className}`}>
+    <form ref={formRef} action={formAction} noValidate data-lead-form className={`space-y-4 ${className}`}>
       <LeadHiddenFields site={site} formType={formType} service={service ?? null} />
 
       <div>

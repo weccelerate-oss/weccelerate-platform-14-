@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { constructMetadata, SITE_CONFIG } from '@/lib/seo';
 import { GUIDES, getGuideBySlug } from '@/lib/seo/guides-catalog';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 export const revalidate = 86400;
 
@@ -278,6 +279,7 @@ export default function FundingGuidePillar() {
  </div>
  </section>
  </div>
+  <LeadFormSection formType="page_cta" service="investors" />
  </main>
  </>
  );

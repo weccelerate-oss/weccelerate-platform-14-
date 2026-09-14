@@ -21,6 +21,7 @@ import { trackLead } from '@/lib/analytics/meta-pixel';
 import { trackClick } from '@/lib/analytics/track';
 import { LeadHiddenFields } from '@/components/forms/LeadHiddenFields';
 import { useLanguage } from '@/lib/i18n';
+import { usePathname } from 'next/navigation';
 import {
   WHATSAPP_GATE_EVENT,
   WHATSAPP_NEEDS,
@@ -71,6 +72,16 @@ function NeedIcon({ need, className }: { need: WhatsAppNeed; className?: string 
   }
 }
 
+/** Which need/service a page implies for the gate's preselection. */
+function needFromPath(path: string): { need?: WhatsAppNeed; service?: string } {
+  if (/medtech|leumit|refui|medical/i.test(path)) return { need: 'medtech', service: 'medtech-leumit' };
+  if (/investor|funding|gius|fundrais|pitch/i.test(path)) return { need: 'funding', service: 'investors' };
+  if (/digital-product|app|mvp|tech-development|software/i.test(path)) return { need: 'product', service: 'digital-product' };
+  if (/physical-product|prototype|av-tipus|mutzar/i.test(path)) return { need: 'product', service: 'physical-product' };
+  if (/business-consulting|tochnit|iskit|consult/i.test(path)) return { need: 'idea', service: 'business-consulting' };
+  return {};
+}
+
 interface WhatsAppFloatProps {
   /** Site key recorded on the lead (main | leumit | biz | landing). */
   site?: string;
@@ -87,12 +98,17 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
   const firstFieldRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
+  const pathname = usePathname() || '';
+
   const openGate = useCallback((o: WhatsAppGateOptions) => {
-    setOpts(o);
-    if (o.need) setNeed(o.need);
+    // Preselect what the page is about, so the visitor has one less tap.
+    const guess = needFromPath(pathname);
+    const merged = { ...o, need: o.need ?? guess.need, service: o.service ?? guess.service };
+    setOpts(merged);
+    if (merged.need) setNeed(merged.need);
     setOpen(true);
     trackClick('click.whatsapp', { location: o.location, gate: 'open' });
-  }, []);
+  }, [pathname]);
 
   // Other WhatsApp buttons (navbar, contact page) dispatch this event.
   useEffect(() => {
@@ -139,7 +155,7 @@ export function WhatsAppFloat({ site = 'main' }: WhatsAppFloatProps) {
         aria-label={t('chrome.whatsapp.aria')}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="fixed bottom-6 left-6 z-[9998] w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1ebe5b] text-white shadow-lg shadow-black/25 hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40"
+        className="fixed bottom-6 left-6 z-[9998] w-14 h-14 rounded-full [body[data-sticky-bar]_&]:hidden md:[body[data-sticky-bar]_&]:flex bg-[#25D366] hover:bg-[#1ebe5b] text-white shadow-lg shadow-black/25 hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40"
       >
         <WhatsAppIcon className="w-7 h-7 fill-white" />
       </button>

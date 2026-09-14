@@ -86,6 +86,7 @@ export const FORM_TYPE_LABELS: Record<string, string> = {
   guide_inline: 'טופס בתוך מדריך',
   blog: 'טופס עמוד הבלוג',
   comparison: 'טופס עמוד ההשוואה',
+  page_cta: 'טופס עמוד תוכן',
   lead_magnet: 'מגנט לידים',
   event: 'הרשמה לאירוע',
   newsletter: 'ניוזלטר',

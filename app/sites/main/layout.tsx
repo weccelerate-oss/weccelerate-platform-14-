@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 import { CorporateNavbar } from '@/components/layout/CorporateNavbar';
 import { ServiceSchema } from '@/components/seo/service-schema';
 import { WhatsAppFloat } from '@/components/ui/WhatsAppFloat';
+import { StickyLeadBar } from '@/components/forms/StickyLeadBar';
+import { SlideInOffer } from '@/components/forms/SlideInOffer';
 import { AccessibilityWidget } from '@/components/ui/AccessibilityWidget';
 
 interface MainSiteLayoutProps {
@@ -29,8 +31,10 @@ export default function MainSiteLayout({ children }: MainSiteLayoutProps) {
       {/* Main content */}
       {children}
 
-      {/* Floating WhatsApp CTA */}
+      {/* Floating WhatsApp CTA (hidden on phones while the sticky bar shows) */}
       <WhatsAppFloat />
+      <StickyLeadBar />
+      <SlideInOffer />
 
       {/* Accessibility Widget — חוק נגישות ישראל */}
       <AccessibilityWidget />

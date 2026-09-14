@@ -7,6 +7,7 @@
 import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import AboutContent from './AboutContent';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // METADATA
@@ -139,6 +140,7 @@ export default function AboutPage() {
  }}
  />
  <AboutContent />
+ <LeadFormSection formType="page_cta" />
  </>
  );
 }

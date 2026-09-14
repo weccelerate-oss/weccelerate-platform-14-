@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { constructMetadata, SITE_CONFIG } from '@/lib/seo';
 import { FAQ_CATALOG } from '@/lib/seo/faq-catalog';
 import FaqContent from './FaqContent';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 export const revalidate = 86400;
 
@@ -54,6 +55,7 @@ export default function FaqPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <FaqContent />
+      <LeadFormSection formType="page_cta" service="business-consulting" />
     </>
   );
 }

@@ -8,6 +8,7 @@ import { Metadata } from 'next';
 import { getEvents } from '@/lib/db-repository';
 import { mockEvents } from '@/lib/mock-data';
 import { EventsContent } from './EventsContent';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // METADATA
@@ -181,6 +182,7 @@ export default async function EventsPage() {
         />
       )}
       <EventsContent events={events} />
+      <LeadFormSection formType="page_cta" />
     </>
   );
 }

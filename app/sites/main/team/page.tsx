@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import TeamContent from './TeamContent';
 import { FOUNDER as SHARED_FOUNDER, CO_FOUNDERS as SHARED_CO_FOUNDERS } from '@/lib/seo/founders';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // METADATA
@@ -160,6 +161,7 @@ export default function TeamPage() {
       />
 
       <TeamContent />
+      <LeadFormSection formType="page_cta" />
     </>
   );
 }
