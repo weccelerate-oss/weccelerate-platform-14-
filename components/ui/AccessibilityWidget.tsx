@@ -175,7 +175,7 @@ export function AccessibilityWidget() {
         aria-label={isOpen ? t('a11y.title') : t('a11y.open')}
         aria-expanded={isOpen}
         aria-controls="a11y-panel"
-        className="fixed bottom-6 right-6 z-[9998] w-14 h-14 rounded-full bg-[#2563EB] hover:bg-[#1d4ed8] text-white shadow-lg shadow-black/25 hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center"
+        className="fixed bottom-6 right-6 [body[data-sticky-bar]_&]:bottom-[5.5rem] md:[body[data-sticky-bar]_&]:bottom-6 z-[9998] w-14 h-14 rounded-full bg-[#2563EB] hover:bg-[#1d4ed8] text-white shadow-lg shadow-black/25 hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center"
       >
         {isOpen ? (
           <X className="w-6 h-6" aria-hidden="true" />
