@@ -3,6 +3,7 @@ import { CorporateNavbar } from '@/components/layout/CorporateNavbar';
 import { ServiceSchema } from '@/components/seo/service-schema';
 import { WhatsAppFloat } from '@/components/ui/WhatsAppFloat';
 import { StickyLeadBar } from '@/components/forms/StickyLeadBar';
+import { UnlessPath } from '@/components/layout/UnlessPath';
 import { SlideInOffer } from '@/components/forms/SlideInOffer';
 import { AccessibilityWidget } from '@/components/ui/AccessibilityWidget';
 
@@ -25,8 +26,11 @@ export default function MainSiteLayout({ children }: MainSiteLayoutProps) {
         includeRating={true}
       />
 
-      {/* Corporate Navbar — skip link handled globally in root layout */}
-      <CorporateNavbar />
+      {/* Corporate Navbar — skip link handled globally in root layout.
+          Hidden on paid landing pages (/lp/*): one page, one action. */}
+      <UnlessPath prefixes={['/lp']}>
+        <CorporateNavbar />
+      </UnlessPath>
 
       {/* Main content */}
       {children}

@@ -23,7 +23,7 @@ import { requireCron } from '@/lib/auth/require-cron';
 import { FORM_TYPE_LABELS, SITE_SOURCE_LABELS, getChannelLabel } from '@/lib/leads/zapier';
 
 const WEEKLY_TARGET = 12; // 50 / month ≈ 11.6 / week
-const REPORT_TO = (process.env.LEAD_REPORT_EMAIL || process.env.ADMIN_NOTIFY_EMAIL || 'weccelerate@gmail.com')
+const REPORT_TO = (process.env.LEAD_REPORT_EMAIL || 'weccelerate@gmail.com')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);

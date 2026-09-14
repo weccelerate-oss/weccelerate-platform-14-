@@ -20,7 +20,7 @@ const IP_HOURLY_LIMIT = 3;
 /** Every action routeLeadThroughFilter writes for an accepted lead. */
 const LEAD_ACTIONS_FOR_EMAIL_LIMIT = [
   'form.contact_submit', 'form.application', 'form.newsletter', 'form.event', 'form.api',
-  'form.whatsapp_gate', 'form.home_cta', 'form.service', 'form.guide_inline', 'form.lead_magnet', 'form.blog', 'form.comparison', 'form.page_cta',
+  'form.whatsapp_gate', 'form.home_cta', 'form.service', 'form.guide_inline', 'form.lead_magnet', 'form.blog', 'form.comparison', 'form.page_cta', 'form.landing_paid',
   'form.leumit_landing', 'form.biz_landing', 'form.landing_multiselect',
 ];
 const LEAD_ACTIONS_FOR_IP_LIMIT = [...LEAD_ACTIONS_FOR_EMAIL_LIMIT, 'lead.spam_review', 'lead.spam_blocked'];

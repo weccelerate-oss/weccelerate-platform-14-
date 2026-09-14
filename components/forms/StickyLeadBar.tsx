@@ -16,7 +16,7 @@ import { MessageCircle, Send } from 'lucide-react';
 import { openWhatsAppGate } from '@/lib/leads/whatsapp-gate';
 import { useLanguage } from '@/lib/i18n';
 
-const SHOW_ON = [/^\/guides\/.+/, /^\/services\/.+/, /^\/comparisons/, /^\/blog/, /^\/funding-guide/, /^\/medtech-guide/, /^\/faq/, /^\/about/, /^\/investors/, /^\/medtech$/, /^\/tech-development/];
+const SHOW_ON = [/^\/lp\/.+/, /^\/guides\/.+/, /^\/services\/.+/, /^\/comparisons/, /^\/blog/, /^\/funding-guide/, /^\/medtech-guide/, /^\/faq/, /^\/about/, /^\/investors/, /^\/medtech$/, /^\/tech-development/];
 const SCROLL_TRIGGER = 480;
 
 export function StickyLeadBar() {

@@ -87,6 +87,7 @@ export const FORM_TYPE_LABELS: Record<string, string> = {
   blog: 'טופס עמוד הבלוג',
   comparison: 'טופס עמוד ההשוואה',
   page_cta: 'טופס עמוד תוכן',
+  landing_paid: 'דף נחיתה ממומן',
   lead_magnet: 'מגנט לידים',
   event: 'הרשמה לאירוע',
   newsletter: 'ניוזלטר',

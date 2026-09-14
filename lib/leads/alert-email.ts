@@ -11,7 +11,7 @@ import { Resend } from 'resend';
 import type { DeliveryResult } from './zapier';
 
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev';
-const TO = process.env.ADMIN_NOTIFY_EMAIL ?? process.env.LEAD_ALERT_EMAIL ?? 'info@weccelerate.co.il';
+const TO = process.env.LEAD_ALERT_EMAIL ?? 'weccelerate@gmail.com';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://weccelerate.co.il';
 
 function esc(s: string | null | undefined): string {

@@ -29,6 +29,7 @@ import {
   type LeadAttribution,
 } from '@/lib/leads/zapier';
 import { notifyLeadDeliveryFailed } from '@/lib/leads/alert-email';
+import { notifySalesNewLead, confirmToLead } from '@/lib/leads/notify';
 
 /** Pull the source IP from request headers. Trusts x-forwarded-for from
  * Vercel's edge, which is set automatically. */
@@ -343,6 +344,25 @@ async function routeLeadThroughFilter(opts: {
     } catch (err) {
       console.error('[Lead] delivery status update failed:', err);
     }
+  }
+
+  if (delivery.status === 'sent') {
+    // Speed-to-lead: the inbox gets a WhatsApp-ready note now, the lead gets
+    // a confirmation (opt-in). Neither can block or fail the submission.
+    const info = {
+      leadId,
+      name: leadData.name,
+      email: leadData.email,
+      phone: leadData.phone,
+      company: leadData.company,
+      message: leadData.message,
+      stage: leadData.stage,
+      service: leadData.service,
+      formType: meta.formType,
+      sourceUrl: meta.sourceUrl,
+      attribution,
+    };
+    await Promise.all([notifySalesNewLead(info), confirmToLead(info)]);
   }
 
   if (delivery.status !== 'sent') {
