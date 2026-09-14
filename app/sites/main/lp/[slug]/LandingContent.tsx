@@ -23,7 +23,18 @@ export function LandingContent({ page }: { page: LandingPage }) {
       <header className="border-b border-white/[0.06]">
         <div className="container-corporate flex items-center justify-between py-4">
           <Link href="/" aria-label="WeCcelerate" className="flex items-center gap-2">
-            <Image src="/images/logos/weccelerate-logo-wide.jpeg" alt="WeCcelerate" width={160} height={40} className="h-9 w-auto" priority />
+            <Image
+              src="/images/logos/weccelerate-logo-wide.jpeg"
+              alt="WeCcelerate"
+              width={320}
+              height={96}
+              priority
+              className="h-16 w-auto object-contain"
+              style={{
+                maskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
+              }}
+            />
           </Link>
           <a href="tel:+972555647538" className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white" dir="ltr">
             <Phone className="w-4 h-4" aria-hidden="true" />
