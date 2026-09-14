@@ -10,6 +10,7 @@ import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 import { LeadFormSection } from '@/components/forms/LeadFormSection';
 import { ServiceFaq } from '@/components/services/ServiceFaq';
 import { SERVICE_FAQS } from '@/lib/services-faqs';
+import { ServiceTestimonials } from '@/components/services/ServiceTestimonials';
 
 
 // =============================================================================
@@ -143,6 +144,7 @@ export default function MarketingContent() {
  {/* ================================================================= */}
  <ServiceCaseStudies serviceId="marketing" />
 
+ <ServiceTestimonials />
  <ServiceFaq items={SERVICE_FAQS['marketing']} />
  <LeadFormSection formType="service" service="marketing" />
 

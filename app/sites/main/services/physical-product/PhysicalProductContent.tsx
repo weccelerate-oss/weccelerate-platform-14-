@@ -10,6 +10,7 @@ import ProductGallery from './ProductGallery';
 import { LeadFormSection } from '@/components/forms/LeadFormSection';
 import { ServiceFaq } from '@/components/services/ServiceFaq';
 import { SERVICE_FAQS } from '@/lib/services-faqs';
+import { ServiceTestimonials } from '@/components/services/ServiceTestimonials';
 
 
 // =============================================================================
@@ -122,6 +123,7 @@ export default function PhysicalProductContent() {
  {/* ================================================================= */}
  <ProductGallery />
 
+ <ServiceTestimonials />
  <ServiceFaq items={SERVICE_FAQS['physical-product']} />
  <LeadFormSection formType="service" service="physical-product" />
 
