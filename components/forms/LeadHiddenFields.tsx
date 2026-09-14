@@ -12,6 +12,9 @@
  *
  * The inputs are uncontrolled and filled imperatively after mount, so the
  * server-rendered markup (empty values) never mismatches the client.
+ * They carry NO `defaultValue`: React re-applies defaultValue on every
+ * re-render, and for type=hidden that is the value itself — the first
+ * keystroke in the form wiped every field (found in production 2026-09-14).
  *
  * Also renders the honeypot envelope so no form forgets it.
  */
@@ -52,7 +55,7 @@ export function LeadHiddenFields({ site = 'main', formType, service }: LeadHidde
       for (const k of URL_KEYS) vals[k] = params.get(k) || '';
       for (const k of ALL_KEYS) {
         const el = refs.current[k];
-        if (el) el.value = vals[k] ?? '';
+        if (el) el.setAttribute('value', vals[k] ?? '');
       }
     } catch {
       /* attribution must never break the form */
@@ -70,7 +73,6 @@ export function LeadHiddenFields({ site = 'main', formType, service }: LeadHidde
           key={k}
           type="hidden"
           name={k}
-          defaultValue=""
           ref={(el) => { refs.current[k] = el; }}
         />
       ))}
