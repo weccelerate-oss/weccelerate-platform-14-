@@ -62,7 +62,9 @@ function pdUrl(path: string, token: string): string {
  * 'מודעה' field does. Then each sent site lead is looked up by name so a
  * lead the scenario dropped (dedupe, mapping error) is listed, not averaged.
  */
-async function pipedriveWeek(since: Date, siteLeadNames: string[]): Promise<PipedriveWeek> {
+interface SiteLeadRef { name: string; email: string; phone: string }
+
+async function pipedriveWeek(since: Date, siteLeads: SiteLeadRef[]): Promise<PipedriveWeek> {
   const token = (process.env.PIPEDRIVE_API_TOKEN || '').trim();
   if (!token) return { ok: false, total: 0, website: 0, missing: [], error: 'PIPEDRIVE_API_TOKEN not configured' };
   const websiteValues = new Set(Object.values(SITE_SOURCE_LABELS));
@@ -94,18 +96,42 @@ async function pipedriveWeek(since: Date, siteLeadNames: string[]): Promise<Pipe
       start = json.additional_data?.pagination?.next_start ?? start + 500;
     }
 
-    // 3. Every sent site lead should have a deal titled with its name.
+    // 3. Every sent site lead should reach a deal. The scenario matches the
+    //    person by email/phone and may add a note to an EXISTING deal (whose
+    //    title can be a different spelling of the name), so: find the person,
+    //    then any deal of theirs touched inside the window. Only fall back to
+    //    a title search when no person is found.
+    const touched = (t: unknown) => {
+      const d = typeof t === 'string' ? new Date(t.replace(' ', 'T') + 'Z') : null;
+      return !!d && d >= new Date(since.getTime() - 86_400_000);
+    };
     const missing: string[] = [];
-    for (const name of siteLeadNames.slice(0, 15)) {
-      if (!name || name.length < 2) continue;
-      const res = await fetch(pdUrl(`/deals/search?term=${encodeURIComponent(name)}&fields=title&limit=3`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
-      if (!res.ok) continue;
-      const json = (await res.json()) as { data?: { items?: Array<{ item: { add_time?: string } }> } };
-      const hit = (json.data?.items ?? []).some((i) => {
-        const t = i.item.add_time ? new Date(String(i.item.add_time).replace(' ', 'T') + 'Z') : null;
-        return !t || t >= new Date(since.getTime() - 86_400_000);
-      });
-      if (!hit) missing.push(name);
+    for (const lead of siteLeads.slice(0, 15)) {
+      let ok = false;
+      const lookups: Array<[string, string]> = [];
+      if (lead.email) lookups.push(['email', lead.email]);
+      if (lead.phone) lookups.push(['phone', lead.phone.replace(/[^\d+]/g, '')]);
+      for (const [field, term] of lookups) {
+        if (ok || term.length < 5) continue;
+        const res = await fetch(pdUrl(`/persons/search?term=${encodeURIComponent(term)}&fields=${field}&limit=3`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
+        if (!res.ok) continue;
+        const json = (await res.json()) as { data?: { items?: Array<{ item: { id: number } }> } };
+        for (const it of json.data?.items ?? []) {
+          if (ok) break;
+          const dr = await fetch(pdUrl(`/persons/${it.item.id}/deals?status=all_not_deleted&limit=20`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
+          if (!dr.ok) continue;
+          const dj = (await dr.json()) as { data?: Array<{ add_time?: string; update_time?: string }> | null };
+          ok = (dj.data ?? []).some((d) => touched(d.add_time) || touched(d.update_time));
+        }
+      }
+      if (!ok && lead.name && lead.name.length >= 2) {
+        const res = await fetch(pdUrl(`/deals/search?term=${encodeURIComponent(lead.name)}&fields=title&limit=3`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
+        if (res.ok) {
+          const json = (await res.json()) as { data?: { items?: Array<{ item: { add_time?: string; update_time?: string } }> } };
+          ok = (json.data?.items ?? []).some((i) => touched(i.item.add_time) || touched(i.item.update_time));
+        }
+      }
+      if (!ok) missing.push(lead.name || lead.email || lead.phone);
     }
     return { ok: true, total, website, missing };
   } catch (err) {
@@ -165,7 +191,7 @@ export async function GET(request: NextRequest) {
     let failed = 0;
     let unknown = 0;
     const failedRows: Array<{ id: string; name: string; phone: string; error: string }> = [];
-    const sentNames: string[] = [];
+    const sentLeads: SiteLeadRef[] = [];
 
     for (const r of leads) {
       const m = (r.metadata as Record<string, unknown>) || {};
@@ -179,7 +205,7 @@ export async function GET(request: NextRequest) {
 
       const d = m.delivery as { status?: string; error?: string } | undefined;
       if (!d) unknown += 1;
-      else if (d.status === 'sent') { sent += 1; sentNames.push((m.name as string) || ''); }
+      else if (d.status === 'sent') { sent += 1; sentLeads.push({ name: (m.name as string) || '', email: (m.email as string) || '', phone: (m.phone as string) || '' }); }
       else {
         failed += 1;
         failedRows.push({
@@ -191,7 +217,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const pipedrive = await pipedriveWeek(since, sentNames);
+    const pipedrive = await pipedriveWeek(since, sentLeads);
     const gap = pipedrive.ok ? pipedrive.missing.length : null;
 
     const total = leads.length;
@@ -225,8 +251,8 @@ export async function GET(request: NextRequest) {
         ${
           gap !== null && gap > 0
             ? `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;margin-bottom:20px;color:#991b1b">
-                <strong>${gap} לידים נשלחו מהאתר אבל אין להם עסקה ב-Pipedrive:</strong> ${esc(pipedrive.missing.join(', '))}.
-                בדרך כלל זה איחוד עם איש קשר קיים בלי פתיחת עסקה, או שגיאת מיפוי בתרחיש. כדאי לפתוח להם עסקה ידנית.
+                <strong>${gap} לידים נשלחו מהאתר ולא נמצאה להם עסקה ב-Pipedrive (לפי אימייל, טלפון או שם):</strong> ${esc(pipedrive.missing.join(', '))}.
+                כדאי לחפש אותם ידנית ב-Pipedrive, ואם באמת אין עסקה, לפתוח אחת.
               </div>`
             : !pipedrive.ok
               ? `<p style="color:#b45309;font-size:13px;margin-bottom:20px">לא הצלחתי לקרוא מ-Pipedrive: ${esc(pipedrive.error)}</p>`
