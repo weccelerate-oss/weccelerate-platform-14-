@@ -15,6 +15,21 @@ data.
 
 ## Step 0 — Deploy, then push to Bing (prerequisite)
 
+> **Status 2026-09-14 (verified live):** deployed. `foundingDate` = 2018, the
+> company number is in the schema, the sitemap has no dead hosts. Items 3–4
+> (IndexNow push, Search Console request) are still manual.
+>
+> **Also verified 2026-09-14:** no Wikidata item exists yet for "WeCcelerate"
+> or "וויסלרייט" (Step 1 is still open). All property/item codes below were
+> checked against Wikidata's API and are correct. Note a *separate* legal
+> entity exists: לאומית וויסלרייט בע״מ, company no. 516531811 (the Leumit
+> joint venture) — do not merge it into this item; it can become its own
+> item later with P749 (parent organization) pointing here.
+>
+> **Step 4 update:** `weccelerate.as7.co.il` now fails HTTPS with
+> **CRYPT_E_REVOKED** (the certificate is revoked, not merely expired) while
+> plain HTTP still serves the full legacy copy (200). Redirect or shut it down.
+
 Nothing below matters while production still serves `foundingDate: 2016` and a
 sitemap full of dead hosts.
 
