@@ -20,7 +20,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireCron } from '@/lib/auth/require-cron';
-import { FORM_TYPE_LABELS, getChannelLabel } from '@/lib/leads/zapier';
+import { FORM_TYPE_LABELS, SITE_SOURCE_LABELS, getChannelLabel } from '@/lib/leads/zapier';
 
 const WEEKLY_TARGET = 12; // 50 / month ≈ 11.6 / week
 const REPORT_TO = (process.env.LEAD_REPORT_EMAIL || process.env.ADMIN_NOTIFY_EMAIL || 'weccelerate@gmail.com')
@@ -36,36 +36,80 @@ interface LeadRow {
   metadata: unknown;
 }
 
-/** Count Pipedrive deals whose add_time falls inside the window. */
-async function countPipedriveDeals(since: Date): Promise<{ ok: boolean; count: number; error?: string }> {
+interface PipedriveWeek {
+  ok: boolean;
+  /** Deals created in the window from every source (ads, landing pages, manual). */
+  total: number;
+  /** Deals whose "מודעה" field says they came from this website. */
+  website: number;
+  /** Site leads that were sent but have no deal with their name. */
+  missing: string[];
+  error?: string;
+}
+
+const PD = 'https://api.pipedrive.com/v1';
+/** The custom deal field the Make/Zapier scenario fills with our 'מודעה' payload key. */
+const AD_FIELD_NAME = process.env.PIPEDRIVE_FIELD_AD_NAME || 'מודעה';
+
+function pdUrl(path: string, token: string): string {
+  return `${PD}${path}${path.includes('?') ? '&' : '?'}api_token=${encodeURIComponent(token)}`;
+}
+
+/**
+ * What Pipedrive received this week, split into "from this website" and
+ * everything else. Most deals come from paid landing pages through the same
+ * Make scenario, so a raw deal count says nothing about the site; the
+ * 'מודעה' field does. Then each sent site lead is looked up by name so a
+ * lead the scenario dropped (dedupe, mapping error) is listed, not averaged.
+ */
+async function pipedriveWeek(since: Date, siteLeadNames: string[]): Promise<PipedriveWeek> {
   const token = (process.env.PIPEDRIVE_API_TOKEN || '').trim();
-  if (!token) return { ok: false, count: 0, error: 'PIPEDRIVE_API_TOKEN not configured' };
+  if (!token) return { ok: false, total: 0, website: 0, missing: [], error: 'PIPEDRIVE_API_TOKEN not configured' };
+  const websiteValues = new Set(Object.values(SITE_SOURCE_LABELS));
   try {
+    // 1. Which custom field carries the ad/source label.
+    const fieldsRes = await fetch(pdUrl('/dealFields', token), { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+    const fieldsJson = (await fieldsRes.json()) as { data?: Array<{ key: string; name: string }> };
+    const adKey = (fieldsJson.data ?? []).find((f) => f.name === AD_FIELD_NAME)?.key ?? null;
+
+    // 2. Deals in the window, newest first.
     let start = 0;
-    let count = 0;
-    // Deals sorted newest-first; stop paging once we pass the window.
-    for (let page = 0; page < 5; page += 1) {
-      const url = `https://api.pipedrive.com/v1/deals?status=all_not_deleted&sort=add_time%20DESC&limit=100&start=${start}&api_token=${encodeURIComponent(token)}`;
-      const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) return { ok: false, count, error: `HTTP ${res.status}` };
+    let total = 0;
+    let website = 0;
+    for (let page = 0; page < 6; page += 1) {
+      const res = await fetch(pdUrl(`/deals?status=all_not_deleted&sort=add_time%20DESC&limit=500&start=${start}`, token), { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
+      if (!res.ok) return { ok: false, total, website, missing: [], error: `HTTP ${res.status}` };
       const json = (await res.json()) as {
-        data?: Array<{ add_time?: string }> | null;
+        data?: Array<Record<string, unknown>> | null;
         additional_data?: { pagination?: { more_items_in_collection?: boolean; next_start?: number } };
       };
-      const deals = json.data ?? [];
       let reachedOlder = false;
-      for (const d of deals) {
-        const t = d.add_time ? new Date(d.add_time.replace(' ', 'T') + 'Z') : null;
-        if (t && t >= since) count += 1;
-        else reachedOlder = true;
+      for (const d of json.data ?? []) {
+        const t = typeof d.add_time === 'string' ? new Date(d.add_time.replace(' ', 'T') + 'Z') : null;
+        if (!t || t < since) { reachedOlder = true; break; }
+        total += 1;
+        if (adKey && websiteValues.has(String(d[adKey] ?? ''))) website += 1;
       }
-      const more = json.additional_data?.pagination?.more_items_in_collection;
-      if (reachedOlder || !more) break;
-      start = json.additional_data?.pagination?.next_start ?? start + 100;
+      if (reachedOlder || !json.additional_data?.pagination?.more_items_in_collection) break;
+      start = json.additional_data?.pagination?.next_start ?? start + 500;
     }
-    return { ok: true, count };
+
+    // 3. Every sent site lead should have a deal titled with its name.
+    const missing: string[] = [];
+    for (const name of siteLeadNames.slice(0, 15)) {
+      if (!name || name.length < 2) continue;
+      const res = await fetch(pdUrl(`/deals/search?term=${encodeURIComponent(name)}&fields=title&limit=3`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
+      if (!res.ok) continue;
+      const json = (await res.json()) as { data?: { items?: Array<{ item: { add_time?: string } }> } };
+      const hit = (json.data?.items ?? []).some((i) => {
+        const t = i.item.add_time ? new Date(String(i.item.add_time).replace(' ', 'T') + 'Z') : null;
+        return !t || t >= new Date(since.getTime() - 86_400_000);
+      });
+      if (!hit) missing.push(name);
+    }
+    return { ok: true, total, website, missing };
   } catch (err) {
-    return { ok: false, count: 0, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, total: 0, website: 0, missing: [], error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -121,6 +165,7 @@ export async function GET(request: NextRequest) {
     let failed = 0;
     let unknown = 0;
     const failedRows: Array<{ id: string; name: string; phone: string; error: string }> = [];
+    const sentNames: string[] = [];
 
     for (const r of leads) {
       const m = (r.metadata as Record<string, unknown>) || {};
@@ -134,7 +179,7 @@ export async function GET(request: NextRequest) {
 
       const d = m.delivery as { status?: string; error?: string } | undefined;
       if (!d) unknown += 1;
-      else if (d.status === 'sent') sent += 1;
+      else if (d.status === 'sent') { sent += 1; sentNames.push((m.name as string) || ''); }
       else {
         failed += 1;
         failedRows.push({
@@ -146,8 +191,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const pipedrive = await countPipedriveDeals(since);
-    const gap = pipedrive.ok ? sent - pipedrive.count : null;
+    const pipedrive = await pipedriveWeek(since, sentNames);
+    const gap = pipedrive.ok ? pipedrive.missing.length : null;
 
     const total = leads.length;
     const pace = total >= WEEKLY_TARGET ? '#166534' : total >= WEEKLY_TARGET * 0.6 ? '#b45309' : '#b91c1c';
@@ -172,21 +217,20 @@ export async function GET(request: NextRequest) {
             <p style="margin:4px 0 0;color:#64748b;font-size:13px">הגיעו לזאפ</p>
           </div>
           <div style="flex:1;min-width:140px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center">
-            <p style="font-size:34px;font-weight:bold;margin:0;color:${pipedrive.ok ? '#0f172a' : '#94a3b8'}">${pipedrive.ok ? pipedrive.count : '—'}</p>
-            <p style="margin:4px 0 0;color:#64748b;font-size:13px">עסקאות חדשות ב-Pipedrive</p>
+            <p style="font-size:34px;font-weight:bold;margin:0;color:${pipedrive.ok ? '#0f172a' : '#94a3b8'}">${pipedrive.ok ? pipedrive.website : '—'}</p>
+            <p style="margin:4px 0 0;color:#64748b;font-size:13px">עסקאות מהאתר ב-Pipedrive${pipedrive.ok ? ` (מתוך ${pipedrive.total} מכל המקורות)` : ''}</p>
           </div>
         </div>
 
         ${
           gap !== null && gap > 0
             ? `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;margin-bottom:20px;color:#991b1b">
-                <strong>פער של ${gap}:</strong> ${sent} לידים נשלחו לזאפ אבל רק ${pipedrive.count} עסקאות נוצרו ב-Pipedrive השבוע. כדאי לבדוק שהזאפ פעיל ושמכסת המשימות לא נגמרה.
+                <strong>${gap} לידים נשלחו מהאתר אבל אין להם עסקה ב-Pipedrive:</strong> ${esc(pipedrive.missing.join(', '))}.
+                בדרך כלל זה איחוד עם איש קשר קיים בלי פתיחת עסקה, או שגיאת מיפוי בתרחיש. כדאי לפתוח להם עסקה ידנית.
               </div>`
-            : gap !== null && gap < 0
-              ? `<p style="color:#64748b;font-size:13px;margin-bottom:20px">ב-Pipedrive נוצרו יותר עסקאות (${pipedrive.count}) מלידים מהאתר (${sent}) — השאר נפתחו ידנית או ממקורות אחרים.</p>`
-              : !pipedrive.ok
-                ? `<p style="color:#b45309;font-size:13px;margin-bottom:20px">לא הצלחתי לקרוא מ-Pipedrive: ${esc(pipedrive.error)}</p>`
-                : `<p style="color:#166534;font-size:13px;margin-bottom:20px">כל הלידים שנשלחו לזאפ מופיעים ב-Pipedrive.</p>`
+            : !pipedrive.ok
+              ? `<p style="color:#b45309;font-size:13px;margin-bottom:20px">לא הצלחתי לקרוא מ-Pipedrive: ${esc(pipedrive.error)}</p>`
+              : `<p style="color:#166534;font-size:13px;margin-bottom:20px">לכל ליד שנשלח מהאתר יש עסקה ב-Pipedrive.</p>`
         }
 
         ${
@@ -230,7 +274,7 @@ export async function GET(request: NextRequest) {
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to: REPORT_TO,
-      subject: `דוח לידים שבועי: ${total} לידים, ${sent} בזאפ${pipedrive.ok ? `, ${pipedrive.count} ב-Pipedrive` : ''}${failed ? `, ${failed} נכשלו` : ''}`,
+      subject: `דוח לידים שבועי: ${total} לידים מהאתר, ${sent} נשלחו${pipedrive.ok && pipedrive.missing.length ? `, ${pipedrive.missing.length} חסרים ב-Pipedrive` : ''}${failed ? `, ${failed} נכשלו` : ''}`,
       html,
     });
 
