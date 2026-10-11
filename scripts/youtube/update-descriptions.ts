@@ -1,8 +1,8 @@
 /**
  * Adds the lead link + site links to every WeCcelerate YouTube description.
  *
- *   npx tsx --env-file=.env.youtube scripts/youtube/update-descriptions.ts            # dry run, writes a preview
- *   npx tsx --env-file=.env.youtube scripts/youtube/update-descriptions.ts --apply    # writes to YouTube
+ *   npx tsx --env-file=.env.youtube.local scripts/youtube/update-descriptions.ts            # dry run, writes a preview
+ *   npx tsx --env-file=.env.youtube.local scripts/youtube/update-descriptions.ts --apply    # writes to YouTube
  *   ... --apply --limit 3                                                              # try on 3 videos first
  *   ... --rollback <backup.json>                                                       # restore the originals
  *
@@ -15,7 +15,7 @@
  * Auth: YouTube API keys are read-only, so this needs an OAuth "Desktop app"
  * client (Google Cloud console → APIs & Services → Credentials) in the same
  * project that has YouTube Data API v3 enabled. Put its id/secret in
- * .env.youtube as YT_OAUTH_CLIENT_ID / YT_OAUTH_CLIENT_SECRET. The script opens
+ * .env.youtube.local as YT_OAUTH_CLIENT_ID / YT_OAUTH_CLIENT_SECRET. The script opens
  * a browser; sign in with the account that owns the channel.
  *
  * Quota: videos.update costs 50 units, the daily quota is 10,000 — about 190
