@@ -63,6 +63,19 @@ const nextConfig: NextConfig = {
         destination: 'https://weccelerate.co.il/:path*',
         permanent: true,
       },
+      {
+        // www served the full site with a 200 (2026-10-11): one host only,
+        // so links and rankings are not split between two copies.
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.weccelerate.co.il',
+          },
+        ],
+        destination: 'https://weccelerate.co.il/:path*',
+        permanent: true,
+      },
     ];
   },
 
