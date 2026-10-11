@@ -15,6 +15,8 @@ import { LeadFormSection } from '@/components/forms/LeadFormSection';
 // =============================================================================
 
 export const metadata: Metadata = {
+  // Without this the hub inherited the root layout canonical (the homepage).
+  alternates: { canonical: 'https://weccelerate.co.il/events' },
   title: { absolute: 'אירועים | WeCcelerate — מפגשים, וובינרים ודמו דייס' },
   description:
     'כל האירועים של WeCcelerate: מפגשי נטוורקינג, Demo Days, וובינרים מקצועיים, סדנאות ליזמים ואירועי חדשנות בתל אביב וירושלים.',

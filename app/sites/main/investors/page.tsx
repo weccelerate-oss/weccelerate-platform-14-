@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import { InvestorsContent } from './InvestorsContent';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // METADATA
@@ -9,7 +10,7 @@ import { InvestorsContent } from './InvestorsContent';
 export const metadata: Metadata = constructMetadata({
   title: 'משקיעים וגיוס הון | Investors & Fundraising',
   description:
-    'WeCcelerate connects startups with Angel Investors, VCs, and strategic partners. Pitch Deck preparation, fundraising strategy, and investor matching in Israel.',
+    'גיוס הון לסטארטאפ עם WeCcelerate (וויסלרייט): הכנת מצגת משקיעים, אסטרטגיית גיוס וחיבור למשקיעי אנג׳ל, קרנות ושותפים אסטרטגיים בישראל. שיחת היכרות חינם.',
   keywords: [
     'Fundraising',
     'Fundraising Israel',
@@ -66,6 +67,7 @@ export default function InvestorsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(investorsSchema) }}
       />
       <InvestorsContent />
+      <LeadFormSection formType="page_cta" service="investors" />
     </>
   );
 }

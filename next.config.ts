@@ -76,6 +76,22 @@ const nextConfig: NextConfig = {
         destination: 'https://weccelerate.co.il/:path*',
         permanent: true,
       },
+      // Internal links in generated guides / glossary that 404ed (site crawl 2026-10-11):
+      // missing /guides prefix, misspelled slugs, and a comparison guide that never existed.
+      ...[
+        ['/pitch-deck-startup', '/guides/pitch-deck-startup'],
+        ['/tochnit-iskit-startup', '/guides/tochnit-iskit-startup'],
+        ['/heskem-sodyut-nda', '/guides/heskem-sodyut-nda'],
+        ['/giyus-series-a', '/guides/giyus-series-a'],
+        ['/vesting-hesber', '/guides/vesting-hesber'],
+        ['/customer-discovery', '/guides/customer-discovery'],
+        ['/product-market-fit', '/guides/product-market-fit'],
+        ['/services/cto-as-a-service', '/guides/cto-as-a-service'],
+        ['/guides/livui-mzimim', '/guides/livui-mizmim'],
+        ['/guides/livui-mzmim', '/guides/livui-mizmim'],
+        ['/guides/grants-rashut-hachadshnaut', '/guides/grants-rashut-hachadshanut'],
+        ['/guides/hashvaat-acceleratorim', '/comparisons'],
+      ].map(([source, destination]) => ({ source, destination, permanent: true })),
     ];
   },
 

@@ -16,6 +16,14 @@ function extractYouTubeId(url: string | null | undefined): string | null {
   return match?.[1] ?? null;
 }
 
+/** Many synced videos have an empty YouTube description; an empty string fell
+ *  through to the site-wide default, so 18 pages shared one meta description. */
+function videoDescription(video: { title: string; description: string | null }): string {
+  const d = video.description?.trim();
+  if (d) return d;
+  return `${video.title} · סרטון של WeCcelerate (וויסלרייט), Venture Builder ומאיץ סטארטאפים ישראלי. צפו באתר ובמדריכים ליזמים.`;
+}
+
 function formatIsoDuration(seconds: number | null | undefined): string | undefined {
   if (!seconds || seconds <= 0) return undefined;
   const h = Math.floor(seconds / 3600);
@@ -42,7 +50,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
   return constructMetadata({
     title: video.title,
-    description: video.description ?? video.title,
+    description: videoDescription(video),
     path: `/videos/${slug}`,
     image: thumb,
     type: 'article',
@@ -81,7 +89,7 @@ function buildVideoSchema(video: Awaited<ReturnType<typeof getVideoBySlug>>) {
     '@type': 'VideoObject',
     '@id': `${videoPageUrl}#video`,
     name: video.title,
-    description: video.description ?? video.title,
+    description: videoDescription(video),
     thumbnailUrl: thumb ? [thumb] : undefined,
     uploadDate: (video.publishAt instanceof Date ? video.publishAt : new Date(video.publishAt)).toISOString(),
     ...(video.duration && { duration: formatIsoDuration(video.duration) }),

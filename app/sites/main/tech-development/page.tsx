@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import { TechDevContent } from './TechDevContent';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // METADATA
@@ -9,7 +10,7 @@ import { TechDevContent } from './TechDevContent';
 export const metadata: Metadata = constructMetadata({
   title: 'פיתוח טכנולוגי לסטארטאפים | Tech Partner, Not a Dev Shop',
   description:
-    'WeCcelerate is your Tech Partner, not a dev shop. MVP Development, CTO-as-a-Service, and Post-MVP Scaling — from idea to production-ready product in Tel Aviv.',
+    'פיתוח טכנולוגי לסטארטאפים עם WeCcelerate (וויסלרייט): שותף טכנולוגי ולא בית תוכנה. אפיון, פיתוח MVP, CTO as a Service וליווי עד מוצר מוכן לשוק. שיחת היכרות חינם.',
   keywords: [
     'Tech Partner for Startups',
     'MVP Development',
@@ -63,6 +64,7 @@ export default function TechDevelopmentPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(techDevSchema) }}
       />
       <TechDevContent />
+      <LeadFormSection formType="page_cta" service="digital-product" />
     </>
   );
 }

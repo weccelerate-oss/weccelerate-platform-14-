@@ -14,6 +14,8 @@ import { VideosContent } from './VideosContent';
 // =============================================================================
 
 export const metadata: Metadata = {
+  // Without this the hub inherited the root layout canonical (the homepage).
+  alternates: { canonical: 'https://weccelerate.co.il/videos' },
   title: { absolute: 'סרטונים | WeCcelerate — פודקאסט, ראיונות, עדויות יזמים ו-Reels' },
   description:
     'צפו בתוכן הווידאו של WeCcelerate: פרקי פודקאסט עם מובילי אקוסיסטם הסטארטאפים, עדויות יזמים שגייסו הון, ראיונות בתקשורת ו-Reels עם טיפים מהירים ליזמים.',

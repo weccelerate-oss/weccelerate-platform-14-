@@ -224,7 +224,7 @@ WeCcelerate has an strategic partnership with **Leumit Health Services** (לאו
  - Helsinki Committee (IRB Israel) complete guide - https://weccelerate.co.il/guides/vaadat-helsinki-madrich
  - FDA 510(k) complete guide - https://weccelerate.co.il/guides/fda-510k-madrich
  - What is a Venture Builder - https://weccelerate.co.il/guides/mah-ze-venture-builder
- - Israeli accelerators comparison - https://weccelerate.co.il/guides/hashvaat-acceleratorim
+ - Israeli accelerators comparison - https://weccelerate.co.il/comparisons
  - Full index - https://weccelerate.co.il/guides
 - **FAQ hub** (50+ questions): https://weccelerate.co.il/faq
 

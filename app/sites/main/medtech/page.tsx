@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import { MedTechPageContent } from './MedTechPageContent';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // METADATA
@@ -9,7 +10,7 @@ import { MedTechPageContent } from './MedTechPageContent';
 export const metadata: Metadata = constructMetadata({
   title: 'מסלול MedTech | Medical Accelerator',
   description:
-    'WeCcelerate Medical Accelerator — the exclusive MedTech track in partnership with Leumit Health Care. Expert medical opinions, full regulatory support, and market research for early-stage healthcare startups.',
+    'מסלול MedTech של WeCcelerate (וויסלרייט) בשותפות עם לאומית שירותי בריאות: חוות דעת רפואיות, ליווי רגולטורי, מחקר שוק ופיילוט ליזמים בתחום הבריאות. שיחת היכרות חינם.',
   keywords: [
     'Medical Accelerator',
     'Medical Accelerator Israel',
@@ -73,6 +74,7 @@ export default function MedTechPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(medtechSchema) }}
       />
       <MedTechPageContent />
+      <LeadFormSection formType="page_cta" service="medtech-leumit" />
     </>
   );
 }

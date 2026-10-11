@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import ServicesDashboardContent from './ServicesDashboardContent';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // METADATA
@@ -28,5 +29,10 @@ export const metadata: Metadata = constructMetadata({
 // =============================================================================
 
 export default function ServicesPage() {
-  return <ServicesDashboardContent />;
+  return (
+    <>
+      <ServicesDashboardContent />
+      <LeadFormSection formType="page_cta" />
+    </>
+  );
 }

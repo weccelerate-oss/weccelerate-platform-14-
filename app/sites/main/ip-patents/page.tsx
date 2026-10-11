@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { constructMetadata } from '@/lib/seo';
 import { IpPatentsContent } from './IpPatentsContent';
+import { LeadFormSection } from '@/components/forms/LeadFormSection';
 
 // =============================================================================
 // METADATA
@@ -9,7 +10,7 @@ import { IpPatentsContent } from './IpPatentsContent';
 export const metadata: Metadata = constructMetadata({
   title: 'פטנטים וקניין רוחני | IP & Patents',
   description:
-    'WeCcelerate IP strategy services: Patent Registration, Prototyping, and comprehensive IP Strategy for startups. Protect your innovation from day one.',
+    'פטנטים וקניין רוחני לסטארטאפים עם WeCcelerate (וויסלרייט): אסטרטגיית IP, רישום פטנטים ואב-טיפוס, כדי להגן על החדשנות כבר מהיום הראשון. שיחת היכרות חינם.',
   keywords: [
     'Patent Registration',
     'Patent Registration Israel',
@@ -63,6 +64,7 @@ export default function IPPatentsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ipSchema) }}
       />
       <IpPatentsContent />
+      <LeadFormSection formType="page_cta" service="business-consulting" />
     </>
   );
 }
