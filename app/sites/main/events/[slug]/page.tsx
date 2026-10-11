@@ -3,13 +3,14 @@ import { notFound } from 'next/navigation';
 import { getEventBySlug, getEvents } from '@/lib/db-repository';
 import { constructMetadata, SITE_CONFIG } from '@/lib/seo';
 import EventDetailContent from './EventDetailContent';
+import { decodeSlug } from '@/lib/decode-slug';
 
 export const revalidate = 3600;
 
 type Params = { slug: string };
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = decodeSlug((await params).slug);
   const event = await getEventBySlug(slug).catch(() => null);
 
   if (!event) {
@@ -131,7 +132,7 @@ function buildEventSchema(event: Awaited<ReturnType<typeof getEventBySlug>>) {
 }
 
 export default async function EventDetailPage({ params }: { params: Promise<Params> }) {
-  const { slug } = await params;
+  const slug = decodeSlug((await params).slug);
   const event = await getEventBySlug(slug).catch(() => null);
 
   if (!event || !event.isActive) {

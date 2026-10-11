@@ -2,7 +2,9 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getVideoBySlug, getVideos } from '@/lib/db-repository';
 import { constructMetadata, SITE_CONFIG } from '@/lib/seo';
+import { decodeSlug } from '@/lib/decode-slug';
 import VideoDetailContent from './VideoDetailContent';
+import { videoTopic, relatedGuides } from '@/lib/video-topic';
 
 export const revalidate = 3600;
 
@@ -23,7 +25,7 @@ function formatIsoDuration(seconds: number | null | undefined): string | undefin
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = decodeSlug((await params).slug);
   const video = await getVideoBySlug(slug).catch(() => null);
 
   if (!video) {
@@ -119,7 +121,7 @@ function buildVideoSchema(video: Awaited<ReturnType<typeof getVideoBySlug>>) {
 }
 
 export default async function VideoDetailPage({ params }: { params: Promise<Params> }) {
-  const { slug } = await params;
+  const slug = decodeSlug((await params).slug);
   const video = await getVideoBySlug(slug).catch(() => null);
 
   if (!video || !video.isActive) {
@@ -133,6 +135,11 @@ export default async function VideoDetailPage({ params }: { params: Promise<Para
 
   const schema = buildVideoSchema(video);
 
+  // Topic decides the lead form's service and which guides are linked below
+  // the video — internal links from every video page into the guide cluster.
+  const topic = videoTopic([video.title, ...(video.tags ?? []), video.description ?? ''].join(' '));
+  const guides = await relatedGuides(topic, video.title);
+
   return (
     <>
       {schema && (
@@ -142,7 +149,7 @@ export default async function VideoDetailPage({ params }: { params: Promise<Para
         />
       )}
 
-      <VideoDetailContent video={video} embedSrc={embedSrc} />
+      <VideoDetailContent video={video} embedSrc={embedSrc} topic={topic} guides={guides} />
     </>
   );
 }

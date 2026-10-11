@@ -7,6 +7,10 @@
  */
 
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { LeadForm } from '@/components/forms/LeadForm';
+import { guideCta } from '@/components/forms/GuideLeadForm';
+import type { VideoTopic, RelatedGuide } from '@/lib/video-topic';
 import { useLanguage } from '@/lib/i18n';
 import type { getVideoBySlug } from '@/lib/db-repository';
 
@@ -15,11 +19,16 @@ type Video = NonNullable<Awaited<ReturnType<typeof getVideoBySlug>>>;
 export default function VideoDetailContent({
   video,
   embedSrc,
+  topic,
+  guides,
 }: {
   video: Video;
   embedSrc: string | null | undefined;
+  topic: VideoTopic;
+  guides: RelatedGuide[];
 }) {
   const { t, lang, dir } = useLanguage();
+  const cta = guideCta(topic);
 
   // Prefer English stored fields when viewing in English; fall back to Hebrew.
   const title = lang === 'en' && video.titleEn ? video.titleEn : video.title;
@@ -95,6 +104,31 @@ export default function VideoDetailContent({
             </div>
           )}
         </dl>
+
+        {guides.length > 0 && (
+          <section aria-labelledby="related-guides" className="mt-10">
+            <h2 id="related-guides" className="mb-4 text-xl font-bold text-slate-900">
+              {lang === 'en' ? 'Related guides' : 'מדריכים בנושא'}
+            </h2>
+            <ul className="grid gap-3">
+              {guides.map((g) => (
+                <li key={g.href}>
+                  <Link
+                    href={g.href}
+                    className="group flex items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 text-slate-800 transition-colors hover:border-[#c8a951] hover:text-slate-950"
+                  >
+                    <span className="font-medium">{g.title}</span>
+                    <ArrowLeft className="h-4 w-4 flex-shrink-0 text-slate-400 transition-colors group-hover:text-[#c8a951] rtl:rotate-0 ltr:rotate-180" aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section id="lead-form" className="mt-10 scroll-mt-24 rounded-2xl border border-[#c8a951]/30 bg-[#0d1321] p-6 sm:p-8" dir="rtl">
+          <LeadForm formType="video" service={cta.service} heading={cta.heading} subheading={cta.sub} />
+        </section>
       </div>
     </article>
   );
