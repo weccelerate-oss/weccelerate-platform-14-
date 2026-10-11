@@ -7,17 +7,22 @@
  * The category decides which service the lead is tagged with and what the
  * form says, so a reader of a fundraising guide is asked about their raise,
  * not offered a generic "contact us". Two placements:
- *   - `mid`: a slim card after the second section, while attention is high
+ *   - `mid`: a slim card after the second section that opens the WhatsApp
+ *     gate. The inline mid form produced no leads in a month while the gate
+ *     turned about half of its openings into leads (2026-10-11), so the
+ *     mid-article ask is now one tap into the gate.
  *   - `end`: the full card that replaces the old text link at the bottom
  * No numbers or promises in the copy, by owner decision (2026-09-10).
  */
 
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MessageCircle } from 'lucide-react';
 import { LeadForm } from '@/components/forms/LeadForm';
+import { openWhatsAppGate, type WhatsAppNeed } from '@/lib/leads/whatsapp-gate';
 
 interface GuideCta {
   service: string;
+  need: WhatsAppNeed;
   servicePath: string;
   heading: string;
   sub: string;
@@ -26,6 +31,7 @@ interface GuideCta {
 
 const BY_CATEGORY: Record<string, GuideCta> = {
   'startup-basics': {
+    need: 'idea',
     service: 'business-consulting',
     servicePath: '/services/business-consulting',
     heading: 'רוצים לדבר על הרעיון שלכם?',
@@ -33,6 +39,7 @@ const BY_CATEGORY: Record<string, GuideCta> = {
     midHeading: 'יש לכם רעיון בשלב הזה? דברו איתנו',
   },
   fundraising: {
+    need: 'funding',
     service: 'investors',
     servicePath: '/services/investors',
     heading: 'מתכוננים לגיוס?',
@@ -40,6 +47,7 @@ const BY_CATEGORY: Record<string, GuideCta> = {
     midHeading: 'רוצים חוות דעת על הגיוס שלכם?',
   },
   'product-development': {
+    need: 'product',
     service: 'digital-product',
     servicePath: '/services/digital-product',
     heading: 'צריכים לבנות את המוצר?',
@@ -47,6 +55,7 @@ const BY_CATEGORY: Record<string, GuideCta> = {
     midHeading: 'רוצים לדבר על המוצר שלכם?',
   },
   medtech: {
+    need: 'medtech',
     service: 'medtech-leumit',
     servicePath: '/services/medtech-leumit',
     heading: 'מיזם רפואי? יש לנו מסלול ייעודי',
@@ -54,6 +63,7 @@ const BY_CATEGORY: Record<string, GuideCta> = {
     midHeading: 'מיזם רפואי? דברו איתנו על המסלול',
   },
   regulatory: {
+    need: 'medtech',
     service: 'medtech-leumit',
     servicePath: '/services/medtech-leumit',
     heading: 'צריכים ליווי ברגולציה?',
@@ -61,6 +71,7 @@ const BY_CATEGORY: Record<string, GuideCta> = {
     midHeading: 'שאלה על רגולציה? דברו איתנו',
   },
   comparison: {
+    need: 'idea',
     service: 'business-consulting',
     servicePath: '/services/business-consulting',
     heading: 'לא בטוחים מה מתאים לכם?',
@@ -91,15 +102,24 @@ export function GuideLeadForm({ category, placement, ctaLabel, ctaServicePath }:
   if (placement === 'mid') {
     return (
       <aside
-        aria-label="השאירו פרטים"
+        aria-label="דברו עם יועץ"
         className="my-12 rounded-2xl border border-[#c8a951]/25 bg-[#c8a951]/[0.05] p-6 md:p-7"
       >
-        <LeadForm
-          formType="guide_inline"
-          service={cta.service}
-          heading={cta.midHeading}
-          subheading={cta.sub}
-        />
+        <p className="text-lg font-bold text-white mb-2">{cta.midHeading}</p>
+        <p className="text-white/60 leading-relaxed mb-5">{cta.sub}</p>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <button
+            type="button"
+            onClick={() => openWhatsAppGate({ location: 'guide-mid', need: cta.need, service: cta.service })}
+            className="inline-flex items-center gap-2 rounded-sm bg-gradient-to-l from-[#c8a951] to-[#e6cf8a] px-6 py-3 font-bold text-[#0a0e27] transition hover:brightness-110"
+          >
+            <MessageCircle className="w-5 h-5" aria-hidden="true" />
+            דברו עם יועץ בוואטסאפ
+          </button>
+          <a href="#lead-form" className="text-sm font-semibold text-white/60 underline-offset-4 hover:text-white hover:underline">
+            או השאירו פרטים ונחזור אליכם
+          </a>
+        </div>
       </aside>
     );
   }
