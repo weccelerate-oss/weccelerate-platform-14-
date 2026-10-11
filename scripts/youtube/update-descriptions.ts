@@ -76,6 +76,7 @@ function parseCsv(text: string): string[][] {
 
 interface Plan {
   videoId: string;
+  summary: string; // one-line description, used when the video has none
   cta: string;   // "יש לכם רעיון..." + lp link
   about: string; // brand line + guides link
 }
@@ -93,6 +94,7 @@ function loadPlans(): Map<string, Plan> {
     if (ctaAt < 0 || aboutAt < 0) continue;
     plans.set(videoId, {
       videoId,
+      summary: lines.slice(0, ctaAt).join('\n').trim(),
       cta: lines.slice(ctaAt, ctaAt + 2).join('\n'),
       about: lines.slice(aboutAt).join('\n').trim(),
     });
@@ -104,7 +106,7 @@ function buildDescription(original: string, plan: Plan): string {
   // Short /v/{id} link — the Hebrew /videos slug shows up percent-encoded on YouTube.
   const site = `\n\nהסרטון ומדריכים נוספים בנושא באתר:\nhttps://weccelerate.co.il/v/${plan.videoId}?utm_source=youtube&utm_medium=video-page`;
   const tail = `${site}\n\n${plan.about}`;
-  let body = original.trim();
+  let body = original.trim() || plan.summary;
   const room = MAX_DESC - plan.cta.length - tail.length - 4;
   if (body.length > room) body = body.slice(0, Math.max(0, room - 1)).trimEnd() + '…';
   // YouTube rejects angle brackets in descriptions.
@@ -123,7 +125,15 @@ async function authorize() {
     process.exit(1);
   }
   const client = new google.auth.OAuth2(id, secret, REDIRECT);
-  const url = client.generateAuthUrl({ access_type: 'offline', scope: ['https://www.googleapis.com/auth/youtube.force-ssl'], prompt: 'consent' });
+
+  // Refresh token from an earlier sign-in, kept outside the repo.
+  const tokenPath = path.join(BACKUP_DIR, 'oauth-token.json');
+  if (fs.existsSync(tokenPath)) {
+    client.setCredentials(JSON.parse(fs.readFileSync(tokenPath, 'utf8')));
+    return google.youtube({ version: 'v3', auth: client });
+  }
+
+  const url =client.generateAuthUrl({ access_type: 'offline', scope: ['https://www.googleapis.com/auth/youtube.force-ssl'], prompt: 'consent' });
 
   const code = await new Promise<string>((resolve, reject) => {
     const server = http.createServer((req, res) => {
@@ -145,6 +155,8 @@ async function authorize() {
 
   const { tokens } = await client.getToken(code);
   client.setCredentials(tokens);
+  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+  fs.writeFileSync(tokenPath, JSON.stringify(tokens), 'utf8');
   return google.youtube({ version: 'v3', auth: client });
 }
 
