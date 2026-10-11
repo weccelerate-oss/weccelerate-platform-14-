@@ -44,6 +44,10 @@ interface PipedriveWeek {
   website: number;
   /** Site leads that were sent but have no deal with their name. */
   missing: string[];
+  /** Site leads that reached Pipedrive but opened no NEW website deal, so they
+   *  are not counted: the person already existed (scenario only touched an old
+   *  deal) or the new deal carries another source (same person came via an ad). */
+  notCounted: Array<{ name: string; why: 'existing' | 'other-source' }>;
   error?: string;
 }
 
@@ -66,7 +70,7 @@ interface SiteLeadRef { name: string; email: string; phone: string }
 
 async function pipedriveWeek(since: Date, siteLeads: SiteLeadRef[]): Promise<PipedriveWeek> {
   const token = (process.env.PIPEDRIVE_API_TOKEN || '').trim();
-  if (!token) return { ok: false, total: 0, website: 0, missing: [], error: 'PIPEDRIVE_API_TOKEN not configured' };
+  if (!token) return { ok: false, total: 0, website: 0, missing: [], notCounted: [], error: 'PIPEDRIVE_API_TOKEN not configured' };
   const websiteValues = new Set(Object.values(SITE_SOURCE_LABELS));
   try {
     // 1. Which custom field carries the ad/source label.
@@ -80,7 +84,7 @@ async function pipedriveWeek(since: Date, siteLeads: SiteLeadRef[]): Promise<Pip
     let website = 0;
     for (let page = 0; page < 6; page += 1) {
       const res = await fetch(pdUrl(`/deals?status=all_not_deleted&sort=add_time%20DESC&limit=500&start=${start}`, token), { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
-      if (!res.ok) return { ok: false, total, website, missing: [], error: `HTTP ${res.status}` };
+      if (!res.ok) return { ok: false, total, website, missing: [], notCounted: [], error: `HTTP ${res.status}` };
       const json = (await res.json()) as {
         data?: Array<Record<string, unknown>> | null;
         additional_data?: { pagination?: { more_items_in_collection?: boolean; next_start?: number } };
@@ -96,46 +100,65 @@ async function pipedriveWeek(since: Date, siteLeads: SiteLeadRef[]): Promise<Pip
       start = json.additional_data?.pagination?.next_start ?? start + 500;
     }
 
-    // 3. Every sent site lead should reach a deal. The scenario matches the
-    //    person by email/phone and may add a note to an EXISTING deal (whose
-    //    title can be a different spelling of the name), so: find the person,
-    //    then any deal of theirs touched inside the window. Only fall back to
-    //    a title search when no person is found.
-    const touched = (t: unknown) => {
+    // 3. Every sent site lead should open a NEW deal tagged as website.
+    //    Find the person by email/phone (several phone spellings: Pipedrive
+    //    stores +972 and 05x forms), then look at their deals:
+    //      - new website deal in the window      → counted
+    //      - new deal with another source        → other-source (came via an ad too)
+    //      - only older deals                    → existing (scenario opened nothing;
+    //        found 2026-10-11: a quarter of site leads were lost this way)
+    //    No person at all → title search, else missing.
+    const windowStart = new Date(since.getTime() - 86_400_000);
+    const isNew = (t: unknown) => {
       const d = typeof t === 'string' ? new Date(t.replace(' ', 'T') + 'Z') : null;
-      return !!d && d >= new Date(since.getTime() - 86_400_000);
+      return !!d && d >= windowStart;
+    };
+    const phoneTerms = (raw: string) => {
+      const digits = raw.replace(/\D/g, '');
+      const local = digits.startsWith('972') ? '0' + digits.slice(3) : digits;
+      return [...new Set([local, local.replace(/^0/, ''), digits])].filter((t) => t.length >= 7);
     };
     const missing: string[] = [];
-    for (const lead of siteLeads.slice(0, 15)) {
-      let ok = false;
+    const notCounted: PipedriveWeek['notCounted'] = [];
+    for (const lead of siteLeads.slice(0, 40)) {
+      const label = lead.name || lead.email || lead.phone;
       const lookups: Array<[string, string]> = [];
       if (lead.email) lookups.push(['email', lead.email]);
-      if (lead.phone) lookups.push(['phone', lead.phone.replace(/[^\d+]/g, '')]);
+      if (lead.phone) for (const t of phoneTerms(lead.phone)) lookups.push(['phone', t]);
+
+      let personFound = false;
+      let deals: Array<Record<string, unknown>> = [];
       for (const [field, term] of lookups) {
-        if (ok || term.length < 5) continue;
+        if (personFound || term.length < 5) continue;
         const res = await fetch(pdUrl(`/persons/search?term=${encodeURIComponent(term)}&fields=${field}&limit=3`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
         if (!res.ok) continue;
         const json = (await res.json()) as { data?: { items?: Array<{ item: { id: number } }> } };
         for (const it of json.data?.items ?? []) {
-          if (ok) break;
-          const dr = await fetch(pdUrl(`/persons/${it.item.id}/deals?status=all_not_deleted&limit=20`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
-          if (!dr.ok) continue;
-          const dj = (await dr.json()) as { data?: Array<{ add_time?: string; update_time?: string }> | null };
-          ok = (dj.data ?? []).some((d) => touched(d.add_time) || touched(d.update_time));
+          personFound = true;
+          const dr = await fetch(pdUrl(`/persons/${it.item.id}/deals?status=all_not_deleted&limit=50`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
+          if (dr.ok) deals = deals.concat(((await dr.json()) as { data?: Array<Record<string, unknown>> | null }).data ?? []);
         }
       }
-      if (!ok && lead.name && lead.name.length >= 2) {
-        const res = await fetch(pdUrl(`/deals/search?term=${encodeURIComponent(lead.name)}&fields=title&limit=3`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
+
+      if (!personFound && lead.name && lead.name.length >= 2) {
+        const res = await fetch(pdUrl(`/deals/search?term=${encodeURIComponent(lead.name)}&fields=title&exact_match=true&limit=5`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
         if (res.ok) {
-          const json = (await res.json()) as { data?: { items?: Array<{ item: { add_time?: string; update_time?: string } }> } };
-          ok = (json.data?.items ?? []).some((i) => touched(i.item.add_time) || touched(i.item.update_time));
+          const json = (await res.json()) as { data?: { items?: Array<{ item: { id: number } }> } };
+          for (const it of json.data?.items ?? []) {
+            const dr = await fetch(pdUrl(`/deals/${it.item.id}`, token), { cache: 'no-store', signal: AbortSignal.timeout(8_000) });
+            if (dr.ok) { personFound = true; deals.push(((await dr.json()) as { data: Record<string, unknown> }).data); }
+          }
         }
       }
-      if (!ok) missing.push(lead.name || lead.email || lead.phone);
+
+      if (!personFound) { missing.push(label); continue; }
+      const fresh = deals.filter((d) => isNew(d.add_time));
+      if (fresh.some((d) => adKey && websiteValues.has(String(d[adKey] ?? '')))) continue;
+      notCounted.push({ name: label, why: fresh.length ? 'other-source' : 'existing' });
     }
-    return { ok: true, total, website, missing };
+    return { ok: true, total, website, missing, notCounted };
   } catch (err) {
-    return { ok: false, total: 0, website: 0, missing: [], error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, total: 0, website: 0, missing: [], notCounted: [], error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -260,6 +283,18 @@ export async function GET(request: NextRequest) {
         }
 
         ${
+          pipedrive.ok && pipedrive.notCounted.length
+            ? `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px;margin-bottom:20px;color:#92400e">
+                <strong>${pipedrive.notCounted.length} לידים מהאתר הגיעו ל-Pipedrive אבל לא נפתחה להם עסקה חדשה של "אתר ראשי":</strong>
+                <ul style="margin:8px 0 0;padding-inline-start:18px">${pipedrive.notCounted
+                  .map((n) => `<li>${esc(n.name)}: ${n.why === 'existing' ? 'איש קשר קיים, התרחיש לא פתח עסקה חדשה' : 'נפתחה עסקה עם מקור אחר (הגיע גם ממודעה)'}</li>`)
+                  .join('')}</ul>
+                <p style="margin:8px 0 0;font-size:13px">איש קשר קיים: צריך לתקן את התרחיש ב-Make כך שיפתח עסקה חדשה גם לאיש קשר קיים. עד אז, לפתוח ידנית.</p>
+              </div>`
+            : ''
+        }
+
+        ${
           failedRows.length
             ? `<h3 style="margin:0 0 6px;color:#991b1b">לידים שלא הגיעו לזאפ (${failedRows.length})</h3>
                <p style="font-size:13px;color:#64748b;margin:0 0 8px">לחצו "שלח שוב" ב-<a href="${SITE_URL}/admin/leads">רשימת הלידים</a>.</p>
@@ -300,7 +335,7 @@ export async function GET(request: NextRequest) {
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to: REPORT_TO,
-      subject: `דוח לידים שבועי: ${total} לידים מהאתר, ${sent} נשלחו${pipedrive.ok && pipedrive.missing.length ? `, ${pipedrive.missing.length} חסרים ב-Pipedrive` : ''}${failed ? `, ${failed} נכשלו` : ''}`,
+      subject: `דוח לידים שבועי: ${total} לידים מהאתר, ${sent} נשלחו${pipedrive.ok && pipedrive.missing.length ? `, ${pipedrive.missing.length} חסרים ב-Pipedrive` : ''}${pipedrive.ok && pipedrive.notCounted.length ? `, ${pipedrive.notCounted.length} בלי עסקה חדשה` : ''}${failed ? `, ${failed} נכשלו` : ''}`,
       html,
     });
 

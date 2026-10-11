@@ -70,8 +70,12 @@ export interface LeadRecord {
 export type RawLeadRow = { id: string; action: string; createdAt: Date; metadata: unknown };
 
 export interface LeadFilters {
-  /** Period: 'month' (calendar month to date) | '7d' | '30d' | '90d' | 'all' */
-  period: 'month' | '7d' | '30d' | '90d' | 'all';
+  /** Period: 'month' (Israel calendar month to date) | 'prev' (previous calendar month)
+   *  | '7d' | '30d' | '90d' | 'all' | 'custom' (from/to, inclusive Israel dates) */
+  period: 'month' | 'prev' | '7d' | '30d' | '90d' | 'all' | 'custom';
+  /** YYYY-MM-DD, only for period=custom. */
+  from: string;
+  to: string;
   status: 'all' | LeadStatus | 'failed';
   formType: string;
   channel: string;
@@ -186,8 +190,14 @@ export function parseFilters(sp: Record<string, string | string[] | undefined>):
   const period = one('period');
   const status = one('status');
   const pageNum = parseInt(one('page') || '1', 10);
+  const isDay = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const from = isDay(one('from')) ? one('from') : '';
+  const to = isDay(one('to')) ? one('to') : '';
+  const custom = period === 'custom' && (from || to);
   return {
-    period: (['month', '7d', '30d', '90d', 'all'].includes(period) ? period : 'month') as LeadFilters['period'],
+    period: (custom ? 'custom' : ['month', 'prev', '7d', '30d', '90d', 'all'].includes(period) ? period : 'month') as LeadFilters['period'],
+    from: custom ? from : '',
+    to: custom ? to : '',
     status: (['all', 'accepted', 'review', 'blocked', 'rate_limited', 'blocklist', 'failed'].includes(status) ? status : 'accepted') as LeadFilters['status'],
     formType: one('formType').slice(0, 40),
     channel: one('channel').slice(0, 40),
@@ -196,20 +206,54 @@ export function parseFilters(sp: Record<string, string | string[] | undefined>):
   };
 }
 
-export function periodStart(period: LeadFilters['period'], now = new Date()): Date | null {
-  switch (period) {
-    case 'month': return new Date(now.getFullYear(), now.getMonth(), 1);
-    case '7d': return new Date(now.getTime() - 7 * 86_400_000);
-    case '30d': return new Date(now.getTime() - 30 * 86_400_000);
-    case '90d': return new Date(now.getTime() - 90 * 86_400_000);
-    default: return null;
+/** Minutes Israel is ahead of UTC at `at` (120 in winter, 180 in summer). */
+function jerusalemOffsetMin(at: Date): number {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Jerusalem', hourCycle: 'h23',
+      year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric',
+    }).formatToParts(at).map((p) => [p.type, p.value]),
+  );
+  const asUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
+  return Math.round((asUtc - at.getTime()) / 60_000);
+}
+
+/** 00:00 Israel time on the given Israel calendar day (month is 0-based, may overflow). */
+export function jerusalemMidnight(y: number, m0: number, d: number): Date {
+  const guess = new Date(Date.UTC(y, m0, d));
+  return new Date(guess.getTime() - jerusalemOffsetMin(guess) * 60_000);
+}
+
+/** Today's Israel calendar date. */
+export function jerusalemToday(now = new Date()): { y: number; m0: number; d: number } {
+  const t = new Date(now.getTime() + jerusalemOffsetMin(now) * 60_000);
+  return { y: t.getUTCFullYear(), m0: t.getUTCMonth(), d: t.getUTCDate() };
+}
+
+/** [start, end) of the filter period; null = unbounded. Months follow Israel time,
+ *  so a lead at 01:00 on the 1st counts for the new month. */
+export function periodRange(f: Pick<LeadFilters, 'period' | 'from' | 'to'>, now = new Date()): { start: Date | null; end: Date | null } {
+  const { y, m0 } = jerusalemToday(now);
+  const day = (v: string, plus = 0) => {
+    const [yy, mm, dd] = v.split('-').map(Number);
+    return jerusalemMidnight(yy, mm - 1, dd + plus);
+  };
+  switch (f.period) {
+    case 'month': return { start: jerusalemMidnight(y, m0, 1), end: null };
+    case 'prev': return { start: jerusalemMidnight(y, m0 - 1, 1), end: jerusalemMidnight(y, m0, 1) };
+    case '7d': return { start: new Date(now.getTime() - 7 * 86_400_000), end: null };
+    case '30d': return { start: new Date(now.getTime() - 30 * 86_400_000), end: null };
+    case '90d': return { start: new Date(now.getTime() - 90 * 86_400_000), end: null };
+    case 'custom': return { start: f.from ? day(f.from) : null, end: f.to ? day(f.to, 1) : null };
+    default: return { start: null, end: null };
   }
 }
 
 export function buildWhere(f: LeadFilters): Record<string, unknown> {
   const and: Array<Record<string, unknown>> = [];
-  const start = periodStart(f.period);
+  const { start, end } = periodRange(f);
   if (start) and.push({ createdAt: { gte: start } });
+  if (end) and.push({ createdAt: { lt: end } });
 
   if (f.status === 'all') {
     and.push({ OR: [...ACCEPTED_OR, ...Object.values(STATUS_ACTION).map((a) => ({ action: a }))] });
@@ -278,9 +322,10 @@ function countBy<T>(items: T[], key: (t: T) => string | null): Record<string, nu
 
 export async function loadLeadDashboard(filters: LeadFilters): Promise<LeadDashboard> {
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const dayOfMonth = now.getDate();
+  const today = jerusalemToday(now);
+  const monthStart = jerusalemMidnight(today.y, today.m0, 1);
+  const daysInMonth = new Date(Date.UTC(today.y, today.m0 + 1, 0)).getUTCDate();
+  const dayOfMonth = today.d;
   const weekAgo = new Date(now.getTime() - 7 * 86_400_000);
   const twoWeeksAgo = new Date(now.getTime() - 14 * 86_400_000);
   const thirtyAgo = new Date(now.getTime() - 30 * 86_400_000);
@@ -335,8 +380,8 @@ export async function loadLeadDashboard(filters: LeadFilters): Promise<LeadDashb
 
   // Breakdowns follow the current filter's period (not its status/search),
   // so the charts always describe accepted leads in the chosen window.
-  const start = periodStart(filters.period);
-  const inPeriod = recent.filter((r) => (!start || r.createdAt >= start) && r.formType !== 'newsletter');
+  const { start, end } = periodRange(filters);
+  const inPeriod = recent.filter((r) => (!start || r.createdAt >= start) && (!end || r.createdAt < end) && r.formType !== 'newsletter');
   const source = inPeriod;
 
   const toList = (o: Record<string, number>, label: (k: string) => string) =>

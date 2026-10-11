@@ -13,6 +13,7 @@ interface Props {
 
 const PERIODS: Array<[LeadFilters['period'], string]> = [
   ['month', 'החודש'],
+  ['prev', 'חודש קודם'],
   ['7d', '7 ימים'],
   ['30d', '30 יום'],
   ['90d', '90 יום'],
@@ -40,7 +41,10 @@ export function LeadsFilters({ filters, formOptions, channelOptions }: Props) {
   const apply = (patch: Partial<LeadFilters>) => {
     const next = { ...filters, ...patch, page: patch.page ?? 1 };
     const qs = new URLSearchParams();
+    if (next.period !== 'custom') { next.from = ''; next.to = ''; }
     if (next.period !== 'month') qs.set('period', next.period);
+    if (next.from) qs.set('from', next.from);
+    if (next.to) qs.set('to', next.to);
     if (next.status !== 'accepted') qs.set('status', next.status);
     if (next.formType) qs.set('formType', next.formType);
     if (next.channel) qs.set('channel', next.channel);
@@ -51,6 +55,8 @@ export function LeadsFilters({ filters, formOptions, channelOptions }: Props) {
 
   const exportQs = new URLSearchParams();
   exportQs.set('period', filters.period);
+  if (filters.from) exportQs.set('from', filters.from);
+  if (filters.to) exportQs.set('to', filters.to);
   exportQs.set('status', filters.status);
   if (filters.formType) exportQs.set('formType', filters.formType);
   if (filters.channel) exportQs.set('channel', filters.channel);
@@ -74,6 +80,25 @@ export function LeadsFilters({ filters, formOptions, channelOptions }: Props) {
             {label}
           </button>
         ))}
+      </div>
+
+      <div className={`inline-flex items-center gap-1.5 rounded-lg border bg-white px-2 py-1 text-sm ${filters.period === 'custom' ? 'border-slate-900' : 'border-slate-300'}`}>
+        <label htmlFor="f-from" className="text-slate-500">מתאריך</label>
+        <input
+          id="f-from"
+          type="date"
+          value={filters.from}
+          onChange={(e) => apply({ period: e.target.value || filters.to ? 'custom' : 'month', from: e.target.value, to: filters.to })}
+          className="rounded px-1 py-1 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        />
+        <label htmlFor="f-to" className="text-slate-500">עד</label>
+        <input
+          id="f-to"
+          type="date"
+          value={filters.to}
+          onChange={(e) => apply({ period: e.target.value || filters.from ? 'custom' : 'month', from: filters.from, to: e.target.value })}
+          className="rounded px-1 py-1 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        />
       </div>
 
       <label className="sr-only" htmlFor="f-status">סטטוס</label>
