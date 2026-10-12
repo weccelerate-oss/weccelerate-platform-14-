@@ -477,7 +477,7 @@ export const SERVICES = [
  priceRange: '₪₪₪',
  price: '50000',
  category: 'Software Development',
- duration: 'over a flexible duration',
+ duration: 'Depends on project scope',
  icon: 'code',
  },
  {
@@ -494,7 +494,7 @@ export const SERVICES = [
  priceRange: '₪₪₪',
  price: '35000',
  category: 'Product Development',
- duration: 'in adjusted timelines',
+ duration: 'Set per product scope',
  icon: 'rocket',
  },
  {
@@ -511,7 +511,7 @@ export const SERVICES = [
  priceRange: '₪₪₪₪',
  price: '75000',
  category: 'AI & Machine Learning',
- duration: 'over a flexible duration',
+ duration: 'Varies by model complexity',
  icon: 'brain',
  },
  {
@@ -528,7 +528,7 @@ export const SERVICES = [
  priceRange: '₪₪₪₪',
  price: '60000',
  category: 'Mobile Development',
- duration: 'over a flexible duration',
+ duration: 'Depends on app scope',
  icon: 'smartphone',
  },
  {
@@ -545,7 +545,7 @@ export const SERVICES = [
  priceRange: '₪₪₪',
  price: '0',
  category: 'Business Acceleration',
- duration: 'over a flexible duration',
+ duration: 'Varies by venture stage',
  icon: 'trending-up',
  },
  {
@@ -581,7 +581,7 @@ export const SERVICES = [
  priceRange: '₪₪₪₪₪',
  price: '100000',
  category: 'Healthcare Innovation',
- duration: 'over a flexible duration',
+ duration: 'Varies by regulatory pathway',
  icon: 'heart-pulse',
  featured: true,
  partnership: 'Leumit Health Services',
@@ -706,7 +706,7 @@ export const FAQ_ITEMS = [
  },
  answer: {
  he: 'פיתוח MVP אופייני לוקח 6-12 שבועות, תלוי במורכבות. ב-WeCcelerate אנו משתמשים במתודולוגיות Agile ו-Lean Startup כדי לספק מוצר עובד במהירות, לקבל משוב מהשוק ולשפר באופן מתמיד.',
- en: 'A typical MVP development takes in adjusted timelines, depending on complexity. At WeCcelerate we use Agile and Lean Startup methodologies to deliver a working product quickly, get market feedback, and continuously improve.',
+ en: 'The pace of MVP development depends on product complexity. At WeCcelerate we use Agile and Lean Startup methodologies to deliver a working product quickly, get market feedback, and continuously improve.',
  },
  },
  {

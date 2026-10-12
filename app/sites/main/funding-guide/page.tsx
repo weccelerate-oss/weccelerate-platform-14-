@@ -129,7 +129,7 @@ export default function FundingGuidePillar() {
  id: 'non-dilutive',
  title: 'מימון Non-Dilutive — גרנטים של רשות החדשנות',
  summary:
- 'הון בלי דילול: קרן המו"פ, חממה טכנולוגית, ומסלולי R&D. עד scope tailored לשנה ללא ויתור על מניות.',
+ 'הון בלי דילול: קרן המו"פ, חממה טכנולוגית, ומסלולי R&D. מימון משמעותי למו"פ ללא ויתור על מניות.',
  slugs: ['grants-rashut-hachadshanut'],
  },
  ];

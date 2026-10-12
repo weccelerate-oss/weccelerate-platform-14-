@@ -52,7 +52,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Startup',
  hebrew: 'סטארטאפ',
  definition:
- 'A sub-category of venture — specifically one aiming for exponential growth and a scope tailored exit. Characterized by high burn rate, search for product-market fit, and venture-capital funding.',
+ 'A sub-category of venture — specifically one aiming for exponential growth and a large exit. Characterized by high burn rate, search for product-market fit, and venture-capital funding.',
  guideHebrewSlug: 'mah-ze-startup',
  category: 'core',
  },
@@ -70,7 +70,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Accelerator',
  hebrew: 'מאיץ סטארטאפים',
  definition:
- 'A time-bounded program (over a flexible duration) providing mentorship, seed capital, and a Demo Day to startups in cohorts. Israeli examples: 8200 EISP, MassChallenge, The Junction.',
+ 'A fixed-length program providing mentorship, seed capital, and a Demo Day to startups in cohorts. Israeli examples: 8200 EISP, MassChallenge, The Junction.',
  guideHebrewSlug: 'hashvaat-acceleratorim',
  category: 'core',
  },
@@ -114,7 +114,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'MVP — Minimum Viable Product',
  hebrew: 'MVP / מוצר מינימלי',
  definition:
- 'The simplest version of a product that can test the core value hypothesis with real users. The goal: not a finished product, but a working artifact you can show to users and investors. Built in in adjusted timelines, scope tailoredK budget for a typical Israeli startup.',
+ 'The simplest version of a product that can test the core value hypothesis with real users. The goal: not a finished product, but a working artifact you can show to users and investors. Built lean and fast, on a budget that depends on scope and complexity.',
  guideHebrewSlug: 'eich-bonim-mvp',
  category: 'product',
  },
@@ -132,7 +132,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'CTO as a Service',
  hebrew: 'CTO חלקי',
  definition:
- 'Model where a startup without a technical co-founder hires a fractional CTO for 10-20 hours per week. The CTO makes architecture decisions, hires the first team, and represents the technical side to investors. Cost: scope tailoredK/month.',
+ 'Model where a startup without a technical co-founder hires a fractional CTO for 10-20 hours per week. The CTO makes architecture decisions, hires the first team, and represents the technical side to investors. Cost is typically a fraction of a full-time CTO salary.',
  guideHebrewSlug: 'cto-as-a-service',
  category: 'product',
  },
@@ -151,7 +151,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Seed Round',
  hebrew: 'סיד / Seed',
  definition:
- 'First substantial fundraising round. In Israel 2026: scope tailored raised, pre-money valuation scope tailored. Required after MVP and initial traction. Comes after Pre-Seed (FFF + Angels) and before Series A.',
+ 'First substantial fundraising round. Round size and pre-money valuation vary with sector, team, and traction. Required after MVP and initial traction. Comes after Pre-Seed (FFF + Angels) and before Series A.',
  guideHebrewSlug: 'eich-mgayisim-mashkim',
  category: 'funding',
  },
@@ -160,7 +160,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Series A',
  hebrew: 'סבב A / Series A',
  definition:
- 'Second fundraising round, after Product-Market Fit is proven. In Israel 2026: scope tailored, pre-money valuation scope tailored. Requires scope tailored ARR, 30%+ D30 retention, and a team of 8-15. Lasts over a flexible duration end-to-end.',
+ 'Second fundraising round, after Product-Market Fit is proven. Round size and pre-money valuation are substantially higher than at Seed. Requires proven recurring revenue (ARR), 30%+ D30 retention, and a team of 8-15. The fundraising process itself takes time and calls for early preparation.',
  guideHebrewSlug: 'giyus-series-a',
  category: 'funding',
  },
@@ -222,7 +222,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Exit',
  hebrew: 'אקזיט',
  definition:
- 'Sale of the company (M&A) or initial public offering (IPO). In Israel, M&A — depends on sector and stage. Mega-exit: scope tailoredB+. Average time from Seed to exit: 7-12 years. we work with startups across all stages.',
+ 'Sale of the company (M&A) or initial public offering (IPO). In Israel, M&A — depends on sector and stage. Mega-exit: deals worth billions of dollars. Average time from Seed to exit: 7-12 years. we work with startups across all stages.',
  guideHebrewSlug: 'exit-startup',
  category: 'funding',
  },
@@ -242,7 +242,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'TAM — Total Addressable Market',
  hebrew: 'שוק יעד כולל',
  definition:
- 'The total global potential market for a product. Meaning: if 100% of the market buys, how much revenue does it generate. Investors require TAM of scope tailored to consider investing.',
+ 'The total global potential market for a product. Meaning: if 100% of the market buys, how much revenue does it generate. Investors look for a TAM large enough to justify the investment.',
  category: 'metrics',
  },
  {
@@ -318,7 +318,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Delaware Flip',
  hebrew: 'Delaware Flip',
  definition:
- 'Process of forming a US holding company (Delaware C-Corp) that owns the Israeli company. Often required before Series A if investors are American. Cost: scope tailoredK in legal fees. Best deferred until truly needed.',
+ 'Process of forming a US holding company (Delaware C-Corp) that owns the Israeli company. Often required before Series A if investors are American. It involves significant legal fees. Best deferred until truly needed.',
  guideHebrewSlug: 'delaware-flip',
  category: 'legal',
  },
@@ -337,7 +337,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Helsinki Committee — Israeli IRB',
  hebrew: 'ועדת הלסינקי',
  definition:
- 'The Israeli ethical committee approving medical research with humans or identifiable data. Equivalent to the US IRB. Approval process: over a flexible duration. Required before any clinical trial or access to medical data.',
+ 'The Israeli ethical committee approving medical research with humans or identifiable data. Equivalent to the US IRB. The length of the approval process depends on the study\'s complexity. Required before any clinical trial or access to medical data.',
  guideHebrewSlug: 'vaadat-helsinki-madrich',
  category: 'medtech',
  },
@@ -346,7 +346,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'FDA 510(k) Premarket Notification',
  hebrew: 'FDA 510(k)',
  definition:
- 'The most common FDA pathway for medical devices. Requires demonstrating "substantial equivalence" to an existing predicate device. Review: over a flexible duration. Preparation: over a flexible duration. Cost: scope tailored including testing and regulatory consulting.',
+ 'The most common FDA pathway for medical devices. Requires demonstrating "substantial equivalence" to an existing predicate device. Preparation usually takes longer than the review itself, and costs, including testing and regulatory consulting, vary by device.',
  guideHebrewSlug: 'fda-510k-madrich',
  category: 'medtech',
  },
@@ -355,7 +355,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'CE Marking',
  hebrew: 'סימון CE',
  definition:
- 'Regulatory marking required for selling medical devices in Europe. Under MDR (Regulation 2017/745). Requires ISO 13485, ISO 14971, IEC 62304 (if software), Notified Body, and clinical evaluation. Process: over a flexible duration.',
+ 'Regulatory marking required for selling medical devices in Europe. Under MDR (Regulation 2017/745). Requires ISO 13485, ISO 14971, IEC 62304 (if software), Notified Body, and clinical evaluation. The process is lengthy, especially for higher-risk classes.',
  category: 'medtech',
  },
  {
@@ -363,7 +363,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'ISO 13485',
  hebrew: 'ISO 13485',
  definition:
- 'International quality management standard specific to medical devices. Required for CE marking, preferred for FDA. Requires a complete QMS (Quality Management System). Setup: over a flexible duration, cost: scope tailoredK.',
+ 'International quality management standard specific to medical devices. Required for CE marking, preferred for FDA. Requires a complete QMS (Quality Management System). Setup is a significant project whose duration and cost depend on company size and product complexity.',
  category: 'medtech',
  },
  {
@@ -371,7 +371,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'MedTech',
  hebrew: 'מיזם רפואי',
  definition:
- 'The medical technology field — devices, software, or products for clinical use. Requires regulation (FDA, CE, Israeli MOH), long development period (3-5 years), and significant capital (scope tailored for FDA). Israel leads globally per capita.',
+ 'The medical technology field — devices, software, or products for clinical use. Requires regulation (FDA, CE, Israeli MOH), long development period (3-5 years), and significant capital (especially for FDA clearance). Israel leads globally per capita.',
  guideHebrewSlug: 'mizam-refui',
  category: 'medtech',
  },
@@ -416,7 +416,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'Angel Investor',
  hebrew: 'אנג\'ל',
  definition:
- 'A wealthy private investor who invests their own money in early-stage startups — usually Pre-Seed or Seed. Average investment: scope tailoredK. Israel has hundreds of active angels, many of them entrepreneurs who have made an exit.',
+ 'A wealthy private investor who invests their own money in early-stage startups — usually Pre-Seed or Seed. Check sizes vary widely from one angel to another. Israel has hundreds of active angels, many of them entrepreneurs who have made an exit.',
  category: 'people',
  },
  {
@@ -424,7 +424,7 @@ const TERMS: GlossaryTerm[] = [
  english: 'VC — Venture Capital',
  hebrew: 'הון סיכון',
  definition:
- 'Professional funds investing in startups for equity. Israel has 100+ active funds. Examples: TLV Partners, Pitango, Vertex, JVP, Ibex. Rounds: Seed (scope tailored), Series A (scope tailored), Series B (scope tailored).',
+ 'Professional funds investing in startups for equity. Israel has 100+ active funds. Examples: TLV Partners, Pitango, Vertex, JVP, Ibex. Rounds: Seed, Series A, and Series B, with check sizes growing at each stage.',
  category: 'people',
  },
  {

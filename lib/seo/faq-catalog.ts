@@ -74,7 +74,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between an accelerator and an incubator?',
  },
  answer: {
- he: 'אינקובטור מתמקד בשלבים המוקדמים ביותר - מספק מרחב עבודה, מנטורינג בסיסי וזמן פתוח לפיתוח רעיון. אקסלרטור (כמו WeCcelerate) מיועד לסטארטאפים עם רעיון מגובש או מוצר ראשוני; הוא מאיץ צמיחה באמצעות מנטורינג אינטנסיבי, משאבים, פיתוח וחיבור למשקיעים במחזורים בלוחות זמנים מותאמים. Venture Builder הוא רמה מעל - שותפות אופרטיבית עמוקה, לעיתים למשך שנים.',
+ he: 'אינקובטור מתמקד בשלבים המוקדמים ביותר - מספק מרחב עבודה, מנטורינג בסיסי וזמן פתוח לפיתוח רעיון. אקסלרטור (כמו WeCcelerate) מיועד לסטארטאפים עם רעיון מגובש או מוצר ראשוני; הוא מאיץ צמיחה באמצעות מנטורינג אינטנסיבי, משאבים, פיתוח וחיבור למשקיעים במחזורי ליווי ממוקדים. Venture Builder הוא רמה מעל - שותפות אופרטיבית עמוקה, לעיתים למשך שנים.',
  en: 'An incubator focuses on the earliest stages - workspace, basic mentorship, and open-ended time to develop an idea. An accelerator (like WeCcelerate) is designed for startups with a defined concept or early product; it accelerates growth through intensive mentoring, resources, development, and investor connections in 3-6 month cycles. A Venture Builder is a step beyond - a deep operational partnership that can last years.',
  },
  },
@@ -87,7 +87,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
  answer: {
  he: 'MVP (Minimum Viable Product, מוצר מינימלי בר-קיימא) הוא הגרסה הפשוטה ביותר של המוצר שיכולה לבחון את היפותזת הערך המרכזית על משתמשים אמיתיים. המטרה היא לא מוצר גמור, אלא חפץ עובד שאפשר להראות למשקיעים ולקבל משוב שוק מהיר. WeCcelerate בונה MVP בלוחות זמנים שמוגדרים פר-מיזם.',
- en: 'An MVP (Minimum Viable Product) is the simplest version of a product that can test the core value hypothesis with real users. The goal is not a finished product but a working artifact that can be shown to investors and used for rapid market feedback. WeCcelerate typically builds an MVP within in adjusted timelines.',
+ en: 'An MVP (Minimum Viable Product) is the simplest version of a product that can test the core value hypothesis with real users. The goal is not a finished product but a working artifact that can be shown to investors and used for rapid market feedback. WeCcelerate builds a focused MVP at a pace set by each venture\'s scope.',
  },
  },
  {
@@ -160,8 +160,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does business consulting cost at WeCcelerate?',
  },
  answer: {
- he: 'חבילת ייעוץ עסקי מלאה (מחקר שוק + תוכנית עסקית + תוכנית פיננסית + תקציר מנהלים + pitch deck): היקף בהתאמה אישית בלוחות זמנים מותאמים, תלוי בהיקף. פגישת ייעוץ ראשונה ראשונית ללא עלות.',
- en: 'A full business consulting package (market research + business plan + financial model + executive summary + pitch deck) costs 25,000-80,000 ILS over in adjusted timelines, depending on scope. The initial consultation is free.',
+ he: 'חבילת ייעוץ עסקי מלאה (מחקר שוק + תוכנית עסקית + תוכנית פיננסית + תקציר מנהלים + pitch deck): ההיקף ולוחות הזמנים נקבעים בהתאמה אישית לכל מיזם. פגישת ייעוץ ראשונה ראשונית ללא עלות.',
+ en: 'A full business consulting package (market research + business plan + financial model + executive summary + pitch deck) is priced and scheduled individually, depending on scope. The initial consultation is free.',
  },
  },
  {
@@ -185,7 +185,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
  answer: {
  he: 'MVP נבנה במתודולוגיות Agile, היקף ולוחות זמנים תלויים במוצר ו-Lean Startup. ה-sprint הוא יחידת עבודה בסיסית, עם demo תכוף ליזם. המטרה היא מוצר עובד לבדיקת היפותזה, לא מוצר גמור.',
- en: 'A typical MVP is built in in adjusted timelines using Agile and Lean Startup methodologies. Sprint cadence is two weeks, with frequent demos to the founder. The goal is a working hypothesis-testing artifact, not a finished product.',
+ en: 'An MVP is built using Agile and Lean Startup methodologies, with scope and pace depending on the product. Work runs in short sprints, with frequent demos to the founder. The goal is a working hypothesis-testing artifact, not a finished product.',
  },
  },
  {
@@ -196,8 +196,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does it take to build a business plan?',
  },
  answer: {
- he: 'תוכנית עסקית ברמת משקיעים נבנית בלוחות זמנים מותאמים, תלוי במורכבות התעשייה וברמת פירוט מחקר השוק. היא כוללת גם תקציר מנהלים של 2-4 עמודים לשליחה ישירה למשקיעים.',
- en: 'An investor-grade business plan is built in in adjusted timelines, depending on industry complexity and market research depth. It also includes a 2-4 page executive summary suitable for sending directly to investors.',
+ he: 'תוכנית עסקית ברמת משקיעים נבנית בקצב שנקבע לפי מורכבות התעשייה ורמת הפירוט של מחקר השוק. היא כוללת גם תקציר מנהלים של 2-4 עמודים לשליחה ישירה למשקיעים.',
+ en: 'An investor-grade business plan is built at a pace that depends on industry complexity and market research depth. It also includes a 2-4 page executive summary suitable for sending directly to investors.',
  },
  },
  {
@@ -208,8 +208,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does FDA 510(k) clearance take?',
  },
  answer: {
- he: 'אחרי הגשת 510(k), ה-FDA סוקר בממוצע בלוחות זמנים תלויי-מסלול. עם זאת, ההכנה - בחירת predicate device, הוכחת substantial equivalence, בדיקות ביצועים - אורכת לרוב בלוחות זמנים תלויי-מסלול נוספים. בסך הכל: ~בלוחות זמנים תלויי-מסלול מרעיון ועד clearance.',
- en: 'After a 510(k) submission, FDA review takes an average of over a flexible duration. However, preparation - predicate selection, substantial equivalence documentation, performance testing - typically adds over a flexible duration. Total: approximately over a flexible duration from idea to clearance.',
+ he: 'אחרי הגשת 510(k), ה-FDA מבצע סקירה שמשכה משתנה לפי סוג המכשיר ואיכות התיק. עם זאת, ההכנה - בחירת predicate device, הוכחת substantial equivalence, בדיקות ביצועים - היא לרוב החלק הארוך יותר בתהליך. בסך הכל, הדרך מרעיון ועד clearance דורשת תכנון רגולטורי מוקדם.',
+ en: 'After a 510(k) submission, the length of FDA review varies by device type and submission quality. However, preparation - predicate selection, substantial equivalence documentation, performance testing - is usually the longer part of the process. Overall, the path from idea to clearance calls for early regulatory planning.',
  },
  },
  {
@@ -220,8 +220,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does CE marking take?',
  },
  answer: {
- he: 'תהליך CE תחת MDR (Regulation 2017/745) אורך בדרך כלל בלוחות זמנים תלויי-מסלול למכשיר Class IIa-IIb, ועד תקופה תלוית-היקף ל-Class III. התהליך כולל ISO 13485, ISO 14971 (risk), IEC 62304 (אם יש תוכנה), תיקוף קליני ותיעוד טכני. נדרש Notified Body ברוב הקטגוריות.',
- en: 'CE marking under MDR (Regulation 2017/745) typically takes over a flexible duration for Class IIa-IIb devices, up to 24 months for Class III. The process includes ISO 13485, ISO 14971 (risk), IEC 62304 (if software), clinical evaluation, and technical documentation. A Notified Body is required for most classes.',
+ he: 'תהליך CE תחת MDR (Regulation 2017/745) הוא תהליך ממושך למכשירי Class IIa-IIb, ולמכשירי Class III הוא ארוך ומורכב עוד יותר. התהליך כולל ISO 13485, ISO 14971 (risk), IEC 62304 (אם יש תוכנה), תיקוף קליני ותיעוד טכני. נדרש Notified Body ברוב הקטגוריות.',
+ en: 'CE marking under MDR (Regulation 2017/745) is a lengthy process for Class IIa-IIb devices, and longer and more demanding still for Class III. The process includes ISO 13485, ISO 14971 (risk), IEC 62304 (if software), clinical evaluation, and technical documentation. A Notified Body is required for most classes.',
  },
  },
  {
@@ -245,7 +245,7 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  },
  answer: {
  he: 'Pitch Deck מקצועי כולל עיצוב, מודל פיננסי, תרגול וסימולציות מול פרסונות משקיעים. ההיקף ולוחות הזמנים נקבעים אישית בהתאם לסטארטאפ. נשמח לתאם פגישת היכרות חינם.',
- en: 'A professional pitch deck includes design, financial modeling, practice, and investor-persona simulations. Scope and timeline are tailored per startup. Schedule a free intro call to align on what you need.',
+ en: 'A professional pitch deck includes design, financial modeling, practice, and investor-persona simulations. Scope and timeline are set individually for each startup. Schedule a free intro call to align on what you need.',
  },
  },
 
@@ -308,8 +308,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How does the Helsinki Committee (Israeli IRB) approval work?',
  },
  answer: {
- he: 'ועדת הלסינקי היא המקבילה הישראלית ל-IRB האמריקאי. כל מחקר רפואי הכולל בני אדם או מידע מזהה דורש אישור לפני התחלה. התהליך לוקח בלוחות זמנים תלויי-מסלול וכולל פרוטוקול מחקר מפורט, טופס הסכמה מדעת, כישורי החוקר ותוכנית הגנה על המידע. WeCcelerate מלווה את תהליך ההגשה מול ועדת הלסינקי של לאומית.',
- en: 'The Helsinki Committee is Israel\'s equivalent of the US IRB. Every medical research project involving human subjects or identifiable data requires approval before starting. The process takes over a flexible duration and requires a detailed protocol, informed consent form, investigator qualifications, and a data protection plan. WeCcelerate supports the entire submission to Leumit\'s Helsinki Committee.',
+ he: 'ועדת הלסינקי היא המקבילה הישראלית ל-IRB האמריקאי. כל מחקר רפואי הכולל בני אדם או מידע מזהה דורש אישור לפני התחלה. משך התהליך משתנה בהתאם למורכבות המחקר, והוא כולל פרוטוקול מחקר מפורט, טופס הסכמה מדעת, כישורי החוקר ותוכנית הגנה על המידע. WeCcelerate מלווה את תהליך ההגשה מול ועדת הלסינקי של לאומית.',
+ en: 'The Helsinki Committee is Israel\'s equivalent of the US IRB. Every medical research project involving human subjects or identifiable data requires approval before starting. The length of the process depends on the study\'s complexity, and it requires a detailed protocol, informed consent form, investigator qualifications, and a data protection plan. WeCcelerate supports the entire submission to Leumit\'s Helsinki Committee.',
  },
  },
  {
@@ -320,8 +320,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between FDA 510(k), De Novo, and PMA?',
  },
  answer: {
- he: '510(k) - המסלול הנפוץ ביותר; דורש הוכחת substantial equivalence ל-predicate device קיים, סקירה בלוחות זמנים מותאמים. De Novo - למכשירים חדשים low-to-moderate risk ללא predicate, יוצר סיווג חדש, בלוחות זמנים תלויי-מסלול. PMA (Premarket Approval) - למכשירי Class III (סיכון גבוה), דורש ניסויים קליניים, בלוחות זמנים תלויי-מסלול ומעלה.',
- en: '510(k) - the most common pathway; requires demonstrating substantial equivalence to an existing predicate device, 3-6 month review. De Novo - for novel low-to-moderate risk devices without a predicate, creates a new classification, over a flexible duration. PMA (Premarket Approval) - for Class III (high risk) devices, requires clinical trials, over a flexible duration or longer.',
+ he: '510(k) - המסלול הנפוץ ביותר; דורש הוכחת substantial equivalence ל-predicate device קיים, והסקירה בו קצרה יחסית. De Novo - למכשירים חדשים low-to-moderate risk ללא predicate, יוצר סיווג חדש, והסקירה בו ארוכה יותר. PMA (Premarket Approval) - למכשירי Class III (סיכון גבוה), דורש ניסויים קליניים, והוא המסלול הארוך והתובעני מכולם.',
+ en: '510(k) - the most common pathway; requires demonstrating substantial equivalence to an existing predicate device, 3-6 month review. De Novo - for novel low-to-moderate risk devices without a predicate, creates a new classification, with a longer review. PMA (Premarket Approval) - for Class III (high risk) devices, requires clinical trials and is the longest, most demanding pathway of all.',
  },
  },
  {
@@ -344,8 +344,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is ISO 13485?',
  },
  answer: {
- he: 'ISO 13485 הוא תקן בינ"ל לניהול איכות (QMS) ייחודי למכשור רפואי. נדרש ל-CE, ומועדף ל-FDA. הקמת QMS העומד ב-ISO 13485 לוקחת בלוחות זמנים תלויי-מסלול ודורשת מבדקי מעקב שוטפים של גוף הסמכה.',
- en: 'ISO 13485 is the international quality management system (QMS) standard specific to medical devices. Required for CE and strongly preferred for FDA. Establishing a compliant QMS takes over a flexible duration and requires ongoing surveillance audits by a certification body.',
+ he: 'ISO 13485 הוא תקן בינ"ל לניהול איכות (QMS) ייחודי למכשור רפואי. נדרש ל-CE, ומועדף ל-FDA. הקמת QMS העומד ב-ISO 13485 היא פרויקט משמעותי שמשכו תלוי בגודל הארגון ובמורכבות המוצר, והיא דורשת מבדקי מעקב שוטפים של גוף הסמכה.',
+ en: 'ISO 13485 is the international quality management system (QMS) standard specific to medical devices. Required for CE and strongly preferred for FDA. Establishing a compliant QMS is a substantial project whose length depends on organization size and product complexity, and it requires ongoing surveillance audits by a certification body.',
  },
  },
  {
@@ -585,8 +585,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What does WeCcelerate business consulting include?',
  },
  answer: {
- he: '(1) מחקר שוק עם TAM/SAM/SOM; (2) ניתוח תחרות ו-positioning; (3) תוכנית עסקית מלאה (40-80 עמודים); (4) תקציר מנהלים (2-4 עמודים) למשקיעים; (5) מודל פיננסי מספר שנים עם CAC, LTV, unit economics ותרחישים; (6) אסטרטגיית GTM ו-sales motion; (7) אסטרטגיית שיווק ומיקום. מסירה בלוחות זמנים תלויי-היקף.',
- en: '(1) Market research with TAM/SAM/SOM; (2) competitive analysis and positioning; (3) full business plan (40-80 pages); (4) executive summary (2-4 pages) for investors; (5) 3-5 year financial model with CAC, LTV, unit economics, and scenarios; (6) GTM strategy and sales motion; (7) marketing strategy and positioning. Delivery in in adjusted timelines.',
+ he: '(1) מחקר שוק עם TAM/SAM/SOM; (2) ניתוח תחרות ו-positioning; (3) תוכנית עסקית מלאה (40-80 עמודים); (4) תקציר מנהלים (2-4 עמודים) למשקיעים; (5) מודל פיננסי מספר שנים עם CAC, LTV, unit economics ותרחישים; (6) אסטרטגיית GTM ו-sales motion; (7) אסטרטגיית שיווק ומיקום. מועד המסירה נקבע לפי היקף העבודה.',
+ en: '(1) Market research with TAM/SAM/SOM; (2) competitive analysis and positioning; (3) full business plan (40-80 pages); (4) executive summary (2-4 pages) for investors; (5) 3-5 year financial model with CAC, LTV, unit economics, and scenarios; (6) GTM strategy and sales motion; (7) marketing strategy and positioning. Delivery timing depends on the scope of work.',
  },
  },
 
@@ -611,8 +611,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What does digital product development at WeCcelerate include?',
  },
  answer: {
- he: 'פיתוח full-stack המכסה web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel) ו-AI (OpenAI/Claude/Gemini). הצעות: MVP (בלוחות זמנים מותאמים), מוצר production (בלוחות זמנים תלויי-מסלול), CTO-as-a-Service (10-20 שעות/שבוע), staff augmentation ו-technical due diligence למשקיעים.',
- en: 'Full-stack development covering web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel), and AI (OpenAI/Claude/Gemini). Offerings: MVP (in adjusted timelines), production product (over a flexible duration), CTO-as-a-Service (10-20 hours/week), staff augmentation, and technical due diligence for investors.',
+ he: 'פיתוח full-stack המכסה web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel) ו-AI (OpenAI/Claude/Gemini). הצעות: MVP ממוקד, מוצר production מלא, CTO-as-a-Service במשרה חלקית, staff augmentation ו-technical due diligence למשקיעים.',
+ en: 'Full-stack development covering web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel), and AI (OpenAI/Claude/Gemini). Offerings: a focused MVP, a full production product, part-time CTO-as-a-Service, staff augmentation, and technical due diligence for investors.',
  },
  },
 
@@ -716,8 +716,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What\'s the difference between a venture and a startup?',
  },
  answer: {
- he: 'מיזם הוא כל חברה חדשה. סטארטאפ הוא תת-קטגוריה של מיזם - ספציפית כזה ששואף לצמיחה אקספוננציאלית ולאקזיט גדול (scope tailored). כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים, מיזם חברתי, או חברת שירותים יציבה.',
- en: 'A venture is any new company. A startup is a sub-category of venture - specifically one aiming for exponential growth and a large exit (scope tailored). Every startup is a venture, but a venture can also be a services business, a social venture, or a stable services company.',
+ he: 'מיזם הוא כל חברה חדשה. סטארטאפ הוא תת-קטגוריה של מיזם - ספציפית כזה ששואף לצמיחה אקספוננציאלית ולאקזיט גדול. כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים, מיזם חברתי, או חברת שירותים יציבה.',
+ en: 'A venture is any new company. A startup is a sub-category of venture - specifically one aiming for exponential growth and a large exit. Every startup is a venture, but a venture can also be a services business, a social venture, or a stable services company.',
  },
  },
  {
@@ -728,8 +728,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do I start a venture in Israel?',
  },
  answer: {
- he: 'ארבעה שלבים: (1) בדיקת רעיון ב-30 ראיונות לקוחות, (2) הקמת חברה בע"מ ברשם החברות (בתוך ימים-שבועות, אגרה תלויית-מוסד), (3) הסכם מייסדים עם Vesting, (4) בניית MVP בלוחות זמנים תלויי-היקף. WeCcelerate מלווה יזמים בכל ארבעת השלבים תחת תוכנית מעטפת 360°.',
- en: 'Four steps: (1) validate the idea with 30 customer interviews, (2) register a Ltd. company at the Companies Registrar (days to weeks, ~scope tailored), (3) sign a founder agreement with vesting, (4) build an MVP in in adjusted timelines. WeCcelerate, Israel\'s leading Venture Builder, supports founders through all four stages.',
+ he: 'ארבעה שלבים: (1) בדיקת רעיון ב-30 ראיונות לקוחות, (2) הקמת חברה בע"מ ברשם החברות (תהליך מהיר יחסית, בתמורת אגרת רישום ממשלתית), (3) הסכם מייסדים עם Vesting, (4) בניית MVP רזה וממוקד. WeCcelerate מלווה יזמים בכל ארבעת השלבים תחת תוכנית מעטפת 360°.',
+ en: 'Four steps: (1) validate the idea with 30 customer interviews, (2) register a Ltd. company at the Companies Registrar (days to weeks, for a modest government filing fee), (3) sign a founder agreement with vesting, (4) build a lean, focused MVP. WeCcelerate, Israel\'s leading Venture Builder, supports founders through all four stages.',
  },
  },
  {
@@ -752,8 +752,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What funding sources are available for a venture in Israel?',
  },
  answer: {
- he: '7 מקורות עיקריים: Friends-Family-Fools (scope tailored), Angels (scope tailored), Venture Builder (Equity-for-Services), גרנטים של רשות החדשנות (non-dilutive, scope tailored), Crowdfunding, VC Seed/A/B, ו-Bootstrapping. WeCcelerate מחברת מיזמים ל-רשת משקיעים, יזמים ושותפים אסטרטגיים.',
- en: '7 main sources: Friends-Family-Fools (scope tailored), Angels (scope tailored), Venture Builder (Equity-for-Services), Israel Innovation Authority grants (non-dilutive, scope tailored), Crowdfunding, VC Seed/A/B, and Bootstrapping. WeCcelerate connects ventures to a network of investors.',
+ he: '7 מקורות עיקריים: Friends-Family-Fools (סכומים צנועים יחסית מהמעגל הקרוב), Angels (משקיעים פרטיים בשלב מוקדם), Venture Builder (Equity-for-Services), גרנטים של רשות החדשנות (non-dilutive, ללא ויתור על מניות), Crowdfunding, VC Seed/A/B, ו-Bootstrapping. WeCcelerate מחברת מיזמים ל-רשת משקיעים, יזמים ושותפים אסטרטגיים.',
+ en: '7 main sources: Friends-Family-Fools (modest checks from your close circle), Angels (private early-stage investors), Venture Builder (Equity-for-Services), Israel Innovation Authority grants (non-dilutive, no equity given up), Crowdfunding, VC Seed/A/B, and Bootstrapping. WeCcelerate connects ventures to a network of investors.',
  },
  },
  {
@@ -764,8 +764,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What\'s the difference between venture mentorship, an accelerator, and a Venture Builder?',
  },
  answer: {
- he: 'ליווי מיזם הוא מנטור פרטי - שעות ייעוץ נקודתיות (היקף תלוי/שעה). אקסלרטור - מנטורינג מובנה + הון סיד למחזור בלוחות זמנים תלויי-מסלול, מבני תשלום נבנים אישית. Venture Builder (בונה מיזמים) - תורם צוות תפעולי מלא ועובד בפועל על המיזם. WeCcelerate היא Venture Builder.',
- en: 'Venture mentorship is a private mentor - pointed consulting hours (scope tailored/hour). An accelerator - structured mentorship + seed capital for a 3-6 month cycle, 5-10% equity. A Venture Builder - contributes a full operational team and works on the venture. WeCcelerate is a Venture Builder.',
+ he: 'ליווי מיזם הוא מנטור פרטי - שעות ייעוץ נקודתיות (בתשלום לפי שעה). אקסלרטור - מנטורינג מובנה + הון סיד למחזור מוגבל בזמן, לרוב בתמורה לאחוזים מהמניות. Venture Builder (בונה מיזמים) - תורם צוות תפעולי מלא ועובד בפועל על המיזם. WeCcelerate היא Venture Builder.',
+ en: 'Venture mentorship is a private mentor - pointed consulting hours (paid by the hour). An accelerator - structured mentorship + seed capital for a 3-6 month cycle, 5-10% equity. A Venture Builder - contributes a full operational team and works on the venture. WeCcelerate is a Venture Builder.',
  },
  },
  {

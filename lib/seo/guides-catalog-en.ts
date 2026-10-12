@@ -130,7 +130,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  {
  heading: 'The economics: why Venture Builders take 20-50% equity',
  paragraphs: [
- 'Running a Venture Builder is expensive. An in-house team of 15-25 operators (engineers, designers, growth marketers, finance) costs scope tailored per year in Israel. That team is shared across the portfolio startups, but the overhead is still substantial.',
+ 'Running a Venture Builder is expensive. An in-house team of 15-25 operators (engineers, designers, growth marketers, finance) is a major annual payroll commitment in Israel. That team is shared across the portfolio startups, but the overhead is still substantial.',
  'The equity stake has to justify that overhead. Typical terms in Israel in 2026: 20-30% for a light-touch Venture Builder (idea-stage + MVP), 30-50% for a heavy-touch Venture Builder (idea-stage through Series A). The human founder keeps the majority, but not the traditional 80-90% that an accelerator would allow.'],
  },
  {
@@ -157,7 +157,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How is a Venture Builder different from an accelerator?',
- a: 'An accelerator mentors an existing team through a fixed program (usually 3 months). A Venture Builder co-founds the startup - contributing daily operational work for over a flexible duration. The Venture Builder takes much more equity but gives much more operational value.',
+ a: 'An accelerator mentors an existing team through a fixed program (usually 3 months). A Venture Builder co-founds the startup - contributing daily operational work over the long term. The Venture Builder takes much more equity but gives much more operational value.',
  },
  {
  q: 'What equity does a Venture Builder take?',
@@ -173,7 +173,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'Do Venture Builders invest money or just provide team?',
- a: 'Both. Most Venture Builders contribute both an operational team AND initial capital (usually scope tailored as an initial "seed from the studio"). Later rounds come from traditional VCs.',
+ a: 'Both. Most Venture Builders contribute both an operational team AND initial capital (usually a modest initial "seed from the studio"). Later rounds come from traditional VCs.',
  },
  {
  q: 'How do I apply to a Venture Builder?',
@@ -217,13 +217,13 @@ export const GUIDES_EN: readonly GuideEn[] = [
  heading: 'Step 1: Define your regulatory pathway before building anything',
  paragraphs: [
  'The single biggest mistake in MedTech is building product before understanding which regulatory class it falls into. A MedTech startup that picks the wrong class wastes 2+ years of engineering. Before writing a line of code, decide: Are you FDA Class I, II, or III? Does your device need 510(k), De Novo, or PMA? Are you CE Class I, IIa, IIb, or III under MDR?',
- 'Class I devices (band-aids, thermometers) typically need only registration. Class II (most imaging, many digital health apps) need 510(k) clearance in the US and a Notified Body assessment in the EU. Class III (implantables, life-sustaining devices) need PMA in the US - a 2-4 year process costing scope tailored. Your business plan and funding needs are ENTIRELY different depending on class.'],
+ 'Class I devices (band-aids, thermometers) typically need only registration. Class II (most imaging, many digital health apps) need 510(k) clearance in the US and a Notified Body assessment in the EU. Class III (implantables, life-sustaining devices) need PMA in the US - a 2-4 year process with a very significant cost. Your business plan and funding needs are ENTIRELY different depending on class.'],
  },
  {
  heading: 'Step 2: The Helsinki Committee approval (Israel-specific)',
  paragraphs: [
  'Any clinical trial or pilot in Israel requires approval from the local hospital\'s Helsinki Committee (named after the Declaration of Helsinki). This is an institutional review board (IRB) that evaluates the ethical aspects, patient safety, and scientific merit of the proposed study.',
- 'The process takes over a flexible duration for a standard protocol, and involves: (1) submitting a detailed protocol document (50-80 pages), (2) informed consent forms translated to Hebrew, Arabic, and Russian, (3) investigator CVs, (4) device safety data, (5) insurance coverage. WeCcelerate-Leumit Accelerator dramatically shortens this timeline (typically to in adjusted timelines) because our partnership pre-negotiates hospital access and provides templated protocols.'],
+ 'For a standard protocol the process typically takes several months, and involves: (1) submitting a detailed protocol document (50-80 pages), (2) informed consent forms translated to Hebrew, Arabic, and Russian, (3) investigator CVs, (4) device safety data, (5) insurance coverage. WeCcelerate-Leumit Accelerator helps streamline this process because our partnership pre-negotiates hospital access and provides templated protocols.'],
  },
  {
  heading: 'Step 3: Secure clinical data (the biggest bottleneck)',
@@ -234,8 +234,8 @@ export const GUIDES_EN: readonly GuideEn[] = [
  {
  heading: 'Step 4: Funding MedTech in Israel',
  paragraphs: [
- 'MedTech startups raise differently than SaaS. Typical progression: (1) Government grants - Israel Innovation Authority (up to 50-85% of R&D costs, non-dilutive). (2) Seed round - scope tailored from specialized MedTech angels and micro-VCs (aMoon, TauVentures, Alpha Capital). (3) Series A - scope tailored from dedicated MedTech funds (OrbiMed, Entrée Capital, Pitango HealthTech). (4) Strategic partnership - late-stage rounds often include corporate VCs from pharma (J&J Innovation, Bayer Life Sciences).',
- 'Total capital needed to reach market for a Class II device: scope tailored over a multi-year horizon. For a Class III device: scope tailored+ over a multi-year horizon. Digital health startups (SaaS-like) can reach market for scope tailored in 2-3 years if regulation is minimal (Class I) or absent (pure wellness).'],
+ 'MedTech startups raise differently than SaaS. Typical progression: (1) Government grants - Israel Innovation Authority (up to 50-85% of R&D costs, non-dilutive). (2) Seed round - typically raised from specialized MedTech angels and micro-VCs (aMoon, TauVentures, Alpha Capital). (3) Series A - a larger round led by dedicated MedTech funds (OrbiMed, Entrée Capital, Pitango HealthTech). (4) Strategic partnership - late-stage rounds often include corporate VCs from pharma (J&J Innovation, Bayer Life Sciences).',
+ 'Total capital needed to bring a Class II device to market is substantial and is raised over a multi-year horizon. A Class III device requires considerably more, again over several years. Digital health startups (SaaS-like) can reach market with far less capital in 2-3 years if regulation is minimal (Class I) or absent (pure wellness).'],
  },
  {
  heading: 'Step 5: The Israeli MedTech network effect',
@@ -246,20 +246,20 @@ export const GUIDES_EN: readonly GuideEn[] = [
  howToSteps: [
  { name: 'Validate clinical need with 30+ physician interviews', text: 'Before any technology work, interview 30+ practicing physicians in your target specialty. Understand the workflow, the pain, and whether your proposed solution fits into the clinical routine.' },
  { name: 'Classify your device', text: 'Determine FDA class (I, II, III) and CE class (I, IIa, IIb, III). This drives every subsequent decision - regulatory pathway, clinical data needs, funding requirements.' },
- { name: 'Incorporate and build founding team', text: 'Israeli incorporation: days to weeks, ~scope tailored. Founding team should include a clinical co-founder (MD) or clinical advisor from day 1.' },
+ { name: 'Incorporate and build founding team', text: 'Israeli incorporation is quick and relatively inexpensive. Founding team should include a clinical co-founder (MD) or clinical advisor from day 1.' },
  { name: 'Secure non-dilutive funding', text: 'Apply to Israel Innovation Authority (50-85% of R&D), MAGNET consortia, and Horizon Europe. Non-dilutive funding extends runway significantly in MedTech.' },
- { name: 'Get Helsinki Committee approval', text: 'For any clinical pilot, submit to the hospital\'s Helsinki Committee. Plan for over a flexible duration (WeCcelerate-Leumit shortens this to in adjusted timelines).' },
+ { name: 'Get Helsinki Committee approval', text: 'For any clinical pilot, submit to the hospital\'s Helsinki Committee. Plan ahead - the process can take several months (WeCcelerate-Leumit helps streamline it).' },
  { name: 'Run a clinical pilot', text: 'Start with 20-50 patient pilot to generate safety + efficacy evidence. Use pilot data to support FDA submission and raise Seed funding.' },
- { name: 'Submit FDA 510(k) or CE', text: 'Average FDA 510(k) clearance timeline: over a flexible duration. CE under MDR: over a flexible duration via Notified Body. Budget: scope tailored per regulatory filing.' },
+ { name: 'Submit FDA 510(k) or CE', text: 'FDA 510(k) review and CE certification under MDR (via a Notified Body) each take meaningful time, and MDR is often the slower of the two. Budget for each regulatory filing as a significant line item.' },
  { name: 'Apply to WeCcelerate-Leumit', text: 'The fastest path to the Israeli MedTech ecosystem.', url: 'https://weccelerate.co.il/contact' }],
  faqs: [
  {
  q: 'How long does it take to start a MedTech startup in Israel?',
- a: 'From incorporation to FDA clearance of a Class II device: typically 3-5 years. Class I devices (minimal regulation): over a flexible duration. Class III: 5-10 years.',
+ a: 'From incorporation to FDA clearance of a Class II device: typically 3-5 years. Class I devices (minimal regulation): considerably shorter. Class III: 5-10 years.',
  },
  {
  q: 'How much capital do I need for a MedTech startup in Israel?',
- a: 'Class I digital health: scope tailored over a multi-year horizon. Class II: scope tailored over a multi-year horizon. Class III: scope tailored+ over a multi-year horizon.',
+ a: 'Capital needs scale with device class: Class I digital health requires the least, Class II considerably more, and Class III the most - in every case raised over a multi-year horizon.',
  },
  {
  q: 'What\'s the Helsinki Committee in Israel?',
@@ -305,7 +305,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  metaDescription:
  'The Israeli Helsinki Committee approves clinical trials under the Declaration of Helsinki. Complete guide: submission documents, timeline, required forms, patient consent, and how WeCcelerate-Leumit shortens the process.',
  speakableAnswer:
- 'The Helsinki Committee is Israel\'s institutional review board (IRB) for clinical trials. Every clinical trial or device pilot in Israel requires approval from the local hospital\'s Helsinki Committee. The standard timeline is over a flexible duration. Required documents: protocol (50-80 pages), informed consent forms in Hebrew/Arabic/Russian, investigator CVs, device safety data, and insurance coverage.',
+ 'The Helsinki Committee is Israel\'s institutional review board (IRB) for clinical trials. Every clinical trial or device pilot in Israel requires approval from the local hospital\'s Helsinki Committee. The standard process typically takes several months. Required documents: protocol (50-80 pages), informed consent forms in Hebrew/Arabic/Russian, investigator CVs, device safety data, and insurance coverage.',
  lastUpdated: '2026-04-24',
  readingTimeMinutes: 11,
  sections: [
@@ -325,13 +325,13 @@ export const GUIDES_EN: readonly GuideEn[] = [
  heading: 'The submission documents',
  paragraphs: [
  'A standard Helsinki submission package includes: (1) **Protocol document** - 50-80 pages describing study objective, design, statistical analysis plan, inclusion/exclusion criteria, risks, benefits, safety monitoring. (2) **Informed Consent Form** - patient-facing document explaining the study in plain language, translated to Hebrew, Arabic, Russian (and English if applicable). (3) **Investigator Brochure** - device safety data, animal study results, regulatory history. (4) **CVs of all investigators** - the principal investigator and co-investigators. (5) **Insurance coverage proof** - professional liability + patient injury coverage. (6) **Sponsor declaration** - financial and regulatory commitments.',
- 'Total document package: typically 200-400 pages. Preparing this properly is the single biggest time investment - typically in adjusted timelines of work for a first-time submitter. Experienced regulatory consultants (or WeCcelerate-Leumit) can prepare the package in in adjusted timelines using templated protocols.'],
+ 'Total document package: typically 200-400 pages. Preparing this properly is the single biggest time investment - typically a substantial amount of work for a first-time submitter. Experienced regulatory consultants (or WeCcelerate-Leumit) can prepare the package far more efficiently using templated protocols.'],
  },
  {
- heading: 'Timeline: over a flexible duration for standard protocols',
+ heading: 'Timeline: what to expect for standard protocols',
  paragraphs: [
- 'From submission to approval: **over a flexible duration** for a standard protocol. The timeline breakdown: (1) Initial review by Helsinki Committee secretariat: in adjusted timelines. (2) First committee meeting: meets monthly at most hospitals. (3) Revision requests + resubmission: in adjusted timelines. (4) Final approval: in adjusted timelines after resubmission.',
- 'Timeline can extend to 6+ months if: (a) The protocol is novel or high-risk, requiring external expert review. (b) The submission is incomplete and requires multiple revision cycles. (c) The committee meets quarterly instead of monthly. WeCcelerate-Leumit partnership typically achieves approval in **in adjusted timelines** due to pre-negotiated templates and direct access to Leumit\'s Helsinki Committee.'],
+ 'From submission to approval: **typically several months** for a standard protocol. The timeline breakdown: (1) Initial review by Helsinki Committee secretariat: a completeness check of the submission package. (2) First committee meeting: meets monthly at most hospitals. (3) Revision requests + resubmission: depends largely on how quickly you respond. (4) Final approval: issued once the committee has reviewed the resubmission.',
+ 'Timeline can extend to 6+ months if: (a) The protocol is novel or high-risk, requiring external expert review. (b) The submission is incomplete and requires multiple revision cycles. (c) The committee meets quarterly instead of monthly. The WeCcelerate-Leumit partnership helps make the approval process **smoother and more efficient** thanks to pre-negotiated templates and direct access to Leumit\'s Helsinki Committee.'],
  },
  {
  heading: 'Common reasons for rejection or revision',
@@ -342,16 +342,16 @@ export const GUIDES_EN: readonly GuideEn[] = [
  {
  heading: 'Helsinki approval with WeCcelerate-Leumit',
  paragraphs: [
- 'The WeCcelerate-Leumit MedTech Accelerator dramatically shortens the Helsinki timeline. Our approach: (1) We provide protocol templates that have passed Helsinki approval multiple times. (2) We have an in-house translator for Hebrew/Arabic/Russian informed consent forms. (3) We have pre-negotiated relationships with Leumit\'s Helsinki Committee (covering Leumit clinics). (4) We support you through revisions. Typical timeline: **in adjusted timelines** from protocol drafting to committee approval, vs. in adjusted timelines for a first-time submitter going alone.'],
+ 'The WeCcelerate-Leumit MedTech Accelerator dramatically shortens the Helsinki timeline. Our approach: (1) We provide protocol templates that have passed Helsinki approval multiple times. (2) We have an in-house translator for Hebrew/Arabic/Russian informed consent forms. (3) We have pre-negotiated relationships with Leumit\'s Helsinki Committee (covering Leumit clinics). (4) We support you through revisions. The result: **a smoother path** from protocol drafting to committee approval than a first-time submitter typically faces going alone.'],
  }],
  howToSteps: [
  { name: 'Identify the target hospital', text: 'Each hospital has its own Helsinki Committee. Choose the hospital where your PI works or where your pilot will run.' },
  { name: 'Contact the Helsinki secretariat', text: 'Each committee has a secretariat - typically the research administration office. Get the submission template and current requirements (may vary by hospital).' },
- { name: 'Write the protocol', text: '50-80 pages. Use the committee template. Hire an experienced medical writer if needed (scope tailored, saves in adjusted timelines of revisions).' },
+ { name: 'Write the protocol', text: '50-80 pages. Use the committee template. Hire an experienced medical writer if needed - it adds cost, but it can spare you several rounds of revisions.' },
  { name: 'Translate the informed consent', text: 'Required languages: Hebrew, Arabic, Russian. Use a certified translator - poor translations are the #1 reason for revision requests.' },
  { name: 'Compile the full package', text: '200-400 pages total: protocol, consent forms, investigator CVs, device safety data, insurance coverage, sponsor declaration.' },
- { name: 'Submit and wait for committee meeting', text: 'Most committees meet monthly. Submit at least in adjusted timelines before the meeting date for inclusion in the agenda.' },
- { name: 'Respond to revision requests', text: 'Expect 1-2 revision cycles. Respond quickly (within in adjusted timelines). Slow responses extend the overall timeline proportionally.' },
+ { name: 'Submit and wait for committee meeting', text: 'Most committees meet monthly. Submit well ahead of the meeting date to be included in the agenda.' },
+ { name: 'Respond to revision requests', text: 'Expect 1-2 revision cycles. Respond as quickly as possible. Slow responses extend the overall timeline proportionally.' },
  { name: 'Get final approval and start the pilot', text: 'Once approved, you can start enrolling patients. Maintain ongoing reporting (adverse events, protocol deviations) to the committee throughout the trial.' }],
  faqs: [
  {
@@ -360,7 +360,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How long does Helsinki Committee approval take?',
- a: 'over a flexible duration for a standard protocol. WeCcelerate-Leumit typically achieves approval in in adjusted timelines due to pre-negotiated templates and direct committee relationships.',
+ a: 'Typically several months for a standard protocol. WeCcelerate-Leumit helps streamline the approval process thanks to pre-negotiated templates and direct committee relationships.',
  },
  {
  q: 'Do I need Helsinki approval for a retrospective data study?',
@@ -372,7 +372,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How much does Helsinki submission cost?',
- a: 'The submission fee itself is small (scope tailored depending on hospital). The real cost is document preparation: scope tailored with a medical writer, or scope tailored with WeCcelerate-Leumit templates.',
+ a: 'The submission fee itself is small and varies by hospital. The real cost is document preparation, which is higher with an outside medical writer and can be reduced by working from proven protocol templates such as those used in the WeCcelerate-Leumit program.',
  },
  {
  q: 'Can I run a clinical trial in Israel without Helsinki approval?',
@@ -384,7 +384,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  }],
  relatedGuideSlugs: ['medtech-startup-israel', 'fda-510k-israeli-startups'],
  ctaServicePath: '/services/medtech-leumit',
- ctaLabel: 'Get Helsinki approval in in adjusted timelines with WeCcelerate-Leumit',
+ ctaLabel: 'Streamline your Helsinki approval with WeCcelerate-Leumit',
  },
 
  // ---------------------------------------------------------------------------
@@ -404,9 +404,9 @@ export const GUIDES_EN: readonly GuideEn[] = [
  h1: 'FDA 510(k) for Israeli Startups: Complete Guide to Clearance',
  metaTitle: 'FDA 510(k) Israeli Startup - Complete Guide 2026 | WeCcelerate',
  metaDescription:
- 'FDA 510(k) process for Israeli MedTech startups: predicate device selection, substantial equivalence, testing requirements, timeline (over a flexible duration), costs (scope tailored), and tips for faster clearance.',
+ 'FDA 510(k) process for Israeli MedTech startups: predicate device selection, substantial equivalence, testing requirements, realistic timelines and costs, and tips for faster clearance.',
  speakableAnswer:
- 'FDA 510(k) is the most common regulatory pathway for Class II medical devices in the US. An Israeli startup needs to demonstrate "substantial equivalence" to a legally marketed "predicate device." Typical timeline: over a flexible duration. Typical cost: scope tailored. Required: predicate identification, performance testing, labeling, clinical data (sometimes), and quality system documentation.',
+ 'FDA 510(k) is the most common regulatory pathway for Class II medical devices in the US. An Israeli startup needs to demonstrate "substantial equivalence" to a legally marketed "predicate device." Timeline and cost depend on device complexity and data requirements. Required: predicate identification, performance testing, labeling, clinical data (sometimes), and quality system documentation.',
  lastUpdated: '2026-04-24',
  readingTimeMinutes: 13,
  sections: [
@@ -420,7 +420,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  heading: 'The predicate device: the foundation of the submission',
  paragraphs: [
  'The entire 510(k) process centers on one document: your predicate device selection. The predicate is an existing FDA-cleared device that is similar to yours in intended use AND technological characteristics. Your job is to prove your device is "substantially equivalent" - same intended use, same or improved safety/effectiveness, no new questions of safety.',
- 'Choosing the right predicate is 50% of the work. If the predicate is too similar to an older technology, the FDA may question why your device isn\'t obviously better. If it\'s too different, the FDA may reject "substantial equivalence" and push you to the De Novo pathway (slower, more expensive). Most Israeli MedTech startups hire FDA regulatory consultants specifically for predicate selection - it\'s worth the scope tailored.'],
+ 'Choosing the right predicate is 50% of the work. If the predicate is too similar to an older technology, the FDA may question why your device isn\'t obviously better. If it\'s too different, the FDA may reject "substantial equivalence" and push you to the De Novo pathway (slower, more expensive). Most Israeli MedTech startups hire FDA regulatory consultants specifically for predicate selection - it\'s worth the investment.'],
  },
  {
  heading: 'The 510(k) submission package',
@@ -429,27 +429,27 @@ export const GUIDES_EN: readonly GuideEn[] = [
  'For AI/ML-based MedTech, additional requirements apply: Software as a Medical Device (SaMD) documentation, Good Machine Learning Practice, and training/validation dataset documentation. The FDA has been evolving its AI/ML guidance rapidly - a 2026 submission looks different from a 2022 submission.'],
  },
  {
- heading: 'Timeline: over a flexible duration from submission to clearance',
+ heading: 'Timeline: from submission to clearance',
  paragraphs: [
  'The official FDA review clock for 510(k) is 90 days, but it\'s often extended. Typical breakdown: (1) Acceptance review (days to weeks) - FDA confirms the submission is complete. (2) Substantive review (days to weeks) - FDA reviews the content. (3) Interactive review - FDA may send "Additional Information" requests. Each AI request stops the clock until the startup responds. (4) Final decision - clearance, not clearance, or request for more data.',
- 'Real-world clearance timelines: **over a flexible duration** for straightforward submissions with strong predicates and clean data. **over a flexible duration** for more complex devices or those requiring AI submissions. **9-12+ months** for novel technologies where the FDA requires multiple rounds of AI requests. WeCcelerate-Leumit typically achieves clearance in over a flexible duration due to pre-submission FDA meetings and experienced regulatory consultants.'],
+ 'Real-world clearance timelines: **several months** for straightforward submissions with strong predicates and clean data. **Longer** for more complex devices or those requiring AI submissions. **9-12+ months** for novel technologies where the FDA requires multiple rounds of AI requests. WeCcelerate-Leumit helps make the path to clearance more efficient through pre-submission FDA meetings and experienced regulatory consultants.'],
  },
  {
- heading: 'Cost: scope tailored all-in',
+ heading: 'Cost: what to budget for',
  paragraphs: [
- 'The direct FDA fee for a 510(k) submission is scope tailored (FY2025, small business rate). The real cost is everything else: (1) Regulatory consultant - scope tailored (strongly recommended for first-time filers). (2) Performance testing - scope tailored (depends on device complexity). (3) Clinical data - scope tailored (not always required, but common for AI/ML). (4) Quality system documentation (ISO 13485) - scope tailored. (5) Medical writing - scope tailored. (6) Legal and company fees - scope tailored.',
- 'Total: scope tailored for most Class II devices. Plus over a flexible duration of runway during the review. An Israeli startup aiming for US market needs to budget 30-50% of their Seed round for regulatory work alone.'],
+ 'The direct FDA user fee for a 510(k) submission (FY2025, with a reduced small business rate) is only a fraction of the total. The real cost is everything else: (1) Regulatory consultant (strongly recommended for first-time filers). (2) Performance testing (depends on device complexity). (3) Clinical data (not always required, but common for AI/ML). (4) Quality system documentation (ISO 13485). (5) Medical writing. (6) Legal and company fees.',
+ 'Taken together, these costs are significant for most Class II devices - on top of the runway needed to sustain the team during the review. An Israeli startup aiming for US market needs to budget 30-50% of their Seed round for regulatory work alone.'],
  },
  {
  heading: 'Pre-submission meetings: the Israeli startup\'s secret weapon',
  paragraphs: [
  'The FDA offers free "Pre-Submission" (Q-Sub) meetings where you can present your proposed 510(k) strategy and get FDA feedback BEFORE spending hundreds of thousands on testing. Most Israeli startups skip this, thinking they\'ll just submit and hope. This is a mistake.',
- 'A Q-Sub meeting takes over a flexible duration to schedule but provides written FDA feedback on your predicate selection, testing strategy, and clinical data requirements. Two Q-Sub meetings for an Israeli startup (at Seed and pre-submission) typically save over a flexible duration of revision cycles. WeCcelerate-Leumit advises founders to budget for 2-3 Q-Sub meetings as standard practice.'],
+ 'A Q-Sub meeting takes some time to schedule but provides written FDA feedback on your predicate selection, testing strategy, and clinical data requirements. Two Q-Sub meetings for an Israeli startup (at Seed and pre-submission) typically save significant time otherwise lost to revision cycles. WeCcelerate-Leumit advises founders to budget for 2-3 Q-Sub meetings as standard practice.'],
  },
  {
  heading: 'How WeCcelerate-Leumit supports FDA 510(k) submissions',
  paragraphs: [
- 'WeCcelerate-Leumit offers end-to-end FDA regulatory support: (1) Former FDA senior advisors on our advisory board. (2) Predicate device selection and substantial equivalence analysis. (3) Pre-Submission meeting preparation and coordination. (4) Performance testing protocols and CRO coordination. (5) Clinical data from Leumit pilots to support the submission. (6) Submission drafting and revision response. Typical clearance timeline: over a flexible duration vs. over a flexible duration for startups going alone.'],
+ 'WeCcelerate-Leumit offers end-to-end FDA regulatory support: (1) Former FDA senior advisors on our advisory board. (2) Predicate device selection and substantial equivalence analysis. (3) Pre-Submission meeting preparation and coordination. (4) Performance testing protocols and CRO coordination. (5) Clinical data from Leumit pilots to support the submission. (6) Submission drafting and revision response. The result: a more efficient path to clearance than startups typically face going alone.'],
  }],
  faqs: [
  {
@@ -458,11 +458,11 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How long does FDA 510(k) clearance take?',
- a: 'Typical range: over a flexible duration. Well-prepared submissions with strong predicates clear in over a flexible duration. Complex AI/ML submissions or novel technologies can take 9-12+ months.',
+ a: 'Typical range: several months, depending on the device and the quality of the submission. Well-prepared submissions with strong predicates clear faster. Complex AI/ML submissions or novel technologies can take 9-12+ months.',
  },
  {
  q: 'How much does an FDA 510(k) submission cost?',
- a: 'scope tailored all-in. Includes FDA fee (scope tailored), regulatory consultant (scope tailored), performance testing (scope tailored), clinical data (scope tailored), quality system (scope tailored), and medical writing.',
+ a: 'The all-in cost is significant. It includes the FDA fee, a regulatory consultant, performance testing, clinical data where required, quality system documentation, and medical writing.',
  },
  {
  q: 'What is substantial equivalence?',
@@ -478,7 +478,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'What is a Pre-Submission (Q-Sub) meeting?',
- a: 'A free FDA meeting where you present your proposed 510(k) strategy and get written FDA feedback before investing in testing. Takes over a flexible duration to schedule. Saves over a flexible duration of revision cycles. Highly recommended.',
+ a: 'A free FDA meeting where you present your proposed 510(k) strategy and get written FDA feedback before investing in testing. Takes some time to schedule, but saves significant time in revision cycles. Highly recommended.',
  }],
  relatedGuideSlugs: ['medtech-startup-israel', 'helsinki-committee-israel'],
  ctaServicePath: '/services/medtech-leumit',
@@ -504,30 +504,30 @@ export const GUIDES_EN: readonly GuideEn[] = [
  metaDescription:
  'Complete guide to raising Pre-Seed, Seed, and Series A funding in Israel. Investor types, term sheets, typical round sizes, pitch deck structure, and how to navigate the Israeli VC ecosystem.',
  speakableAnswer:
- 'Raising startup funding in Israel involves Pre-Seed (scope tailored from angels and Venture Builders), Seed (scope tailored from Israeli micro-VCs), Series A (scope tailored from dedicated Israeli and US funds), and later rounds. Israel has over 400 active VCs and 4,000+ angel investors. WeCcelerate maintains active relationships with a network of specialized investors across the Israeli ecosystem.',
+ 'Raising startup funding in Israel involves Pre-Seed (from angels and Venture Builders), Seed (from Israeli micro-VCs), Series A (from dedicated Israeli and US funds), and later rounds. Israel has over 400 active VCs and 4,000+ angel investors. WeCcelerate maintains active relationships with a network of specialized investors across the Israeli ecosystem.',
  lastUpdated: '2026-04-24',
  readingTimeMinutes: 12,
  sections: [
  {
  heading: 'The Israeli fundraising landscape in 2026',
  paragraphs: [
- 'Israel is the world\'s second-largest startup ecosystem by VC investment per capita (after Silicon Valley). In 2024, Israeli startups raised scope tailored.8 billion across 500+ deals - down from the 2021 peak of scope tailoredB but recovering steadily. The ecosystem includes over 400 active VC funds, 4,000+ angel investors, 80+ family offices, and 30+ corporate venture arms.',
+ 'Israel is the world\'s second-largest startup ecosystem by VC investment per capita (after Silicon Valley). In 2024, Israeli startups raised billions of dollars across 500+ deals - below the 2021 peak but recovering steadily. The ecosystem includes over 400 active VC funds, 4,000+ angel investors, 80+ family offices, and 30+ corporate venture arms.',
  'For a foreign founder, Israel is an unusual market: small country (~9M people) but deeply connected to US capital (most Israeli Series A rounds are led by US funds like Sequoia, a16z, or Benchmark). A typical Israeli Seed round in 2026 has 30-50% Israeli investors and 50-70% US investors. This creates a unique dynamic where an Israeli founder must speak to two audiences simultaneously.'],
  },
  {
  heading: 'Round sizes and expectations in 2026',
  paragraphs: [
- '**Pre-Seed** (scope tailored): From angels, Venture Builders like WeCcelerate, or friends-and-family. Valuation cap: scope tailored. Typically over a flexible duration of runway to reach MVP + early users.',
- '**Seed** (scope tailored): From Israeli micro-VCs (Aleph, TLV Partners, Vertex Ventures), angel syndicates, or crossover US Seed funds. Valuation: scope tailored pre-money. Typically over a flexible duration of runway to reach Product-Market Fit + growth metrics for Series A.',
- '**Series A** (scope tailored): From dedicated Series A funds - Israeli (Aleph, TLV Partners, Pitango) or US (Sequoia, a16z, Index Ventures). Valuation: scope tailored pre-money. Typically over a flexible duration of runway to scale.',
- '**Series B+** (scope tailored): From growth-stage funds, often involving corporate VCs and strategic partnerships. Valuation: scope tailored+.'],
+ '**Pre-Seed**: From angels, Venture Builders like WeCcelerate, or friends-and-family. Valuation caps are modest and depend on team and sector. The goal is enough runway to reach MVP + early users.',
+ '**Seed**: From Israeli micro-VCs (Aleph, TLV Partners, Vertex Ventures), angel syndicates, or crossover US Seed funds. Round sizes and pre-money valuations vary widely by sector, team and traction. The round should fund the path to Product-Market Fit + growth metrics for Series A.',
+ '**Series A**: From dedicated Series A funds - Israeli (Aleph, TLV Partners, Pitango) or US (Sequoia, a16z, Index Ventures). Pre-money valuations reflect proven traction and growth. The capital is meant to fund scaling.',
+ '**Series B+**: From growth-stage funds, often involving corporate VCs and strategic partnerships. Valuations at this stage are driven by revenue scale and growth rate.'],
  },
  {
  heading: 'The three stages of raising: Preparation, Execution, Closing',
  paragraphs: [
- '**Preparation (over a flexible duration)**: Build a compelling narrative. Assemble your pitch deck (10-12 slides, following the Sequoia template). Create a financial model (P&L, cash flow, cohort analysis). Set up a data room (legal docs, cap table, customer contracts). Prepare a short list of 30-50 target investors.',
- '**Execution (over a flexible duration)**: Schedule first meetings. Conduct 20- meetings in a tight 6-8 week window. After 5-10 meetings, expect partner meetings. After partner meetings, expect due diligence. Aim for 2-3 competitive term sheets to create leverage.',
- '**Closing (over a flexible duration)**: Sign term sheet. Coordinate legal due diligence (Cap Table verification, IP ownership, employment agreements, customer contracts). Draft and sign final docs (SPA, SHA, Articles of Association, Amended Bylaws). Wire transfer - typically days to weeks from signed term sheet to money in the bank.'],
+ '**Preparation**: Build a compelling narrative. Assemble your pitch deck (10-12 slides, following the Sequoia template). Create a financial model (P&L, cash flow, cohort analysis). Set up a data room (legal docs, cap table, customer contracts). Prepare a short list of 30-50 target investors.',
+ '**Execution**: Schedule first meetings. Conduct 20+ meetings in a tight 6-8 week window. After 5-10 meetings, expect partner meetings. After partner meetings, expect due diligence. Aim for 2-3 competitive term sheets to create leverage.',
+ '**Closing**: Sign term sheet. Coordinate legal due diligence (Cap Table verification, IP ownership, employment agreements, customer contracts). Draft and sign final docs (SPA, SHA, Articles of Association, Amended Bylaws). Wire transfer - typically days to weeks from signed term sheet to money in the bank.'],
  },
  {
  heading: 'The pitch deck: what actually works in 2026',
@@ -546,22 +546,22 @@ export const GUIDES_EN: readonly GuideEn[] = [
  { name: 'Assemble data room', text: 'Cap Table, incorporation docs, customer contracts, financial model, IP assignments. Complete data room = 10-20% faster due diligence.' },
  { name: 'Build target investor list', text: '30-50 investors, prioritized by fit (stage, sector, geography). Use Pitchbook, Crunchbase, and LinkedIn to research. WeCcelerate provides pre-qualified lists.' },
  { name: 'Get warm intros', text: 'Cold outreach converts at 1-3%. Warm intros convert at 30-50%. Every meeting should come via an introduction from a mutual connection.' },
- { name: 'Run meetings in parallel (in adjusted timelines)', text: 'Schedule all first meetings in a tight 2-4 week window. Creates time pressure and competitive dynamics. Slow rolling = weak signal.' },
+ { name: 'Run meetings in parallel', text: 'Schedule all first meetings in a tight 2-4 week window. Creates time pressure and competitive dynamics. Slow rolling = weak signal.' },
  { name: 'Convert to partner meetings', text: 'After first meeting with a junior analyst/associate, push for a partner meeting. The partner decides, not the associate.' },
  { name: 'Negotiate term sheets', text: 'Aim for 2-3 competitive term sheets. Key terms to negotiate: valuation, board composition, pro rata rights, anti-dilution, ESOP refresh.' },
- { name: 'Close via legal due diligence', text: 'Prepare for in adjusted timelines of legal due diligence. Have a startup-experienced Israeli law firm ready (Herzog, Meitar, Gross).' }],
+ { name: 'Close via legal due diligence', text: 'Prepare for a thorough legal due diligence process. Have a startup-experienced Israeli law firm ready (Herzog, Meitar, Gross).' }],
  faqs: [
  {
  q: 'How much should I raise in Pre-Seed?',
- a: 'scope tailored is typical. Raise what gets you to MVP + first customers in over a flexible duration. Raising too much at Pre-Seed means selling too much equity at a low valuation.',
+ a: 'Raise what gets you to MVP + first customers - and not much more. Raising too much at Pre-Seed means selling too much equity at a low valuation.',
  },
  {
  q: 'What\'s the typical Seed round size in Israel?',
- a: 'scope tailored in 2026. Pre-money valuation: scope tailored. From Israeli micro-VCs (Aleph, TLV Partners) and US crossover Seed funds. Aim for over a flexible duration of runway.',
+ a: 'Seed round sizes and pre-money valuations in Israel vary widely by sector, team and traction. Funding typically comes from Israeli micro-VCs (Aleph, TLV Partners) and US crossover Seed funds. Aim for enough runway to reach clear Series A milestones.',
  },
  {
  q: 'When should I raise Series A?',
- a: 'When you have clear Product-Market Fit (30%+ Sean Ellis score) and at least scope tailored ARR for B2B SaaS, or 100K+ monthly active users for B2C. Typically over a flexible duration post-Seed.',
+ a: 'When you have clear Product-Market Fit (30%+ Sean Ellis score) and meaningful recurring revenue for B2B SaaS, or 100K+ monthly active users for B2C. How long after Seed depends on how quickly you reach those milestones.',
  },
  {
  q: 'Who are the top Seed-stage VCs in Israel?',
@@ -573,7 +573,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'What\'s a typical valuation multiple for Israeli SaaS?',
- a: 'In 2026, B2B SaaS: 8-15x ARR. B2C: 5-10x revenue. MedTech pre-revenue: difficult - typically based on comparables and technology milestones, scope tailored pre-money for Seed.',
+ a: 'In 2026, B2B SaaS: 8-15x ARR. B2C: 5-10x revenue. MedTech pre-revenue: difficult - Seed pre-money valuations are typically based on comparables and technology milestones.',
  },
  {
  q: 'How does WeCcelerate help with fundraising?',
@@ -603,45 +603,45 @@ export const GUIDES_EN: readonly GuideEn[] = [
  metaDescription:
  'Step-by-step guide to starting a startup in Israel: legal entity, founder agreement, MVP, fundraising, and the unique Israeli ecosystem advantages - from Israel\'s leading Venture Builder.',
  speakableAnswer:
- 'To start a startup in Israel, you need: (1) validate the idea with 30 customer interviews, (2) register a Ltd. company at the Companies Registrar (days to weeks, ~scope tailored), (3) sign a founder agreement with 4-year vesting, (4) build an MVP in in adjusted timelines, (5) raise a Seed round of scope tailored. WeCcelerate, Israel\'s leading Venture Builder, supports founders through all stages with a 360° wrap-around program.',
+ 'To start a startup in Israel, you need: (1) validate the idea with 30 customer interviews, (2) register a Ltd. company at the Companies Registrar (a quick, low-cost process), (3) sign a founder agreement with 4-year vesting, (4) build a focused MVP, (5) raise a Seed round. WeCcelerate, Israel\'s leading Venture Builder, supports founders through all stages with a 360° wrap-around program.',
  lastUpdated: '2026-04-24',
  readingTimeMinutes: 11,
  sections: [
  {
  heading: 'Why Israel is a unique startup hub',
  paragraphs: [
- 'Israel has more startups per capita than any other country - over 7,000 active startups for 9.6 million people. Per capita venture funding exceeds scope tailored - eight times the US average. Why? Compulsory military service in technology units (especially 8200) produces hundreds of technical founders annually; four world-class research universities; a small domestic market that forces companies to think globally from day one; deep relationships with Microsoft, Google, Intel, NVIDIA, and Apple R&D centers.',
- '90+ unicorns (scope tailoredB+ valuation) have been built in Israel. Notable examples from 2020-2025: Wiz (cybersecurity, sold to Google for scope tailoredB), Monday.com (project management, NASDAQ), Lemonade, ironSource, Via, Melio, and many more.'],
+ 'Israel has more startups per capita than any other country - over 7,000 active startups for 9.6 million people. Per capita venture funding is roughly eight times the US average. Why? Compulsory military service in technology units (especially 8200) produces hundreds of technical founders annually; four world-class research universities; a small domestic market that forces companies to think globally from day one; deep relationships with Microsoft, Google, Intel, NVIDIA, and Apple R&D centers.',
+ '90+ unicorns (startups valued at a billion dollars or more) have been built in Israel. Notable examples from 2020-2025: Wiz (cybersecurity, acquired by Google in a landmark deal), Monday.com (project management, NASDAQ), Lemonade, ironSource, Via, Melio, and many more.'],
  },
  {
  heading: 'Step 1 - Validate before you incorporate',
  paragraphs: [
- 'The most expensive mistake in starting a startup: incorporating, signing a founder agreement, going big - and then discovering there\'s no market. Before you register a company, invest in adjusted timelines in Customer Discovery: 30 in-depth interviews with people from your target audience (not friends and family).',
+ 'The most expensive mistake in starting a startup: incorporating, signing a founder agreement, going big - and then discovering there\'s no market. Before you register a company, invest real time in Customer Discovery: 30 in-depth interviews with people from your target audience (not friends and family).',
  'If 70%+ of interviewees describe the same pain and are willing to pay for it - you have a viable startup. If less than 30% even recognize the problem - you\'re solving a phantom and the startup will fail in this direction.'],
  },
  {
  heading: 'Step 2 - Choose the right legal structure',
  paragraphs: [
- 'Three options for Israeli startups: (1) Israeli Ltd. (Bm) - standard, fits 90% of founders. (2) Delaware C-Corp - only if you plan to raise primarily from US investors. (3) "Delaware Flip" - start as Israeli Ltd., flip to Delaware before Series A if needed. Most founders should start with Israeli Ltd. - flipping costs scope tailored in legal fees and is best done after PMF, not before.',
- 'Registration at the Companies Registrar takes 3-a few business days, costs ~scope tailored in government fees + scope tailored in attorney fees. The company name must be unique and not misleading. Standard articles of association suffice for most startups - no need for a custom version unless you have an unusual structure.'],
+ 'Three options for Israeli startups: (1) Israeli Ltd. (Bm) - standard, fits 90% of founders. (2) Delaware C-Corp - only if you plan to raise primarily from US investors. (3) "Delaware Flip" - start as Israeli Ltd., flip to Delaware before Series A if needed. Most founders should start with Israeli Ltd. - flipping involves significant legal fees and is best done after PMF, not before.',
+ 'Registration at the Companies Registrar takes only a few business days and involves modest government fees plus attorney fees. The company name must be unique and not misleading. Standard articles of association suffice for most startups - no need for a custom version unless you have an unusual structure.'],
  },
  {
  heading: 'Step 3 - Founder agreement and equity',
  paragraphs: [
  'A founder agreement must be signed on day 1 of the startup - not "after we close the first round". 60% of disputes between cofounders in startups stem from un-agreed equity splits or the absence of vesting.',
- 'The right rules: all founders get 4-year vesting with a 1-year cliff (if someone leaves at 11 months - they get 0%). Clear Bad Leaver clauses. Anti-dilution before Seed. A good startup attorney charges scope tailored for a professional founder agreement.'],
+ 'The right rules: all founders get 4-year vesting with a 1-year cliff (if someone leaves at 11 months - they get 0%). Clear Bad Leaver clauses. Anti-dilution before Seed. A professionally drafted founder agreement from an experienced startup attorney is money well spent.'],
  },
  {
- heading: 'Step 4 - Build an MVP in in adjusted timelines',
+ heading: 'Step 4 - Build a lean, focused MVP',
  paragraphs: [
- 'Your MVP must test ONE critical hypothesis. Resist the temptation to build "the full vision." A typical MVP budget: scope tailored per project. WeCcelerate builds MVPs on timelines tailored per project.js, Node.js, and PostgreSQL.',
+ 'Your MVP must test ONE critical hypothesis. Resist the temptation to build "the full vision." MVP budgets depend on scope and complexity. WeCcelerate builds MVPs on a modern stack - React, Next.js, Node.js, and PostgreSQL.',
  'After MVP launch: closed beta with 50-100 users, then Landing Page + paid ads to test demand. If D30 retention is 30%+ and people pay or use repeatedly - you have a Seed-ready signal. If not - return to hypothesis validation; you\'re not ready to raise.'],
  },
  {
  heading: 'Step 5 - Raise Seed in Israel',
  paragraphs: [
- 'A typical Seed round in Israel in 2026: scope tailored raised, pre-money valuation scope tailored, runway over a flexible duration. Major Israeli Seed VCs in 2026: TLV Partners, Ibex, J-Ventures, Lemonade Hat, NFX, Israel Seed Partners, Pitango First. Each specializes in different verticals (FinTech, AI, MedTech, etc.).',
- 'Critical: warm introductions convert 8x better than cold outreach (40% vs 5%). WeCcelerate connects portfolio companies to a network of investors via warm intros - cutting fundraising time from over a flexible duration to over a flexible duration on average.'],
+ 'Seed round sizes, pre-money valuations and target runway in Israel in 2026 vary widely by sector, team and traction. Major Israeli Seed VCs in 2026: TLV Partners, Ibex, J-Ventures, Lemonade Hat, NFX, Israel Seed Partners, Pitango First. Each specializes in different verticals (FinTech, AI, MedTech, etc.).',
+ 'Critical: warm introductions convert 8x better than cold outreach (40% vs 5%). WeCcelerate connects portfolio companies to a network of investors via warm intros - helping make the fundraising process more focused and efficient.'],
  },
  {
  heading: 'How WeCcelerate accelerates Israeli startups',
@@ -650,19 +650,19 @@ export const GUIDES_EN: readonly GuideEn[] = [
  }],
  howToSteps: [
  { name: 'Validate hypothesis with 30 customer interviews', text: 'Talk to 30 target customers before writing a line of code. 70%+ pain recognition = viable startup.' },
- { name: 'Register an Israeli Ltd. at the Companies Registrar', text: '3-a few business days, ~scope tailored in fees + attorney. Unique name, standard articles.' },
- { name: 'Sign a founder agreement', text: '4-year vesting, 1-year cliff, Bad Leaver clauses. scope tailored in attorney fees.' },
- { name: 'Build an MVP in in adjusted timelines', text: 'Simplest version that proves your hypothesis. scope tailored typical budget.' },
+ { name: 'Register an Israeli Ltd. at the Companies Registrar', text: 'A few business days, modest government and attorney fees. Unique name, standard articles.' },
+ { name: 'Sign a founder agreement', text: '4-year vesting, 1-year cliff, Bad Leaver clauses. Have it drafted by an experienced startup attorney.' },
+ { name: 'Build a focused MVP', text: 'Simplest version that proves your hypothesis, built on a lean budget.' },
  { name: 'Measure retention and look for PMF', text: 'D7, D30 retention. 40%+ "would be very disappointed" in the Sean Ellis test.' },
  { name: 'Raise Seed via WeCcelerate', text: 'a network of investors, warm intros, term sheet negotiation support.', url: 'https://weccelerate.co.il/contact' }],
  faqs: [
  {
  q: 'How much does it cost to start a startup in Israel?',
- a: 'Legal incorporation: ~scope tailored. Founder agreement: scope tailored. MVP: scope tailored. Total from idea to Seed-ready: scope tailored (or half via Venture Builder Equity-for-Services).',
+ a: 'It depends on scope. Legal incorporation is relatively inexpensive, a founder agreement requires attorney fees, and the MVP is usually the largest expense. The total from idea to Seed-ready can be reduced via Venture Builder Equity-for-Services.',
  },
  {
  q: 'How long does it take to start a startup in Israel?',
- a: 'Legal: days to weeks. MVP: in adjusted timelines. Seed raise: over a flexible duration after MVP. Total from idea to first funding: over a flexible duration.',
+ a: 'Legal: days to weeks. MVP: depends on scope and complexity. Seed raise: typically begins once the MVP shows early traction. Total from idea to first funding: varies widely by sector, team, and market.',
  },
  {
  q: 'Do I need a CTO to start a startup?',
@@ -702,9 +702,9 @@ export const GUIDES_EN: readonly GuideEn[] = [
  h1: 'App Development Cost in Israel 2026: Full Pricing Guide',
  metaTitle: 'App Development Cost Israel 2026 - Pricing Guide | WeCcelerate',
  metaDescription:
- 'How much does it cost to develop an app in Israel in 2026? Full pricing table by app type (scope tailored MVP, scope tailored full platform), cost factors, and savings tactics from Israel\'s leading Venture Builder.',
+ 'How much does it cost to develop an app in Israel in 2026? Pricing by app type (from a basic MVP to a full platform), cost factors, and savings tactics from Israel\'s leading Venture Builder.',
  speakableAnswer:
- 'App development in Israel in 2026 costs scope tailored for a basic mobile MVP, scope tailored for a full web SaaS platform, and scope tailored for complex SaaS with AI integration. Pricing varies based on platforms supported, backend complexity, and team seniority. WeCcelerate provides custom quotes free of charge based on detailed scoping sessions.',
+ 'App development cost in Israel in 2026 depends on what you build - a basic mobile MVP, a full web SaaS platform, or complex SaaS with AI integration. Pricing is driven by platforms supported, backend complexity, and team seniority. WeCcelerate provides custom quotes free of charge based on detailed scoping sessions.',
  lastUpdated: '2026-04-24',
  readingTimeMinutes: 8,
  sections: [
@@ -713,13 +713,13 @@ export const GUIDES_EN: readonly GuideEn[] = [
  paragraphs: [
  'Pricing varies significantly based on app type, complexity, and tech stack. Here are 2026 Israeli market rates:'],
  list: [
- 'Basic mobile MVP (iOS+Android, 5-10 screens): scope tailored per project',
- 'Web app (simple SaaS): scope tailored per project',
- 'Full web platform (SaaS with dashboard, billing, admin): scope tailored per project',
- 'Complex SaaS with AI and integrations: scope tailored per project',
- 'Native mobile app (full, not MVP): scope tailored per project',
- 'App with hardware/IoT: scope tailored for MVP, scope tailored for full',
- 'Two-sided marketplace (like Airbnb): scope tailored per project'],
+ 'Basic mobile MVP (iOS+Android, 5-10 screens): the most accessible tier, quoted after scoping',
+ 'Web app (simple SaaS): comparable to a basic MVP, driven by the number of user flows and integrations',
+ 'Full web platform (SaaS with dashboard, billing, admin): a substantially larger investment, since billing and admin tooling add significant work',
+ 'Complex SaaS with AI and integrations: among the costliest projects - AI components and every external integration widen the scope',
+ 'Native mobile app (full, not MVP): a significant investment, especially with separate iOS and Android codebases',
+ 'App with hardware/IoT: costly even at MVP stage, and considerably more for a full version because of firmware and device testing',
+ 'Two-sided marketplace (like Airbnb): one of the most complex builds - two user types, payments, matching and trust features'],
  },
  {
  heading: '5 factors that drive app development cost',
@@ -730,12 +730,12 @@ export const GUIDES_EN: readonly GuideEn[] = [
  'Backend complexity - no backend (Firebase) < simple backend < microservices',
  'Integrations - every external API integration (payments, maps, SMS) adds weeks',
  'Design - using ready components < custom UI < animated UI',
- 'Team seniority - Junior (scope tailored/month) < Senior (scope tailored/month) < Expert (scope tailored/month)'],
+ 'Team seniority - Junior < Senior < Expert in monthly cost, though senior engineers often deliver faster and with less technical debt'],
  },
  {
  heading: 'How to save on app development costs',
  paragraphs: [
- 'Proven approach to save 40-60% on app development: build a simple MVP first, release to beta, learn what really matters, and only then build the full version. Many companies waste scope tailored on "features users requested" - that nobody actually uses.',
+ 'Proven approach to save 40-60% on app development: build a simple MVP first, release to beta, learn what really matters, and only then build the full version. Many companies waste a large share of their budget on "features users requested" - that nobody actually uses.',
  'Other approaches: No-Code MVP before real development (additional 30% savings), starting with Next.js before native mobile (much cheaper), working with a Venture Builder in Equity-for-Services model (lower prices in exchange for small equity).'],
  },
  {
@@ -751,19 +751,19 @@ export const GUIDES_EN: readonly GuideEn[] = [
  faqs: [
  {
  q: 'How much does it cost to develop a simple app?',
- a: 'A simple app (5-10 screens, no complex backend, single platform) - scope tailored per project.',
+ a: 'A simple app (5-10 screens, no complex backend, single platform) is the most affordable category; the exact cost depends on design and integrations and is set per project.',
  },
  {
  q: 'How much does it cost to develop an app like Uber?',
- a: 'A two-sided marketplace with maps, payments, chat, and real-time tracking - scope tailored for a robust version. An MVP of Uber is possible at scope tailored.',
+ a: 'A two-sided marketplace with maps, payments, chat, and real-time tracking requires a substantial budget for a robust version. A focused Uber-style MVP, limited to the core ride flow, costs considerably less.',
  },
  {
  q: 'How much does it cost to develop an AI app?',
- a: 'Depends on whether it\'s an external API integration (OpenAI/Claude - adds 20-30% to the cost) or a dedicated trained model (doubles the cost or more). A typical AI MVP: scope tailored.',
+ a: 'Depends on whether it\'s an external API integration (OpenAI/Claude - adds 20-30% to the cost) or a dedicated trained model (doubles the cost or more). A typical AI MVP costs more than a standard MVP, depending on how much of the AI is custom-built.',
  },
  {
  q: 'How much does it cost to maintain an app monthly?',
- a: 'Typical monthly maintenance: 5-15% of the initial development cost annually. A scope tailored app - maintenance of scope tailored annually (including bugs, OS updates, and small additions).',
+ a: 'Typical monthly maintenance: 5-15% of the initial development cost annually. The larger the original build, the larger the maintenance budget (including bugs, OS updates, and small additions).',
  },
  {
  q: 'Should I work with a freelancer or a company?',
@@ -793,7 +793,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  metaDescription:
  'How to build a pitch deck that raises: 13 essential slides, common founder mistakes, examples of decks that raised, design tips, and what investors really look for in 30 seconds.',
  speakableAnswer:
- 'A successful Israeli startup pitch deck typically includes 10-15 slides: problem, solution, market, product, traction, business model, competition, team, financial projections, the current round, and vision. WeCcelerate builds professional pitch decks within in adjusted timelines, including 5 practice rounds with former-investor advisors.',
+ 'A successful Israeli startup pitch deck typically includes 10-15 slides: problem, solution, market, product, traction, business model, competition, team, financial projections, the current round, and vision. WeCcelerate builds professional pitch decks, including 5 practice rounds with former-investor advisors.',
  lastUpdated: '2026-04-24',
  readingTimeMinutes: 9,
  sections: [
@@ -827,21 +827,21 @@ export const GUIDES_EN: readonly GuideEn[] = [
  'The 5 mistakes that kill a fundraising round:'],
  list: [
  'Opening with the product instead of the problem - investors love "billion-dollar problem", not "product feature"',
- 'Trillion-dollar TAM - "our market is scope tailored billion" says you don\'t know how to calculate a realistic market',
+ 'Trillion-dollar TAM - an inflated, top-down market figure says you don\'t know how to calculate a realistic market',
  'More than 15 slides - investors lose focus. If you have 30 slides, you don\'t know how to summarize',
- 'Bad design - Arial font, loud colors, animations. Invest scope tailored in a designer',
+ 'Bad design - Arial font, loud colors, animations. Investing in a professional designer pays off',
  'No traction - if you have no traction, you\'re not ready to raise'],
  },
  {
  heading: 'Examples of pitch decks that raised',
  paragraphs: [
- 'Airbnb was a 14-slide deck that raised scope tailored. It\'s available online - for study. Their structure: Problem, Solution, Market Validation, Market Size, Product, Business Model, Market Adoption, Competition, Competitive Advantage, Team, Press, User Testimonials, The Ask.',
- 'Another excellent example - the 2008 Uber Pitch Deck that raised a scope tailored Seed. 25 slides (slightly more than ideal, but worked), with strong emphasis on the network-effect model and the team. Available online as "Uber Pitch Deck 2008".'],
+ 'Airbnb was a 14-slide deck that raised the company\'s early seed funding. It\'s available online - for study. Their structure: Problem, Solution, Market Validation, Market Size, Product, Business Model, Market Adoption, Competition, Competitive Advantage, Team, Press, User Testimonials, The Ask.',
+ 'Another excellent example - the 2008 Uber Pitch Deck that helped raise its Seed round. 25 slides (slightly more than ideal, but worked), with strong emphasis on the network-effect model and the team. Available online as "Uber Pitch Deck 2008".'],
  },
  {
  heading: 'How WeCcelerate builds a Pitch Deck',
  paragraphs: [
- 'WeCcelerate\'s pitch deck process: Week 1 - fill out a questionnaire and analyze the competition. Week 2 - first deck draft. Week 3 - rounds of Pitch Practice with advisors. Week 4 - completion and professional design (InDesign/Figma). Weeks 5-6 - introductions to investors. Cost: scope tailored, including follow-up meetings.'],
+ 'WeCcelerate\'s pitch deck process: first - fill out a questionnaire and analyze the competition. Then - a first deck draft, followed by rounds of Pitch Practice with advisors. Next - completion and professional design (InDesign/Figma), and finally introductions to investors. Pricing is set per engagement and includes follow-up meetings.'],
  }],
  faqs: [
  {
@@ -862,7 +862,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How much does a professional pitch deck cost?',
- a: 'Freelancer - scope tailored. Agency - scope tailored. WeCcelerate - scope tailored per engagement.scope tailored including 5 Pitch Practice rounds and investor introductions.',
+ a: 'Freelancers are usually the cheapest option and agencies cost more, with quality varying widely in both. At WeCcelerate, pricing is set per engagement and includes Pitch Practice rounds and investor introductions.',
  }],
  relatedGuideSlugs: ['raise-funding-israel', 'how-to-start-a-startup-israel'],
  ctaServicePath: '/services/business-consulting',
@@ -886,16 +886,16 @@ export const GUIDES_EN: readonly GuideEn[] = [
  h1: 'How to Build an MVP in 8 Weeks: The Practical Guide for Founders',
  metaTitle: 'How to Build an MVP in 8 Weeks - Practical Guide | WeCcelerate',
  metaDescription:
- 'Step-by-step guide to building an MVP in in adjusted timelines: how to scope, the right tech stack for 2026, scope tailored budget, success metrics, and what NOT to build. From Israel\'s leading Venture Builder.',
+ 'Step-by-step guide to building an MVP fast: how to scope, the right tech stack for 2026, how to budget realistically, success metrics, and what NOT to build. From Israel\'s leading Venture Builder.',
  speakableAnswer:
- 'Building an MVP (Minimum Viable Product) takes in adjusted timelines and costs scope tailored for a typical Israeli startup. The key: choose ONE core feature that proves your value hypothesis, skip everything else, and ship to 50-100 users in 60 days. WeCcelerate builds MVPs on timelines tailored per project.js, and PostgreSQL.',
+ 'Building an MVP (Minimum Viable Product) usually takes weeks to a few months, and its cost depends on scope, platform and integrations. The key: choose ONE core feature that proves your value hypothesis, skip everything else, and ship to 50-100 users in 60 days. WeCcelerate builds MVPs with a modern stack such as React, Next.js, and PostgreSQL, with scope and timeline set per venture.',
  lastUpdated: '2026-04-24',
  readingTimeMinutes: 9,
  sections: [
  {
  heading: 'What an MVP is and why it\'s critical',
  paragraphs: [
- 'An MVP is the simplest version of a product that proves your core value hypothesis. The goal: not a finished product but a working artifact you can show to thousands of users and to investors. Why it\'s critical: 42% of startups fail because of "no market need" - an MVP lets you discover this after 60 days and scope tailored, not after two years and scope tailored.'],
+ 'An MVP is the simplest version of a product that proves your core value hypothesis. The goal: not a finished product but a working artifact you can show to thousands of users and to investors. Why it\'s critical: 42% of startups fail because of "no market need" - an MVP lets you discover this after 60 days and a modest budget, not after two years and a fortune spent.'],
  },
  {
  heading: 'How to choose the core feature',
@@ -912,13 +912,13 @@ export const GUIDES_EN: readonly GuideEn[] = [
  {
  heading: 'How much an MVP costs to build in Israel',
  paragraphs: [
- 'Basic mobile MVP (iOS+Android) - scope tailored per project. SaaS platform MVP (web only) - scope tailored per project. Complex MVP with AI and integrations - scope tailored per project. MVP with physical hardware - scope tailored.',
- 'WeCcelerate typically works on a success-fee model: full development team at reduced price in exchange for small equity, or full price when the founder prefers not to dilute. Note: we don\'t work with budgets under scope tailored - it\'s simply not realistic for the required quality.'],
+ 'Basic mobile MVP (iOS+Android) - a moderate budget, driven largely by the number of screens. SaaS platform MVP (web only) - often the most cost-efficient starting point. Complex MVP with AI and integrations - a significantly larger budget. MVP with physical hardware - the costliest category, because of prototyping and device testing.',
+ 'WeCcelerate typically works on a success-fee model: full development team at reduced price in exchange for small equity, or full price when the founder prefers not to dilute. Note: we don\'t take on projects whose budget can\'t support the required quality - it\'s simply not realistic.'],
  },
  {
  heading: 'How to launch the MVP and measure success',
  paragraphs: [
- 'MVP launch day is not the end of the journey - it\'s its beginning. First week: 50-100 limited users (Soft Launch). Weeks 2-4: public Landing Page + scope tailored Meta ads to capture feedback. Month 2: if Retention is 30%+ (Day-7) and 20%+ (Day-30) - there\'s a chance to raise Seed. If less - return to hypothesis testing.'],
+ 'MVP launch day is not the end of the journey - it\'s its beginning. First week: 50-100 limited users (Soft Launch). Weeks 2-4: public Landing Page + a small Meta ads test budget to capture feedback. Month 2: if Retention is 30%+ (Day-7) and 20%+ (Day-30) - there\'s a chance to raise Seed. If less - return to hypothesis testing.'],
  },
  {
  heading: 'How WeCcelerate builds MVPs for clients',
@@ -937,11 +937,11 @@ export const GUIDES_EN: readonly GuideEn[] = [
  faqs: [
  {
  q: 'How long does it take to build an MVP?',
- a: 'in adjusted timelines is the standard range. Simple MVP (web SaaS) - in adjusted timelines. Complex MVP with native mobile and AI - in adjusted timelines.',
+ a: 'It depends mainly on scope. A simple MVP (web SaaS) can be built relatively quickly. A complex MVP with native mobile and AI takes considerably longer.',
  },
  {
  q: 'How much does it cost to build an MVP in Israel?',
- a: 'Mobile MVP: scope tailored. Web SaaS MVP: scope tailored. Complex MVP with AI: scope tailored. Recommended minimum budget: scope tailored.',
+ a: 'Web SaaS MVPs are usually the most affordable, mobile MVPs cost more, and complex MVPs with AI cost the most. Plan a budget that supports real quality - an underfunded MVP usually has to be rebuilt.',
  },
  {
  q: 'What technology should a startup use?',
@@ -983,7 +983,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  metaDescription:
  'CTO as a Service for startups without a technical co-founder: 10-20 hours per week, architecture decisions, hiring the dev team, representing the technical side to investors. Pricing, process, when needed.',
  speakableAnswer:
- 'CTO as a Service is a model where a startup without a technical founder hires a fractional CTO for 10-20 hours per week. The CTO makes architecture decisions, hires the first engineering team, reviews code, and represents the technical side to investors. WeCcelerate provides this service for Israeli startups with scope tailored per engagement.',
+ 'CTO as a Service is a model where a startup without a technical founder hires a fractional CTO for 10-20 hours per week. The CTO makes architecture decisions, hires the first engineering team, reviews code, and represents the technical side to investors. WeCcelerate provides this service for Israeli startups, with scope and pricing set per engagement.',
  lastUpdated: '2026-04-24',
  readingTimeMinutes: 6,
  sections: [
@@ -1001,8 +1001,8 @@ export const GUIDES_EN: readonly GuideEn[] = [
  {
  heading: 'How much it costs',
  paragraphs: [
- 'CTO as a Service at WeCcelerate: scope tailored per engagement. For transitioning to a full CTO after PMF - we help with recruitment and smooth knowledge transfer.',
- 'For comparison: a full-time CTO at an Israeli startup - scope tailored per month gross + 5-15% equity. CTO as a Service saves the startup scope tailored per month in the most critical phase.'],
+ 'CTO as a Service at WeCcelerate: scope and pricing are set per engagement, based on the hours and stage you need. For transitioning to a full CTO after PMF - we help with recruitment and smooth knowledge transfer.',
+ 'For comparison: a full-time senior CTO is one of the highest salaries at an Israeli startup, plus 5-15% equity. CTO as a Service spares the startup that fixed cost in the most critical phase.'],
  },
  {
  heading: 'The starting process',
@@ -1020,7 +1020,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How long do you work with CTO as a Service?',
- a: 'Average: over a flexible duration. Young startups work from Idea to Seed. Post-Seed startups work over a flexible duration until they hire a full-time CTO.',
+ a: 'It depends on the stage. Young startups work from Idea to Seed. Post-Seed startups work with us until they hire a full-time CTO.',
  },
  {
  q: 'Does CTO as a Service write code?',
@@ -1054,7 +1054,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  metaDescription:
  'How to write a startup business plan that raises funding: 7-section structure, executive summary, financial model, competitive analysis, GTM strategy. From Israel\'s leading Venture Builder.',
  speakableAnswer:
- 'A typical investor-grade startup business plan is 40-80 pages with 7 sections: executive summary, market research, product description, business model, competitive analysis, team, and financial projections. WeCcelerate builds professional business plans on tailored timelines.',
+ 'A typical investor-grade startup business plan is 40-80 pages with 7 sections: executive summary, market research, product description, business model, competitive analysis, team, and financial projections. WeCcelerate builds professional business plans, with scope and timeline agreed per venture.',
  lastUpdated: '2026-04-23',
  readingTimeMinutes: 7,
  sections: [
@@ -1080,7 +1080,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  heading: 'Financial Model - Excel Investors Understand',
  paragraphs: [
  'A typical Seed-stage financial model: 3 years out (monthly), 6 sheets - revenues (by segment/product), CAC, LTV, employees, other expenses, cashflow. P&L and Balance Sheet. A column for each month, not just yearly summaries.',
- 'Common mistakes: 10x growth projection year 1 to year 2 (unrealistic), scope tailoredB revenue in year 3 (self-aggrandizement), unexplained assumptions. An experienced Israeli investor will spot a poorly-grounded financial model in two minutes.'],
+ 'Common mistakes: 10x growth projection year 1 to year 2 (unrealistic), multi-billion revenue in year 3 (self-aggrandizement), unexplained assumptions. An experienced Israeli investor will spot a poorly-grounded financial model in two minutes.'],
  },
  {
  heading: 'Investor Business Plan vs. Bank Business Plan',
@@ -1103,7 +1103,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How much does a professional business plan cost?',
- a: 'scope tailored in Israel in 2026. WeCcelerate - scope tailored per engagement. depending on scope (plan only, or plan + financial model + Pitch Deck).',
+ a: 'Prices in Israel vary widely by provider and depth of work. At WeCcelerate, pricing is set per engagement, depending on scope (plan only, or plan + financial model + Pitch Deck).',
  },
  {
  q: 'Can I write a business plan myself?',
@@ -1111,7 +1111,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How long does it take to build a business plan?',
- a: 'in adjusted timelines for a professional plan. A founder working alone - over a flexible duration, with additional polish along the way.',
+ a: 'With professional guidance, building a solid plan is a focused, efficient process. A founder working alone usually takes longer, with additional polish along the way.',
  }],
  relatedGuideSlugs: ['startup-pitch-deck', 'raise-funding-israel', 'how-to-start-a-startup-israel'],
  ctaServicePath: '/services/business-consulting',
@@ -1235,7 +1235,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  metaDescription:
  'The difference between a venture and a startup: growth model, funding model, time horizon, team type, and success metrics. 7 distinctions that help you decide which path to pursue.',
  speakableAnswer:
- 'A venture is any new company searching for a business model. A startup is a sub-category of venture - specifically one aiming for exponential growth and a scope tailored exit. Every startup is a venture, but a venture can also be a stable services business or a social company. WeCcelerate is a Venture Builder and Startup Accelerator - supporting both paths.',
+ 'A venture is any new company searching for a business model. A startup is a sub-category of venture - specifically one aiming for exponential growth and a large exit. Every startup is a venture, but a venture can also be a stable services business or a social company. WeCcelerate is a Venture Builder and Startup Accelerator - supporting both paths.',
  lastUpdated: '2026-04-23',
  readingTimeMinutes: 5,
  sections: [
@@ -1243,7 +1243,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  heading: 'Quick Definitions',
  paragraphs: [
  '**Venture**: Any new company or initiative that hasn\'t yet proven a stable business model. Can be a startup, but also a services business, social company, real estate venture, or cultural initiative.',
- '**Startup**: Sub-category of venture - a new company specifically aiming for exponential growth and a large exit (scope tailored). Characterized by high burn rate, search for PMF, and VC funding.',
+ '**Startup**: Sub-category of venture - a new company specifically aiming for exponential growth and a large exit, through acquisition or IPO. Characterized by high burn rate, search for PMF, and VC funding.',
  'Rule of thumb: every startup is a venture, but not every venture is a startup.'],
  },
  {
@@ -1254,8 +1254,8 @@ export const GUIDES_EN: readonly GuideEn[] = [
  'Growth model - Startup: exponential (10x+ per year). Venture: can also be linear (slowly growing company).',
  'Time horizon - Startup: 7-12 years to exit. Venture: can be open-ended (stable services company).',
  'Funding source - Startup: VC, angels, CVCs. Venture: can also be bank loan, bootstrapping, or customer revenue.',
- 'Burn ratio - Startup: burns scope tailored/month sometimes without revenue. Venture: most ventures are profitable after over a flexible duration.',
- 'Defined success - Startup: scope tailored exit or IPO. Venture: stable profitability, or even just ROI.',
+ 'Burn ratio - Startup: burns significant capital every month, sometimes without revenue. Venture: most ventures aim to reach profitability relatively early.',
+ 'Defined success - Startup: a large exit or IPO. Venture: stable profitability, or even just ROI.',
  'Founder equity - Startup: aggressive dilution to 15-25% eventually. Venture: founders typically retain 50%+.',
  'Founder type - Startup: growth-and-risk-thirsty. Venture: can also be an experienced professional wanting autonomy.'],
  },
@@ -1264,7 +1264,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  paragraphs: [
  'The answers to these five questions will determine whether you\'re founding a startup or a venture:'],
  list: [
- 'Is my market scope tailored TAM? If not - not a startup.',
+ 'Is my market large enough to build a very large company? If not - not a startup.',
  'Am I willing to go 7-10 years without a full salary? If not - not a startup.',
  'Am I built to be diluted to 20% of the company by Series B? If not - venture.',
  'Can the product grow 100x without linear cost replication? If not - venture, not startup.',
@@ -1273,7 +1273,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  {
  heading: 'In Israel - Both Paths Are Active',
  paragraphs: [
- 'Israel is famous as the "Start-Up Nation" but in practice the ecosystem is one of ventures - startups and stable ventures together. Stable ventures that grew: Sapiens, Verint (like a "startup" that became a scope tailoredB public company). Classic startups: Wiz, Monday.com, Lemonade.',
+ 'Israel is famous as the "Start-Up Nation" but in practice the ecosystem is one of ventures - startups and stable ventures together. Stable ventures that grew: Sapiens, Verint (like a "startup" that became a large public company). Classic startups: Wiz, Monday.com, Lemonade.',
  'WeCcelerate, Israel\'s leading Venture Builder, supports both paths. We support ventures that plan for IPO and ones that aim to stabilize as a successful services company.'],
  }],
  faqs: [
@@ -1283,7 +1283,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'How do I know if my idea is a venture or a startup?',
- a: 'If your market is less than scope tailored TAM, or you plan to grow linearly, or you don\'t want aggressive dilution - you\'re founding a venture, not a startup. Both are legitimate, just different funding and growth paths.',
+ a: 'If your market isn\'t large enough to build a very large company, or you plan to grow linearly, or you don\'t want aggressive dilution - you\'re founding a venture, not a startup. Both are legitimate, just different funding and growth paths.',
  },
  {
  q: 'What kind does WeCcelerate build - ventures or startups?',
@@ -1291,7 +1291,7 @@ export const GUIDES_EN: readonly GuideEn[] = [
  },
  {
  q: 'Do investors distinguish between ventures and startups?',
- a: 'Very much. VCs invest only in startups (market size scope tailored, exponential growth). Stable ventures turn to banks, private equity, or bootstrapping. Two different ecosystems, two different rule books.',
+ a: 'Very much. VCs invest only in startups (very large markets, exponential growth). Stable ventures turn to banks, private equity, or bootstrapping. Two different ecosystems, two different rule books.',
  },
  {
  q: 'Can I start as a venture and become a startup?',

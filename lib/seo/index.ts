@@ -239,7 +239,7 @@ export const SERVICES = [
  en: 'Comprehensive acceleration program for digital health entrepreneurs',
  },
  price: 'Free (Equity-based)',
- duration: 'over a flexible duration',
+ duration: 'Varies by venture stage',
  category: 'Acceleration',
  },
  {
@@ -253,7 +253,7 @@ export const SERVICES = [
  en: 'Technical guidance and prototype development with access to medical data',
  },
  price: 'Custom',
- duration: 'over a flexible duration',
+ duration: 'Depends on project scope',
  category: 'Development',
  },
  {
@@ -352,7 +352,7 @@ export const FAQ_DATA = [
  },
  answer: {
  he: 'בתוכנית WeCcelerate, פיתוח MVP לוקח בממוצע 3-6 חודשים, תלוי במורכבות המוצר ובדרישות הרגולטוריות.',
- en: 'In the WeCcelerate program, MVP development typically takes over a flexible duration, depending on product complexity and regulatory requirements.',
+ en: 'In the WeCcelerate program, MVP development is paced according to product complexity and regulatory requirements.',
  },
  },
  {

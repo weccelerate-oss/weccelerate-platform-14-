@@ -150,7 +150,7 @@ export const comparisonsEn: Record<string, string> = {
 
   // WeCcelerate head-to-head row values
   'comparisons.weccelerate.model': 'Venture Builder (contributes an operational team)',
-  'comparisons.weccelerate.equity': 'Equity-for-Services, tailored per venture',
+  'comparisons.weccelerate.equity': 'Equity-for-Services, structured individually for each venture',
   'comparisons.weccelerate.duration': 'Months to years — long-term',
   'comparisons.weccelerate.focus': 'MedTech, AI, B2B SaaS, Corporate Venture Building',
   'comparisons.weccelerate.medicalData': '✅ Clinical data access through Leumit',

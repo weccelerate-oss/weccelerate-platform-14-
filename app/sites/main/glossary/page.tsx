@@ -51,7 +51,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'סטארטאפ',
  english: 'Startup',
  definition:
- 'תת-קטגוריה של מיזם — חברה חדשה שספציפית שואפת לצמיחה אקספוננציאלית ולאקזיט של scope tailored+. מאופיינת ב-burn rate גבוה, חיפוש PMF, ומימון מקרנות הון סיכון.',
+ 'תת-קטגוריה של מיזם — חברה חדשה שספציפית שואפת לצמיחה אקספוננציאלית ולאקזיט גדול. מאופיינת ב-burn rate גבוה, חיפוש PMF, ומימון מקרנות הון סיכון.',
  guideSlug: 'mah-ze-startup',
  category: 'core',
  },
@@ -69,7 +69,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'מאיץ סטארטאפים',
  english: 'Accelerator',
  definition:
- 'תוכנית מוגבלת בזמן (בלוחות זמנים תלויי-מסלול) שמספקת מנטורינג, הון סיד, ו-Demo Day לסטארטאפים בקבוצות (cohorts). דוגמאות בישראל: 8200 EISP, MassChallenge, The Junction.',
+ 'תוכנית מוגבלת בזמן שמספקת מנטורינג, הון סיד, ו-Demo Day לסטארטאפים בקבוצות (cohorts). דוגמאות בישראל: 8200 EISP, MassChallenge, The Junction.',
  guideSlug: 'hashvaat-acceleratorim',
  category: 'core',
  },
@@ -113,7 +113,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'MVP / מוצר מינימלי',
  english: 'Minimum Viable Product',
  definition:
- 'הגרסה הפשוטה ביותר של המוצר שיכולה לבחון את היפותזת הערך המרכזית על משתמשים אמיתיים. המטרה: לא מוצר גמור אלא חפץ עובד שאפשר להראות למשקיעים. נבנה בלוחות זמנים תלויי-היקף, בתקציב היקף תלוי.',
+ 'הגרסה הפשוטה ביותר של המוצר שיכולה לבחון את היפותזת הערך המרכזית על משתמשים אמיתיים. המטרה: לא מוצר גמור אלא חפץ עובד שאפשר להראות למשקיעים. לוחות הזמנים והתקציב נגזרים מהיקף המוצר.',
  guideSlug: 'eich-bonim-mvp',
  category: 'product',
  },
@@ -150,7 +150,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'סיד / Seed',
  english: 'Seed Round',
  definition:
- 'סבב גיוס ראשון משמעותי. בישראל ב-2026: scope tailored, valuation pre-money scope tailored. נדרש לאחר MVP ו-traction ראשונית. בא לאחר Pre-Seed (FFF + Angels) ולפני Series A.',
+ 'סבב גיוס ראשון משמעותי. היקף הגיוס והשווי (pre-money valuation) משתנים לפי התחום, הצוות וה-traction. נדרש לאחר MVP ו-traction ראשונית. בא לאחר Pre-Seed (FFF + Angels) ולפני Series A.',
  guideSlug: 'eich-mgayisim-mashkim',
  category: 'funding',
  },
@@ -159,7 +159,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'סבב A / Series A',
  english: 'Series A',
  definition:
- 'סבב גיוס שני, אחרי הוכחת PMF. בישראל ב-2026: scope tailored, valuation pre-money scope tailored. דורש scope tailored ARR, retention D30 30%+, וצוות של 8-15. נמשך בלוחות זמנים תלויי-מסלול.',
+ 'סבב גיוס שני, אחרי הוכחת PMF. היקף הגיוס והשווי (pre-money valuation) גבוהים משמעותית מאלה של סבב Seed. דורש הכנסות חוזרות (ARR) מוכחות, retention D30 30%+, וצוות של 8-15. תהליך הגיוס עצמו אורך זמן ודורש הכנה מוקדמת.',
  guideSlug: 'giyus-series-a',
  category: 'funding',
  },
@@ -221,7 +221,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'אקזיט',
  english: 'Exit',
  definition:
- 'מכירת החברה (M&A) או הנפקה ראשונית (IPO). בישראל אקזיט M&A — תלוי בתחום ובשלב. אקזיט מגה: scope tailoredB+. זמן ממוצע מ-Seed לאקזיט: מספר שנים. אנחנו עובדים עם סטארטאפים בכל שלבי הפיתוח.',
+ 'מכירת החברה (M&A) או הנפקה ראשונית (IPO). בישראל אקזיט M&A — תלוי בתחום ובשלב. אקזיט מגה: עסקאות בהיקף של מיליארדי דולרים. זמן ממוצע מ-Seed לאקזיט: מספר שנים. אנחנו עובדים עם סטארטאפים בכל שלבי הפיתוח.',
  guideSlug: 'exit-startup',
  category: 'funding',
  },
@@ -241,7 +241,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'TAM / שוק יעד כולל',
  english: 'Total Addressable Market',
  definition:
- 'סך השוק הפוטנציאלי הגלובלי למוצר. משמעותו: אם 100% מהשוק קונים, כמה הכנסות זה יוצר. משקיעים דורשים TAM של scope tailored+ כדי לשקול השקעה.',
+ 'סך השוק הפוטנציאלי הגלובלי למוצר. משמעותו: אם 100% מהשוק קונים, כמה הכנסות זה יוצר. משקיעים מחפשים TAM גדול מספיק כדי להצדיק השקעה.',
  category: 'metrics',
  },
  {
@@ -317,7 +317,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'Delaware Flip',
  english: 'Delaware Flip',
  definition:
- 'תהליך הקמת הולדינג בארה"ב (Delaware C-Corp) שבעלת את החברה הישראלית. נדרש לרוב לפני Series A אם המשקיעים אמריקאים. עלות: scope tailored בעורכי דין. עדיף לדחות עד שצריך באמת.',
+ 'תהליך הקמת הולדינג בארה"ב (Delaware C-Corp) שבעלת את החברה הישראלית. נדרש לרוב לפני Series A אם המשקיעים אמריקאים. התהליך כרוך בהוצאות משמעותיות על עורכי דין. עדיף לדחות עד שצריך באמת.',
  guideSlug: 'delaware-flip',
  category: 'legal',
  },
@@ -336,7 +336,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'ועדת הלסינקי',
  english: 'Helsinki Committee (Israeli IRB)',
  definition:
- 'הוועדה האתית הישראלית לאישור מחקר רפואי עם בני אדם או מידע מזהה. שווה ערך ל-IRB האמריקאי. תהליך אישור: בלוחות זמנים תלויי-מסלול. נדרש לפני כל ניסוי קליני או גישה לדאטה רפואית.',
+ 'הוועדה האתית הישראלית לאישור מחקר רפואי עם בני אדם או מידע מזהה. שווה ערך ל-IRB האמריקאי. משך תהליך האישור משתנה לפי סוג המחקר ומורכבותו. נדרש לפני כל ניסוי קליני או גישה לדאטה רפואית.',
  guideSlug: 'vaadat-helsinki-madrich',
  category: 'medtech',
  },
@@ -345,7 +345,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'FDA 510(k)',
  english: 'FDA 510(k) Premarket Notification',
  definition:
- 'מסלול האישור הנפוץ של ה-FDA למכשור רפואי. דורש הוכחת "substantial equivalence" ל-predicate device קיים. סקירה: בלוחות זמנים תלויי-מסלול. הכנה: בלוחות זמנים תלויי-מסלול. עלות: היקף תלוי כולל testing וייעוץ רגולטורי.',
+ 'מסלול האישור הנפוץ של ה-FDA למכשור רפואי. דורש הוכחת "substantial equivalence" ל-predicate device קיים. שלב ההכנה ארוך לרוב מהסקירה עצמה, והעלות, הכוללת testing וייעוץ רגולטורי, משתנה לפי המכשיר.',
  guideSlug: 'fda-510k-madrich',
  category: 'medtech',
  },
@@ -354,7 +354,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'סימון CE',
  english: 'CE Marking',
  definition:
- 'הסימון הרגולטורי הנדרש למכירת מכשור רפואי באירופה. תחת MDR (Regulation 2017/745). דורש ISO 13485, ISO 14971, IEC 62304 (אם תוכנה), Notified Body, וניסוי קליני. תהליך: בלוחות זמנים תלויי-מסלול.',
+ 'הסימון הרגולטורי הנדרש למכירת מכשור רפואי באירופה. תחת MDR (Regulation 2017/745). דורש ISO 13485, ISO 14971, IEC 62304 (אם תוכנה), Notified Body, וניסוי קליני. זהו תהליך ממושך שדורש תכנון מוקדם.',
  category: 'medtech',
  },
  {
@@ -362,7 +362,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'ISO 13485',
  english: 'ISO 13485',
  definition:
- 'תקן ניהול איכות בינלאומי ייחודי למכשור רפואי. נדרש ל-CE marking, מועדף ל-FDA. דורש מערכת QMS (Quality Management System) מלאה. הקמה: בלוחות זמנים תלויי-מסלול, עלות: היקף תלוי.',
+ 'תקן ניהול איכות בינלאומי ייחודי למכשור רפואי. נדרש ל-CE marking, מועדף ל-FDA. דורש מערכת QMS (Quality Management System) מלאה. ההקמה היא פרויקט משמעותי, ומשכה ועלותה תלויים בגודל הארגון ובמורכבות המוצר.',
  category: 'medtech',
  },
  {
@@ -415,7 +415,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'אנג\'ל / Angel Investor',
  english: 'Angel Investor',
  definition:
- 'משקיע פרטי אמיד שמשקיע מכספו האישי בסטארטאפים מוקדמים — לרוב Pre-Seed או Seed. השקעה ממוצעת: scope tailoredK. בישראל פעילים מאות אנג\'לים, רבים מהם יזמים שעשו אקזיט.',
+ 'משקיע פרטי אמיד שמשקיע מכספו האישי בסטארטאפים מוקדמים — לרוב Pre-Seed או Seed. היקף ההשקעה משתנה מאוד ממשקיע למשקיע. בישראל פעילים מאות אנג\'לים, רבים מהם יזמים שעשו אקזיט.',
  category: 'people',
  },
  {
@@ -423,7 +423,7 @@ const TERMS: GlossaryTerm[] = [
  hebrew: 'הון סיכון / VC',
  english: 'Venture Capital',
  definition:
- 'קרנות מקצועיות שמשקיעות בסטארטאפים בתמורה לאקוויטי. ישראל יש מעל 100 קרנות פעילות. דוגמאות: TLV Partners, Pitango, Vertex, JVP, Ibex. סבבים: Seed (scope tailored), Series A (scope tailored), Series B (scope tailored).',
+ 'קרנות מקצועיות שמשקיעות בסטארטאפים בתמורה לאקוויטי. ישראל יש מעל 100 קרנות פעילות. דוגמאות: TLV Partners, Pitango, Vertex, JVP, Ibex. סבבים: Seed, Series A ו-Series B, כשהיקף ההשקעה גדל בכל סבב.',
  category: 'people',
  },
  {
