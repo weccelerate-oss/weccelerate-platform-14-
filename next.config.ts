@@ -91,6 +91,8 @@ const nextConfig: NextConfig = {
         ['/guides/livui-mzmim', '/guides/livui-mizmim'],
         ['/guides/grants-rashut-hachadshnaut', '/guides/grants-rashut-hachadshanut'],
         ['/guides/hashvaat-acceleratorim', '/comparisons'],
+        // Linked from the daily content brief (2026-10-18); the real page is medtech-leumit.
+        ['/services/medtech', '/services/medtech-leumit'],
       ].map(([source, destination]) => ({ source, destination, permanent: true })),
     ];
   },

@@ -18,6 +18,8 @@
  * and hub listing update automatically.
  */
 
+import { MEDTECH_GUIDES_2026 } from './guides-medtech-2026';
+
 export type GuideCategory =
  | 'startup-basics'
  | 'product-development'
@@ -987,7 +989,7 @@ export const GUIDES: readonly Guide[] = [
  q: 'איזה סוגי סטארטאפים רפואיים מגייסים ב-2026?',
  a: 'חמים ביותר: Digital Therapeutics (תרופה דיגיטלית), AI לאבחון רפואי, טלרפואה לאוכלוסיות מיוחדות, בינה מלאכותית להדמיה רפואית, Women\'s Health Tech, Mental Health.',
  }],
- relatedGuideSlugs: ['vaadat-helsinki-madrich', 'fda-510k-madrich', 'eich-mgayisim-mashkim', 'mizam-refui'],
+ relatedGuideSlugs: ['vaadat-helsinki-madrich', 'fda-510k-madrich', 'eich-mgayisim-mashkim', 'mizam-refui', 'maslul-fda-510k-de-novo-pma', 'pilot-kupat-cholim', 'samd-tochna-kemechshir-refui'],
  ctaServicePath: '/services/medtech-leumit',
  ctaLabel: 'בואו לשיחה חינם על מסלול MedTech',
  },
@@ -1074,7 +1076,7 @@ export const GUIDES: readonly Guide[] = [
  q: 'מה אם ועדת הלסינקי דוחה את המחקר?',
  a: 'דחייה בדרך כלל מתבטאת בהערות לתיקון. מגישים מחדש עם תיקונים, וזה מוסיף סבב בדיקה נוסף. דחייה מוחלטת נדירה וקורית רק אם המחקר מסוכן מאוד או לא אתי.',
  }],
- relatedGuideSlugs: ['eich-lehakim-startup-refui', 'fda-510k-madrich'],
+ relatedGuideSlugs: ['eich-lehakim-startup-refui', 'fda-510k-madrich', 'pilot-kupat-cholim', 'rishum-amar-mechshir-refui'],
  ctaServicePath: '/services/medtech-leumit',
  ctaLabel: 'נסייע לכם לעבור את ועדת הלסינקי',
  },
@@ -1187,7 +1189,7 @@ export const GUIDES: readonly Guide[] = [
  q: 'איזה מסמכים צריכים להיות ב-510(k)?',
  a: '20 פרקים - Indications for Use, Device Description, Substantial Equivalence, Performance Data, Biocompatibility, Software Documentation, Cybersecurity, Labeling, Risk Analysis, QMS. סה"כ 500-2,000 עמודים.',
  }],
- relatedGuideSlugs: ['vaadat-helsinki-madrich', 'eich-lehakim-startup-refui'],
+ relatedGuideSlugs: ['vaadat-helsinki-madrich', 'eich-lehakim-startup-refui', 'maslul-fda-510k-de-novo-pma', 'ce-mark-mdr-mechshir-refui'],
  ctaServicePath: '/services/medtech-leumit',
  ctaLabel: 'קבלו ליווי 510(k) מיועצים לשעבר FDA',
  },
@@ -2208,7 +2210,7 @@ export const GUIDES: readonly Guide[] = [
  q: 'איך סטארטאפ DTx ישראלי יכול לקבל גישה לדאטה רפואי?',
  a: 'קופות החולים הישראליות (לאומית, מכבי, כללית) הן המאגר העיקרי. לאומית מעניקה גישה דרך WeCcelerate-Leumit Medical Accelerator - מאגר נתונים קליני אנונימי בשותפות לאומית, פעילות קלינית רחבה.',
  }],
- relatedGuideSlugs: ['eich-lehakim-startup-refui', 'fda-510k-madrich', 'vaadat-helsinki-madrich'],
+ relatedGuideSlugs: ['eich-lehakim-startup-refui', 'fda-510k-madrich', 'vaadat-helsinki-madrich', 'samd-tochna-kemechshir-refui'],
  ctaServicePath: '/services/medtech-leumit',
  ctaLabel: 'הצטרפו למסלול DTx של WeCcelerate-Leumit',
  },
@@ -2577,7 +2579,7 @@ export const GUIDES: readonly Guide[] = [
  q: 'מה היתרון של WeCcelerate × Leumit למיזם רפואי?',
  a: 'גישה למאגר נתונים קליני של לאומית, פעילות קלינית רחבה, פיילוטים קליניים במרפאות לאומית, וייעוץ של מומחי FDA. אין מסלול דומה במאיץ ישראלי אחר.',
  }],
- relatedGuideSlugs: ['eich-lehakim-startup-refui', 'vaadat-helsinki-madrich', 'fda-510k-madrich', 'digital-therapeutics-israel'],
+ relatedGuideSlugs: ['eich-lehakim-startup-refui', 'vaadat-helsinki-madrich', 'fda-510k-madrich', 'digital-therapeutics-israel', 'pilot-kupat-cholim', 'rishum-amar-mechshir-refui'],
  ctaServicePath: '/services/medtech-leumit',
  ctaLabel: 'הצטרפו למסלול MedTech של WeCcelerate × Leumit',
  },
@@ -3266,7 +3268,7 @@ export const GUIDES: readonly Guide[] = [
  {
  heading: 'איך WeCcelerate מסייעת באקזיט',
  paragraphs: [
- 'WeCcelerate מלווה מיזמים בפורטפוליו לאקזיטים מאז 2016. השירותים שלנו לתהליך אקזיט: (1) זיהוי acquirers פוטנציאליים מתוך רשת של חברות גלובליות. (2) הכנת data room וחבילת מסמכים. (3) חיבור לבנקי השקעות מובילים. (4) ייעוץ מיסוי וייעוץ משפטי. כל תהליך מותאם לשלב ולמטרות של המיזם.'],
+ 'WeCcelerate מלווה מיזמים בפורטפוליו לאקזיטים מאז 2018. השירותים שלנו לתהליך אקזיט: (1) זיהוי acquirers פוטנציאליים מתוך רשת של חברות גלובליות. (2) הכנת data room וחבילת מסמכים. (3) חיבור לבנקי השקעות מובילים. (4) ייעוץ מיסוי וייעוץ משפטי. כל תהליך מותאם לשלב ולמטרות של המיזם.'],
  }],
  faqs: [
  {
@@ -3489,7 +3491,9 @@ export const GUIDES: readonly Guide[] = [
  relatedGuideSlugs: ['heskem-meyasdim', 'esop-ovdim', 'cap-table-hesber', 'safe-vs-convertible-note'],
  ctaServicePath: '/services/business-consulting',
  ctaLabel: 'נסייע לכם להבין ולחתום על Vesting נכון',
- }];
+ },
+ ...MEDTECH_GUIDES_2026,
+];
 
 // =============================================================================
 // HELPERS

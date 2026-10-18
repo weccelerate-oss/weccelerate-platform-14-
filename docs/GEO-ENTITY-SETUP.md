@@ -15,6 +15,8 @@ data.
 
 ## Step 0 — Deploy, then push to Bing (prerequisite)
 
+> **Update 2026-10-18:** founding year is now **2018** everywhere (owner via Maor). Expect `foundingDate` = 2018; Wikidata P571 → 2018.
+
 > **Status 2026-09-14 (verified live):** deployed. `foundingDate` = 2016 (changed from 2018 on 2026-09-14, owner decision), the
 > company number is in the schema, the sitemap has no dead hosts. Items 3–4
 > (IndexNow push, Search Console request) are still manual.

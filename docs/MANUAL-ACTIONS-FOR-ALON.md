@@ -60,6 +60,8 @@ re-evaluation.
 
 ---
 
+> **Update 2026-10-18:** founding year changed to **2018** (Maor). Site, schema, llms and FAQ updated; Wikidata P571 must be set to 2018 (scripts/entity/wikidata-set-founded.mjs). The section below is history.
+
 ## ✅ Resolved — Founding year (final: 2016, set 2026-09-14)
 
 **Canonical founding year is 2016.** The legal entity WeCcelerate Ltd.

@@ -1,6 +1,6 @@
 # ערכת נוסחים לאלון — לידים
 
-**תאריך:** 14.9.2026. כל הנוסחים כאן עומדים בכלל הבית: בלי מספרים, בלי טווחי זמן, בלי הבטחות. שנת ייסוד: 2016.
+**תאריך:** 14.9.2026. כל הנוסחים כאן עומדים בכלל הבית: בלי מספרים, בלי טווחי זמן, בלי הבטחות. שנת ייסוד: 2018 (עודכן 18.10.2026).
 
 ---
 
@@ -35,10 +35,10 @@ https://weccelerate.co.il/lp/startup?utm_source=whatsapp&utm_medium=reengage&utm
 
 ## 3. ה-About של לינקדאין (חברה)
 
-להחליף את הטקסט הקיים. לתקן גם את **שנת הייסוד ל-2016** בפרטי החברה.
+להחליף את הטקסט הקיים. לתקן גם את **שנת הייסוד ל-2018** בפרטי החברה.
 
 ```text
-WeCcelerate (וויסלרייט) is an Israeli venture builder and startup accelerator based in Tel Aviv, with an office in Jerusalem. Israeli company no. 515962819, founded in 2016.
+WeCcelerate (וויסלרייט) is an Israeli venture builder and startup accelerator based in Tel Aviv, with an office in Jerusalem. Israeli company no. 515962819, founded in 2018.
 
 We work alongside founders from idea to investors: market research and business planning, digital and physical product development, marketing and PR, investor preparation and introductions. Our MedTech track, in partnership with Leumit Health Services, gives medical ventures clinical expertise, regulatory guidance, data access and pilot opportunities inside a national health fund.
 
@@ -67,13 +67,13 @@ Verification:
 - LinkedIn: https://www.linkedin.com/company/weccelerate
 - Wikidata: https://www.wikidata.org/wiki/Q141451357
 - Israeli company registry no.: 515962819
-- Founded: 2016
+- Founded: 2018
 
 Thanks,
 Alon Pinchas, Founder & CEO, WeCcelerate Ltd.
 ```
 
-בפרופיל עצמו: Founded 2016, שם חלופי "וויסלרייט", מייסדים עם לינקדאין, פורטפוליו, השותפות עם לאומית.
+בפרופיל עצמו: Founded 2018, שם חלופי "וויסלרייט", מייסדים עם לינקדאין, פורטפוליו, השותפות עם לאומית.
 
 ---
 

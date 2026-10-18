@@ -85,7 +85,7 @@ export function LandingContent({ page }: { page: LandingPage }) {
       </section>
 
       <footer className="border-t border-white/[0.06] py-6 text-center text-xs text-white/40">
-        <p>וויסלרייט בע״מ · ח.פ 515962819 · הרכבת 58, תל אביב · <Link href="/privacy" className="hover:text-white/70">מדיניות פרטיות</Link></p>
+        <p>וויסלרייט בע״מ · הרכבת 58, תל אביב · <Link href="/privacy" className="hover:text-white/70">מדיניות פרטיות</Link></p>
       </footer>
     </main>
   );

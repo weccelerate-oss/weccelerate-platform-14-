@@ -110,12 +110,12 @@ function buildOrganizationSchema() {
     },
     
     // Founding & Contact
-    // Founding year: 2016. History: 2016 (owner, 2026-04-26) -> 2018 (owner,
-    // 2026-05-14) -> 2016 (owner via Maor, 2026-09-14). Every surface must
+    // Founding year: 2018. History: 2016 (owner, 2026-04-26) -> 2018 (owner,
+    // 2026-05-14) -> 2016 (owner via Maor, 2026-09-14) -> 2018 (Maor, 2026-10-18). Every surface must
     // agree: config/seo.ts, footer i18n, faq-catalog, llms.txt, writing-rules,
     // Wikidata Q141451357 (P571). A mismatch between them is what got the
     // domain flagged by reputation systems in April 2026.
-    foundingDate: '2016',
+    foundingDate: '2018',
     foundingLocation: {
       '@type': 'Place',
       name: 'Tel Aviv, Israel',
