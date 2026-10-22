@@ -14,6 +14,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { GuideFigure } from '@/components/seo/GuideFigure';
+import { GuideText } from '@/components/seo/GuideText';
+import { GuideSources } from '@/components/seo/GuideSources';
+import { guideCitations, guideImageObjects } from '@/lib/seo/guide-schema';
 import { constructMetadata, SITE_CONFIG } from '@/lib/seo';
 import {
   GUIDES_EN,
@@ -87,6 +91,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 function buildArticleSchema(guide: GuideEn) {
   const url = `${SITE_CONFIG.url}/en/guides/${guide.slug}`;
   const hebrewUrl = `${SITE_CONFIG.url}/guides/${guide.hebrewSlug}`;
+  const images = guideImageObjects(guide.sections, SITE_CONFIG.url);
+  const citation = guideCitations(guide.sources, guide.sections);
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -112,7 +118,11 @@ function buildArticleSchema(guide: GuideEn) {
     },
     keywords: [guide.targetKeyword, ...guide.relatedKeywords].join(', '),
     timeRequired: `PT${guide.readingTimeMinutes}M`,
-    image: { '@type': 'ImageObject', url: `${SITE_CONFIG.url}/logo.png`, width: 512, height: 512 },
+    image: images.length
+      ? images
+      : { '@type': 'ImageObject', url: `${SITE_CONFIG.url}/logo.png`, width: 512, height: 512 },
+    ...(citation.length && { citation }),
+    isAccessibleForFree: true,
     speakable: {
       '@type': 'SpeakableSpecification',
       cssSelector: ['[data-speakable]'],
@@ -252,7 +262,9 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
               </span>
               <span>{guide.readingTimeMinutes} min read</span>
               <span>·</span>
-              <time dateTime={guide.lastUpdated}>Updated {guide.lastUpdated}</time>
+              <time dateTime={guide.lastUpdated}>
+                Updated {new Date(`${guide.lastUpdated}T00:00:00`).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </time>
             </div>
             <h1 className="mb-5 text-3xl font-bold leading-tight text-white md:text-4xl">
               {guide.h1}
@@ -296,6 +308,13 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
                   FAQ
                 </a>
               </li>
+              {guide.sources?.length ? (
+                <li>
+                  <a href="#sources" className="hover:text-[#e8d48b] transition-colors">
+                    Sources
+                  </a>
+                </li>
+              ) : null}
             </ol>
           </nav>
 
@@ -306,15 +325,16 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
                 <h2 className="mb-4 text-2xl md:text-3xl font-bold tracking-tight text-white">{section.heading}</h2>
                 <div className="space-y-4 text-white/75 leading-relaxed">
                   {section.paragraphs.map((p, j) => (
-                    <p key={j}>{p}</p>
+                    <p key={j}><GuideText text={p} /></p>
                   ))}
                   {section.list && (
                     <ul className="list-disc space-y-2 pl-6 marker:text-[#c8a951]">
                       {section.list.map((item, j) => (
-                        <li key={j}>{item}</li>
+                        <li key={j}><GuideText text={item} /></li>
                       ))}
                     </ul>
                   )}
+                  {section.figure && <GuideFigure figure={section.figure} />}
                 </div>
               </section>
             ))}
@@ -375,6 +395,8 @@ export default async function GuideDetailPageEn({ params }: { params: Promise<Pa
               ))}
             </div>
           </section>
+
+          <GuideSources sources={guide.sources} locale="en" />
 
           {/* CTA to service */}
           <section className="mt-14 relative overflow-hidden rounded-2xl border border-[#c8a951]/30 bg-gradient-to-br from-[#c8a951]/[0.10] via-transparent to-[#c8a951]/[0.04] p-8">

@@ -12,6 +12,10 @@ import {
 import { getEnSlugFromHebrew } from '@/lib/seo/guides-catalog-en';
 import { prisma } from '@/lib/db';
 import { renderGeneratedGuide } from './generated-guide-view';
+import { GuideFigure } from '@/components/seo/GuideFigure';
+import { GuideText } from '@/components/seo/GuideText';
+import { GuideSources } from '@/components/seo/GuideSources';
+import { guideCitations, guideImageObjects } from '@/lib/seo/guide-schema';
 import { GuideLeadForm } from '@/components/forms/GuideLeadForm';
 import { NewsletterBox } from '@/components/forms/NewsletterBox';
 
@@ -94,6 +98,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 function buildArticleSchema(guide: Guide) {
   const url = `${SITE_CONFIG.url}/guides/${guide.slug}`;
+  const images = guideImageObjects(guide.sections, SITE_CONFIG.url);
+  const citation = guideCitations(guide.sources, guide.sections);
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -119,7 +125,11 @@ function buildArticleSchema(guide: Guide) {
       0,
     ),
     timeRequired: `PT${guide.readingTimeMinutes}M`,
-    image: { '@type': 'ImageObject', url: `${SITE_CONFIG.url}/logo.png`, width: 512, height: 512 },
+    image: images.length
+      ? images
+      : { '@type': 'ImageObject', url: `${SITE_CONFIG.url}/logo.png`, width: 512, height: 512 },
+    ...(citation.length && { citation }),
+    isAccessibleForFree: true,
     speakable: { '@type': 'SpeakableSpecification', cssSelector: ['[data-speakable]'] },
     about: { '@type': 'Thing', name: guide.targetKeyword },
   };
@@ -246,7 +256,9 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
               </span>
               <span>{guide.readingTimeMinutes} דק׳ קריאה</span>
               <span>·</span>
-              <time dateTime={guide.lastUpdated}>עודכן {guide.lastUpdated}</time>
+              <time dateTime={guide.lastUpdated}>
+                עודכן {new Date(`${guide.lastUpdated}T00:00:00`).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </time>
             </div>
             <h1 className="mb-6 text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.15] tracking-tight">
               {guide.h1}
@@ -293,6 +305,13 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
                   שאלות נפוצות
                 </a>
               </li>
+              {guide.sources?.length ? (
+                <li>
+                  <a href="#sources" className="hover:text-[#e8d48b] transition-colors">
+                    מקורות
+                  </a>
+                </li>
+              ) : null}
             </ol>
           </nav>
 
@@ -304,15 +323,16 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
                 <h2 className="mb-4 text-2xl md:text-3xl font-bold tracking-tight">{section.heading}</h2>
                 <div className="space-y-4 text-white/75 leading-relaxed">
                   {section.paragraphs.map((p, j) => (
-                    <p key={j}>{p}</p>
+                    <p key={j}><GuideText text={p} /></p>
                   ))}
                   {section.list && (
                     <ul className="list-disc space-y-2 pr-6 marker:text-[#c8a951]">
                       {section.list.map((item, j) => (
-                        <li key={j}>{item}</li>
+                        <li key={j}><GuideText text={item} /></li>
                       ))}
                     </ul>
                   )}
+                  {section.figure && <GuideFigure figure={section.figure} />}
                 </div>
               </section>
             ))}
@@ -373,6 +393,8 @@ export default async function GuideDetailPage({ params }: { params: Promise<Para
               ))}
             </div>
           </section>
+
+          <GuideSources sources={guide.sources} locale="he" />
 
           {/* CTA */}
           <GuideLeadForm

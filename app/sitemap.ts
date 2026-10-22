@@ -14,6 +14,7 @@ import { MetadataRoute } from 'next';
 import { SITE_CONFIG, hasEnglishMirror } from '@/lib/seo';
 import { GUIDES } from '@/lib/seo/guides-catalog';
 import { GUIDES_EN } from '@/lib/seo/guides-catalog-en';
+import { guideFigures } from '@/lib/seo/guide-schema';
 import { TEAM_SLUGS } from '@/lib/seo/founders';
 
 // =============================================================================
@@ -164,6 +165,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(g.lastUpdated),
       changeFrequency: 'monthly',
       priority: 0.85,
+      images: guideFigures(g.sections).map((fig) => `${baseUrl}${fig.src}`),
     }),
   );
 
@@ -188,6 +190,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(g.lastUpdated),
       changeFrequency: 'monthly',
       priority: 0.75,
+      images: guideFigures(g.sections).map((fig) => `${baseUrl}${fig.src}`),
     }),
   );
 
