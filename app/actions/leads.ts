@@ -85,6 +85,7 @@ const ApplicationFormSchema = ContactFormSchema.extend({
 
 const NewsletterSchema = z.object({
   email: z.string().email('כתובת אימייל לא תקינה'),
+  phone: ContactFormSchema.shape.phone,
   name: z.string().optional(),
 });
 
@@ -514,6 +515,7 @@ export async function submitNewsletterSignup(
 ): Promise<FormState> {
   const rawData = {
     email: formData.get('email') ?? '',
+    phone: formData.get('phone') ?? '',
     name: opt(formData, 'name'),
   };
 
@@ -524,7 +526,7 @@ export async function submitNewsletterSignup(
   if (!validationResult.success) {
     return {
       success: false,
-      message: 'כתובת אימייל לא תקינה',
+      message: 'נא לתקן את השגיאות בטופס',
       errors: validationResult.error.flatten().fieldErrors as Record<string, string[]>,
     };
   }
@@ -536,7 +538,7 @@ export async function submitNewsletterSignup(
     leadData: {
       name: inferredName,
       email: validData.email,
-      phone: null,
+      phone: validData.phone,
       company: null,
       message: null,
     },
@@ -645,7 +647,7 @@ const VALID_FORM_TYPES = [
 const LeadSchema = z.object({
   name: z.string().min(1).max(200),
   email: z.string().email().max(320),
-  phone: z.string().max(30).optional(),
+  phone: z.string().max(30).refine(isPhone),
   company: z.string().max(200).optional(),
   message: z.string().max(2000).optional(),
   sourceUrl: z.string().max(2048).optional(),
@@ -660,7 +662,7 @@ const LeadSchema = z.object({
 export async function createLeadAction(data: {
   name: string;
   email: string;
-  phone?: string;
+  phone: string;
   company?: string;
   message?: string;
   sourceUrl?: string;
@@ -675,7 +677,7 @@ export async function createLeadAction(data: {
   if (!parsed.success) {
     return {
       success: false,
-      message: 'שם ואימייל הם שדות חובה',
+      message: 'שם, אימייל וטלפון הם שדות חובה',
     };
   }
 
@@ -686,7 +688,7 @@ export async function createLeadAction(data: {
     leadData: {
       name: validData.name,
       email: validData.email,
-      phone: validData.phone || null,
+      phone: validData.phone,
       company: validData.company || null,
       message: validData.message || null,
       stage: validData.stage || null,

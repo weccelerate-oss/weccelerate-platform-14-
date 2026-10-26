@@ -21,7 +21,13 @@ export function guideImageObjects(sections: readonly SectionWithFigure[], siteUr
     height: f.height,
     caption: f.caption,
     description: f.alt,
-    ...(f.credit && { creditText: f.credit }),
+    // Screenshots of third-party sites: credit the owner, but never claim a
+    // license (no `license` / `acquireLicensePage`) we do not hold.
+    ...(f.credit && {
+      creditText: f.credit,
+      creator: { '@type': 'Organization', name: f.credit.split(',')[0].trim() },
+      copyrightNotice: `© ${f.credit.split(',')[0].trim()}`,
+    }),
     ...(f.sourceUrl && { isBasedOn: f.sourceUrl }),
   }));
 }

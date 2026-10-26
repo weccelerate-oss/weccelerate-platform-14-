@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * Email-only signup at the end of a guide, for readers who are not ready to
- * talk yet. Goes through the same server action + spam filter as every lead
+ * Email + phone signup at the end of a guide. Phone is required like every
+ * other lead form, so nothing reaches Pipedrive without one. Goes through the same server action + spam filter as every lead
  * (formType `newsletter`); it is tagged separately so the leads dashboard
  * does not count it against the monthly target.
  */
 
 import { useActionState, useEffect, useRef } from 'react';
-import { Loader2, Mail, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, Mail, Phone, CheckCircle2, AlertCircle } from 'lucide-react';
 import { submitNewsletterSignup, type FormState } from '@/app/actions/leads';
 import { LeadHiddenFields } from '@/components/forms/LeadHiddenFields';
 
@@ -27,7 +27,7 @@ export function NewsletterBox({ site = 'main' }: { site?: string }) {
       <div className="flex flex-col md:flex-row md:items-center gap-5">
         <div className="flex-1">
           <h2 className="text-xl font-bold text-white">מדריכים חדשים ליזמים, ישירות למייל</h2>
-          <p className="mt-1 text-sm text-white/55 leading-relaxed">בלי פרסומות. אפשר להסיר את עצמכם בכל רגע.</p>
+          <p className="mt-1 text-sm text-white/55 leading-relaxed">בלי פרסומות. אפשר להסיר את עצמכם בכל רגע. נשמח גם לחזור אליכם בטלפון.</p>
         </div>
         {state.success ? (
           <p className="flex items-center gap-2 text-emerald-300 text-sm" role="status">
@@ -37,7 +37,7 @@ export function NewsletterBox({ site = 'main' }: { site?: string }) {
         ) : (
           <form ref={formRef} action={formAction} noValidate className="flex-1 flex flex-col gap-2">
             <LeadHiddenFields site={site} formType="newsletter" />
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <label htmlFor="newsletter-email" className="sr-only">אימייל</label>
               <div className="flex-1 flex items-center gap-2 rounded-xl bg-white/[0.05] border border-white/[0.08] px-3 min-h-[44px] focus-within:ring-2 focus-within:ring-[#c8a951]/40">
                 <Mail className="w-4 h-4 text-white/40 flex-shrink-0" aria-hidden="true" />
@@ -54,6 +54,23 @@ export function NewsletterBox({ site = 'main' }: { site?: string }) {
                   className="w-full min-w-0 bg-transparent text-white placeholder-white/35 text-base focus:outline-none disabled:opacity-50 text-start"
                 />
               </div>
+              <label htmlFor="newsletter-phone" className="sr-only">טלפון</label>
+              <div className="flex-1 flex items-center gap-2 rounded-xl bg-white/[0.05] border border-white/[0.08] px-3 min-h-[44px] focus-within:ring-2 focus-within:ring-[#c8a951]/40">
+                <Phone className="w-4 h-4 text-white/40 flex-shrink-0" aria-hidden="true" />
+                <input
+                  id="newsletter-phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  autoComplete="tel"
+                  inputMode="tel"
+                  dir="ltr"
+                  disabled={isPending}
+                  placeholder="050-0000000"
+                  aria-invalid={state.errors?.phone ? 'true' : undefined}
+                  className="w-full min-w-0 bg-transparent text-white placeholder-white/35 text-base focus:outline-none disabled:opacity-50 text-start"
+                />
+              </div>
               <button
                 type="submit"
                 disabled={isPending}
@@ -63,10 +80,10 @@ export function NewsletterBox({ site = 'main' }: { site?: string }) {
                 הרשמה
               </button>
             </div>
-            {(state.errors?.email?.[0] || (!state.success && state.message)) && (
+            {(state.errors?.email?.[0] || state.errors?.phone?.[0] || (!state.success && state.message)) && (
               <p className="flex items-center gap-1.5 text-xs text-red-400" role="alert">
                 <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
-                {state.errors?.email?.[0] || state.message}
+                {state.errors?.email?.[0] || state.errors?.phone?.[0] || state.message}
               </p>
             )}
           </form>
