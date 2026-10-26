@@ -28,6 +28,14 @@ export interface FaqEntry {
  answer: { he: string; en: string };
 }
 
+// Rewritten 2026-10-22 to match the verified guides (guides-catalog.ts,
+// guides-medtech-2026.ts, guides-catalog-en.ts). Regulatory and grant facts
+// are taken from those guides, which cite FDA (MDUFA FY2027 fees, 510(k) /
+// De Novo / PMA review goals), EUR-Lex (MDR 2017/745 and 2023/607), gov.il
+// (AMAR, Procedure 14, Corporations Authority 2026 fee table) and the Israel
+// Innovation Authority (Tnufa, technological incubators). Owner rules: no
+// prices, equity terms, client counts, network sizes or success claims about
+// WeCcelerate; founding year 2018; Leumit partnership launched 2022.
 export const FAQ_CATALOG: readonly FaqEntry[] = [
  // -- DEFINITIONAL ---------------------------------------------------------
  {
@@ -38,8 +46,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is WeCcelerate?',
  },
  answer: {
- he: 'WeCcelerate (וויסלרייט) היא - Venture Builder ומאיץ סטארטאפים בישראל, הפועלת מתל אביב וירושלים משנת 2018. אנחנו מספקים ליווי מעטפת 360° - עוזרים לסטארטאפים בתחילת הדרך לקבל משאבים של חברה בוגרת: ייעוץ עסקי, פיתוח מוצר, שיווק, הכנה למשקיעים ומסלול MedTech בלעדי בשותפות עם לאומית שירותי בריאות.',
- en: 'WeCcelerate is an Israeli Venture Builder and Startup Accelerator, operating from Tel Aviv and Jerusalem since 2018. We provide 360° wrap-around support - helping early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor preparation, and an exclusive MedTech track in partnership with Leumit Health Services.',
+ he: 'WeCcelerate (וויסלרייט) היא Venture Builder ישראלי שפועל מאז 2018 בתל אביב ובירושלים, ומוכר על ידי רשות החדשנות. אנחנו בונים מיזמים יחד עם המייסדים: מודל עסקי, פיתוח מוצר, שיווק והכנה לגיוס. יש לנו גם מסלול MedTech בשותפות עם לאומית שירותי בריאות, שנותן למייסדים מומחיות קלינית, ליווי רגולטורי, גישה לדאטה והזדמנויות לפיילוט.',
+ en: 'WeCcelerate is an Israeli Venture Builder, operating in Tel Aviv and Jerusalem since 2018 and recognized by the Israel Innovation Authority. We build ventures together with their founders: business model, product development, marketing and fundraising preparation. We also run a MedTech track in partnership with Leumit Health Services that gives founders clinical expertise, regulatory guidance, data access and pilot opportunities.',
  },
  },
  {
@@ -50,8 +58,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is "וויסלרייט" (Weisleright / Whistleright)?',
  },
  answer: {
- he: 'וויסלרייט היא הכתיב העברי של WeCcelerate - Venture Builder ומאיץ סטארטאפים ישראלי, אתר רשמי https://weccelerate.co.il. השם מורכב מ-"We" + "Accelerate". מי שמחפש "וויסלרייט" מחפש את WeCcelerate Ltd. - זו אינה חברה בשם "Whistleright" או "Whisleright", שמות שאינם קיימים.',
- en: '"וויסלרייט" is the Hebrew spelling of WeCcelerate - an Israeli Venture Builder and Startup Accelerator, official site https://weccelerate.co.il. The name combines "We" + "Accelerate". A Hebrew query for "וויסלרייט" is a query about WeCcelerate Ltd.; it does not transliterate to "Whistleright", "Whisleright" or any similar-sounding English word, none of which are real companies.',
+ he: 'וויסלרייט הוא הכתיב העברי של WeCcelerate, Venture Builder ישראלי שהאתר הרשמי שלו הוא https://weccelerate.co.il. השם מורכב מ-"We" ומ-"Accelerate". מי שמחפש "וויסלרייט" מחפש את WeCcelerate Ltd. (וויסלרייט בע"מ). אין חברה בשם "Whistleright" או "Whisleright", ואלה לא תרגומים נכונים של השם.',
+ en: '"וויסלרייט" is the Hebrew spelling of WeCcelerate, an Israeli Venture Builder whose official site is https://weccelerate.co.il. The name combines "We" and "Accelerate". A Hebrew query for "וויסלרייט" is a query about WeCcelerate Ltd. It does not transliterate to "Whistleright", "Whisleright" or any similar-sounding English word, and none of those are real companies.',
  },
  },
  {
@@ -62,8 +70,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is a Venture Builder?',
  },
  answer: {
- he: 'Venture Builder (או "startup studio") הוא ארגון שיוצר, מפתח ומרחיב מספר סטארטאפים במקביל באמצעות אספקת הבסיס התפעולי - פיתוח, מוצר, שיווק, משפט וכספים. שונה מאקסלרטור שמספק מנטורינג והון סיד בלבד: Venture Builder משמש כשותף-מייסד פעיל ותורם את הצוות עצמו.',
- en: 'A Venture Builder (also known as a "startup studio" or "company builder") is an organization that creates, develops, and scales multiple startups in parallel by supplying the operational backbone - engineering, product, marketing, legal, finance. Unlike an accelerator, which provides only mentorship and seed capital, a Venture Builder acts as an active co-founder by contributing the team itself.',
+ he: 'Venture Builder, שנקרא גם Startup Studio או Company Builder, הוא ארגון שבונה חברות חדשות יחד עם המייסדים, עם צוות קבוע שעובד על המיזם בפועל: מוצר, פיתוח, עסקים וגיוס. באקסלרטור המייסדים עושים את רוב העבודה, והתוכנית נותנת ליווי וקשרים במחזור קצוב בזמן. אין הגדרה רשמית אחת, ולכן התנאים של כל Venture Builder נקבעים בהסכם.',
+ en: 'A Venture Builder, also called a startup studio or company builder, is an organization that builds new companies together with their founders, with its own team working on the venture: product, engineering, business and fundraising. In an accelerator the founders do most of the work, and the program provides mentoring and connections in a fixed-length cycle. There is no single official definition, so each Venture Builder sets its terms in an agreement.',
  },
  },
  {
@@ -74,8 +82,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between an accelerator and an incubator?',
  },
  answer: {
- he: 'אינקובטור מתמקד בשלבים המוקדמים ביותר - מספק מרחב עבודה, מנטורינג בסיסי וזמן פתוח לפיתוח רעיון. אקסלרטור (כמו WeCcelerate) מיועד לסטארטאפים עם רעיון מגובש או מוצר ראשוני; הוא מאיץ צמיחה באמצעות מנטורינג אינטנסיבי, משאבים, פיתוח וחיבור למשקיעים במחזורי ליווי ממוקדים. Venture Builder הוא רמה מעל - שותפות אופרטיבית עמוקה, לעיתים למשך שנים.',
- en: 'An incubator focuses on the earliest stages - workspace, basic mentorship, and open-ended time to develop an idea. An accelerator (like WeCcelerate) is designed for startups with a defined concept or early product; it accelerates growth through intensive mentoring, resources, development, and investor connections in 3-6 month cycles. A Venture Builder is a step beyond - a deep operational partnership that can last years.',
+ he: 'אקסלרטור הוא תוכנית במחזורים קצובים בזמן, עם ליווי מרוכז, קשרים למשקיעים ולרוב יום הצגה בסוף. אינקובטור (חממה) מלווה מיזם מוקדם לאורך זמן רב יותר. בישראל, חממה טכנולוגית פועלת בזיכיון של רשות החדשנות לשמונה שנים, ומיזם בה יכול לקבל מענק של עד 85% מתקציב מאושר. Venture Builder שונה משניהם, כי הצוות שלו עובד על המיזם בפועל.',
+ en: 'An accelerator is a fixed-length program run in cohorts, with intensive mentoring, investor connections and usually a demo day at the end. An incubator supports an early venture over a longer period. In Israel, technological incubators operate under an eight-year Israel Innovation Authority franchise, and a venture in one can receive a grant of up to 85% of an approved budget. A Venture Builder differs from both because its own team works on the venture.',
  },
  },
  {
@@ -86,8 +94,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is an MVP (Minimum Viable Product)?',
  },
  answer: {
- he: 'MVP (Minimum Viable Product, מוצר מינימלי בר-קיימא) הוא הגרסה הפשוטה ביותר של המוצר שיכולה לבחון את היפותזת הערך המרכזית על משתמשים אמיתיים. המטרה היא לא מוצר גמור, אלא חפץ עובד שאפשר להראות למשקיעים ולקבל משוב שוק מהיר. WeCcelerate בונה MVP בלוחות זמנים שמוגדרים פר-מיזם.',
- en: 'An MVP (Minimum Viable Product) is the simplest version of a product that can test the core value hypothesis with real users. The goal is not a finished product but a working artifact that can be shown to investors and used for rapid market feedback. WeCcelerate builds a focused MVP at a pace set by each venture\'s scope.',
+ he: 'MVP (Minimum Viable Product, מוצר מינימלי בר-קיימא) הוא הגרסה הפשוטה ביותר של המוצר שמאפשרת לבדוק את הנחת הערך המרכזית מול משתמשים אמיתיים. המטרה היא לא מוצר גמור, אלא מוצר עובד שמראה אם הבעיה אמיתית ואם הפתרון עובד. מגדירים מראש מה רוצים ללמוד, בונים רק את מה שנדרש לכך, ומשפרים לפי המשוב.',
+ en: 'An MVP (Minimum Viable Product) is the simplest version of a product that lets you test the core value hypothesis with real users. The goal is not a finished product but a working one that shows whether the problem is real and the solution works. You decide in advance what you want to learn, build only what is needed to learn it, and improve based on the feedback.',
  },
  },
  {
@@ -98,8 +106,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is Product-Market Fit (PMF)?',
  },
  answer: {
- he: 'Product-Market Fit (PMF) הוא השלב שבו סטארטאפ הוכיח ששוק מסוים רוצה את המוצר מספיק כדי לשלם עליו, להשתמש בו ולהמליץ עליו. זו נקודת מפנה קריטית לפני גיוס Series A - ללא PMF, גיוס הון נוסף בדרך כלל לא משתלם.',
- en: 'Product-Market Fit (PMF) is the stage at which a startup has demonstrated that a market wants its product enough to pay for it, use it, and recommend it. It is a critical inflection point before a Series A raise - without PMF, further fundraising is usually unwarranted.',
+ he: 'Product-Market Fit (PMF) הוא המצב שבו שוק מוגדר רוצה את המוצר מספיק כדי לשלם עליו, להמשיך להשתמש בו ולהמליץ עליו. סימנים טובים הם לקוחות שחוזרים בלי תזכורות, מכירות שלא תלויות רק במייסדים, ומשתמשים שמתאכזבים כשהמוצר לא זמין. בלי PMF קשה יותר לגייס סבבים מתקדמים, כי אין עדיין הוכחה שהצמיחה תחזיק.',
+ en: 'Product-Market Fit (PMF) is the state in which a defined market wants a product enough to pay for it, keep using it and recommend it. Good signs are customers who return without reminders, sales that do not depend only on the founders, and users who are disappointed when the product is unavailable. Without PMF, later rounds are harder to raise because there is no proof yet that growth will last.',
  },
  },
  {
@@ -110,8 +118,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is CTO-as-a-Service?',
  },
  answer: {
- he: 'CTO-as-a-Service הוא מודל שבו סטארטאפ ללא מייסד טכנולוגי (Technical Co-founder) שוכר CTO חלקי או משובץ. ה-CTO מקבל החלטות ארכיטקטוניות, שוכר את הצוות ההנדסי הראשון, מבקר קוד, מנהל ספקים ומייצג את הצד הטכני בשיחות עם משקיעים. WeCcelerate מציעה את השירות בהיקף שעות שנקבע אישית ולתקופה מוסכמת.',
- en: 'CTO-as-a-Service is a model in which a startup without a technical co-founder engages a fractional or embedded Chief Technology Officer. The CTO makes architectural decisions, hires the first engineering team, reviews code, manages vendors, and represents the technical side in investor conversations. WeCcelerate offers this service with weekly hours and engagement length scoped per project.',
+ he: 'CTO as a Service הוא מודל שבו סטארטאפ בלי מייסד טכנולוגי עובד עם CTO במשרה חלקית או במסגרת התקשרות מוגדרת. ה-CTO מקבל את ההחלטות הארכיטקטוניות, עוזר לגייס את הצוות ההנדסי הראשון, בודק קוד, מנהל ספקים ומייצג את הצד הטכני מול משקיעים. ב-WeCcelerate היקף השעות ומשך ההתקשרות נקבעים לפי צורכי המיזם.',
+ en: 'CTO-as-a-Service is a model in which a startup without a technical co-founder works with a part-time or engaged Chief Technology Officer. The CTO makes architectural decisions, helps hire the first engineering team, reviews code, manages vendors and represents the technical side in investor conversations. At WeCcelerate, weekly hours and engagement length are set according to each venture\'s needs.',
  },
  },
  {
@@ -122,8 +130,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between MedTech and HealthTech?',
  },
  answer: {
- he: 'MedTech (טכנולוגיה רפואית) מתייחסת למוצרים, תוכנה או מכשור שמיועדים להקשרים קליניים ורפואיים מוגדרים - לרוב דורשים אישור רגולטורי (FDA, CE). HealthTech הוא מונח רחב יותר שכולל גם טכנולוגיה לבריאות צרכנית, ניהול בתי חולים, wellness וטלרפואה - לא בהכרח דורש אישור רגולטורי כמו מכשיר רפואי.',
- en: 'MedTech (Medical Technology) refers to products, software, or devices intended for defined clinical and medical contexts - typically requiring regulatory approval (FDA, CE). HealthTech is a broader term that includes consumer health, hospital management, wellness, and telemedicine - not necessarily requiring the same regulatory approval as a medical device.',
+ he: 'MedTech הוא טכנולוגיה רפואית: מכשירים ותוכנות שמיועדים לאבחון, טיפול, ניטור או מניעה של מחלה, ולכן הם לרוב מכשיר רפואי שצריך אישור רגולטורי, כמו FDA בארה"ב, CE באירופה ורישום אמ"ר בישראל. HealthTech הוא מונח רחב יותר, שכולל גם wellness, ניהול מערכות בריאות וטלרפואה. מה שקובע אם נדרש אישור הוא השימוש המיועד של המוצר, לא השם.',
+ en: 'MedTech is medical technology: devices and software intended to diagnose, treat, monitor or prevent disease, so they are often medical devices that need regulatory clearance, such as FDA in the US, CE marking in Europe and AMAR registration in Israel. HealthTech is a broader term that also covers wellness, health-system management and telemedicine. Whether approval is needed depends on the product\'s intended use, not on the label.',
  },
  },
  {
@@ -134,8 +142,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What are TAM, SAM, and SOM?',
  },
  answer: {
- he: 'TAM (Total Addressable Market) - סך השוק הפוטנציאלי הגלובלי. SAM (Serviceable Addressable Market) - החלק מ-TAM שהמוצר שלכם יכול לתת לו מענה מבחינה גיאוגרפית/רגולטורית. SOM (Serviceable Obtainable Market) - החלק מ-SAM שניתן לכבוש באופן מציאותי בטווח של מספר שנים. משקיעים מצפים לראות את שלושת הגדלים במצגת.',
- en: 'TAM (Total Addressable Market) - total global potential market. SAM (Serviceable Addressable Market) - the portion of TAM your product can serve given geographic and regulatory constraints. SOM (Serviceable Obtainable Market) - the portion of SAM you can realistically capture within 3-5 years. Investors expect to see all three figures in a pitch deck.',
+ he: 'TAM, SAM ו-SOM הם שלוש דרכים למדוד את גודל השוק. TAM (Total Addressable Market) הוא כל השוק הפוטנציאלי. SAM (Serviceable Addressable Market) הוא החלק שהמוצר שלכם יכול לשרת בפועל, לפי גאוגרפיה, רגולציה וערוצי מכירה. SOM (Serviceable Obtainable Market) הוא החלק שאפשר לכבוש באופן מציאותי בשנים הקרובות. משקיעים מצפים לראות חישוב שמבוסס על לקוחות ומחירים, לא רק על דוחות שוק.',
+ en: 'TAM, SAM and SOM are three ways to size a market. TAM (Total Addressable Market) is the whole potential market. SAM (Serviceable Addressable Market) is the part your product can actually serve, given geography, regulation and sales channels. SOM (Serviceable Obtainable Market) is the part you can realistically capture in the next few years. Investors expect a bottom-up calculation based on customers and prices, not only on market reports.',
  },
  },
 
@@ -148,8 +156,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does it cost to develop an app?',
  },
  answer: {
- he: 'העלות והלוחות הזמנים נקבעים אישית לפי המוצר - MVP בסיסי למובייל, פלטפורמת ווב, או SaaS מורכב עם AI הם פרויקטים שונים מאוד מבחינת מורכבות, גודל צוות וניסיון מפתחים. נשמח לתת הצעת מחיר בפגישת היכרות חינם.',
- en: 'MVP cost depends on platform, backend complexity, and team seniority. We scope each project individually - basic mobile MVPs, web SaaS platforms, and AI-integrated apps each carry very different price points and timelines. Schedule a free intro call to scope your project.',
+ he: 'אין מחיר אחד לפיתוח אפליקציה. העלות תלויה בפלטפורמה (מובייל, ווב או שתיהן), במורכבות צד השרת, באינטגרציות, בשימוש ב-AI ובניסיון של הצוות. MVP ממוקד עולה פחות ממוצר מלא, ולכן כדאי להגדיר קודם מה הגרסה הראשונה צריכה להוכיח. ב-WeCcelerate ההיקף והמחיר נקבעים אחרי שיחת היכרות ואפיון של המוצר.',
+ en: 'There is no single price for building an app. Cost depends on the platform (mobile, web or both), backend complexity, integrations, use of AI and the seniority of the team. A focused MVP costs less than a full product, so first define what the first version needs to prove. At WeCcelerate, scope and price are set after an intro conversation and a product specification.',
  },
  },
  {
@@ -160,8 +168,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does business consulting cost at WeCcelerate?',
  },
  answer: {
- he: 'חבילת ייעוץ עסקי מלאה (מחקר שוק + תוכנית עסקית + תוכנית פיננסית + תקציר מנהלים + pitch deck): ההיקף ולוחות הזמנים נקבעים בהתאמה אישית לכל מיזם. פגישת ייעוץ ראשונה ראשונית ללא עלות.',
- en: 'A full business consulting package (market research + business plan + financial model + executive summary + pitch deck) is priced and scheduled individually, depending on scope. The initial consultation is free.',
+ he: 'ל-WeCcelerate אין מחירון קבוע לייעוץ עסקי. המחיר נקבע לפי מה שהמיזם צריך: מחקר שוק, תוכנית עסקית, מודל פיננסי, תקציר מנהלים או מצגת למשקיעים, ולפי מורכבות התחום. את ההיקף מגדירים יחד בשיחת ההיכרות, ורק אחר כך נותנים הצעה.',
+ en: 'WeCcelerate does not have a fixed price list for business consulting. The price depends on what the venture needs, such as market research, a business plan, a financial model, an executive summary or an investor deck, and on how complex the sector is. The scope is defined together in an intro conversation, and only then is a proposal given.',
  },
  },
  {
@@ -172,8 +180,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does the full MedTech track cost?',
  },
  answer: {
- he: 'מסלול MedTech מלא עם לאומית - היקף נבנה אישית לכל venture. מותאם אישית לכל venture.',
- en: 'Full MedTech track with Leumit: 100,000 ILS+ for a 12-18 month program, including clinical advisory, anonymized medical data access, clinic pilots, regulatory guidance (CE/FDA/Israeli MOH), and investor preparation. Pricing is customized per venture.',
+ he: 'ל-WeCcelerate אין מחיר אחיד למסלול ה-MedTech עם לאומית. התנאים נקבעים לכל מיזם לפי השלב שלו, סוג המכשיר והליווי שהוא צריך. המסלול נותן מומחיות קלינית, ליווי רגולטורי, גישה לדאטה והזדמנויות לפיילוט. בנפרד מזה יש עלויות רגולטוריות חיצוניות, למשל אגרת 510(k) של FDA, שבשנת הכספים 2027 היא 28,653 דולר, או 7,163 דולר לעסק קטן מאושר.',
+ en: 'WeCcelerate does not have a single price for the MedTech track with Leumit. Terms are set per venture, based on its stage, device type and the support it needs. The track provides clinical expertise, regulatory guidance, data access and pilot opportunities. External regulatory costs are separate, for example the FDA 510(k) user fee, which for fiscal year 2027 is $28,653, or $7,163 for a qualified small business.',
  },
  },
  {
@@ -184,8 +192,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does MVP development take?',
  },
  answer: {
- he: 'MVP נבנה במתודולוגיות Agile, היקף ולוחות זמנים תלויים במוצר ו-Lean Startup. ה-sprint הוא יחידת עבודה בסיסית, עם demo תכוף ליזם. המטרה היא מוצר עובד לבדיקת היפותזה, לא מוצר גמור.',
- en: 'An MVP is built using Agile and Lean Startup methodologies, with scope and pace depending on the product. Work runs in short sprints, with frequent demos to the founder. The goal is a working hypothesis-testing artifact, not a finished product.',
+ he: 'משך הפיתוח של MVP תלוי בעיקר בהיקף: כמה מסכים ותהליכים, כמה אינטגרציות, והאם יש רכיב חומרה, AI או רגולציה. הדרך לקצר היא להגדיר שאלה אחת שה-MVP צריך לענות עליה ולבנות רק את מה שנדרש לה. עובדים בספרינטים קצרים עם הדגמה תכופה ליזם, כדי לקבל משוב מוקדם ולא לבנות דברים מיותרים.',
+ en: 'How long an MVP takes depends mainly on scope: how many screens and flows, how many integrations, and whether hardware, AI or regulation is involved. The way to shorten it is to define one question the MVP must answer and build only what that requires. Work runs in short sprints with frequent demos to the founder, so feedback comes early and nothing unnecessary gets built.',
  },
  },
  {
@@ -196,8 +204,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does it take to build a business plan?',
  },
  answer: {
- he: 'תוכנית עסקית ברמת משקיעים נבנית בקצב שנקבע לפי מורכבות התעשייה ורמת הפירוט של מחקר השוק. היא כוללת גם תקציר מנהלים של 2-4 עמודים לשליחה ישירה למשקיעים.',
- en: 'An investor-grade business plan is built at a pace that depends on industry complexity and market research depth. It also includes a 2-4 page executive summary suitable for sending directly to investors.',
+ he: 'הזמן לבניית תוכנית עסקית תלוי בעיקר במחקר השוק: כמה מידע כבר קיים, כמה ראיונות עם לקוחות צריך לעשות, וכמה מורכב התחום. תוכנית למשקיעים כוללת בדרך כלל ניתוח שוק ותחרות, מודל עסקי, תוכנית שיווק ומודל פיננסי. לצידה כדאי להכין תקציר מנהלים קצר, כי זה המסמך שרוב המשקיעים יקראו קודם.',
+ en: 'How long a business plan takes depends mostly on the market research: how much data already exists, how many customer interviews are needed and how complex the sector is. A plan for investors usually covers market and competition, business model, marketing plan and a financial model. Prepare a short executive summary alongside it, because that is the document most investors read first.',
  },
  },
  {
@@ -208,8 +216,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does FDA 510(k) clearance take?',
  },
  answer: {
- he: 'אחרי הגשת 510(k), ה-FDA מבצע סקירה שמשכה משתנה לפי סוג המכשיר ואיכות התיק. עם זאת, ההכנה - בחירת predicate device, הוכחת substantial equivalence, בדיקות ביצועים - היא לרוב החלק הארוך יותר בתהליך. בסך הכל, הדרך מרעיון ועד clearance דורשת תכנון רגולטורי מוקדם.',
- en: 'After a 510(k) submission, the length of FDA review varies by device type and submission quality. However, preparation - predicate selection, substantial equivalence documentation, performance testing - is usually the longer part of the process. Overall, the path from idea to clearance calls for early regulatory planning.',
+ he: 'יעד ה-FDA הוא החלטה על 510(k) תוך 90 ימי FDA מקבלת ההגשה. ימי FDA לא כוללים את הזמן שבו ההגשה בהמתנה לתשובה שלכם לבקשת מידע נוסף, ולתשובה כזו יש עד 180 ימים קלנדריים. לכן הזמן בלוח השנה ארוך יותר. ההכנה, כלומר בחירת predicate, בדיקות ביצועים ותיעוד, היא לרוב החלק הארוך בתהליך. הפירוט במדריך /guides/fda-510k-madrich.',
+ en: 'FDA\'s goal is a 510(k) decision within 90 FDA days of receipt. FDA days exclude the time the submission waits for your answer to an Additional Information request, and you have up to 180 calendar days to send that answer. So calendar time is longer. Preparation, meaning predicate selection, performance testing and documentation, is usually the longest part. Details are in the guide at /guides/fda-510k-madrich.',
  },
  },
  {
@@ -220,8 +228,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How long does CE marking take?',
  },
  answer: {
- he: 'תהליך CE תחת MDR (Regulation 2017/745) הוא תהליך ממושך למכשירי Class IIa-IIb, ולמכשירי Class III הוא ארוך ומורכב עוד יותר. התהליך כולל ISO 13485, ISO 14971 (risk), IEC 62304 (אם יש תוכנה), תיקוף קליני ותיעוד טכני. נדרש Notified Body ברוב הקטגוריות.',
- en: 'CE marking under MDR (Regulation 2017/745) is a lengthy process for Class IIa-IIb devices, and longer and more demanding still for Class III. The process includes ISO 13485, ISO 14971 (risk), IEC 62304 (if software), clinical evaluation, and technical documentation. A Notified Body is required for most classes.',
+ he: 'משך התהליך לסימון CE תלוי בסיווג המכשיר לפי MDR (תקנה 2017/745). ב-Class I רגיל היצרן חותם על הצהרת התאמה עצמית, ולכן הזמן תלוי בעיקר בהכנת התיעוד. בשאר הסיווגים נדרשת סקירה של גוף מאושר (Notified Body), והזמן תלוי גם בזמינות שלו. לפני ההגשה צריך מערכת ניהול איכות, ניהול סיכונים, הערכה קלינית ותיעוד טכני.',
+ en: 'How long CE marking takes depends on the device class under the MDR (Regulation 2017/745). For a standard Class I device, the manufacturer signs a self-declaration of conformity, so time depends mainly on preparing the documentation. All other classes need review by a Notified Body, so time also depends on its availability. Before applying you need a quality management system, risk management, a clinical evaluation and technical documentation.',
  },
  },
  {
@@ -232,8 +240,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does a monthly marketing retainer cost?',
  },
  answer: {
- he: 'ליווי שיווקי חודשי ב-WeCcelerate נבנה אישית לכל לקוח לפי ההיקף: ניהול קמפיינים, תוכן, יחסי ציבור, רשתות חברתיות. היקף ההתחייבות נקבע פר-מיזם בפגישת ההיכרות.',
- en: 'Monthly marketing retainers at WeCcelerate are scoped per client based on the work involved: campaign management, content, PR, and social media. Engagement length is defined per project during the intro call.',
+ he: 'עלות ליווי שיווקי חודשי תלויה בהיקף העבודה ובערוצים: ניהול קמפיינים, תוכן, יחסי ציבור ורשתות חברתיות. תקציב המדיה עצמו, כלומר הכסף שמשולם לפלטפורמות הפרסום, הוא בדרך כלל נפרד מדמי הליווי. ב-WeCcelerate ההיקף, הערוצים ומשך ההתקשרות נקבעים לכל מיזם בשיחת ההיכרות.',
+ en: 'The cost of a monthly marketing retainer depends on the scope and channels: campaign management, content, PR and social media. The media budget itself, meaning the money paid to ad platforms, is usually separate from the retainer fee. At WeCcelerate, scope, channels and engagement length are set per venture in the intro conversation.',
  },
  },
  {
@@ -244,8 +252,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How much does a professional pitch deck cost?',
  },
  answer: {
- he: 'Pitch Deck מקצועי כולל עיצוב, מודל פיננסי, תרגול וסימולציות מול פרסונות משקיעים. ההיקף ולוחות הזמנים נקבעים אישית בהתאם לסטארטאפ. נשמח לתאם פגישת היכרות חינם.',
- en: 'A professional pitch deck includes design, financial modeling, practice, and investor-persona simulations. Scope and timeline are set individually for each startup. Schedule a free intro call to align on what you need.',
+ he: 'המחיר של pitch deck מקצועי תלוי במה שנכלל בו: רק עיצוב, או גם בניית הסיפור, מודל פיננסי ותרגול מול שאלות של משקיעים. מצגת טובה נשענת על עבודה עסקית שכבר נעשתה, ולכן אם עדיין אין מודל עסקי או ניתוח שוק, העבודה ארוכה יותר. ב-WeCcelerate ההיקף והמחיר נקבעים לכל סטארטאפ אחרי שיחת היכרות.',
+ en: 'The price of a professional pitch deck depends on what it includes: design only, or also the storyline, a financial model and practice with investor questions. A good deck rests on business work that is already done, so if there is no business model or market analysis yet, the work takes longer. At WeCcelerate, scope and price are set per startup after an intro conversation.',
  },
  },
 
@@ -258,8 +266,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do you raise funding for a startup?',
  },
  answer: {
- he: 'גיוס הון מתחיל בהוכחת PMF (Product-Market Fit) ובהכנת pitch deck מקצועי. WeCcelerate מכינה את היזם בסימולציות, בונה את המצגת והמודל הפיננסי, ומחברת ישירות ל-רשת משקיעים, יזמים ושותפים אסטרטגייםברשת: קרנות הון סיכון (VC), משקיעי אנג\'ל, שותפים אסטרטגיים וקרנות CVC.',
- en: 'Fundraising starts with proving Product-Market Fit and preparing a professional pitch deck. WeCcelerate prepares founders through simulations, builds the deck and financial model, and introduces them directly to a network of investors and strategic partners in our network: venture capital (VC), angel investors, strategic partners, and CVC funds.',
+ he: 'מגייסים הון כשיש סיפור שמשקיע יכול לבדוק: בעיה מוכחת, עדות לביקוש, צוות מתאים ותוכנית ברורה לשימוש בכסף. מכינים מצגת ומודל פיננסי, בונים רשימה קצרה של משקיעים שמתאימים לשלב ולתחום, ומבקשים היכרות דרך מי שמכיר אותם. בשלב מוקדם משקיעים לרוב ב-SAFE, ב-Convertible Note או בסבב במניות. בישראל אפשר לשלב גם מענקים של רשות החדשנות.',
+ en: 'You raise money when you have a story an investor can check: a proven problem, evidence of demand, the right team and a clear plan for the money. Prepare a deck and a financial model, build a short list of investors that fit your stage and sector, and ask for introductions through people who know them. Early rounds usually use a SAFE, a convertible note or a priced equity round. In Israel you can also combine Israel Innovation Authority grants.',
  },
  },
  {
@@ -270,8 +278,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the ideal Pitch Deck structure?',
  },
  answer: {
- he: 'pitch deck מומלץ ב-WeCcelerate: (1) תיאור של משפט אחד; (2) בעיה + עדות לבעיה; (3) פתרון; (4) גודל שוק (TAM/SAM/SOM); (5) המוצר (demo); (6) traction; (7) מודל עסקי; (8) אסטרטגיית GTM; (9) תחרות; (10) צוות; (11) תחזיות פיננסיות (מספר שנים); (12) הסבב הנוכחי: סכום, שימוש, שווי; (13) חזון ו-exit. 10-15 שקפים. הטעות הנפוצה - לפתוח במוצר במקום בבעיה.',
- en: 'WeCcelerate-recommended pitch deck: (1) one-line description; (2) problem + evidence; (3) solution; (4) market size (TAM/SAM/SOM); (5) product (demo); (6) traction; (7) business model; (8) GTM strategy; (9) competition; (10) team; (11) financial projections (3 years); (12) current round: amount, use, valuation; (13) vision and exit. 10-15 slides total. Common mistake: opening with the product instead of the problem.',
+ he: 'מבנה מקובל ל-pitch deck: (1) תיאור החברה במשפט אחד; (2) הבעיה והעדות לה; (3) הפתרון; (4) גודל השוק (TAM/SAM/SOM); (5) המוצר; (6) traction; (7) מודל עסקי; (8) אסטרטגיית GTM; (9) תחרות; (10) צוות; (11) תחזית פיננסית; (12) הסבב הנוכחי: סכום ושימוש בכסף; (13) חזון. כדאי שהמצגת תהיה קצרה. הטעות הנפוצה היא לפתוח במוצר במקום בבעיה.',
+ en: 'A common pitch deck structure: (1) one-line company description; (2) the problem and evidence for it; (3) the solution; (4) market size (TAM/SAM/SOM); (5) the product; (6) traction; (7) business model; (8) go-to-market strategy; (9) competition; (10) team; (11) financial projections; (12) the current round: amount and use of funds; (13) vision. Keep the deck short. The most common mistake is opening with the product instead of the problem.',
  },
  },
  {
@@ -282,8 +290,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Can WeCcelerate guarantee funding?',
  },
  answer: {
- he: 'לא. אף אקסלרטור או venture builder לגיטימי לא יכול להבטיח גיוס כי ההחלטות מתקבלות על ידי משקיעים חיצוניים עצמאיים. מה שכן מובטח: חבילת pitch ברמה גבוהה, היכרויות חמות, הכנה יסודית ומשוב כנה על מיקום החברה מול ציפיות המשקיעים.',
- en: 'No. No legitimate accelerator or venture builder can guarantee funding because investment decisions are made by independent external investors. What is guaranteed: a professional pitch package, warm introductions, thorough preparation, and honest feedback on where the company stands relative to investor expectations.',
+ he: 'לא. אף אקסלרטור או Venture Builder רציני לא יכול להבטיח גיוס, כי ההחלטה להשקיע מתקבלת על ידי משקיעים חיצוניים ועצמאיים. מה ש-WeCcelerate עושה הוא לעבוד עם המייסדים על המוכנות לגיוס: המודל העסקי, המצגת, המודל הפיננסי, תרגול מול שאלות של משקיעים ומשוב כן על המצב של החברה.',
+ en: 'No. No serious accelerator or Venture Builder can guarantee funding, because the decision to invest is made by independent outside investors. What WeCcelerate does is work with founders on fundraising readiness: the business model, the deck, the financial model, practice with investor questions, and honest feedback on where the company stands.',
  },
  },
  {
@@ -294,8 +302,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Does WeCcelerate take equity?',
  },
  answer: {
- he: 'לפעמים כן, לפעמים לא. האקוויטי מוגדר לכל התקשרות לפי שלב הסטארטאפ, סיכון והערך הכספי של השירותים. חלק מהשירותים בתשלום מזומן בלבד. בעבודה עם חברות גדולות (Corporate Venture Building) בד"כ משתמשים ב-retainer או success fee - בלי אקוויטי, IP מלא נשאר אצל הלקוח.',
- en: 'Sometimes yes, sometimes no. Equity is defined per engagement based on stage, risk, and the cash value of services provided. Some services are cash-only. In Corporate Venture Building engagements we typically use a retainer or success-fee model - no equity, with full IP retention by the client.',
+ he: 'זה תלוי בהתקשרות. ל-WeCcelerate אין תנאים אחידים, והתמורה, בין אם בתשלום, במניות או בשילוב, נקבעת בהסכם לכל מיזם לפי השלב שלו והעבודה הנדרשת. לפני שחותמים עם כל Venture Builder או אקסלרטור כדאי לברר מה נותנים בתמורה, מי יעבוד על המיזם, למי שייך הקניין הרוחני ומה קורה אם מפסיקים את העבודה המשותפת.',
+ en: 'It depends on the engagement. WeCcelerate has no standard terms, and the consideration, whether payment, equity or a combination, is set in an agreement for each venture based on its stage and the work involved. Before signing with any Venture Builder or accelerator, ask what you give in return, who will work on the venture, who owns the intellectual property and what happens if the collaboration ends.',
  },
  },
 
@@ -308,8 +316,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How does the Helsinki Committee (Israeli IRB) approval work?',
  },
  answer: {
- he: 'ועדת הלסינקי היא המקבילה הישראלית ל-IRB האמריקאי. כל מחקר רפואי הכולל בני אדם או מידע מזהה דורש אישור לפני התחלה. משך התהליך משתנה בהתאם למורכבות המחקר, והוא כולל פרוטוקול מחקר מפורט, טופס הסכמה מדעת, כישורי החוקר ותוכנית הגנה על המידע. WeCcelerate מלווה את תהליך ההגשה מול ועדת הלסינקי של לאומית.',
- en: 'The Helsinki Committee is Israel\'s equivalent of the US IRB. Every medical research project involving human subjects or identifiable data requires approval before starting. The length of the process depends on the study\'s complexity, and it requires a detailed protocol, informed consent form, investigator qualifications, and a data protection plan. WeCcelerate supports the entire submission to Leumit\'s Helsinki Committee.',
+ he: 'כל ניסוי רפואי בבני אדם בישראל, כולל פיילוט של מכשיר או מחקר על רשומות רפואיות קיימות, צריך אישור של ועדת הלסינקי של המוסד ואישור בכתב של מנהל המוסד, לפי תקנות בריאות העם משנת 1980 ונוהל 14 של משרד הבריאות. מגישים פרוטוקול מחקר, טופס הסכמה מדעת ופרטי החוקר. חלק מהניסויים צריכים גם אישור של משרד הבריאות. הפירוט במדריך /guides/vaadat-helsinki-madrich.',
+ en: 'Every medical trial in humans in Israel, including a device pilot or a study on existing medical records, needs approval from the institution\'s Helsinki Committee and written approval from the institution director, under the Public Health Regulations of 1980 and Ministry of Health Procedure 14. You submit a study protocol, an informed consent form and investigator details. Some trials also need Ministry of Health approval. Details are in /guides/vaadat-helsinki-madrich.',
  },
  },
  {
@@ -320,8 +328,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the difference between FDA 510(k), De Novo, and PMA?',
  },
  answer: {
- he: '510(k) - המסלול הנפוץ ביותר; דורש הוכחת substantial equivalence ל-predicate device קיים, והסקירה בו קצרה יחסית. De Novo - למכשירים חדשים low-to-moderate risk ללא predicate, יוצר סיווג חדש, והסקירה בו ארוכה יותר. PMA (Premarket Approval) - למכשירי Class III (סיכון גבוה), דורש ניסויים קליניים, והוא המסלול הארוך והתובעני מכולם.',
- en: '510(k) - the most common pathway; requires demonstrating substantial equivalence to an existing predicate device, 3-6 month review. De Novo - for novel low-to-moderate risk devices without a predicate, creates a new classification, with a longer review. PMA (Premarket Approval) - for Class III (high risk) devices, requires clinical trials and is the longest, most demanding pathway of all.',
+ he: '510(k) מוכיח שהמכשיר שקול מהותית למכשיר שכבר משווק בארה"ב (predicate), ויעד ה-FDA הוא החלטה תוך 90 ימי FDA. De Novo מיועד למכשיר חדשני בסיכון נמוך עד בינוני בלי predicate, עם יעד של 150 ימי סקירה. PMA מיועד לרוב מכשירי Class III ודורש בדרך כלל נתונים קליניים. אגרות 2027: 510(k) 28,653 דולר, De Novo 191,020 דולר ו-PMA 636,732 דולר, עם הנחה לעסק קטן מאושר.',
+ en: 'A 510(k) shows the device is substantially equivalent to one already legally marketed in the US (a predicate), with an FDA goal of a decision within 90 FDA days. De Novo is for a novel low-to-moderate risk device with no predicate, with a goal of 150 review days. PMA is for most Class III devices and usually requires clinical data. FY2027 fees: 510(k) $28,653, De Novo $191,020 and PMA $636,732, with reduced fees for qualified small businesses.',
  },
  },
  {
@@ -332,8 +340,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is CE marking?',
  },
  answer: {
- he: 'CE marking הוא סימון רגולטורי הנדרש למכירת מכשור רפואי באזור הכלכלי האירופי (EEA). תחת ה-MDR (Regulation 2017/745) המכשירים מסווגים לפי רמת סיכון (Class I, IIa, IIb, III). רוב הקטגוריות דורשות Notified Body. התהליך כולל ISO 13485, ISO 14971 (risk), evaluation קליני ותיעוד טכני.',
- en: 'CE marking is the regulatory conformity mark required to sell medical devices in the European Economic Area. Under MDR (Regulation 2017/745), devices are classified by risk level (Class I, IIa, IIb, III). Most classes require a Notified Body. The process includes ISO 13485, ISO 14971 (risk), clinical evaluation, and technical documentation.',
+ he: 'סימון CE למכשיר רפואי מראה שהמכשיר עומד ברגולציה האירופית למכשירים רפואיים, MDR (תקנה 2017/745), שחלה מ-26 במאי 2021. המכשירים מסווגים לפי רמת סיכון: Class I, IIa, IIb ו-III. ב-Class I רגיל היצרן חותם על הצהרה עצמית, ובשאר הסיווגים נדרש גוף מאושר (Notified Body). יצרן ישראלי חייב גם למנות נציג מורשה באיחוד. הפירוט במדריך /guides/ce-mark-mdr-mechshir-refui.',
+ en: 'CE marking for a medical device shows that it complies with the EU Medical Device Regulation, MDR (Regulation 2017/745), which has applied since 26 May 2021. Devices are classified by risk: Class I, IIa, IIb and III. For a standard Class I device the manufacturer signs a self-declaration, and all other classes need a Notified Body. An Israeli manufacturer must also appoint an Authorised Representative in the EU. Details are in /guides/ce-mark-mdr-mechshir-refui.',
  },
  },
  {
@@ -344,8 +352,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is ISO 13485?',
  },
  answer: {
- he: 'ISO 13485 הוא תקן בינ"ל לניהול איכות (QMS) ייחודי למכשור רפואי. נדרש ל-CE, ומועדף ל-FDA. הקמת QMS העומד ב-ISO 13485 היא פרויקט משמעותי שמשכו תלוי בגודל הארגון ובמורכבות המוצר, והיא דורשת מבדקי מעקב שוטפים של גוף הסמכה.',
- en: 'ISO 13485 is the international quality management system (QMS) standard specific to medical devices. Required for CE and strongly preferred for FDA. Establishing a compliant QMS is a substantial project whose length depends on organization size and product complexity, and it requires ongoing surveillance audits by a certification body.',
+ he: 'ISO 13485 הוא התקן הבינלאומי למערכת ניהול איכות (QMS) של יצרני מכשור רפואי. MDR באירופה דורש מערכת ניהול איכות, ורוב היצרנים בונים אותה לפי ISO 13485. בארה"ב, תקנת ה-QMSR של FDA, שנכנסה לתוקף ב-2 בפברואר 2026, משלבת את ISO 13485:2016 בדרישות האיכות. כדאי להתחיל לבנות את המערכת כבר בשלב הפיתוח, יחד עם ניהול סיכונים לפי ISO 14971.',
+ en: 'ISO 13485 is the international standard for the quality management system (QMS) of medical device manufacturers. The EU MDR requires a quality management system, and most manufacturers build it to ISO 13485. In the US, FDA\'s Quality Management System Regulation (QMSR), in effect since 2 February 2026, incorporates ISO 13485:2016 into its quality requirements. Start building the system during development, together with risk management under ISO 14971.',
  },
  },
  {
@@ -356,8 +364,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do I get Israeli Ministry of Health approval?',
  },
  answer: {
- he: 'מכשירים רפואיים בישראל נרשמים באגף אמ"ר (אביזרים ומכשירים רפואיים) במשרד הבריאות. ברוב הקטגוריות, אישורי CE או FDA משמשים כעדות תומכת. נדרש נציג רשום בישראל אם היצרן חו"ל. WeCcelerate שומרת קשר שוטף עם אמ"ר ומסייעת להגשות מקומיות.',
- en: 'Medical devices sold in Israel must be registered with AMAR (Medical Devices Division) at the Ministry of Health. For most classes, CE or FDA approvals serve as supporting evidence. A registered local representative is required for foreign manufacturers. WeCcelerate maintains active relationships with AMAR and supports local submissions.',
+ he: 'מכשיר רפואי בישראל נרשם בפנקס הציוד הרפואי של אגף ציוד רפואי (אמ"ר) במשרד הבריאות, וזה תנאי לשיווק. את הבקשה מגיש תושב ישראל או תאגיד רשום בישראל, ויצרן זר עובד דרך יבואן או חברה ישראלית. מכשיר שרשום במדינה מוכרת, כמו ארה"ב או מדינות באירופה, נרשם על בסיס האישור הזר. מאז 15.8.2022 אין אגרה על רישום. הפירוט במדריך /guides/rishum-amar-mechshir-refui.',
+ en: 'A medical device in Israel is registered in the medical equipment register of the Ministry of Health\'s Medical Devices Division (AMAR), which is a condition for marketing it. The applicant must be an Israeli resident or a company registered in Israel, so a foreign manufacturer works through an importer or Israeli company. A device registered in a recognized country, such as the US or European states, is registered based on that approval. There have been no registration fees since 15 August 2022.',
  },
  },
 
@@ -371,8 +379,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do I apply to WeCcelerate?',
  },
  answer: {
- he: 'ממלאים את טופס יצירת הקשר ב-weccelerate.co.il/contact. נציג חוזר תוך 48 שעות לתיאום פגישת הכרות ראשונה - ללא עלות. אנחנו עובדים עם יזמים בכל שלב, מרעיון גולמי ועד חברות בשלב צמיחה.',
- en: 'Fill out the contact form at weccelerate.co.il/contact. A representative will get back to you within 48 hours to schedule a free introductory meeting. We work with founders at every stage, from raw idea to growth-stage companies.',
+ he: 'ממלאים את טופס יצירת הקשר באתר, בכתובת weccelerate.co.il/contact, עם כמה מילים על המיזם ועל השלב שבו הוא נמצא. נציג של WeCcelerate חוזר כדי לתאם שיחת היכרות. בשיחה מבינים מה המיזם צריך ואם יש התאמה. WeCcelerate עובדת עם יזמים כבר משלב הרעיון וגם עם חברות שכבר יש להן מוצר.',
+ en: 'Fill out the contact form at weccelerate.co.il/contact with a few words about your venture and its stage. A WeCcelerate representative gets back to you to schedule an intro conversation, where we work out what the venture needs and whether there is a fit. WeCcelerate works with founders from the idea stage as well as with companies that already have a product.',
  },
  },
  {
@@ -383,8 +391,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What stages does WeCcelerate support?',
  },
  answer: {
- he: 'מפרה-idea ועד פרה-IPO. תהליך הקבלה מתאים כל יזם למסלול המתאים: יזמים ברמת רעיון - תוכנית Venture Builder; חברות עם מוצר ו-traction ראשוני - אקסלרטור; חברות בצמיחה - שירותים נקודתיים (הכנה למשקיעים, scale טכנולוגי, התרחבות בינ"ל).',
- en: 'From pre-idea through pre-IPO. The intake process matches each founder to the appropriate track: idea-stage founders → Venture Builder program; companies with a product and early traction → accelerator; growth-stage companies → targeted services (investor prep, tech scaling, international expansion).',
+ he: 'WeCcelerate עובדת עם מיזמים משלב הרעיון ועד חברות שכבר יש להן מוצר ולקוחות ראשונים. בשלב הרעיון עובדים על הגדרת הבעיה, בדיקה מול לקוחות, מודל עסקי ו-MVP. כשיש מוצר, העבודה עוברת לשיווק, להכנה לגיוס ולשירותים ממוקדים לפי הצורך. המסלול המתאים נקבע בשיחת ההיכרות.',
+ en: 'WeCcelerate works with ventures from the idea stage through to companies that already have a product and first customers. At the idea stage the work covers defining the problem, testing it with customers, the business model and an MVP. Once there is a product, the focus moves to marketing, fundraising preparation and targeted services as needed. The right track is chosen in the intro conversation.',
  },
  },
  {
@@ -395,8 +403,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What languages does WeCcelerate work in?',
  },
  answer: {
- he: 'עברית ואנגלית - כל השירותים זמינים בשתי השפות. מסמכים למשקיעים, תוכניות עסקיות ו-pitch decks נבנים לרוב באנגלית גם ליזמים עבריים, כי רשת המשקיעים בינ"ל.',
- en: 'Hebrew and English - all services are available in both. Investor-facing documents, business plans, and pitch decks are typically produced in English even for Hebrew-native founders, because the investor network is international.',
+ he: 'WeCcelerate עובדת בעברית ובאנגלית, וכל השירותים זמינים בשתי השפות. מסמכים למשקיעים, כמו תוכנית עסקית ו-pitch deck, נכתבים לרוב באנגלית גם ליזמים ישראלים, כי חלק גדול מהמשקיעים והשותפים הפוטנציאליים קוראים באנגלית.',
+ en: 'WeCcelerate works in Hebrew and English, and all services are available in both. Investor-facing documents, such as the business plan and pitch deck, are usually written in English even for Israeli founders, because many potential investors and partners read English.',
  },
  },
  {
@@ -407,8 +415,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Where are WeCcelerate\'s offices located?',
  },
  answer: {
- he: 'משרד ראשי: הרכבת 58, תל אביב 6777801. סניף משני: ירושלים. שעות: ראשון-חמישי, 09:00-18:00 (שעון ישראל).',
- en: 'Primary office: HaRakevet 58, Tel Aviv 6777801. Secondary office: Jerusalem. Hours: Sunday-Thursday, 09:00-18:00 Israel Time.',
+ he: 'המשרד הראשי של WeCcelerate נמצא ברחוב הרכבת 58, תל אביב 6777801, ויש לה פעילות גם בירושלים. שעות הפעילות הן ראשון עד חמישי, 09:00 עד 18:00 (שעון ישראל). אפשר לתאם פגישה דרך טופס יצירת הקשר באתר.',
+ en: 'WeCcelerate\'s main office is at HaRakevet 58, Tel Aviv 6777801, and it also operates in Jerusalem. Office hours are Sunday to Thursday, 09:00 to 18:00 Israel time. Meetings can be scheduled through the contact form on the website.',
  },
  },
  {
@@ -419,8 +427,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Can I apply as a solo founder?',
  },
  answer: {
- he: 'כן. מודל ה-Venture Builder אפילו מתאים יותר ליזמים יחידים - WeCcelerate מספקת את השותפים האופרטיביים (טכנולוגי, מוצר, שיווק) שיזם יחיד אחרת היה נדרש לגייס לבד.',
- en: 'Yes. The Venture Builder model is particularly well-suited to solo founders - WeCcelerate supplies the operational co-founders (technical, product, marketing) that a solo founder would otherwise need to recruit independently.',
+ he: 'כן. מודל ה-Venture Builder מתאים במיוחד ליזמים יחידים, כי הצוות של WeCcelerate יכול להשלים יכולות שחסרות, למשל פיתוח, מוצר ושיווק, בשלבים שבהם יזם יחיד היה צריך לגייס שותפים או עובדים בעצמו. עם הזמן כדאי לבנות צוות מייסדים, כי משקיעים בודקים גם את הצוות.',
+ en: 'Yes. The Venture Builder model suits solo founders well, because the WeCcelerate team can fill missing capabilities, such as engineering, product and marketing, at stages where a solo founder would otherwise have to recruit partners or staff alone. Over time it is worth building a founding team, because investors look at the team too.',
  },
  },
  {
@@ -431,8 +439,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Does WeCcelerate work with international founders?',
  },
  answer: {
- he: 'כן, במיוחד ליזמים שמתכוונים להתאגד בישראל או לגשת למערכת הקלינית והרגולטורית הישראלית. עבודה מרחוק בשוטף עם ביקורים רבעוניים פרונטליים.',
- en: 'Yes, especially founders who plan to incorporate in Israel or access the Israeli clinical and regulatory ecosystem. Engagements are typically remote with quarterly in-person visits.',
+ he: 'כן, בעיקר עם יזמים שרוצים להקים חברה בישראל או לעבוד מול המערכת הקלינית והרגולטורית בישראל. חשוב לדעת שרישום מכשיר רפואי באמ"ר נעשה דרך תושב ישראל או תאגיד רשום בישראל, ושמחקר קליני בישראל צריך אישור ועדת הלסינקי של המוסד. חלק גדול מהעבודה יכול להתבצע מרחוק.',
+ en: 'Yes, especially with founders who want to set up a company in Israel or work with the Israeli clinical and regulatory system. Note that medical device registration with AMAR is done through an Israeli resident or a company registered in Israel, and clinical research in Israel needs approval from the institution\'s Helsinki Committee. Much of the work can be done remotely.',
  },
  },
  {
@@ -443,8 +451,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Who owns the intellectual property (IP) created during engagement?',
  },
  answer: {
- he: 'ב-Corporate Venture Building - ה-IP המלא נשאר אצל הלקוח. בהתקשרויות של יזמים שבהן WeCcelerate לוקחת אקוויטי - ה-IP שייך ל-NewCo (החברה החדשה) שבה WeCcelerate מחזיקה אקוויטי - סטנדרט מקובל במודל Venture Builder.',
- en: 'In Corporate Venture Building, full IP ownership remains with the client. In founder-led engagements where WeCcelerate takes equity, IP is owned by the NewCo (the startup entity) in which WeCcelerate holds equity - standard practice in the Venture Builder model.',
+ he: 'הבעלות על הקניין הרוחני נקבעת בהסכם ההתקשרות, ולכן חשוב לסגור אותה בכתב לפני שמתחילים לעבוד. ב-WeCcelerate הנושא מוגדר בהסכם של כל מיזם. משקיעים בודקים בבדיקת הנאותות שהקניין הרוחני שייך לחברה עצמה, ולכן כדאי שגם המייסדים, העובדים והספקים יעבירו לחברה את הזכויות במה שפיתחו עבורה.',
+ en: 'IP ownership is set in the engagement agreement, so it should be agreed in writing before work starts. At WeCcelerate it is defined in each venture\'s agreement. In due diligence, investors check that the IP belongs to the company itself, so founders, employees and contractors should also assign to the company their rights in what they developed for it.',
  },
  },
 
@@ -457,8 +465,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What advantage does the Leumit MedTech partnership provide?',
  },
  answer: {
- he: 'שלושה נכסים שקשה מאוד להשיג בשוק: (1) גישה מובנית לדאטה רפואי אנונימי דרך השותפות עם לאומית - לאימון ML, מחקרים retrospective ו-real-world evidence; (2) פיילוטים קליניים במרפאות לאומית עם רופאים ומטופלים; (3) קשרים מובנים עם רופאים-יועצים של לאומית. בנוסף - ההמלצה של לאומית היא חותם מהותי מול משקיעים בבריאות.',
- en: 'Three assets that are difficult to obtain on the open market: (1) structured access to anonymized longitudinal medical data via the Leumit partnership - for ML training, retrospective studies, and real-world evidence; (2) clinical pilots in Leumit\'s clinics with real physicians and patients; (3) structured relationships with Leumit-affiliated physician advisors. Additionally, the Leumit endorsement is a significant signal to healthcare investors.',
+ he: 'מסלול ה-MedTech של WeCcelerate ולאומית שירותי בריאות, שהושק ב-2022, נותן למייסדים ארבעה דברים שקשה להשיג לבד: מומחיות קלינית מרופאים ואנשי מקצוע, ליווי רגולטורי, גישה לדאטה רפואי והזדמנויות לפיילוט. כל שימוש בדאטה או פיילוט עם מטופלים עובר את האישורים שהחוק דורש, כולל ועדת הלסינקי.',
+ en: 'The MedTech track of WeCcelerate and Leumit Health Services, launched in 2022, gives founders four things that are hard to get alone: clinical expertise from physicians and health professionals, regulatory guidance, access to medical data and pilot opportunities. Any use of data or pilot with patients goes through the approvals the law requires, including the Helsinki Committee.',
  },
  },
  {
@@ -469,8 +477,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Do I need to be a doctor to apply for the MedTech track?',
  },
  answer: {
- he: 'לא. WeCcelerate מחפשת צוות עם שילוב של מומחיות טכנולוגית וקלינית. אם אין רופא בצוות, אפשר להתחבר ליועצים רפואיים מרשת לאומית.',
- en: 'No. WeCcelerate looks for teams with a combination of technological and clinical expertise. If no physician is on the team, you can connect with medical advisors from Leumit\'s network.',
+ he: 'לא. לא צריך להיות רופא כדי להגיש למסלול ה-MedTech. מה שחשוב הוא שלצוות תהיה גישה למומחיות קלינית, כדי להגדיר נכון את הבעיה, את השימוש המיועד ואת המחקר. אם אין רופא בצוות, המסלול עם לאומית נותן מומחיות קלינית, ואפשר גם לצרף יועץ רפואי.',
+ en: 'No. You do not need to be a doctor to apply for the MedTech track. What matters is that the team has access to clinical expertise, to define the problem, the intended use and the study correctly. If there is no physician on the team, the Leumit track provides clinical expertise, and you can also add a medical advisor.',
  },
  },
  {
@@ -481,8 +489,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How is medical data kept secure and anonymized?',
  },
  answer: {
- he: 'כל גישה לדאטה של לאומית עוברת אישור ועדת הלסינקי, בקרת קצין הגנת פרטיות, וחוזה מחייב של ההצפנה, שימוש והחזקה. הנתונים אנונימיים לחלוטין - זיהוי מטופלים מוסר לפני מסירה, ולמקומות מעטים ניתנת גישה direct-query בסביבה מבוקרת.',
- en: 'Every data access at Leumit passes Helsinki Committee approval, a data protection officer review, and a binding contract covering encryption, use, and retention. Data is fully anonymized - patient identifiers are removed before delivery, and for select cases, direct query access is granted only in a controlled environment.',
+ he: 'דאטה רפואי בישראל מוגן בחוק הגנת הפרטיות ובתקנות הגנת הפרטיות (אבטחת מידע), ותיקון 13 לחוק החמיר את הדרישות. מחקר על רשומות רפואיות קיימות צריך אישור של ועדת הלסינקי של המוסד ואישור מנהל המוסד. בנוסף נדרשים בדרך כלל אישור של הארגון שמחזיק בדאטה והסכם שמגדיר את השימוש, האבטחה והשמירה. ההיקף והאופן של הגישה נקבעים לכל מחקר.',
+ en: 'Medical data in Israel is protected by the Privacy Protection Law and the Privacy Protection (Data Security) Regulations, and Amendment 13 to the law tightened the requirements. A study on existing medical records needs approval from the institution\'s Helsinki Committee and its director. You usually also need approval from the organization holding the data and an agreement that defines use, security and retention. The scope and form of access are set per study.',
  },
  },
 
@@ -495,8 +503,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What technologies does WeCcelerate build with?',
  },
  answer: {
- he: 'Frontend: React, Next.js, TypeScript, Vue, Tailwind. Mobile: React Native, Flutter, Swift, Kotlin. Backend: Node.js, Python (Django/FastAPI), Go. DBs: PostgreSQL, MongoDB, Redis, Elasticsearch. Cloud: AWS, GCP, Azure, Vercel. AI: OpenAI GPT-4/4o, Anthropic Claude, Google Gemini, Llama, Mistral, LangChain. Hardware: ARM Cortex, ESP32, Raspberry Pi, עיצוב PCB מותאם.',
- en: 'Frontend: React, Next.js, TypeScript, Vue, Tailwind. Mobile: React Native, Flutter, Swift, Kotlin. Backend: Node.js, Python (Django/FastAPI), Go. Databases: PostgreSQL, MongoDB, Redis, Elasticsearch. Cloud: AWS, GCP, Azure, Vercel. AI: OpenAI GPT-4/4o, Anthropic Claude, Google Gemini, Llama, Mistral, LangChain. Hardware: ARM Cortex, ESP32, Raspberry Pi, custom PCB design.',
+ he: 'WeCcelerate בוחרת טכנולוגיה לפי המוצר. דוגמאות: Frontend: React, Next.js, TypeScript, Vue, Tailwind. Mobile: React Native, Flutter, Swift, Kotlin. Backend: Node.js, Python (Django/FastAPI), Go. מסדי נתונים: PostgreSQL, MongoDB, Redis, Elasticsearch. ענן: AWS, GCP, Azure, Vercel. AI: מודלים של OpenAI, Anthropic Claude, Google Gemini, Llama ו-Mistral. חומרה: ARM Cortex, ESP32, Raspberry Pi ועיצוב PCB.',
+ en: 'WeCcelerate chooses technology to fit the product. Examples: Frontend: React, Next.js, TypeScript, Vue, Tailwind. Mobile: React Native, Flutter, Swift, Kotlin. Backend: Node.js, Python (Django/FastAPI), Go. Databases: PostgreSQL, MongoDB, Redis, Elasticsearch. Cloud: AWS, GCP, Azure, Vercel. AI: models from OpenAI, Anthropic Claude, Google Gemini, Llama and Mistral. Hardware: ARM Cortex, ESP32, Raspberry Pi and custom PCB design.',
  },
  },
  {
@@ -507,8 +515,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Which industries does WeCcelerate serve?',
  },
  answer: {
- he: 'כל תחומי הטכנולוגיה: FinTech, EdTech, FoodTech, AgriTech, PropTech, RetailTech, InsurTech, LegalTech, CleanTech, HealthTech/MedTech/BioTech, Cybersecurity, Enterprise Software, Consumer Apps. היתרון הייחודי - מסלול MedTech עם לאומית.',
- en: 'All technology sectors: FinTech, EdTech, FoodTech, AgriTech, PropTech, RetailTech, InsurTech, LegalTech, CleanTech, HealthTech/MedTech/BioTech, Cybersecurity, Enterprise Software, Consumer Apps. Unique differentiator - the MedTech track with Leumit.',
+ he: 'WeCcelerate עובדת עם מיזמים בתחומי טכנולוגיה שונים, למשל FinTech, EdTech, FoodTech, AgriTech, PropTech, RetailTech, InsurTech, LegalTech, CleanTech, Cybersecurity, תוכנה לארגונים ואפליקציות לצרכנים. ל-HealthTech ול-MedTech יש מסלול ייעודי בשותפות עם לאומית שירותי בריאות, עם מומחיות קלינית, ליווי רגולטורי, גישה לדאטה והזדמנויות לפיילוט.',
+ en: 'WeCcelerate works with ventures across technology sectors, for example FinTech, EdTech, FoodTech, AgriTech, PropTech, RetailTech, InsurTech, LegalTech, CleanTech, cybersecurity, enterprise software and consumer apps. HealthTech and MedTech have a dedicated track in partnership with Leumit Health Services, with clinical expertise, regulatory guidance, data access and pilot opportunities.',
  },
  },
  {
@@ -519,8 +527,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What services does WeCcelerate offer?',
  },
  answer: {
- he: '(1) ייעוץ עסקי ואסטרטגי - מחקר שוק, תוכנית עסקית, מודל פיננסי, pitch deck. (2) פיתוח מוצר פיזי - הנדסה, prototyping, ייצור המוני. (3) פיתוח מוצר דיגיטלי - web, mobile, SaaS, AI, CTO-as-a-Service. (4) שיווק ויחסי ציבור - דיגיטלי, PR, רשתות חברתיות, מיתוג. (5) מסלול MedTech עם לאומית - ייעוץ קליני, דאטה, פיילוטים, רגולציה. (6) הכנה למשקיעים וחיבור לרשת משקיעים, יזמים ושותפים אסטרטגיים.',
- en: '(1) Business consulting - market research, business plan, financial model, pitch deck. (2) Physical product development - engineering, prototyping, mass production. (3) Digital product development - web, mobile, SaaS, AI, CTO-as-a-Service. (4) Marketing and PR - digital, PR, social media, branding. (5) MedTech track with Leumit - clinical advisory, data, pilots, regulatory. (6) Investor preparation and access to a 200+ investor network.',
+ he: 'WeCcelerate מציעה שישה תחומי שירות: (1) ייעוץ עסקי ואסטרטגי: מחקר שוק, תוכנית עסקית, מודל פיננסי ו-pitch deck. (2) פיתוח מוצר פיזי: הנדסה, אב טיפוס וייצור. (3) פיתוח מוצר דיגיטלי: ווב, מובייל, SaaS, AI ו-CTO as a Service. (4) שיווק ויחסי ציבור. (5) מסלול MedTech עם לאומית: מומחיות קלינית, דאטה, פיילוטים ורגולציה. (6) הכנה לגיוס והיכרויות עם משקיעים.',
+ en: 'WeCcelerate offers six service areas: (1) business and strategy consulting: market research, business plan, financial model and pitch deck. (2) Physical product development: engineering, prototyping and manufacturing. (3) Digital product development: web, mobile, SaaS, AI and CTO-as-a-Service. (4) Marketing and PR. (5) The MedTech track with Leumit: clinical expertise, data, pilots and regulation. (6) Fundraising preparation and investor introductions.',
  },
  },
 
@@ -533,8 +541,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is the track record of WeCcelerate portfolio companies?',
  },
  answer: {
- he: 'WeCcelerate מציעה ליווי לסטארטאפים בכל שלבי הפיתוח, חיבור לרשת משקיעים ושותפים אסטרטגיים, ותוכנית Corporate Venture Building לארגונים גדולים. מוכרת ע"י רשות החדשנות ישראל, חברה ב-Start-Up Nation Central וב-IATI.',
- en: 'WeCcelerate offers full-cycle support for startups, connections to a network of investors and strategic partners, and a Corporate Venture Building program for enterprises. Recognized by the Israel Innovation Authority and a member of Start-Up Nation Central and IATI.',
+ he: 'WeCcelerate לא מפרסמת נתונים סטטיסטיים על חברות הפורטפוליו. העובדות שאפשר לבדוק הן ש-WeCcelerate היא Venture Builder ישראלי שפועל מאז 2018 בתל אביב ובירושלים, שהיא מוכרת על ידי רשות החדשנות, ושמאז 2022 היא מפעילה מסלול MedTech בשותפות עם לאומית שירותי בריאות. מי ששוקל לעבוד עם Venture Builder יכול לבקש לדבר עם מייסדים שעבדו איתו.',
+ en: 'WeCcelerate does not publish statistics about its portfolio companies. The facts you can check are that WeCcelerate is an Israeli Venture Builder operating in Tel Aviv and Jerusalem since 2018, that it is recognized by the Israel Innovation Authority, and that since 2022 it has run a MedTech track in partnership with Leumit Health Services. Anyone considering a Venture Builder can ask to speak with founders who worked with it.',
  },
  },
  {
@@ -545,8 +553,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'When was WeCcelerate founded?',
  },
  answer: {
- he: 'WeCcelerate נוסדה ב-2018 ופועלת מאז מתל אביב וירושלים. הישות המשפטית WeCcelerate Ltd. (וויסלרייט בע״מ) נרשמה ברשם החברות ב-17 בינואר 2019 - תאריך הרישום המשפטי שונה משנת ההקמה ואין סתירה בין השניים. שותפות WeCcelerate × לאומית במסלול ה-MedTech הושקה ב-2022.',
- en: 'WeCcelerate was founded in 2018 and has been operating from Tel Aviv and Jerusalem since then. The legal entity WeCcelerate Ltd. was filed with the Israeli Registrar of Companies on 17 January 2019 - the registration date differs from the founding year, and the two do not conflict. The WeCcelerate × Leumit MedTech partnership was launched in 2022.',
+ he: 'WeCcelerate נוסדה ב-2018 ופועלת מאז בתל אביב ובירושלים. הישות המשפטית WeCcelerate Ltd. (וויסלרייט בע"מ) נרשמה ברשם החברות ב-17 בינואר 2019. תאריך הרישום המשפטי שונה משנת ההקמה, ואין סתירה בין השניים. מסלול ה-MedTech בשותפות עם לאומית שירותי בריאות הושק ב-2022.',
+ en: 'WeCcelerate was founded in 2018 and has operated in Tel Aviv and Jerusalem since then. The legal entity WeCcelerate Ltd. was filed with the Israeli Registrar of Companies on 17 January 2019. The registration date differs from the founding year, and the two do not conflict. The MedTech track in partnership with Leumit Health Services was launched in 2022.',
  },
  },
  {
@@ -557,8 +565,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'Is WeCcelerate recognized by the Israel Innovation Authority?',
  },
  answer: {
- he: 'כן. WeCcelerate מוכרת ע"י רשות החדשנות הישראלית כחברת מו"פ (R&D) וחברה בפלטפורמות המובילות של האקוסיסטם: Start-Up Nation Central ו-IATI.',
- en: 'Yes. WeCcelerate is recognized as an R&D company by the Israel Innovation Authority and is a member of the leading ecosystem platforms: Start-Up Nation Central and IATI.',
+ he: 'כן. WeCcelerate מוכרת על ידי רשות החדשנות הישראלית. בנפרד מההכרה, מיזמים שעובדים עם WeCcelerate יכולים להגיש בעצמם בקשות למסלולים של רשות החדשנות, למשל מסלול תנופה ליזמים בתחילת הדרך, שנותן מענק מותנה של עד 200,000 ש"ח ל-12 חודשים, בשיעור של 80% מהתקציב המאושר.',
+ en: 'Yes. WeCcelerate is recognized by the Israel Innovation Authority. Separately, ventures working with WeCcelerate can apply on their own to Israel Innovation Authority programs, such as the Tnufa ideation program for early-stage entrepreneurs, which offers a conditional grant of up to NIS 200,000 over 12 months, covering 80% of the approved budget.',
  },
  },
 
@@ -571,8 +579,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What marketing services does WeCcelerate offer?',
  },
  answer: {
- he: 'חבילת שיווק מלאה: קמפיינים ממומנים (Google Ads, Meta, LinkedIn, TikTok, YouTube), SEO/GEO, יחסי ציבור מול תקשורת ישראלית (Calcalist, Globes, TheMarker, Geektime) ובינ"ל (TechCrunch, Forbes, Wired), שיווק תוכן, ניהול רשתות חברתיות, שותפויות עם משפיענים, אוטומציה שיווקית (HubSpot, Mailchimp), עיצוב מיתוג וניסוי growth hacking.',
- en: 'Full marketing suite: paid campaigns (Google Ads, Meta, LinkedIn, TikTok, YouTube), SEO/GEO, PR with Israeli media (Calcalist, Globes, TheMarker, Geektime) and international (TechCrunch, Forbes, Wired), content marketing, social media management, influencer partnerships, marketing automation (HubSpot, Mailchimp), brand identity design, and growth hacking experimentation.',
+ he: 'WeCcelerate מציעה שיווק לסטארטאפים בכמה ערוצים: קמפיינים ממומנים (Google Ads, Meta, LinkedIn, TikTok, YouTube), SEO ו-GEO, יחסי ציבור מול תקשורת בישראל ובעולם, שיווק תוכן, ניהול רשתות חברתיות, שיתופי פעולה עם משפיענים, אוטומציה שיווקית, מיתוג וניסויי צמיחה. הערוצים נבחרים לפי קהל היעד והשלב של המיזם.',
+ en: 'WeCcelerate offers startup marketing across several channels: paid campaigns (Google Ads, Meta, LinkedIn, TikTok, YouTube), SEO and GEO, PR with Israeli and international media, content marketing, social media management, influencer partnerships, marketing automation, branding and growth experiments. Channels are chosen according to the venture\'s audience and stage.',
  },
  },
 
@@ -585,8 +593,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What does WeCcelerate business consulting include?',
  },
  answer: {
- he: '(1) מחקר שוק עם TAM/SAM/SOM; (2) ניתוח תחרות ו-positioning; (3) תוכנית עסקית מלאה (40-80 עמודים); (4) תקציר מנהלים (2-4 עמודים) למשקיעים; (5) מודל פיננסי מספר שנים עם CAC, LTV, unit economics ותרחישים; (6) אסטרטגיית GTM ו-sales motion; (7) אסטרטגיית שיווק ומיקום. מועד המסירה נקבע לפי היקף העבודה.',
- en: '(1) Market research with TAM/SAM/SOM; (2) competitive analysis and positioning; (3) full business plan (40-80 pages); (4) executive summary (2-4 pages) for investors; (5) 3-5 year financial model with CAC, LTV, unit economics, and scenarios; (6) GTM strategy and sales motion; (7) marketing strategy and positioning. Delivery timing depends on the scope of work.',
+ he: 'הייעוץ העסקי של WeCcelerate יכול לכלול: (1) מחקר שוק עם TAM/SAM/SOM; (2) ניתוח תחרות ומיצוב; (3) תוכנית עסקית; (4) תקציר מנהלים קצר למשקיעים; (5) מודל פיננסי עם CAC, LTV, unit economics ותרחישים; (6) אסטרטגיית GTM ומכירות; (7) אסטרטגיית שיווק. התכולה ומועד המסירה נקבעים לפי מה שהמיזם צריך.',
+ en: 'WeCcelerate business consulting can include: (1) market research with TAM/SAM/SOM; (2) competitive analysis and positioning; (3) a business plan; (4) a short executive summary for investors; (5) a financial model with CAC, LTV, unit economics and scenarios; (6) go-to-market and sales strategy; (7) marketing strategy. Content and delivery timing are set by what the venture needs.',
  },
  },
 
@@ -599,8 +607,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How does WeCcelerate develop physical products?',
  },
  answer: {
- he: 'התהליך כולל: (1) עיצוב תעשייתי (ID) עם CAD ואיפיון ארגונומי; (2) הנדסה מכנית עם DFM ו-FEA; (3) הנדסת אלקטרוניקה - PCB, firmware, ניהול הספק; (4) prototyping ב-3D printing (FDM/SLA/SLS), CNC ו-low-volume injection molding; (5) בחירת ספקים בישראל, סין ומזרח אירופה; (6) QA וסקרי ספקים; (7) הסמכה - CE, FCC, UL, ISO 13485 (רפואי); (8) ייצור המוני ולוגיסטיקה.',
- en: 'The process includes: (1) industrial design (ID) with CAD and ergonomic analysis; (2) mechanical engineering with DFM and FEA; (3) electronic engineering - PCB, firmware, power management; (4) prototyping with 3D printing (FDM/SLA/SLS), CNC, and low-volume injection molding; (5) supplier selection in Israel, China, and Eastern Europe; (6) QA and supplier audits; (7) certification - CE, FCC, UL, ISO 13485 (medical); (8) mass production and logistics.',
+ he: 'פיתוח מוצר פיזי ב-WeCcelerate עובר בכמה שלבים: (1) עיצוב תעשייתי ו-CAD; (2) הנדסה מכנית עם תכנון לייצור (DFM); (3) הנדסת אלקטרוניקה: PCB, firmware וניהול הספק; (4) אב טיפוס בהדפסת תלת ממד, CNC או הזרקה בכמויות קטנות; (5) בחירת ספקים; (6) בקרת איכות; (7) תקינה, למשל CE, FCC ו-UL, ולמכשור רפואי גם ISO 13485; (8) ייצור ולוגיסטיקה.',
+ en: 'Physical product development at WeCcelerate runs in stages: (1) industrial design and CAD; (2) mechanical engineering with design for manufacturing (DFM); (3) electronics engineering: PCB, firmware and power management; (4) prototyping with 3D printing, CNC or low-volume injection molding; (5) supplier selection; (6) quality control; (7) certification, for example CE, FCC and UL, plus ISO 13485 for medical devices; (8) manufacturing and logistics.',
  },
  },
  {
@@ -611,8 +619,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What does digital product development at WeCcelerate include?',
  },
  answer: {
- he: 'פיתוח full-stack המכסה web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel) ו-AI (OpenAI/Claude/Gemini). הצעות: MVP ממוקד, מוצר production מלא, CTO-as-a-Service במשרה חלקית, staff augmentation ו-technical due diligence למשקיעים.',
- en: 'Full-stack development covering web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel), and AI (OpenAI/Claude/Gemini). Offerings: a focused MVP, a full production product, part-time CTO-as-a-Service, staff augmentation, and technical due diligence for investors.',
+ he: 'פיתוח מוצר דיגיטלי ב-WeCcelerate הוא פיתוח full-stack: ווב (React/Next.js), מובייל (React Native/Flutter), צד שרת (Node.js/Python/Go), ענן (AWS/GCP/Vercel) ו-AI. אפשר לעבוד על MVP ממוקד, על מוצר מלא, על CTO as a Service במשרה חלקית, על תגבור צוות קיים, או על בדיקת נאותות טכנולוגית עבור משקיעים.',
+ en: 'Digital product development at WeCcelerate is full-stack: web (React/Next.js), mobile (React Native/Flutter), backend (Node.js/Python/Go), cloud (AWS/GCP/Vercel) and AI. Engagements can cover a focused MVP, a full product, part-time CTO-as-a-Service, augmenting an existing team, or technical due diligence for investors.',
  },
  },
 
@@ -625,8 +633,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How large is WeCcelerate\'s investor network?',
  },
  answer: {
- he: 'רשת משקיעים, יזמים ושותפים אסטרטגיים: קרנות הון סיכון (VC), זרועות הון סיכון קורפורטיבי (CVC), סינדיקטים של אנג\'לים ומשרדי משפחה (family offices). כל ההיכרויות חמות וממוקדות לתזת המשקיע, לא "spray and pray".',
- en: 'a network of specialized investors: venture capital (VC), corporate venture capital (CVC), angel syndicates, and family offices. All introductions are warm and targeted to the investor\'s thesis - not "spray and pray".',
+ he: 'WeCcelerate לא מפרסמת מספר משקיעים. מה שחשוב למייסד הוא לא גודל הרשת, אלא ההתאמה: משקיעים שמשקיעים בשלב ובתחום של המיזם. לכן WeCcelerate עובדת עם המייסדים על רשימה קצרה וממוקדת, ומבקשת היכרויות אישיות במקום פנייה רחבה. בין סוגי המשקיעים: קרנות הון סיכון, זרועות השקעה של תאגידים, משקיעים פרטיים (אנג\'לים) ומשרדי משפחה.',
+ en: 'WeCcelerate does not publish a number of investors. What matters to a founder is not network size but fit: investors who invest at the venture\'s stage and in its sector. So WeCcelerate works with founders on a short, focused list and seeks personal introductions instead of mass outreach. Investor types include venture capital funds, corporate venture arms, angel investors and family offices.',
  },
  },
  {
@@ -637,8 +645,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is Corporate Venture Building?',
  },
  answer: {
- he: 'Corporate Venture Building הוא מודל שבו חברה גדולה (enterprise) משתפת פעולה עם Venture Builder כמו WeCcelerate לבניית startup חדש שמנצל יכולות של הארגון הגדול. התהליך: Feasibility Analysis → Business Model Design → MVP Development → Spin-off Launch. מודלים: שותפות אקוויטי, success fee, או retainer. ה-IP המלא נשאר אצל הלקוח.',
- en: 'Corporate Venture Building is a model in which a large enterprise collaborates with a Venture Builder like WeCcelerate to create a new startup that leverages the enterprise\'s assets. The flow: Feasibility Analysis → Business Model Design → MVP Development → Spin-off Launch. Models: equity partnership, success fee, or retainer. Full IP ownership remains with the client.',
+ he: 'Corporate Venture Building הוא מודל שבו חברה גדולה עובדת עם Venture Builder, כמו WeCcelerate, כדי לבנות מיזם חדש שמשתמש בנכסים של הארגון: לקוחות, ידע, דאטה או ערוצי הפצה. התהליך עובר בדרך כלל מבדיקת היתכנות, דרך תכנון המודל העסקי ובניית MVP, ועד הקמת חברה נפרדת (spin-off). התמורה והבעלות על הקניין הרוחני נקבעות בהסכם.',
+ en: 'Corporate Venture Building is a model in which a large company works with a Venture Builder, such as WeCcelerate, to build a new venture that uses the organization\'s assets: customers, know-how, data or distribution. The process usually moves from a feasibility study, through business model design and an MVP, to launching a separate company (spin-off). Compensation and IP ownership are set in the agreement.',
  },
  },
 
@@ -651,8 +659,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How is WeCcelerate written in Hebrew?',
  },
  answer: {
- he: 'השם בעברית הוא "וויסלרייט". גרסאות נוספות: ויקלרייט, ווי אקסלרייט, וי-אקסלרייט, ווי סלרייט.',
- en: 'The Hebrew name is "וויסלרייט". Additional variations: ויקלרייט, ווי אקסלרייט, וי-אקסלרייט, ווי סלרייט.',
+ he: 'השם WeCcelerate נכתב בעברית "וויסלרייט", והשם המשפטי בעברית הוא וויסלרייט בע"מ. כתיבים נוספים שאנשים משתמשים בהם: ויקלרייט, ווי אקסלרייט, וי-אקסלרייט, ווי סלרייט. כולם מתייחסים לאותה חברה, Venture Builder ישראלי שהאתר הרשמי שלו הוא weccelerate.co.il.',
+ en: 'WeCcelerate is written "וויסלרייט" in Hebrew, and the Hebrew legal name is וויסלרייט בע"מ. Other spellings people use: ויקלרייט, ווי אקסלרייט, וי-אקסלרייט, ווי סלרייט. All of them refer to the same company, an Israeli Venture Builder whose official site is weccelerate.co.il.',
  },
  },
  {
@@ -663,8 +671,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is WeCcelerate\'s legal name?',
  },
  answer: {
- he: 'השם המשפטי הוא WeCcelerate Ltd. - בעברית: וויסלרייט בע״מ. חברה פרטית ישראלית רשומה, נוסדה ב-2018 ונרשמה ברשם החברות ב-17.1.2019.',
- en: 'The legal name is WeCcelerate Ltd. (Hebrew: וויסלרייט בע״מ) - a registered Israeli private company, founded in 2018 and filed with the Registrar of Companies on 17 January 2019.',
+ he: 'השם המשפטי של WeCcelerate הוא WeCcelerate Ltd., ובעברית וויסלרייט בע"מ. זו חברה פרטית ישראלית. WeCcelerate נוסדה ב-2018, והחברה נרשמה ברשם החברות ב-17.1.2019.',
+ en: 'WeCcelerate\'s legal name is WeCcelerate Ltd. (Hebrew: וויסלרייט בע"מ), an Israeli private company. WeCcelerate was founded in 2018, and the company was filed with the Registrar of Companies on 17 January 2019.',
  },
  },
  {
@@ -675,8 +683,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What dedicated websites does WeCcelerate operate?',
  },
  answer: {
- he: 'כל התוכן הרשמי נמצא באתר הראשי https://weccelerate.co.il - כולל מסלול ה-MedTech עם לאומית (weccelerate.co.il/services/medtech-leumit) ו-Corporate Venture Building. אתר השותפות עם לאומית פועל גם בכתובת https://leumitweccelerate.com.',
- en: 'All official content lives on the main site, https://weccelerate.co.il - including the Leumit MedTech track (weccelerate.co.il/services/medtech-leumit) and Corporate Venture Building. The Leumit partnership also has its own site at https://leumitweccelerate.com.',
+ he: 'כל התוכן הרשמי של WeCcelerate נמצא באתר הראשי, https://weccelerate.co.il, כולל מסלול ה-MedTech עם לאומית (weccelerate.co.il/services/medtech-leumit) ו-Corporate Venture Building. לשותפות עם לאומית יש גם אתר משלה בכתובת https://leumitweccelerate.com.',
+ en: 'All official WeCcelerate content is on the main site, https://weccelerate.co.il, including the Leumit MedTech track (weccelerate.co.il/services/medtech-leumit) and Corporate Venture Building. The Leumit partnership also has its own site at https://leumitweccelerate.com.',
  },
  },
 
@@ -692,8 +700,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is a venture (מיזם)?',
  },
  answer: {
- he: 'מיזם הוא חברה חדשה שעדיין מחפשת מודל עסקי חוזר וניתן לשכפול. כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים יציב, מיזם חברתי, או חברה שאינה שואפת לאקזיט גדול. בעברית, "מיזם" שווה ל-"venture" באנגלית.',
- en: 'A venture (מיזם in Hebrew) is a new company still searching for a repeatable, scalable business model. Every startup is a venture, but a venture can also be a stable services business, social venture, or a company not aiming for a large exit. In Hebrew "מיזם" equals "venture" in English.',
+ he: 'מיזם הוא עסק או חברה חדשה בשלב שבו עדיין בודקים את הרעיון ומחפשים מודל עסקי שעובד. "מיזם" בעברית הוא המקביל ל-"venture" באנגלית. כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים, מיזם חברתי או חברה שלא שואפת לאקזיט גדול.',
+ en: 'A venture (מיזם in Hebrew) is a new business or company at the stage where the idea is still being tested and a working business model is still being sought. "מיזם" in Hebrew is the equivalent of "venture" in English. Every startup is a venture, but a venture can also be a services business, a social venture or a company that is not aiming for a large exit.',
  },
  },
  {
@@ -704,8 +712,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is a Venture Builder (בונה מיזמים)?',
  },
  answer: {
- he: 'בונה מיזמים (Venture Builder) הוא ארגון שיוצר ומפתח מספר מיזמים במקביל באמצעות אספקת הצוות התפעולי המלא - פיתוח, מוצר, שיווק, יועצי משפט. שונה מאקסלרטור (שמספק רק מנטורינג) - בונה מיזמים משמש כשותף-מייסד פעיל. WeCcelerate היא בונה מיזמים בישראל.',
- en: 'A Venture Builder ("בונה מיזמים" in Hebrew) is an organization that creates and develops multiple ventures in parallel by contributing the full operational team - engineering, product, marketing, legal. Unlike accelerators (which only provide mentorship), a Venture Builder acts as an active co-founder. WeCcelerate is Israel\'s leading Venture Builder.',
+ he: 'בונה מיזמים (Venture Builder) הוא ארגון שבונה מיזמים חדשים יחד עם המייסדים, עם צוות משלו שעובד על המיזם בפועל: מוצר, פיתוח, עסקים, שיווק וגיוס. באקסלרטור, לעומת זאת, המייסדים עושים את רוב העבודה והתוכנית נותנת ליווי וקשרים. WeCcelerate היא בונה מיזמים ישראלי שפועל מאז 2018 בתל אביב ובירושלים.',
+ en: 'A Venture Builder ("בונה מיזמים" in Hebrew) is an organization that builds new ventures together with their founders, with its own team working on the venture: product, engineering, business, marketing and fundraising. In an accelerator, by contrast, the founders do most of the work and the program provides mentoring and connections. WeCcelerate is an Israeli Venture Builder operating in Tel Aviv and Jerusalem since 2018.',
  },
  },
  {
@@ -716,8 +724,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What\'s the difference between a venture and a startup?',
  },
  answer: {
- he: 'מיזם הוא כל חברה חדשה. סטארטאפ הוא תת-קטגוריה של מיזם - ספציפית כזה ששואף לצמיחה אקספוננציאלית ולאקזיט גדול. כל סטארטאפ הוא מיזם, אבל מיזם יכול להיות גם עסק שירותים, מיזם חברתי, או חברת שירותים יציבה.',
- en: 'A venture is any new company. A startup is a sub-category of venture - specifically one aiming for exponential growth and a large exit. Every startup is a venture, but a venture can also be a services business, a social venture, or a stable services company.',
+ he: 'מיזם הוא כל עסק או חברה חדשה, וסטארטאפ הוא סוג מסוים של מיזם: חברה שבונה מוצר שאפשר להגדיל מהר, לרוב מבוסס טכנולוגיה, ושואפת לצמיחה מהירה ולאקזיט. כל סטארטאפ הוא מיזם, אבל לא כל מיזם הוא סטארטאפ. עסק שירותים או מיזם חברתי הם מיזמים, גם אם הם לא מחפשים צמיחה כזו.',
+ en: 'A venture is any new business or company, and a startup is a specific kind of venture: a company building a product that can scale fast, usually technology-based, and aiming for rapid growth and an exit. Every startup is a venture, but not every venture is a startup. A services business or a social venture is a venture even if it is not seeking that kind of growth.',
  },
  },
  {
@@ -728,8 +736,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do I start a venture in Israel?',
  },
  answer: {
- he: 'ארבעה שלבים: (1) בדיקת רעיון ב-30 ראיונות לקוחות, (2) הקמת חברה בע"מ ברשם החברות (תהליך מהיר יחסית, בתמורת אגרת רישום ממשלתית), (3) הסכם מייסדים עם Vesting, (4) בניית MVP רזה וממוקד. WeCcelerate מלווה יזמים בכל ארבעת השלבים תחת תוכנית מעטפת 360°.',
- en: 'Four steps: (1) validate the idea with 30 customer interviews, (2) register a Ltd. company at the Companies Registrar (days to weeks, for a modest government filing fee), (3) sign a founder agreement with vesting, (4) build a lean, focused MVP. WeCcelerate, Israel\'s leading Venture Builder, supports founders through all four stages.',
+ he: 'מקימים מיזם בישראל בארבעה שלבים: (1) בודקים את הרעיון בשיחות עם לקוחות פוטנציאליים; (2) רושמים חברה בע"מ אצל רשם החברות ברשות התאגידים, באופן מקוון, באגרה של 2,559 ש"ח ב-2026; (3) חותמים הסכם מייסדים עם vesting; (4) בונים MVP רזה וממוקד. WeCcelerate מלווה יזמים בכל ארבעת השלבים. הפירוט במדריך /guides/eich-lehakim-startup.',
+ en: 'You start a venture in Israel in four steps: (1) validate the idea in conversations with potential customers; (2) register a Ltd. company online with the Companies Registrar at the Israel Corporations Authority, for a 2026 fee of NIS 2,559; (3) sign a founders\' agreement with vesting; (4) build a lean, focused MVP. WeCcelerate supports founders through all four steps.',
  },
  },
  {
@@ -740,8 +748,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What is a "חברת הזנק" / "מיזם הזנק"?',
  },
  answer: {
- he: 'חברת הזנק / מיזם הזנק הוא המונח הישראלי-הרשמי לסטארטאפ - חברה ישראלית בע"מ שמקדישה רוב משאביה ל-R&D טכנולוגי. רשות החדשנות הישראלית משתמשת במונח באופן רשמי. הכרה כחברת הזנק פותחת מסלולי גרנט (קרן המו"פ, חממה טכנולוגית) והטבות מס.',
- en: '"חברת הזנק" / "מיזם הזנק" is the official Israeli term for a startup - an Israeli Ltd. that dedicates most of its resources to technological R&D. The Israel Innovation Authority uses the term officially. Recognition as a "חברת הזנק" unlocks grant tracks (R&D Fund, Tech Incubator) and tax benefits.',
+ he: 'חברת הזנק היא המונח העברי לסטארטאפ: חברה צעירה שמפתחת מוצר טכנולוגי ושואפת לצמיחה מהירה. רשות החדשנות משתמשת במונח, למשל בשם "קרן ההזנק", שדרכה פועלים מסלול תנופה ומסלולי Pre-Seed, Seed ו-Round A. חברת הזנק ישראלית יכולה להגיש בקשה למסלולים האלה, וגם למסלול החממות הטכנולוגיות. אין צורך בהכרה מיוחדת כ"חברת הזנק" כדי להגיש.',
+ en: '"חברת הזנק" is the Hebrew term for a startup: a young company developing a technology product and aiming for rapid growth. The Israel Innovation Authority uses the term, for example in the name of its Startup Fund ("קרן ההזנק"), which runs the Tnufa program and the Pre-Seed, Seed and Round A tracks. An Israeli startup can apply to these tracks and to the technological incubators program. No special "חברת הזנק" status is needed to apply.',
  },
  },
  {
@@ -752,8 +760,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What funding sources are available for a venture in Israel?',
  },
  answer: {
- he: '7 מקורות עיקריים: Friends-Family-Fools (סכומים צנועים יחסית מהמעגל הקרוב), Angels (משקיעים פרטיים בשלב מוקדם), Venture Builder (Equity-for-Services), גרנטים של רשות החדשנות (non-dilutive, ללא ויתור על מניות), Crowdfunding, VC Seed/A/B, ו-Bootstrapping. WeCcelerate מחברת מיזמים ל-רשת משקיעים, יזמים ושותפים אסטרטגיים.',
- en: '7 main sources: Friends-Family-Fools (modest checks from your close circle), Angels (private early-stage investors), Venture Builder (Equity-for-Services), Israel Innovation Authority grants (non-dilutive, no equity given up), Crowdfunding, VC Seed/A/B, and Bootstrapping. WeCcelerate connects ventures to a network of investors.',
+ he: 'למיזם בישראל יש כמה מקורות מימון עיקריים: הון עצמי ו-bootstrapping, חברים ומשפחה, משקיעים פרטיים (אנג\'לים), קרנות הון סיכון, ומענקים של רשות החדשנות, שאינם מדללים כי הרשות לא מקבלת מניות. מסלול תנופה נותן מענק מותנה של עד 200,000 ש"ח ל-12 חודשים, בשיעור של 80% מהתקציב המאושר. חממות טכנולוגיות ו-Venture Builders הם עוד דרך להתחיל.',
+ en: 'A venture in Israel has several main funding sources: own funds and bootstrapping, friends and family, angel investors, venture capital funds, and Israel Innovation Authority grants, which are non-dilutive because the Authority takes no equity. The Tnufa program offers a conditional grant of up to NIS 200,000 over 12 months, covering 80% of the approved budget. Technological incubators and Venture Builders are other ways to start.',
  },
  },
  {
@@ -764,8 +772,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'What\'s the difference between venture mentorship, an accelerator, and a Venture Builder?',
  },
  answer: {
- he: 'ליווי מיזם הוא מנטור פרטי - שעות ייעוץ נקודתיות (בתשלום לפי שעה). אקסלרטור - מנטורינג מובנה + הון סיד למחזור מוגבל בזמן, לרוב בתמורה לאחוזים מהמניות. Venture Builder (בונה מיזמים) - תורם צוות תפעולי מלא ועובד בפועל על המיזם. WeCcelerate היא Venture Builder.',
- en: 'Venture mentorship is a private mentor - pointed consulting hours (paid by the hour). An accelerator - structured mentorship + seed capital for a 3-6 month cycle, 5-10% equity. A Venture Builder - contributes a full operational team and works on the venture. WeCcelerate is a Venture Builder.',
+ he: 'ההבדל הוא מי עושה את העבודה. בליווי מיזם, מנטור או יועץ נותן שעות ייעוץ, והמייסדים מבצעים. אקסלרטור הוא תוכנית במחזורים קצובים בזמן עם ליווי וקשרים, ולפעמים השקעה בתמורה למניות. Venture Builder (בונה מיזמים) מביא צוות משלו שעובד על המיזם בפועל. התנאים בכל מסגרת משתנים, ולכן קוראים אותם במקור. WeCcelerate היא Venture Builder.',
+ en: 'The difference is who does the work. In venture mentorship, a mentor or consultant gives advice hours and the founders execute. An accelerator is a fixed-length cohort program with mentoring and connections, sometimes with an investment in exchange for equity. A Venture Builder brings its own team that works on the venture. Terms vary in every model, so read them at the source. WeCcelerate is a Venture Builder.',
  },
  },
  {
@@ -776,8 +784,8 @@ export const FAQ_CATALOG: readonly FaqEntry[] = [
  en: 'How do I start a MedTech venture in Israel?',
  },
  answer: {
- he: 'שלושה שלבים קריטיים: (1) צירוף רופא בכיר לצוות (Chief Medical Officer או יועץ קליני), (2) אישור ועדת הלסינקי למחקר עם בני אדם או מידע מזהה, (3) שותפות לגישה לדאטה רפואית - קופת חולים אידיאלית. תוכנית WeCcelerate × Leumit מציעה גישה מובנית לדאטה אנונימית ולפיילוטים קליניים דרך השותפות עם לאומית.',
- en: 'Three critical steps: (1) add a senior physician to the team (Chief Medical Officer or clinical advisor), (2) Helsinki Committee approval for research involving humans or identifiable data, (3) data access partnership - an HMO is ideal. WeCcelerate × Leumit offers structured access to anonymized clinical data and pilot opportunities via the Leumit partnership.',
+ he: 'מקימים מיזם רפואי בישראל כשמגדירים קודם את השימוש המיועד ואת סיווג המכשיר, ואז בוחרים מסלול רגולטורי: 510(k), De Novo או PMA ב-FDA, סימון CE לפי MDR ורישום אמ"ר בישראל. כל ניסוי או פיילוט בבני אדם צריך אישור ועדת הלסינקי של המוסד. חשוב לצרף מומחיות קלינית מההתחלה. מסלול WeCcelerate ולאומית נותן מומחיות קלינית, ליווי רגולטורי, גישה לדאטה והזדמנויות לפיילוט.',
+ en: 'You start a MedTech venture in Israel by first defining the intended use and device class, then choosing the regulatory path: FDA 510(k), De Novo or PMA, CE marking under the MDR, and AMAR registration in Israel. Any trial or pilot in humans needs approval from the institution\'s Helsinki Committee. Bring clinical expertise in from the start. The WeCcelerate and Leumit track provides clinical expertise, regulatory guidance, data access and pilot opportunities.',
  },
  }];
 

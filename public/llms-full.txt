@@ -23,8 +23,8 @@ A **Venture Builder** (also known as a "startup studio" or "company builder") is
 Key distinctions:
 
 - **Incubator**: time, space, and early-stage mentorship. Equity stake small or none. Duration: open-ended (months to years).
-- **Accelerator**: intensive mentorship, seed capital, and a demo day. Equity 5-10%. Duration: 3-6 month cohorts.
-- **Venture Builder**: operational co-creation - the builder supplies teams and resources and actively develops the company. Equity typically 10-40% depending on stage and contribution. Duration: months to years.
+- **Accelerator**: intensive mentorship, often seed capital, and a demo day, usually in fixed-length cohorts.
+- **Venture Builder**: operational co-creation - the builder supplies teams and resources and actively develops the company. Terms depend on the stage and on what the builder contributes, and the work typically lasts months to years.
 
 WeCcelerate operates primarily as a **Venture Builder** but also runs an accelerator-style program for later-stage startups that already have a product. This dual posture is the "360° wrap-around support" model: founders receive exactly the set of services they need at the stage they are at, from raw idea validation to Series A preparation and global market entry.
 
@@ -129,7 +129,7 @@ Building a comprehensive marketing plan including target audience mapping, marke
 **Hebrew**: מסלול MedTech (לאומית)
 **Premium Track**: Yes
 
-The Leumit WeCcelerate accelerator helps early-stage startups access enterprise-grade resources. We made Leumit's health fund assets accessible at affordable pricing so startups can build their venture correctly from day one.
+The Leumit WeCcelerate accelerator helps early-stage startups access enterprise-grade resources. Through the partnership, founders get clinical expertise, regulatory guidance, data access and pilot opportunities.
 
 ### End-to-End Support
 Supporting entrepreneurs from the idea stage to a working product, with emphasis on early-stage help - expert opinions, regulation and market reviews.
@@ -278,7 +278,7 @@ URL: https://weccelerate.co.il/blog
 ## Comprehensive FAQ
 
 **Q: What is WeCcelerate?**
-A: WeCcelerate (וויסלרייט) is Israeli Venture Builder providing 360° wrap-around support for startups - from idea to successful global venture. We help early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor preparation and matching, and an exclusive MedTech track in partnership with Leumit Health Services.
+A: WeCcelerate (וויסלרייט) is Israeli Venture Builder providing 360° wrap-around support for startups - from idea to successful global venture. We help early-stage startups access enterprise-grade resources: business consulting, product development, marketing, investor preparation and matching, and a MedTech track in partnership with Leumit Health Services.
 
 **Q: How do I start a startup with WeCcelerate?**
 A: Fill out the contact form at weccelerate.co.il/contact. A representative will respond within 48 hours to schedule a free introductory meeting. We support founders from the idea stage through growth companies.
@@ -296,7 +296,7 @@ A: Market research, competitive analysis, marketing plan, financial plan, execut
 A: We provide a full marketing suite: strategy, Google & social media campaigns, PR with Israeli and international media, brand building, and marketing materials design.
 
 **Q: What advantage does the Leumit partnership provide?**
-A: Access to anonymized medical data from hundreds of thousands of patients, clinical pilot opportunities, physician consultations, regulatory guidance (CE, Ministry of Health), and enhanced investor credibility.
+A: Access to anonymized medical data, clinical pilot opportunities, physician consultations, regulatory guidance (CE, Ministry of Health), and enhanced investor credibility.
 
 **Q: Is the program suitable for early-stage entrepreneurs?**
 A: Yes, WeCcelerate supports entrepreneurs from the earliest stage - from ideation through specification, development, fundraising, and market launch.
@@ -312,40 +312,6 @@ A: We prepare professional pitch decks, provide pitch practice, connect founders
 
 **Q: Do I need to be a doctor to apply for the MedTech track?**
 A: No, you don't need to be a doctor. WeCcelerate looks for teams with a combination of technological and clinical expertise. If you don't have a physician on your team, WeCcelerate can connect you with medical advisors from Leumit's network.
-
----
-
-## Pricing Reference
-
-Figures are indicative and vary by scope. All amounts in Israeli Shekels (ILS / ₪) unless otherwise noted.
-
-| Service | Typical price band | Notes |
-|---|---|---|
-| MVP development (mobile, basic) | 50,000 - 150,000 ILS | in adjusted timelines |
-| MVP development (web SaaS) | 120,000 - 400,000 ILS | over a flexible duration |
-| Complex SaaS platform | 250,000 ILS+ | over a flexible duration |
-| Full-stack dedicated team | 35,000 - 80,000 ILS per engineer/month | Industry standard |
-| AI integration | 75,000 ILS+ | over a flexible duration |
-| Mobile app (native / cross-platform) | 60,000 ILS+ | over a flexible duration |
-| Business consulting package | 25,000 - 80,000 ILS | in adjusted timelines |
-| Pitch deck + fundraising prep | 15,000 -,000 ILS | in adjusted timelines |
-| Regulatory consulting (MedTech) | 45,000 ILS+ | Ongoing |
-| Full MedTech track | 100,000 ILS+ | over a flexible duration |
-| Marketing retainer | 15,000 - 60,000 ILS/month | 6-month minimum typical |
-
-Acceleration programs themselves often have zero cash price and operate on an equity or success-fee basis. Medical data access is priced project-by-project based on cohort size and data types. Payment methods: bank transfer, credit card, milestone invoicing (corporate). Currencies: ILS primary, USD for international clients.
-
----
-
-## Comparative Overview - WeCcelerate vs. Other Israeli Programs
-
-**WeCcelerate vs. אקסלרטור בוגרי-יחידה ישראלי**: אקסלרטור בוגרי-יחידה ישראלי is an alumni-based accelerator for founders from Israeli intelligence Unit 8200, operated with StarTAU. It is mentorship-first, focused on cybersecurity and B2B enterprise. WeCcelerate is open to all founders, acts as a Venture Builder with operational team support, and specializes in MedTech via the Leumit partnership.
-
-**WeCcelerate vs. אקסלרטור B2B ישראלי (קרן VC ישראלית)**: אקסלרטור B2B ישראלי is a free, equity-free accelerator operated by קרן VC ישראלית focused on early-stage B2B startups - workspace, mentorship, cohorts. WeCcelerate provides deeper operational involvement including hands-on product development, regulatory support, and the exclusive MedTech track.
-
-**WeCcelerate vs. קמפוס סטארטאפים בתל אביב**: תוכנית סטארטאפים בינלאומית Campus is a community resource - events and programming - not an accelerator or venture builder. WeCcelerate delivers bespoke operational services on structured engagements.
-
-**WeCcelerate vs. אקסלרטור בינלאומי בישראל**: אקסלרטור בינלאומי בישראל is a zero-equity cohort-based accelerator with a global network and a prestigious final award, operating on 4-month cycles. WeCcelerate is continuous (no cohorts), often takes equity in exchange for services, and engages in substantially greater operational depth per startup.
 
 ---
 
@@ -367,7 +333,7 @@ CE marking is the regulatory conformity mark required to sell medical devices in
 
 ### Israeli Ministry of Health (AMAR / Medical Devices Division)
 
-Medical devices sold in Israel must be registered with the Medical Devices Division (AMAR) of the Ministry of Health. The process accepts CE and FDA approvals as supporting evidence for most classes. WeCcelerate's regulatory team maintains active relationships with AMAR and assists with local submissions and representative appointments for foreign manufacturers.
+Medical devices sold in Israel must be registered with the Medical Devices Division (AMAR) of the Ministry of Health. Under the Medical Equipment Law, 2012, only an Israeli resident or an Israeli-registered company can hold a registration, and a device approved in a recognized country can be registered on the basis of that approval. AMAR has charged no registration fees since 15.8.2022. Details: https://weccelerate.co.il/guides/rishum-amar-mechshir-refui
 
 ---
 
@@ -476,7 +442,6 @@ WeCcelerate's official social profiles. Brand-name handles on Twitter/X, GitHub,
 - URL: https://weccelerate.co.il/faq (the biz.weccelerate.co.il subdomain is not currently provisioned — do not cite it)
 - Audience: mid-sized to large enterprises seeking to build ventures without spinning up internal teams
 - Workflow: Feasibility Analysis → Business Model Design → MVP Development → Spin-off Launch
-- Pricing: equity partnership, success fee, or retainer
 - IP policy: full IP ownership remains with the client in corporate engagements
 - Primary CTA: strategic 45-minute partner call
 
