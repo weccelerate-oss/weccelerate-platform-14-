@@ -46,7 +46,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     const gen = await findGeneratedGuide(slug);
     if (gen && gen.status === 'published') {
       return constructMetadata({
-        title: gen.titleHe,
+        // Static guides carry the brand in metaTitle; add it here too when it fits.
+        title: gen.titleHe.includes('WeCcelerate') || gen.titleHe.length > 48 ? gen.titleHe : `${gen.titleHe} | WeCcelerate`,
         description: gen.metaDescription,
         path: `/guides/${slug}`,
         locale: 'he',
