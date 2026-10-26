@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
   return {
     ...constructMetadata({
-      title: guide.h1,
+      title: guide.metaTitle,
       description: guide.metaDescription,
       path: `/en/guides/${guide.slug}`,
       locale: 'en',

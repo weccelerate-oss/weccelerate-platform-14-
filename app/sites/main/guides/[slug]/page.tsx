@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   }
 
   const base = constructMetadata({
-    title: guide.h1,
+    title: guide.metaTitle,
     description: guide.metaDescription,
     path: `/guides/${guide.slug}`,
     locale: 'he',
