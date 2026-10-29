@@ -17,6 +17,7 @@
 
 'use server';
 
+import crypto from 'crypto';
 import { prisma } from '@/lib/db';
 import { headers } from 'next/headers';
 import { z } from 'zod';
@@ -200,12 +201,15 @@ async function routeLeadThroughFilter(opts: {
     extra?: Record<string, unknown>;
     userSuccessMessage: string;
   };
+  /** Server-to-server source (webhook): every lead arrives from the sender's
+   * one IP, so the per-IP rate limit would drop real leads. Email limit stays. */
+  trustedSource?: boolean;
 }): Promise<FormState> {
   const { leadData, envelope, meta } = opts;
   const attribution = meta.attribution ?? {};
 
   // PHASE 2: capture source IP + check blocklist + rate-limit before scoring.
-  const ip = await getSourceIp();
+  const ip = opts.trustedSource ? null : await getSourceIp();
   const ipHash = ip ? hashIp(ip) : null;
 
   const rate = await checkRateLimit({ email: leadData.email, ip });
@@ -639,7 +643,7 @@ export async function submitEventRegistration(
 // =============================================================================
 
 const VALID_FORM_TYPES = [
-  'contact', 'application', 'newsletter', 'event', 'api',
+  'contact', 'application', 'newsletter', 'event', 'api', 'lp_webhook',
   'leumit_landing', 'biz_landing', 'landing_multiselect',
   'whatsapp_gate', 'home_cta', 'service', 'guide_inline', 'lead_magnet',
 ] as const;
@@ -705,5 +709,71 @@ export async function createLeadAction(data: {
       },
       userSuccessMessage: 'הפנייה נשלחה בהצלחה',
     },
+  });
+}
+
+// =============================================================================
+// WEBHOOK LEAD ACTION (lp.weccelerate.co.il, built in Base44 by the
+// group's campaign company). Called only from /api/webhooks/lead after the
+// shared secret is verified.
+// =============================================================================
+
+const WebhookLeadSchema = WhatsAppGateSchema.extend({
+  message: z.string().max(2000).optional(),
+  sourceUrl: z.string().max(2048).optional(),
+  utmSource: z.string().max(200).optional(),
+  utmMedium: z.string().max(200).optional(),
+  utmCampaign: z.string().max(200).optional(),
+  utmContent: z.string().max(200).optional(),
+  utmTerm: z.string().max(200).optional(),
+  gclid: z.string().max(500).optional(),
+});
+
+export type WebhookLeadInput = z.input<typeof WebhookLeadSchema>;
+
+/** Exported from a 'use server' module, so it is publicly callable as a
+ * server action: it must verify the secret itself, not rely on the route. */
+export async function submitWebhookLead(secret: string | null, data: WebhookLeadInput): Promise<FormState> {
+  const expected = process.env.LEAD_WEBHOOK_SECRET;
+  if (!expected || !secret || secret.length !== expected.length
+    || !crypto.timingSafeEqual(Buffer.from(secret), Buffer.from(expected))) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
+  const parsed = WebhookLeadSchema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'נדרשים שם וטלפון תקין',
+      errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+  const v = parsed.data;
+
+  return routeLeadThroughFilter({
+    leadData: {
+      name: v.name,
+      email: v.email || '',
+      phone: v.phone,
+      company: v.company || null,
+      message: v.message || null,
+    },
+    envelope: { honeypot: null, renderedAtMs: null },
+    meta: {
+      site: 'lp',
+      sourceUrl: v.sourceUrl || 'https://lp.weccelerate.co.il/',
+      formType: 'lp_webhook',
+      attribution: {
+        channelDetail: 'lp.weccelerate.co.il',
+        utmSource: v.utmSource || null,
+        utmMedium: v.utmMedium || null,
+        utmCampaign: v.utmCampaign || null,
+        utmContent: v.utmContent || null,
+        utmTerm: v.utmTerm || null,
+        gclid: v.gclid || null,
+      },
+      userSuccessMessage: 'הליד התקבל',
+    },
+    trustedSource: true,
   });
 }

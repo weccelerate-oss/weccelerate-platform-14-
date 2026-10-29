@@ -76,6 +76,7 @@ export const SITE_SOURCE_LABELS: Record<string, string> = {
   leumit: 'דף נחיתה · Leumit MedTech',
   biz: 'דף נחיתה · Business',
   landing: 'דף נחיתה · קמפיין',
+  lp: 'דף נחיתה · lp.weccelerate.co.il',
 };
 
 export const FORM_TYPE_LABELS: Record<string, string> = {
@@ -97,6 +98,7 @@ export const FORM_TYPE_LABELS: Record<string, string> = {
   biz_landing: 'דף נחיתה Business',
   landing_multiselect: 'דף נחיתה קמפיין',
   api: 'API',
+  lp_webhook: 'דף נחיתה lp (Base44)',
 };
 
 export const STAGE_LABELS: Record<string, string> = {

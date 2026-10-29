@@ -21,7 +21,7 @@ const IP_HOURLY_LIMIT = 3;
 const LEAD_ACTIONS_FOR_EMAIL_LIMIT = [
   'form.contact_submit', 'form.application', 'form.newsletter', 'form.event', 'form.api',
   'form.whatsapp_gate', 'form.home_cta', 'form.service', 'form.guide_inline', 'form.lead_magnet', 'form.blog', 'form.comparison', 'form.page_cta', 'form.landing_paid', 'form.video',
-  'form.leumit_landing', 'form.biz_landing', 'form.landing_multiselect',
+  'form.leumit_landing', 'form.biz_landing', 'form.landing_multiselect', 'form.lp_webhook',
 ];
 const LEAD_ACTIONS_FOR_IP_LIMIT = [...LEAD_ACTIONS_FOR_EMAIL_LIMIT, 'lead.spam_review', 'lead.spam_blocked'];
 const EMAIL_DAILY_LIMIT = 3;
