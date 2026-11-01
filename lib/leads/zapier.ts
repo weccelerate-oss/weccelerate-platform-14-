@@ -77,6 +77,7 @@ export const SITE_SOURCE_LABELS: Record<string, string> = {
   biz: 'דף נחיתה · Business',
   landing: 'דף נחיתה · קמפיין',
   lp: 'דף נחיתה · lp.weccelerate.co.il',
+  we: 'קמפיין · we.weccelerate.co.il (אלמנטור)',
 };
 
 export const FORM_TYPE_LABELS: Record<string, string> = {
@@ -99,6 +100,7 @@ export const FORM_TYPE_LABELS: Record<string, string> = {
   landing_multiselect: 'דף נחיתה קמפיין',
   api: 'API',
   lp_webhook: 'דף נחיתה lp (Base44)',
+  elementor_campaign: 'טופס קמפיין (אלמנטור)',
 };
 
 export const STAGE_LABELS: Record<string, string> = {

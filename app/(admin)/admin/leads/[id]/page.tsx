@@ -101,6 +101,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
                 <span className="text-slate-500">לא נשלח: הליד {STATUS_LABELS[lead.status]}</span>
               ) : d.status === 'sent' ? (
                 <span className="inline-flex items-center gap-1 text-emerald-700"><Send className="h-4 w-4" aria-hidden="true" />נשלח לזאפ</span>
+              ) : d.status === 'external' ? (
+                <span className="inline-flex items-center gap-1 text-emerald-700"><Send className="h-4 w-4" aria-hidden="true" />נוצר ב-Pipedrive דרך הסוכנות (תיעוד בלבד)</span>
               ) : d.status === 'unknown' || d.status === 'pending' ? (
                 <span className="inline-flex items-center gap-1 text-slate-500"><Clock className="h-4 w-4" aria-hidden="true" />ללא מעקב (נרשם לפני העדכון)</span>
               ) : (
@@ -114,7 +116,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           <Row label="זמן שליחה" value={d.at ? fmt(d.at) : null} />
           <Row label="נשלח שוב" value={lead.resentAt ? fmt(lead.resentAt) : null} />
           <Row label="אושר אחרי בדיקה" value={lead.reviewedAt ? fmt(lead.reviewedAt) : null} />
-          {lead.status === 'accepted' && (
+          {lead.status === 'accepted' && d.status !== 'external' && (
             <div className="pt-3"><ResendButton leadId={lead.id} label={d.status === 'sent' ? 'שלח שוב לזאפ' : 'שלח לזאפ'} /></div>
           )}
         </Card>

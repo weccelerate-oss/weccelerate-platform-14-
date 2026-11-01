@@ -229,6 +229,7 @@ export async function GET(request: NextRequest) {
       const d = m.delivery as { status?: string; error?: string } | undefined;
       if (!d) unknown += 1;
       else if (d.status === 'sent') { sent += 1; sentLeads.push({ name: (m.name as string) || '', email: (m.email as string) || '', phone: (m.phone as string) || '' }); }
+      else if (d.status === 'external') { /* created in Pipedrive by the agency's flow — not ours to reconcile */ }
       else {
         failed += 1;
         failedRows.push({

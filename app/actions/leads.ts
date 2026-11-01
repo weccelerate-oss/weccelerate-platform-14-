@@ -205,6 +205,10 @@ async function routeLeadThroughFilter(opts: {
   /** Server-to-server source (webhook): every lead arrives from the sender's
    * one IP, so the per-IP rate limit would drop real leads. Email limit stays. */
   trustedSource?: boolean;
+  /** The lead already reached Pipedrive through another flow (the agency's
+   * Elementor → Make scenario): record it for the admin board only. Sending it
+   * on would create a duplicate deal and a duplicate sales email. */
+  recordOnly?: boolean;
 }): Promise<FormState> {
   const { envelope, meta } = opts;
   const attribution = meta.attribution ?? {};
@@ -317,6 +321,27 @@ async function routeLeadThroughFilter(opts: {
       console.error('[Spam] review log failed:', err);
     }
     return { success: true, delivered: false, message: meta.userSuccessMessage };
+  }
+
+  if (opts.recordOnly) {
+    try {
+      const row = await prisma.activityLog.create({
+        data: {
+          action: `form.${meta.formType}`,
+          description: `${getSourceLabel(meta.site)} · ${leadData.name} · ${leadData.email || leadData.phone}`,
+          metadata: {
+            ...sharedMeta,
+            status: 'approved',
+            delivery: { status: 'external', via: 'agency flow', at: new Date().toISOString() },
+          },
+        },
+        select: { id: true },
+      });
+      return { success: true, delivered: true, leadId: row.id, message: meta.userSuccessMessage };
+    } catch (err) {
+      console.error(`[${meta.formType}] DB log failed:`, err);
+      return { success: false, message: 'Could not record the lead' };
+    }
   }
 
   // Decision: pass. Persist first (so the Zap can reference the row), then deliver.
@@ -746,9 +771,22 @@ const WebhookLeadSchema = WhatsAppGateSchema.extend({
 
 export type WebhookLeadInput = z.input<typeof WebhookLeadSchema>;
 
+/** Where a webhook lead came from. `lp` (Base44) goes through the full pipeline;
+ * `we` (Elementor on we.weccelerate.co.il) is already in Pipedrive via the
+ * agency's flow, so it is recorded for the admin board only. */
+const WEBHOOK_SOURCES = {
+  lp: { site: 'lp', host: 'lp.weccelerate.co.il', formType: 'lp_webhook', recordOnly: false },
+  we: { site: 'we', host: 'we.weccelerate.co.il', formType: 'elementor_campaign', recordOnly: true },
+} as const;
+export type WebhookSource = keyof typeof WEBHOOK_SOURCES;
+
 /** Exported from a 'use server' module, so it is publicly callable as a
  * server action: it must verify the secret itself, not rely on the route. */
-export async function submitWebhookLead(secret: string | null, data: WebhookLeadInput): Promise<FormState> {
+export async function submitWebhookLead(
+  secret: string | null,
+  data: WebhookLeadInput,
+  source: WebhookSource = 'lp',
+): Promise<FormState> {
   const expected = process.env.LEAD_WEBHOOK_SECRET;
   if (!expected || !secret || secret.length !== expected.length
     || !crypto.timingSafeEqual(Buffer.from(secret), Buffer.from(expected))) {
@@ -764,6 +802,7 @@ export async function submitWebhookLead(secret: string | null, data: WebhookLead
     };
   }
   const v = parsed.data;
+  const src = WEBHOOK_SOURCES[source] ?? WEBHOOK_SOURCES.lp;
 
   return routeLeadThroughFilter({
     leadData: {
@@ -775,11 +814,11 @@ export async function submitWebhookLead(secret: string | null, data: WebhookLead
     },
     envelope: { honeypot: null, renderedAtMs: null },
     meta: {
-      site: 'lp',
-      sourceUrl: v.sourceUrl || 'https://lp.weccelerate.co.il/',
-      formType: 'lp_webhook',
+      site: src.site,
+      sourceUrl: v.sourceUrl || `https://${src.host}/`,
+      formType: src.formType,
       attribution: {
-        channelDetail: 'lp.weccelerate.co.il',
+        channelDetail: src.host,
         utmSource: v.utmSource || null,
         utmMedium: v.utmMedium || null,
         utmCampaign: v.utmCampaign || null,
@@ -790,5 +829,6 @@ export async function submitWebhookLead(secret: string | null, data: WebhookLead
       userSuccessMessage: 'הליד התקבל',
     },
     trustedSource: true,
+    recordOnly: src.recordOnly,
   });
 }

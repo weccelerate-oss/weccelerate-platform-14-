@@ -68,6 +68,9 @@ export async function resendLeadAction(activityLogId: string): Promise<{ success
   if (!row) return { success: false, error: 'Lead not found' };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const meta = (row.metadata as any) ?? {};
+  if (meta.delivery?.status === 'external') {
+    return { success: false, error: 'הליד כבר נוצר ב-Pipedrive דרך הסוכנות — שליחה חוזרת תיצור כפילות' };
+  }
 
   const delivery = await deliverLead(leadFromMeta(row.id, meta, 'admin_resend'));
   await prisma.activityLog.update({

@@ -22,7 +22,8 @@ import { FORM_TYPE_LABELS, STAGE_LABELS, SERVICE_LABELS, SITE_SOURCE_LABELS, get
 export const MONTHLY_TARGET = 50;
 
 export type LeadStatus = 'accepted' | 'review' | 'blocked' | 'rate_limited' | 'blocklist';
-export type DeliveryStatus = 'sent' | 'failed' | 'skipped' | 'pending' | 'unknown';
+/** `external`: the lead reached Pipedrive through another flow (agency/Elementor) and is only recorded here. */
+export type DeliveryStatus = 'sent' | 'external' | 'failed' | 'skipped' | 'pending' | 'unknown';
 
 export interface LeadRecord {
   id: string;
@@ -172,7 +173,7 @@ export function mapLeadRow(row: RawLeadRow): LeadRecord {
       status !== 'accepted'
         ? { status: 'skipped' }
         : d && d.status
-          ? { ...d, status: (['sent', 'failed', 'skipped', 'pending'].includes(d.status) ? d.status : 'unknown') as DeliveryStatus }
+          ? { ...d, status: (['sent', 'external', 'failed', 'skipped', 'pending'].includes(d.status) ? d.status : 'unknown') as DeliveryStatus }
           : { status: 'unknown' },
     reviewedAt: s(m.reviewedAt),
     resentAt: s(m.resentAt),
@@ -371,7 +372,7 @@ export async function loadLeadDashboard(filters: LeadFilters): Promise<LeadDashb
   const month = (monthRows as RawLeadRow[]).map(mapLeadRow).filter((r) => r.formType !== 'newsletter');
   const monthAccepted = month.length;
   const monthProjected = dayOfMonth > 0 ? Math.round((monthAccepted / dayOfMonth) * daysInMonth) : 0;
-  const monthSent = month.filter((r) => r.delivery.status === 'sent').length;
+  const monthSent = month.filter((r) => r.delivery.status === 'sent' || r.delivery.status === 'external').length;
   const monthFailed = month.filter((r) => r.delivery.status === 'failed' || r.delivery.status === 'skipped').length;
   const monthUnknown = month.filter((r) => r.delivery.status === 'unknown' || r.delivery.status === 'pending').length;
 

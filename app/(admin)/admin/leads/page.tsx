@@ -47,6 +47,14 @@ function Delivery({ lead }: { lead: LeadRecord }) {
       </span>
     );
   }
+  if (d.status === 'external') {
+    // Already created in Pipedrive by the agency's flow — a resend would duplicate the deal.
+    return (
+      <span className="inline-flex items-center gap-1 text-xs text-emerald-700" title="נוצר ב-Pipedrive דרך האוטומציה של הסוכנות">
+        <Send className="h-3 w-3" aria-hidden="true" />בפייפדרייב (סוכנות)
+      </span>
+    );
+  }
   if (d.status === 'unknown' || d.status === 'pending') {
     // Rows from before delivery tracking (2026-09-10). They already reached
     // Pipedrive through the old path; a resend only adds a duplicate note to
