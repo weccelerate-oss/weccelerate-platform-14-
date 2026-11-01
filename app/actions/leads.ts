@@ -23,6 +23,7 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 import { runSpamFilter, type SpamFilterResult } from '@/lib/leads/spam-filter';
 import { checkRateLimit, hashIp } from '@/lib/leads/rate-limit';
+import { fixEmailTypo } from '@/lib/leads/email-typo';
 import {
   deliverLead,
   getSourceLabel,
@@ -205,8 +206,21 @@ async function routeLeadThroughFilter(opts: {
    * one IP, so the per-IP rate limit would drop real leads. Email limit stays. */
   trustedSource?: boolean;
 }): Promise<FormState> {
-  const { leadData, envelope, meta } = opts;
+  const { envelope, meta } = opts;
   const attribution = meta.attribution ?? {};
+
+  // gmail.om / gmial.com would make the lead unreachable — fix the mailbox
+  // domain before anything is stored or sent, and keep what was typed.
+  const emailFix = fixEmailTypo(opts.leadData.email);
+  const leadData = emailFix.corrected
+    ? {
+        ...opts.leadData,
+        email: emailFix.email,
+        message: [opts.leadData.message, `(האימייל תוקן אוטומטית — הוקלד במקור: ${emailFix.original})`]
+          .filter(Boolean)
+          .join('\n'),
+      }
+    : { ...opts.leadData, email: emailFix.email };
 
   // PHASE 2: capture source IP + check blocklist + rate-limit before scoring.
   const ip = opts.trustedSource ? null : await getSourceIp();
@@ -261,6 +275,7 @@ async function routeLeadThroughFilter(opts: {
     ...leadData,
     ...(meta.extra ?? {}),
     ...attribution,
+    ...(emailFix.corrected ? { emailTyped: emailFix.original } : {}),
     site: meta.site || 'main',
     sourceUrl: meta.sourceUrl,
     formType: meta.formType,

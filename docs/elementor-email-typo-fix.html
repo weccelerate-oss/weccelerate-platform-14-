@@ -1,0 +1,150 @@
+<!--
+  WeCcelerate — תיקון טעויות הקלדה בכתובות אימייל, לטפסי אלמנטור (we.weccelerate.co.il)
+
+  מה זה עושה:
+   1. כשמישהו מקליד דומיין שגוי (gmail.om / gmial.com / walla.co.ll…) ויוצא מהשדה,
+      מופיע מתחתיו "התכוונת ל…@gmail.com?" עם כפתור "כן, תקן".
+   2. ברגע השליחה — אם הטעות עדיין שם, הכתובת מתוקנת אוטומטית לפני שהטופס יוצא,
+      כך שהליד מגיע עם אימייל שאפשר לחזור אליו.
+   דומיינים של חברות וספקים אמיתיים (email.com, hotmail.fr, gov.il…) לא נוגעים בהם.
+
+  התקנה (פעם אחת):
+   Elementor Pro → Custom Code → Add New → הדבק את כל הקובץ הזה →
+   Location: "</body> - End" → Conditions: Entire Site → Publish.
+   (בלי Pro: הוסף ווידג'ט HTML בעמוד /application/ והדבק שם.)
+
+  זהה בלוגיקה ל-lib/leads/email-typo.ts באתר — אם משנים רשימה, לשנות בשניהם.
+-->
+<script>
+(function () {
+  'use strict';
+  if (window.__weccEmailTypo) return;
+  window.__weccEmailTypo = true;
+
+  var LEGIT = ['gmail.com', 'googlemail.com', 'walla.co.il', 'walla.com', 'hotmail.com', 'hotmail.co.il',
+    'outlook.com', 'outlook.co.il', 'live.com', 'msn.com', 'yahoo.com', 'ymail.com', 'icloud.com', 'me.com',
+    'mac.com', 'bezeqint.net', 'netvision.net.il', '012.net.il', 'zahav.net.il', 'smile.net.il',
+    'inter.net.il', '013net.net', 'aol.com', 'mail.com', 'email.com', 'gmx.com', 'gmx.net',
+    'protonmail.com', 'proton.me'];
+  var BY_NAME = {
+    gmail: { any: 'gmail.com' }, icloud: { any: 'icloud.com' }, walla: { any: 'walla.co.il' },
+    bezeqint: { any: 'bezeqint.net' }, netvision: { any: 'netvision.net.il' },
+    hotmail: { tlds: ['com', 'co.il'] }, outlook: { tlds: ['com', 'co.il'] }, yahoo: { tlds: ['com'] }
+  };
+  var TARGETS = ['gmail.com', 'walla.co.il', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com',
+    'bezeqint.net', 'netvision.net.il'];
+
+  // keyboard positions: a substituted letter is a typo only between neighbouring keys
+  var KEY = {};
+  [['1234567890', 0], ['qwertyuiop', 0.5], ['asdfghjkl', 0.75], ['zxcvbnm,.', 1.25]].forEach(function (row, r) {
+    row[0].split('').forEach(function (k, i) { KEY[k] = [r, i + row[1]]; });
+  });
+  function adjacent(a, b) {
+    var p = KEY[a], q = KEY[b];
+    return !!p && !!q && Math.abs(p[0] - q[0]) <= 1 && Math.abs(p[1] - q[1]) <= 1;
+  }
+  function distance(a, b) {
+    var d = [], i, j;
+    for (i = 0; i <= a.length; i++) { d[i] = [i]; for (j = 1; j <= b.length; j++) d[i][j] = i ? 0 : j; }
+    for (i = 1; i <= a.length; i++) {
+      for (j = 1; j <= b.length; j++) {
+        var sub = a[i - 1] === b[j - 1] ? 0 : adjacent(a[i - 1], b[j - 1]) ? 1 : 2;
+        d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + sub);
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
+    }
+    return d[a.length][b.length];
+  }
+  function split(dom) { var i = dom.indexOf('.'); return i < 0 ? [dom, ''] : [dom.slice(0, i), dom.slice(i + 1)]; }
+  function normalize(dom) { return dom.trim().toLowerCase().replace(/\.{2,}/g, '.').replace(/^\.+|\.+$/g, ''); }
+
+  function correctDomain(raw) {
+    var dom = normalize(raw);
+    if (!dom || LEGIT.indexOf(dom) >= 0) return null;
+    var parts = split(dom), name = parts[0], tld = parts[1], brand = BY_NAME[name];
+    if (brand && brand.any) return brand.any;
+    if (brand && brand.tlds) {
+      var best = null, bd = 99;
+      brand.tlds.forEach(function (t) { var x = distance(tld, t); if (x < bd) { bd = x; best = t; } });
+      return bd <= 2 ? name + '.' + best : null;
+    }
+    var out = null, score = 99;
+    TARGETS.forEach(function (target) {
+      var tp = split(target), dn = distance(name, tp[0]), dt = distance(tld, tp[1]);
+      var nameOk = dn <= (tp[0].length >= 6 ? 2 : 1);
+      if (((dt === 0 && nameOk) || (dn <= 1 && dt <= 1)) && dn + dt < score) { out = target; score = dn + dt; }
+    });
+    return out;
+  }
+
+  function suggest(value) {
+    var v = (value || '').trim(), at = v.lastIndexOf('@');
+    if (at <= 0) return null;
+    var typed = v.slice(at + 1), fixed = correctDomain(typed) || normalize(typed);
+    return fixed !== typed.trim().toLowerCase() ? v.slice(0, at) + '@' + fixed : null;
+  }
+
+  function isEmail(el) {
+    return el && el.tagName === 'INPUT' && (el.type === 'email' || /email/i.test(el.name || ''));
+  }
+
+  function clearHint(input) {
+    var old = input.parentNode && input.parentNode.querySelector('.wecc-email-hint');
+    if (old) old.remove();
+  }
+
+  function showHint(input, fixed) {
+    clearHint(input);
+    var box = document.createElement('div');
+    box.className = 'wecc-email-hint';
+    box.setAttribute('role', 'status');
+    box.setAttribute('dir', 'rtl');
+    box.style.cssText = 'margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;' +
+      'font-size:14px;line-height:1.4;padding:6px 10px;border-radius:10px;' +
+      'background:#0d1430;color:#fff;border:1px solid rgba(200,169,81,.5);width:100%;box-sizing:border-box';
+    var text = document.createElement('span');
+    text.appendChild(document.createTextNode('התכוונת ל־'));
+    var b = document.createElement('bdi');
+    b.setAttribute('dir', 'ltr');
+    b.style.cssText = 'color:#e8d48b;font-weight:600';
+    b.textContent = fixed;
+    text.appendChild(b);
+    text.appendChild(document.createTextNode('?'));
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'כן, תקן';
+    btn.style.cssText = 'min-height:36px;padding:0 12px;border:0;border-radius:8px;cursor:pointer;' +
+      'font-weight:700;font-size:13px;color:#070b1e;background:linear-gradient(90deg,#c8a951,#e8d48b)';
+    btn.addEventListener('click', function () {
+      input.value = fixed;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      clearHint(input);
+    });
+    box.appendChild(text);
+    box.appendChild(btn);
+    input.parentNode.appendChild(box);
+  }
+
+  document.addEventListener('focusout', function (e) {
+    if (!isEmail(e.target)) return;
+    var fixed = suggest(e.target.value);
+    if (fixed) showHint(e.target, fixed); else clearHint(e.target);
+  }, true);
+
+  document.addEventListener('input', function (e) {
+    if (isEmail(e.target)) clearHint(e.target);
+  }, true);
+
+  // last line of defence: fix silently on submit (runs before Elementor reads the form)
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form || !form.querySelectorAll) return;
+    Array.prototype.forEach.call(form.querySelectorAll('input'), function (input) {
+      if (!isEmail(input)) return;
+      var fixed = suggest(input.value);
+      if (fixed) { input.value = fixed; clearHint(input); }
+    });
+  }, true);
+})();
+</script>

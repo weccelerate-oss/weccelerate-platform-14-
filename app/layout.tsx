@@ -16,6 +16,7 @@ import { GeoSchema } from "@/components/seo/GeoSchema";
 import { Clarity } from "@/components/analytics/Clarity";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { SkipToContent } from "@/components/ui/SkipToContent";
+import { EmailTypoGuard } from "@/components/forms/EmailTypoGuard";
 import { LanguageProvider } from "@/lib/i18n";
 import { HtmlAttrs } from "@/components/providers/HtmlAttrs";
 import { LangRouteSync } from "@/components/providers/LangRouteSync";
@@ -243,6 +244,9 @@ export default function RootLayout({
 
           {/* Page content — #main-content target lives in each page's <main> */}
           {children}
+
+          {/* "התכוונת ל…@gmail.com?" under any email field with a typo'd domain */}
+          <EmailTypoGuard />
         </LanguageProvider>
       </body>
     </html>
