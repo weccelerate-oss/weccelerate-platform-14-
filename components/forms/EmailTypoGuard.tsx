@@ -76,6 +76,7 @@ export function EmailTypoGuard() {
   }, [hint]);
 
   if (!hint) return null;
+  // Pin to the side opposite the labels (left in Hebrew) so the next field's label stays readable.
   const rtl = document.documentElement.dir !== 'ltr';
 
   return createPortal(
@@ -83,8 +84,8 @@ export function EmailTypoGuard() {
       role="status"
       aria-live="polite"
       dir="rtl"
-      style={{ position: 'fixed', top: hint.top, zIndex: 2147483000, ...(rtl ? { right: hint.right } : { left: hint.left }) }}
-      className="flex items-center gap-2 rounded-xl border border-[#c8a951]/50 bg-[#0d1430] px-3 py-1.5 text-sm text-white shadow-lg shadow-black/30"
+      style={{ position: 'fixed', top: hint.top, zIndex: 2147483000, ...(rtl ? { left: hint.left } : { right: hint.right }) }}
+      className="flex items-center gap-2 rounded-xl border border-[#c8a951]/50 bg-[#0d1430] px-3 py-1 text-sm text-white shadow-lg shadow-black/30"
     >
       <span>
         התכוונת ל־
@@ -96,7 +97,7 @@ export function EmailTypoGuard() {
       <button
         type="button"
         onClick={apply}
-        className="min-h-[36px] rounded-lg bg-gradient-to-r from-[#c8a951] to-[#e8d48b] px-3 text-xs font-bold text-[#070b1e] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8d48b]"
+        className="min-h-[32px] rounded-lg bg-gradient-to-r from-[#c8a951] to-[#e8d48b] px-3 text-xs font-bold text-[#070b1e] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8d48b]"
       >
         כן, תקן
       </button>
@@ -104,7 +105,7 @@ export function EmailTypoGuard() {
         type="button"
         aria-label="סגור"
         onClick={() => setHint(null)}
-        className="min-h-[36px] min-w-[28px] text-white/50 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8d48b] rounded"
+        className="min-h-[32px] min-w-[28px] text-white/50 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8d48b] rounded"
       >
         ×
       </button>
