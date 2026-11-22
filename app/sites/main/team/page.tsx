@@ -53,7 +53,7 @@ interface TeamMember {
 // Organization's authority signal.
 //
 // This roster therefore contains ONLY:
-//   1. The CEO & founder (Alon Pinchas)
+//   1. The CEO & founder (Alon Pinhas)
 //   2. Confirmed co-founders (Avraham Hinoch, Ido Sabag)
 //
 // UI display of other team members is handled separately inside TeamContent —
@@ -126,7 +126,7 @@ function generateTeamSchema() {
           cssSelector: ['[data-speakable]'],
         },
       },
-      // Reinforce the Organization with explicit `founder` (Alon Pinchas + co-founders)
+      // Reinforce the Organization with explicit `founder` (Alon Pinhas + co-founders)
       // and `member` links — bidirectional graph between Organization and each Person
       // strengthens entity recognition for LLMs and Google Knowledge Graph.
       {

@@ -568,7 +568,7 @@ vercel logs --since=7d production | grep "ai-bot"
 | `alternateName` | misspelled Hebrew transliteration | וויסלרייט |
 | `streetAddress` | מגדל עזריאלי שרונה | HaRakevet 58 |
 | `telephone` | +972-3-555-1234 (פיקטיבי) | +972-55-564-7538 |
-| `founder` | שם שגוי (מערך בודד) | [Alon Pinchas, Avraham Hinoch, Ido Sabag] עם `@id` linking |
+| `founder` | שם שגוי (מערך בודד) | [Alon Pinhas, Avraham Hinoch, Ido Sabag] עם `@id` linking |
 | `award` | 2 פרסים מפוברקים | הוסר (ממתין לפרסים מאומתים) |
 | `aggregateRating` ב-Organization | 4.9 / 127 reviews (מזויף) | **הוסר** |
 | `aggregateRating` ב-4 ServiceData | 4.7–4.9 (מזויף) | **הוסר** |

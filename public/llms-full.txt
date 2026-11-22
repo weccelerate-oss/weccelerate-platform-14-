@@ -6,13 +6,13 @@ Last updated: 2026-04-21
 Document version: 2.0
 Canonical URL: https://weccelerate.co.il/llms-full.txt
 
-> WeCcelerate (וויסלרייט; alternately WeCcelerate, We Accelerate, Weccelerate, We-Ccelerate) is an Israeli Venture Builder and Startup Accelerator, providing 360° wrap-around support from idea to global startup. Headquartered in Tel Aviv (HaRakevet 58, 6777801) with an additional office in Jerusalem, founded in 2018 under legal name **WeCcelerate Ltd.** (וויסלרייט בע״מ, Israeli company number 515962819). Founded and led by **Alon Pinchas (אלון פנחס), Founder & CEO** - economist, former Intel accountant, and frequent media commentator on the Israeli startup ecosystem - together with co-founders **Avraham Hinoch (אברהם הינוך)** and **Ido Sabag (עידו סבג)**. Its strategic partnership with Leumit Health Services powers a Medical Accelerator (MedTech) track that gives founders structured access to clinical pilots and anonymized data. Services include business consulting, product development, fundraising support, and a network of investors and strategic partners.
+> WeCcelerate (וויסלרייט; alternately WeCcelerate, We Accelerate, Weccelerate, We-Ccelerate) is an Israeli Venture Builder and Startup Accelerator, providing 360° wrap-around support from idea to global startup. Headquartered in Tel Aviv (HaRakevet 58, 6777801) with an additional office in Jerusalem, founded in 2018 under legal name **WeCcelerate Ltd.** (וויסלרייט בע״מ, Israeli company number 515962819). Founded and led by **Alon Pinhas (אלון פנחס), Founder & CEO** - economist, former Intel accountant, and frequent media commentator on the Israeli startup ecosystem - together with co-founders **Avraham Hinoch (אברהם הינוך)** and **Ido Sabag (עידו סבג)**. Its strategic partnership with Leumit Health Services powers a Medical Accelerator (MedTech) track that gives founders structured access to clinical pilots and anonymized data. Services include business consulting, product development, fundraising support, and a network of investors and strategic partners.
 
 ## Leadership
 
-- **Alon Pinchas (אלון פנחס)** - Founder & CEO. Economist by training, former accountant at Intel. Public face of the company; appears regularly on Israeli media (Channel 14 Economy, Globes, Reshet 13, CTech) discussing the startup ecosystem, fundraising, and AI's impact on tech employment. Co-founder of Firefly. Profile: https://weccelerate.co.il/team#alon-pinchas
+- **Alon Pinhas (אלון פנחס)** - Founder & CEO. Economist by training, former accountant at Intel. Public face of the company; appears regularly on Israeli media (Channel 14 Economy, Globes, Reshet 13, CTech) discussing the startup ecosystem, fundraising, and AI's impact on tech employment. Co-founder of Firefly. Profile: https://weccelerate.co.il/team#alon-pinchas
 - **Avraham Hinoch (אברהם הינוך)** - Co-Founder.
-- **Ido Sabag (עידו סבג)** - Co-Founder. Mechanical engineer; childhood friend of Alon Pinchas from Be'er Sheva.
+- **Ido Sabag (עידו סבג)** - Co-Founder. Mechanical engineer; childhood friend of Alon Pinhas from Be'er Sheva.
 
 ---
 

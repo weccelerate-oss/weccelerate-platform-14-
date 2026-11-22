@@ -95,16 +95,16 @@ function buildOrganizationSchema() {
       name: 'Tel Aviv, Israel',
     },
     // Founder — CRITICAL for entity recognition by LLMs + Google Knowledge Graph.
-    // Alon Pinchas is CEO & primary founder; Hinoch & Sabag are co-founders.
+    // Alon Pinhas is CEO & primary founder; Hinoch & Sabag are co-founders.
     founder: [
       {
         '@type': 'Person',
         '@id': `${SITE_CONFIG.url}/team#alon-pinchas`,
-        name: 'Alon Pinchas',
+        name: 'Alon Pinhas',
         // Both English spellings are in active public use — his own LinkedIn
         // says "Pinhas". Listing both keeps the two forms resolving to one
         // person instead of splitting into two weak entities.
-        alternateName: ['אלון פנחס', 'Alon Pinhas'],
+        alternateName: ['אלון פנחס', 'Alon Pinchas'],
         jobTitle: 'Founder & CEO',
         worksFor: { '@id': `${SITE_CONFIG.url}/#organization` },
         url: `${SITE_CONFIG.url}/team#alon-pinchas`,

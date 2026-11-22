@@ -197,7 +197,7 @@ export default function TeamContent() {
         </div>
       </section>
 
-      {/* Alon Pinchas -- Founder Spotlight */}
+      {/* Alon Pinhas -- Founder Spotlight */}
       <section className="section-padding bg-[#070b1e] border-b border-white/[0.06]" aria-labelledby="founder-heading">
         <div className="container-corporate">
           <div className="grid lg:grid-cols-2 gap-12 items-center">

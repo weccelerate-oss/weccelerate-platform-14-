@@ -52,7 +52,7 @@ interface SchemaPerson {
 }
 
 const teamForSchema: SchemaPerson[] = [
- { name: 'Alon Pinchas', jobTitle: 'CEO & Founder', image: '/images/team/alon.jpg' },
+ { name: 'Alon Pinhas', jobTitle: 'CEO & Founder', image: '/images/team/alon.jpg' },
  { name: 'Ido Sabag', jobTitle: 'VP & Head of Technology', image: '/images/ido2.png' },
  { name: 'Avraham Hinuch', jobTitle: 'VP of Marketing', image: '/images/team/avraham.jpg' },
  { name: 'Noam Ohayon', jobTitle: 'Head of Business Development', image: '/images/noam2.png' },

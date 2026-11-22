@@ -70,7 +70,7 @@ Verification:
 - Founded: 2018
 
 Thanks,
-Alon Pinchas, Founder & CEO, WeCcelerate Ltd.
+Alon Pinhas, Founder & CEO, WeCcelerate Ltd.
 ```
 
 בפרופיל עצמו: Founded 2018, שם חלופי "וויסלרייט", מייסדים עם לינקדאין, פורטפוליו, השותפות עם לאומית.

@@ -226,10 +226,10 @@ const videos = [
   // ===================== TV INTERVIEWS =====================
   {
     title: 'אלון פנחס בערוץ הכלכלה: האקזיטים של Wiz והדור החדש של ההייטק הישראלי',
-    titleEn: 'Alon Pinchas on Economy Channel: Wiz Exits and the New Generation of Israeli Tech',
+    titleEn: 'Alon Pinhas on Economy Channel: Wiz Exits and the New Generation of Israeli Tech',
     slug: 'alon-pinchas-economy-channel-wiz-exits',
     description: 'אלון פנחס, מנכ"ל WeCcelerate, בראיון מעמיק לערוץ הכלכלה על האקזיטים של Wiz, המגמות החדשות בהייטק הישראלי ומה צפוי לאקוסיסטם הסטארטאפים.',
-    descriptionEn: 'Alon Pinchas, WeCcelerate CEO, in an in-depth interview on the Economy Channel about Wiz exits and the future of the Israeli startup ecosystem.',
+    descriptionEn: 'Alon Pinhas, WeCcelerate CEO, in an in-depth interview on the Economy Channel about Wiz exits and the future of the Israeli startup ecosystem.',
     youtubeUrl: 'https://www.youtube.com/watch?v=7m0gFDt4SXA',
     category: 'TV_INTERVIEW' as const,
     tags: ['ראיון טלוויזיה', 'ערוץ הכלכלה', 'Wiz', 'אקזיט', 'הייטק ישראלי', 'אלון פנחס'],
@@ -287,7 +287,7 @@ const videos = [
   },
   {
     title: 'האם ה-AI יחליף את הג׳וניורים? — אלון פנחס על עתיד שוק העבודה',
-    titleEn: 'Will AI Replace Juniors? — Alon Pinchas on the Future of Work',
+    titleEn: 'Will AI Replace Juniors? — Alon Pinhas on the Future of Work',
     slug: 'reel-ai-replace-juniors',
     description: 'אלון פנחס דן בשאלה הבוערת: האם הבינה המלאכותית תחליף את עובדי ה-Junior בהייטק?',
     youtubeUrl: 'https://www.youtube.com/watch?v=78mtd1OWSxk',
@@ -312,7 +312,7 @@ const videos = [
   },
   {
     title: 'אלון פנחס חושף: איך AI ישנה את החיים של כל יזם',
-    titleEn: 'Alon Pinchas Reveals: How AI Will Change Every Entrepreneur\'s Life',
+    titleEn: 'Alon Pinhas Reveals: How AI Will Change Every Entrepreneur\'s Life',
     slug: 'reel-alon-pinchas-ai-entrepreneurs',
     description: 'מנכ"ל WeCcelerate חולק תובנות על איך בינה מלאכותית כבר משנה את עולם היזמות.',
     youtubeUrl: 'https://www.youtube.com/watch?v=jS-mWxf_U0o',

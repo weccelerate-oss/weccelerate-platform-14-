@@ -52,7 +52,7 @@ export interface TeamPerson {
 export const FOUNDER: TeamPerson = {
   id: 'alon-pinchas',
   name: 'אלון פנחס',
-  nameEn: 'Alon Pinchas',
+  nameEn: 'Alon Pinhas',
   role: 'מייסד ומנכ"ל',
   roleEn: 'Founder & CEO',
   bio: 'מייסד ומנכ"ל WeCcelerate — Venture Builder ישראלי. כלכלן במקצועו, בעל רקע ברואת חשבון באינטל. הוביל את הקמת המאיץ וליווי של סטארטאפים ישראלים משלב הרעיון ועד גיוסי Pre-Seed, Seed ו-Series A. שותף-מייסד של Firefly. מופיע באופן קבוע בתקשורת הישראלית (ערוץ הכלכלה, גלובס, רשת 13) כמומחה לאקוסיסטם הסטארטאפים.',
@@ -102,7 +102,7 @@ export const CO_FOUNDERS: TeamPerson[] = [
     roleEn: 'Co-Founder',
     bio: 'שותף מייסד של WeCcelerate. מהנדס מכונות במקצועו, חבר ילדות של אלון פנחס משכונה ד׳ בבאר שבע. מתמקד בפיתוח עסקי ובמסלולי ליווי לחברות פורטפוליו.',
     bioEn:
-      'Co-Founder of WeCcelerate. Mechanical engineer by training, childhood friend of Alon Pinchas from Be\'er Sheva. Focuses on business development and portfolio company support tracks.',
+      'Co-Founder of WeCcelerate. Mechanical engineer by training, childhood friend of Alon Pinhas from Be\'er Sheva. Focuses on business development and portfolio company support tracks.',
     image: '/images/team/ido-sabag.jpg',
     linkedin: 'https://www.linkedin.com/in/ido-sabag-382b641b3/',
     credentials: ['שותף מייסד', 'מהנדס מכונות'],

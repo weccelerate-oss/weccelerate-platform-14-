@@ -135,7 +135,7 @@ pending.
 > - Leumit × WeCcelerate MedTech partnership launched: 2022
 >
 > Thanks,
-> Alon Pinchas, Founder & CEO
+> Alon Pinhas, Founder & CEO
 
 **Also confirm in Crunchbase**: Founded year is set to **2016** (canonical),
 not 2016 or 2020.
@@ -146,7 +146,7 @@ not 2016 or 2020.
 
 Verified and added to `lib/seo/founders.ts` + `components/seo/GeoSchema.tsx`:
 
-- ✅ Alon Pinchas:   https://www.linkedin.com/in/alon-pinhas-589a97172/
+- ✅ Alon Pinhas:   https://www.linkedin.com/in/alon-pinhas-589a97172/
 - ✅ Avraham Hinoch: https://www.linkedin.com/in/avraham-heinoch-20168a231/
 - ✅ Ido Sabag:      https://www.linkedin.com/in/ido-sabag-382b641b3/
 
