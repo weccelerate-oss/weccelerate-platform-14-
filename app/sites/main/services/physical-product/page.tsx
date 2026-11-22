@@ -9,7 +9,7 @@ import { SERVICE_FAQS } from '@/lib/services-faqs';
 // =============================================================================
 
 export const metadata: Metadata = constructMetadata({
- title: 'פיתוח מוצר פיזי | Physical Product Development',
+ title: 'פיתוח מוצר פיזי ואב-טיפוס | WeCcelerate',
  description:
  'מעיצוב תעשייתי דרך אב-טיפוס ועד לייצור המוני. תהליך הנדסי מקצה לקצה להבאת מוצר פיזי לשוק.',
  keywords: [

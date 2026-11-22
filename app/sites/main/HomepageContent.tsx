@@ -827,6 +827,7 @@ function Footer() {
       { name: t('footer.guideRaiseInvestors'), href: en ? '/en/guides/raise-funding-israel' : '/guides/eich-mgayisim-mashkim' },
       { name: t('footer.guideMedtechTrack'), href: en ? '/en/guides/medtech-startup-israel' : '/guides/eich-lehakim-startup-refui' },
       // /faq and /press translate in place (no /en mirror needed).
+      { name: t('footer.accelerator'), href: '/accelerator' },
       { name: t('footer.faq'), href: '/faq' },
       { name: t('footer.press'), href: '/press' },
     ],

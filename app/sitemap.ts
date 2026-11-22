@@ -44,6 +44,8 @@ const STATIC_PAGES = [
   { path: '/glossary', priority: 0.85, changeFreq: 'monthly' as const },
   // Comparison page — high commercial intent for "WeCcelerate vs X" queries.
   { path: '/comparisons', priority: 0.85, changeFreq: 'monthly' as const },
+  // Category page — "אקסלרטור לסטארטאפים בישראל".
+  { path: '/accelerator', priority: 0.9, changeFreq: 'monthly' as const },
   { path: '/press', priority: 0.7, changeFreq: 'monthly' as const },
   { path: '/privacy', priority: 0.3, changeFreq: 'yearly' as const },
   { path: '/terms', priority: 0.3, changeFreq: 'yearly' as const },
@@ -98,7 +100,9 @@ async function getDynamicContent() {
     {
       const [events, videos, generatedGuides] = await Promise.all([
         prisma.event.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
-        prisma.video.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
+        // Videos synced with no description are served noindex (see
+        // videos/[slug]/page.tsx), so they stay out of the sitemap too.
+        prisma.video.findMany({ where: { isActive: true, NOT: [{ description: null }, { description: '' }] }, select: { slug: true, updatedAt: true } }),
         // David's agent-written guides. Without these entries the articles are
         // invisible to Google/LLM crawlers — no other page links to them.
         prisma.generatedGuide.findMany({

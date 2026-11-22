@@ -159,11 +159,7 @@ export default function RootLayout({
             FAQPage (the @graph ends up rendered twice in head by Next.js/React
             streaming). Reintroduce per-page with a dedicated component if
             needed. */}
-        <GeoSchema
-          path="/"
-          pageTitle="WeCcelerate - Venture Builder & Startup Accelerator Israel"
-          includeFaq={false}
-        />
+        <GeoSchema />
 
         {/* Additional meta for Hebrew optimization */}
         <meta name="language" content="Hebrew" />

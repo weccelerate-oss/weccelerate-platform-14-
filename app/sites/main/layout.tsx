@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import { CorporateNavbar } from '@/components/layout/CorporateNavbar';
-import { ServiceSchema } from '@/components/seo/service-schema';
 import { WhatsAppFloat } from '@/components/ui/WhatsAppFloat';
 import { StickyLeadBar } from '@/components/forms/StickyLeadBar';
 import { UnlessPath } from '@/components/layout/UnlessPath';
@@ -19,12 +18,12 @@ export default function MainSiteLayout({ children }: MainSiteLayoutProps) {
         via <GeoSchema /> — see components/seo/GeoSchema.tsx. A duplicate
         <OrganizationSchema /> used to live here; it was removed 2026-04-24
         because it emitted the same @id and contained factual errors.
+        Service JSON-LD is likewise NOT emitted site-wide. Until 2026-11 a
+        <ServiceSchema services={['all']} /> here put four generic services
+        (with @ids of pages that do not exist, one typed FinancialService) on
+        every page. Each /services/* page emits its own Service node via
+        <ServicePageSchema />.
       */}
-      <ServiceSchema
-        services={['all']}
-        site="main"
-        includeRating={true}
-      />
 
       {/* Corporate Navbar — skip link handled globally in root layout.
           Hidden on paid landing pages (/lp/*): one page, one action. */}

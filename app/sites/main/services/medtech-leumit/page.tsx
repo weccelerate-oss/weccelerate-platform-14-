@@ -9,7 +9,7 @@ import { SERVICE_FAQS } from '@/lib/services-faqs';
 // =============================================================================
 
 export const metadata: Metadata = constructMetadata({
- title: 'מסלול MedTech לאומית | Medical Deep-Tech Accelerator',
+ title: 'מסלול MedTech עם לאומית — מאיץ רפואי | WeCcelerate',
  description:
  'המסלול היוקרתי למיזמים רפואיים בשיתוף לאומית שירותי בריאות. חוות דעת מרופאים מומחים, ליווי רגולטורי מלא וסקירות שוק לסטארטאפים בשלבים מוקדמים.',
  keywords: [

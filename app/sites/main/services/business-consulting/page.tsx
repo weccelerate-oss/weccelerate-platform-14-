@@ -9,7 +9,7 @@ import { SERVICE_FAQS } from '@/lib/services-faqs';
 // =============================================================================
 
 export const metadata: Metadata = constructMetadata({
- title: 'ייעוץ עסקי ואסטרטגי | Business Consulting',
+ title: 'ייעוץ עסקי לסטארטאפים ויזמים | WeCcelerate',
  description:
  'ייעוץ עסקי מלא ליזמים — תוכנית עסקית, מחקר שוק, תוכנית פיננסית ותקציר מנהלים. בונים את היסודות לגיוס הון והצלחה עסקית.',
  keywords: [

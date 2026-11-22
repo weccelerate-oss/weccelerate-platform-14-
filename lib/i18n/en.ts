@@ -137,6 +137,7 @@ const enCore: Record<string, string> = {
   'footer.guideStartVenture': 'How to start a venture',
   'footer.guideRaiseInvestors': 'How to raise from investors',
   'footer.guideMedtechTrack': 'MedTech track with Leumit',
+  'footer.accelerator': 'Startup accelerator',
   'footer.faq': 'FAQ',
   'footer.press': 'WeCcelerate in the press',
   'footer.rights': 'All rights reserved.',

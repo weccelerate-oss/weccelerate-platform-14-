@@ -137,6 +137,7 @@ const heCore: Record<string, string> = {
   'footer.guideStartVenture': 'איך להקים מיזם',
   'footer.guideRaiseInvestors': 'איך מגייסים משקיעים',
   'footer.guideMedtechTrack': 'מסלול MedTech עם לאומית',
+  'footer.accelerator': 'אקסלרטור לסטארטאפים',
   'footer.faq': 'שאלות נפוצות',
   'footer.press': 'WeCcelerate בתקשורת',
   'footer.rights': 'כל הזכויות שמורות.',

@@ -7,6 +7,8 @@ import { servicesHe, servicesEn, type Service } from '@/lib/services-data';
 import ServiceFullSections from '@/components/services/ServiceFullSections';
 import ServiceCaseStudies from '@/components/services/ServiceCaseStudies';
 import { LeadFormSection } from '@/components/forms/LeadFormSection';
+import { ServiceFaq } from '@/components/services/ServiceFaq';
+import { SERVICE_FAQS } from '@/lib/services-faqs';
 
 
 // =============================================================================
@@ -129,6 +131,9 @@ export function ServiceDetailContent({ serviceId }: { serviceId: string }) {
       {/* ================================================================= */}
       <ServiceCaseStudies serviceId={serviceId} />
 
+      {/* FAQ is Hebrew-only content; the matching FAQPage JSON-LD is emitted
+          by page.tsx from the same SERVICE_FAQS entry. */}
+      {lang === 'he' && <ServiceFaq items={SERVICE_FAQS[serviceId] ?? []} />}
       <LeadFormSection formType="service" service={serviceId} />
 
       {/* ================================================================= */}

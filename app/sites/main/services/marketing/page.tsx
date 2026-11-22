@@ -9,7 +9,7 @@ import { SERVICE_FAQS } from '@/lib/services-faqs';
 // =============================================================================
 
 export const metadata: Metadata = constructMetadata({
- title: 'שיווק, פרסום ויח"צ | Marketing, Advertising & PR',
+ title: 'שיווק ויח"צ לסטארטאפים | WeCcelerate',
  description:
  'מעטפת שיווקית מלאה למיזמים — פרסום דיגיטלי, יחסי ציבור, שיווק ברשתות חברתיות ואסטרטגיית שיווק מקיפה.',
  keywords: [

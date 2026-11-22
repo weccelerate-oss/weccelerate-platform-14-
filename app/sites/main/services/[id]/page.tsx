@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { constructMetadata } from '@/lib/seo';
 import { services } from '@/lib/services-data';
 import { ServiceDetailContent } from './ServiceDetailContent';
+import { ServicePageSchema } from '@/components/seo/ServicePageSchema';
+import { SERVICE_FAQS } from '@/lib/services-faqs';
 
 // =============================================================================
 // STATIC PARAMS
@@ -19,7 +21,7 @@ export function generateStaticParams() {
 // METADATA
 // =============================================================================
 
-const metaMap: Record<string, { title: string; description: string; keywords: string[] }> = {
+const metaMap: Record<string, { title: string; description: string; keywords: string[]; titleEn?: string; descriptionEn?: string; category?: string }> = {
   'business-consulting': {
     title: 'ייעוץ עסקי ואסטרטגי | Business Consulting',
     description:
@@ -69,9 +71,9 @@ const metaMap: Record<string, { title: string; description: string; keywords: st
     ],
   },
   'investors': {
-    title: 'למשקיעים | For Investors',
+    title: 'השקעה בסטארטאפים — למשקיעים | WeCcelerate',
     description:
-      'מצאו את ההשקעה הבאה שלכם — מיזמים שעברו אקסלרציה מלאה, מוכנים להשקעה ומותאמים לתחומי העניין שלכם. חוסכים 80% מתהליך הסינון.',
+      'מצאו את ההשקעה הבאה שלכם — מיזמים שעברו אקסלרציה מלאה, מוכנים להשקעה ומותאמים לתחומי העניין שלכם.',
     keywords: [
       'השקעה בסטארטאפים',
       'משקיעים',
@@ -80,9 +82,13 @@ const metaMap: Record<string, { title: string; description: string; keywords: st
       'Angel Investors',
       'Venture Capital',
     ],
+    titleEn: 'For Investors',
+    descriptionEn:
+      'Startup investment opportunities for investors: ventures that completed the WeCcelerate acceleration process, matched to each investor and their fields of interest.',
+    category: 'Investor Relations',
   },
   'investor-preparation': {
-    title: 'מעטפת הכנה למשקיעים | Investor Preparation',
+    title: 'הכנה לפגישת משקיעים ו-Pitch | WeCcelerate',
     description:
       'תיכנסו לפגישת המשקיעים עם ביטחון מלא. סימולציות, תרגול Pitch, הכנה ל-100 השאלות הקשות וחיבור ישיר למשקיעים רלוונטיים.',
     keywords: [
@@ -92,6 +98,10 @@ const metaMap: Record<string, { title: string; description: string; keywords: st
       'Investor Meeting Preparation',
       'פגישת משקיעים',
     ],
+    titleEn: 'Investor Preparation',
+    descriptionEn:
+      'Investor-meeting preparation for founders: pitch practice, meeting simulations, preparation for investor questions and introductions to relevant investors.',
+    category: 'Fundraising Preparation',
   },
 };
 
@@ -126,5 +136,26 @@ export default async function ServiceDetailPage({
   const service = services.find((s) => s.id === id);
   if (!service) notFound();
 
-  return <ServiceDetailContent serviceId={id} />;
+  // Same data feeds the FAQPage schema and the visible accordion, so what
+  // Google is told matches what a visitor sees.
+  const meta = metaMap[id];
+  const faqs = SERVICE_FAQS[id] ?? [];
+
+  return (
+    <>
+      {meta && (
+        <ServicePageSchema
+          serviceId={id}
+          title={service.title}
+          titleEn={meta.titleEn ?? service.title}
+          description={meta.description}
+          descriptionEn={meta.descriptionEn ?? meta.description}
+          path={`/services/${id}`}
+          category={meta.category ?? 'Business Consulting'}
+          faqs={faqs}
+        />
+      )}
+      <ServiceDetailContent serviceId={id} />
+    </>
+  );
 }

@@ -5,13 +5,8 @@
  * for both traditional search engines (SEO) and AI/LLM-powered generative
  * engines (GEO - Generative Engine Optimization).
  * 
- * Key Features:
- * 1. Organization Schema with Parent Organization (Authority Transfer)
- * 2. Service Catalog (hasOfferCatalog)
- * 3. FAQPage Schema (Voice Search & Chatbot Optimization)
- * 4. LocalBusiness Schema (Local SEO)
- * 5. BreadcrumbList Schema (Navigation)
- * 6. WebSite Schema (Sitelinks Search Box)
+ * Emits the site-wide entity nodes only: Organization, WebSite, LocalBusiness
+ * (+ optional FAQPage). Page-level markup belongs to the page itself.
  * 
  * @module components/seo/GeoSchema
  */
@@ -20,8 +15,6 @@ import {
   SITE_CONFIG,
   SEMANTIC_CORE,
   BRAND,
-  PARENT_ORGANIZATION,
-  SERVICES,
   FAQ_ITEMS,
   USER_INTENT_KEYWORDS,
 } from '@/lib/seo';
@@ -35,14 +28,8 @@ const KEYWORDS = USER_INTENT_KEYWORDS;
 // =============================================================================
 
 interface GeoSchemaProps {
-  /** Current page path for breadcrumbs */
-  path?: string;
-  /** Page title for WebPage schema */
-  pageTitle?: string;
-  /** Include FAQ schema */
+  /** Include the site FAQ (off by default — /faq emits its own FAQPage) */
   includeFaq?: boolean;
-  /** Include services schema */
-  includeServices?: boolean;
   /** Locale for content */
   locale?: 'he' | 'en';
 }
@@ -52,8 +39,7 @@ interface GeoSchemaProps {
 // =============================================================================
 
 /**
- * Build Organization Schema with Parent Organization (Authority Transfer)
- * This is CRITICAL for transferring Leumit's domain authority to WeCcelerate
+ * Build Organization Schema
  */
 function buildOrganizationSchema() {
   return {
@@ -93,22 +79,10 @@ function buildOrganizationSchema() {
       height: 512,
     },
     
-    // CRITICAL: Parent Organization - Authority Transfer from Leumit
-    parentOrganization: {
-      '@type': 'HealthcareOrganization',
-      '@id': `${PARENT_ORGANIZATION.url}/#organization`,
-      name: PARENT_ORGANIZATION.nameEn,
-      alternateName: PARENT_ORGANIZATION.name,
-      description: PARENT_ORGANIZATION.description.en,
-      url: PARENT_ORGANIZATION.url,
-      logo: PARENT_ORGANIZATION.logo,
-      areaServed: {
-        '@type': 'Country',
-        name: 'Israel',
-        identifier: 'IL',
-      },
-    },
-    
+    // No parentOrganization: Leumit Health Services is a strategic partner of
+    // the MedTech track, not a parent company. Declaring it as the parent was
+    // a false ownership claim repeated on every page.
+
     // Founding & Contact
     // Founding year: 2018. History: 2016 (owner, 2026-04-26) -> 2018 (owner,
     // 2026-05-14) -> 2016 (owner via Maor, 2026-09-14) -> 2018 (Maor, 2026-10-18). Every surface must
@@ -192,7 +166,6 @@ function buildOrganizationSchema() {
         name: 'WeCcelerate Jerusalem',
         address: {
           '@type': 'PostalAddress',
-          streetAddress: 'Jerusalem Branch',
           addressLocality: 'Jerusalem',
           addressRegion: 'Jerusalem District',
           addressCountry: 'IL',
@@ -303,58 +276,6 @@ function buildOrganizationSchema() {
 }
 
 /**
- * Build Service Catalog Schema (hasOfferCatalog)
- */
-function buildServicesSchema() {
-  return {
-    '@type': 'Service',
-    '@id': `${SITE_CONFIG.url}/#services`,
-    name: 'WeCcelerate Acceleration Program',
-    description: BRAND.descriptions.medium.en,
-    provider: {
-      '@id': `${SITE_CONFIG.url}/#organization`,
-    },
-    areaServed: {
-      '@type': 'Country',
-      name: 'Israel',
-    },
-    audience: {
-      '@type': 'Audience',
-      audienceType: 'Healthcare Entrepreneurs',
-      geographicArea: {
-        '@type': 'Country',
-        name: 'Israel',
-      },
-    },
-    serviceType: 'Startup Acceleration',
-    category: 'Business Consulting',
-    
-    // Service Catalog
-    hasOfferCatalog: {
-      '@type': 'OfferCatalog',
-      name: 'WeCcelerate Services',
-      itemListElement: SERVICES.map((service, index) => ({
-        '@type': 'Offer',
-        '@id': `${SITE_CONFIG.url}/#service-${service.id}`,
-        itemOffered: {
-          '@type': 'Service',
-          name: service.name.en,
-          alternateName: service.name.he,
-          description: service.description.en,
-          category: service.category,
-        },
-        priceSpecification: {
-          '@type': 'PriceSpecification',
-          price: service.price,
-          priceCurrency: 'ILS',
-        },
-        position: index + 1,
-      })),
-    },
-  };
-}
-
-/**
  * Build FAQ Schema (Voice Search & Chatbot Optimization)
  * This is CRITICAL for AI assistants to answer questions directly
  */
@@ -393,143 +314,6 @@ function buildWebSiteSchema() {
       '@id': `${SITE_CONFIG.url}/#organization`,
     },
     inLanguage: ['he-IL', 'en'],
-    
-    // Sitelinks Search Box
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${SITE_CONFIG.url}/search?q={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
-  };
-}
-
-/**
- * Build WebPage Schema with Speakable (AEO: AI & Voice Search Optimization)
- */
-function buildWebPageSchema(path: string, pageTitle: string) {
-  const pageUrl = `${SITE_CONFIG.url}${path}`;
-
-  return {
-    '@type': 'WebPage',
-    '@id': `${pageUrl}/#webpage`,
-    url: pageUrl,
-    name: pageTitle,
-    description: BRAND.descriptions.medium.he,
-    isPartOf: {
-      '@id': `${SITE_CONFIG.url}/#website`,
-    },
-    about: {
-      '@id': `${SITE_CONFIG.url}/#organization`,
-    },
-    inLanguage: 'he-IL',
-    primaryImageOfPage: {
-      '@id': `${SITE_CONFIG.url}/#logo`,
-    },
-    datePublished: '2024-01-01T00:00:00+02:00',
-    dateModified: new Date().toISOString(),
-
-    // Speakable — tells voice assistants & AI which content to read aloud.
-    // Narrow selector: only content authors explicitly mark with data-speakable,
-    // so Google Assistant/Alexa read the answer sentence, not headings/navigation.
-    speakable: {
-      '@type': 'SpeakableSpecification',
-      cssSelector: ['[data-speakable]'],
-    },
-  };
-}
-
-/**
- * Build HowTo Schema — makes WeCcelerate appear in "how to start a startup" queries
- */
-function buildHowToSchema() {
-  return {
-    '@type': 'HowTo',
-    '@id': `${SITE_CONFIG.url}/#howto-startup`,
-    name: 'איך להקים סטארטאפ בישראל עם WeCcelerate',
-    description: 'מדריך שלב-אחר-שלב להקמת סטארטאפ מוצלח בישראל דרך WeCcelerate — מהרעיון הראשוני ועד גיוס הון והשקה לשוק.',
-    totalTime: 'P6M',
-    estimatedCost: {
-      '@type': 'MonetaryAmount',
-      currency: 'ILS',
-      value: '0',
-    },
-    step: [
-      {
-        '@type': 'HowToStep',
-        position: 1,
-        name: 'הגשת מועמדות',
-        text: 'הגישו מועמדות לתוכנית ההאצה של WeCcelerate דרך טופס יצירת קשר באתר. הצוות יחזור אליכם תוך 48 שעות.',
-        url: `${SITE_CONFIG.url}/contact`,
-      },
-      {
-        '@type': 'HowToStep',
-        position: 2,
-        name: 'אבחון ואפיון',
-        text: 'פגישת אבחון עם הצוות לבחינת הרעיון, ניתוח שוק ראשוני, והתאמת מסלול מתאים — ייעוץ עסקי, פיתוח מוצר או מסלול MedTech.',
-        url: `${SITE_CONFIG.url}/services`,
-      },
-      {
-        '@type': 'HowToStep',
-        position: 3,
-        name: 'בניית תוכנית עסקית',
-        text: 'עבודה עם צוות הייעוץ של WeCcelerate על מחקר שוק, תוכנית פיננסית ותקציר מנהלים.',
-        url: `${SITE_CONFIG.url}/services/business-consulting`,
-      },
-      {
-        '@type': 'HowToStep',
-        position: 4,
-        name: 'פיתוח MVP',
-        text: 'פיתוח מוצר ראשוני (MVP) — דיגיטלי או פיזי — עם צוות הפיתוח הטכני של WeCcelerate.',
-        url: `${SITE_CONFIG.url}/tech-development`,
-      },
-      {
-        '@type': 'HowToStep',
-        position: 5,
-        name: 'שיווק וגיוס הון',
-        text: 'הכנת חומרי שיווק, פיץ׳ דק, וחיבור למשקיעים מרשת הקשרים של WeCcelerate.',
-        url: `${SITE_CONFIG.url}/investors`,
-      },
-    ],
-    tool: [
-      { '@type': 'HowToTool', name: 'מחשבון עלות MVP' },
-      { '@type': 'HowToTool', name: 'תוכנית עסקית' },
-    ],
-  };
-}
-
-/**
- * Build BreadcrumbList Schema
- */
-function buildBreadcrumbSchema(path: string, pageTitle: string) {
-  const segments = path.split('/').filter(Boolean);
-  
-  const items: { '@type': string; position: number; name: string; item: string }[] = [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      name: 'בית',
-      item: SITE_CONFIG.url,
-    },
-  ];
-  
-  let currentPath = '';
-  segments.forEach((segment, index) => {
-    currentPath += `/${segment}`;
-    items.push({
-      '@type': 'ListItem',
-      position: index + 2,
-      name: index === segments.length - 1 ? pageTitle : segment,
-      item: `${SITE_CONFIG.url}${currentPath}`,
-    });
-  });
-  
-  return {
-    '@type': 'BreadcrumbList',
-    '@id': `${SITE_CONFIG.url}${path}/#breadcrumb`,
-    itemListElement: items,
   };
 }
 
@@ -605,45 +389,29 @@ function buildLocalBusinessSchema() {
 
 /**
  * GeoSchema Component
- * 
- * Renders the complete JSON-LD structured data graph for SEO and GEO optimization.
- * Place this component in the <head> section or at the end of the body.
- * 
- * @example
- * // In app/layout.tsx or any page
- * <GeoSchema
- *   path="/"
- *   pageTitle="WeCcelerate - הפלטפורמה המובילה לסטארטאפים רפואיים"
- *   includeFaq={true}
- *   includeServices={true}
- * />
+ *
+ * Rendered once in the root layout, so everything it emits lands on EVERY
+ * page. It therefore carries only the nodes that are true site-wide: the
+ * Organization, the WebSite and the LocalBusiness.
+ *
+ * Page-level nodes (WebPage, BreadcrumbList, HowTo, Service, FAQPage) must be
+ * emitted by the page they describe. Until 2026-11 this component also pushed
+ * a homepage WebPage + breadcrumb, a HowTo and a priced service catalog onto
+ * all pages — contact, videos and guides each claimed to be the homepage and
+ * to be a "how to start a startup" tutorial, which contradicts Google's
+ * structured-data guidelines (markup must describe the page's own content).
  */
-export function GeoSchema({
-  path = '/',
-  pageTitle = 'WeCcelerate - הפלטפורמה המובילה לסטארטאפים רפואיים',
-  includeFaq = true,
-  includeServices = true,
-  locale = 'he',
-}: GeoSchemaProps) {
-  // Build the complete graph
+export function GeoSchema({ includeFaq = false, locale = 'he' }: GeoSchemaProps = {}) {
   const graphItems: Record<string, unknown>[] = [
     buildOrganizationSchema(),
     buildWebSiteSchema(),
-    buildWebPageSchema(path, pageTitle),
-    buildBreadcrumbSchema(path, pageTitle),
     buildLocalBusinessSchema(),
-    buildHowToSchema(),
   ];
-
-  if (includeServices) {
-    graphItems.push(buildServicesSchema());
-  }
 
   if (includeFaq) {
     graphItems.push(buildFaqSchema(locale));
   }
-  
-  // Construct the final JSON-LD
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': graphItems,
@@ -681,20 +449,6 @@ export function FaqPageSchema({ locale = 'he' }: { locale?: 'he' | 'en' }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     ...buildFaqSchema(locale),
-  };
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  );
-}
-
-export function ServicesSchema() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    ...buildServicesSchema(),
   };
 
   return (

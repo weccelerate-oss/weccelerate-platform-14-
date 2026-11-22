@@ -9,7 +9,7 @@ import { SERVICE_FAQS } from '@/lib/services-faqs';
 // =============================================================================
 
 export const metadata: Metadata = constructMetadata({
- title: 'פיתוח מוצר דיגיטלי | Digital Product Development',
+ title: 'פיתוח מוצר דיגיטלי ואפליקציות | WeCcelerate',
  description:
  'פיתוח אפליקציות ומערכות WEB מקצה לקצה. מאפיון UX/UI דרך כתיבת קוד ועד להשקה בחנויות.',
  keywords: [

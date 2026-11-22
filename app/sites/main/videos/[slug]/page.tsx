@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const thumb =
     video.thumbnail ?? (videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : undefined);
 
-  return constructMetadata({
+  const meta = constructMetadata({
     title: video.title,
     description: videoDescription(video),
     path: `/videos/${slug}`,
@@ -63,6 +63,15 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       'פודקאסט סטארטאפים',
     ],
   });
+
+  // A video synced with no description is a page with a title and an embed
+  // and nothing else to read. Keep it reachable and let its links count, but
+  // out of the index (and out of the sitemap — see app/sitemap.ts) until it
+  // gets a description in the admin.
+  if (!video.description?.trim()) {
+    return { ...meta, robots: { index: false, follow: true } };
+  }
+  return meta;
 }
 
 export async function generateStaticParams() {
