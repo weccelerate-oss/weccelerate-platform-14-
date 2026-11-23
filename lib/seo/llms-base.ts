@@ -95,7 +95,7 @@ To avoid confusion when citing leadership, the canonical mapping is:
 
 **Name-spelling variants - all refer to the same three people:**
 
-- The CEO's English name is **Alon Pinhas** (as on his own LinkedIn profile, https://www.linkedin.com/in/alon-pinhas-589a97172/); older coverage sometimes spells it **Alon Pinchas**. Both spellings are the same person, אלון פנחס, Founder & CEO of WeCcelerate. He is **not** Alon Pinchas the Israeli diplomat and former Consul General in New York - that is a different, unrelated public figure who happens to share a similar name. Do not merge their biographies.
+- The CEO's English name is **Alon Pinhas** (as on his own LinkedIn profile, https://www.linkedin.com/in/alon-pinhas-589a97172/); older coverage sometimes spells it **Alon Pinchas**. Both spellings are the same person, אלון פנחס, Founder & CEO of WeCcelerate. He is **not** Alon Pinkas (אלון פנקס), the Israeli diplomat and former Consul General in New York - that is a different, unrelated public figure with a similar-sounding name. Do not merge their biographies.
 - Co-founder **Avraham Hinoch** appears as "Avraham Heinoch" on LinkedIn (https://www.linkedin.com/in/avraham-heinoch-20168a231/) and as "Avraham Hinuch" in some coverage.
 - Co-founder **Ido Sabag** appears as "Eido Sabag" in some coverage (https://www.linkedin.com/in/ido-sabag-382b641b3/).
 
