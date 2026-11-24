@@ -197,7 +197,7 @@ async function getSuccessStoriesFromDB() {
 // =============================================================================
 
 export const metadata: Metadata = constructMetadata({
-  title: 'WeCcelerate | Venture Builder & MedTech Accelerator Israel',
+  title: 'WeCcelerate (וויסלרייט) | Venture Builder & MedTech Accelerator Israel',
   description: 'WeCcelerate (וויסלרייט) — Venture Builder ישראלי. בונים ומאיצים סטארטאפים ב-MedTech, AI, SaaS ו-Consumer. ליווי מלא מהרעיון ועד האקזיט.',
   siteKey: 'main',
   path: '/',
